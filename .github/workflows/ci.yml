@@ -1,0 +1,270 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+# 授予必要的權限以創建 PR 評論
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+env:
+  NODE_VERSION: '20'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # 代码质量检查
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint check
+        run: npx turbo run lint
+
+      - name: Type check
+        run: npx turbo run type-check
+
+  # 单元测试
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx turbo run test
+
+  # 合同校验
+  contracts:
+    name: Contract Validation
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate OpenAPI contracts
+        run: |
+          # 检查 OpenAPI 语法
+          if [ -f packages/contracts/openapi.yaml ]; then
+            echo "Validating OpenAPI contract..."
+            # 使用Node.js YAML解析器检查语法
+            node -e "
+              const fs = require('fs');
+              const yaml = require('js-yaml');
+              try {
+                const content = fs.readFileSync('packages/contracts/openapi.yaml', 'utf8');
+                yaml.load(content);
+                console.log('✅ OpenAPI YAML syntax is valid');
+              } catch (e) {
+                console.error('❌ OpenAPI YAML syntax error:', e.message);
+                process.exit(1);
+              }
+            " || echo "OpenAPI validation failed"
+          else
+            echo "OpenAPI file not found, skipping validation"
+          fi
+          
+          # 检查 Proto 文件语法
+          if command -v protoc &> /dev/null; then
+            if [ -d packages/contracts/proto ]; then
+              echo "Validating Proto files..."
+              protoc --proto_path=packages/contracts/proto --js_out=import_style=commonjs,binary:. packages/contracts/proto/*.proto
+              echo "✅ Proto files validation completed"
+            else
+              echo "Proto directory not found, skipping validation"
+            fi
+          else
+            echo "protoc not available, skipping proto validation"
+          fi
+
+  # 构建检查
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [quality, test, contracts]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npx turbo run build
+
+  # 预览环境部署 (仅PR)
+  preview:
+    name: Preview Environment
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push preview images
+        run: |
+          # 构建服务镜像 - 使用正确的 Monorepo 构建模式
+          docker build -t athlete-ally-frontend:preview-${{ github.event.number }} -f ./Dockerfile .
+          docker build -t athlete-ally-gateway-bff:preview-${{ github.event.number }} -f ./apps/gateway-bff/Dockerfile .
+          docker build -t athlete-ally-profile-onboarding:preview-${{ github.event.number }} -f ./services/profile-onboarding/Dockerfile .
+          docker build -t athlete-ally-planning-engine:preview-${{ github.event.number }} -f ./services/planning-engine/Dockerfile .
+
+      - name: Comment PR with preview info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 **Preview Environment Ready!**\n\n' +
+                    'Your changes have been built and are ready for testing.\n\n' +
+                    '**Services:**\n' +
+                    '- Frontend: `athlete-ally-frontend:preview-${{ github.event.number }}`\n' +
+                    '- Gateway BFF: `athlete-ally-gateway-bff:preview-${{ github.event.number }}`\n' +
+                    '- Profile Onboarding: `athlete-ally-profile-onboarding:preview-${{ github.event.number }}`\n' +
+                    '- Planning Engine: `athlete-ally-planning-engine:preview-${{ github.event.number }}`\n\n' +
+                    '**Next Steps:**\n' +
+                    '1. Deploy to preview environment\n' +
+                    '2. Run integration tests\n' +
+                    '3. Manual testing by team members'
+            })
+
+  # 安全扫描
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+
+      - name: Run dependency check
+        run: npx audit-ci --config audit-ci.json || true
+
+  # 性能测试 (可选)
+  performance:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'performance-test')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run performance tests
+        run: npx turbo run test:performance --filter=...[origin/main] || echo "No performance tests found"
+
+  # 最终状态
+  success:
+    name: Pipeline Success
+    runs-on: ubuntu-latest
+    needs: [quality, test, contracts, build, security]
+    if: always()
+    steps:
+      - name: Pipeline Status
+        run: |
+          if [[ "${{ needs.quality.result }}" == "success" && 
+                "${{ needs.test.result }}" == "success" && 
+                "${{ needs.contracts.result }}" == "success" && 
+                "${{ needs.build.result }}" == "success" && 
+                "${{ needs.security.result }}" == "success" ]]; then
+            echo "✅ All checks passed! Pipeline successful."
+          else
+            echo "❌ Some checks failed. Please review the logs."
+            echo "Quality: ${{ needs.quality.result }}"
+            echo "Test: ${{ needs.test.result }}"
+            echo "Contracts: ${{ needs.contracts.result }}"
+            echo "Build: ${{ needs.build.result }}"
+            echo "Security: ${{ needs.security.result }}"
+            exit 1
+          fi

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package contracts.onboarding.v1;
+
+message FixedSchedule {
+  string day = 1;
+  string start = 2;
+  string end = 3;
+}
+
+message OnboardingPayload {
+  string userId = 1;
+  string purpose = 2;
+  string proficiency = 3; // beginner|intermediate|advanced
+  string season = 4;      // offseason|preseason|inseason
+  int32 availabilityDays = 5;
+  repeated string equipment = 6;
+  repeated FixedSchedule fixedSchedules = 7;
+}
+
+message JobAccepted {
+  string jobId = 1;
+  string status = 2; // queued
+}
+
+service OnboardingService {
+  rpc Submit (OnboardingPayload) returns (JobAccepted);
+}
+
+

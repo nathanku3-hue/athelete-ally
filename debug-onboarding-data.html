@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Data Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { background: #2a2a2a; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warning { color: #ffd43b; }
+        pre { background: #1a1a1a; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #4c6ef5; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #364fc7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Onboarding Data Debug Tool</h1>
+        
+        <div class="section">
+            <h2>LocalStorage Data</h2>
+            <button onclick="checkLocalStorage()">Check LocalStorage</button>
+            <button onclick="clearLocalStorage()">Clear LocalStorage</button>
+            <div id="localStorageResult"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Current URL</h2>
+            <p id="currentUrl"></p>
+        </div>
+        
+        <div class="section">
+            <h2>Navigation Test</h2>
+            <button onclick="goToPurpose()">Go to Purpose Page</button>
+            <button onclick="goToSummary()">Go to Summary Page</button>
+        </div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const result = document.getElementById('localStorageResult');
+            try {
+                const stored = localStorage.getItem('onboardingData');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    result.innerHTML = `
+                        <div class="success">✅ Data found in localStorage</div>
+                        <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = '<div class="warning">⚠️ No data found in localStorage</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error parsing localStorage data: ${error.message}</div>`;
+            }
+        }
+        
+        function clearLocalStorage() {
+            localStorage.removeItem('onboardingData');
+            document.getElementById('localStorageResult').innerHTML = '<div class="success">✅ LocalStorage cleared</div>';
+        }
+        
+        function goToPurpose() {
+            window.location.href = '/onboarding/purpose';
+        }
+        
+        function goToSummary() {
+            window.location.href = '/onboarding/summary';
+        }
+        
+        // Display current URL
+        document.getElementById('currentUrl').textContent = window.location.href;
+        
+        // Auto-check localStorage on load
+        checkLocalStorage();
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "timestamp": "2025-09-09T06:18:09.065Z",
+  "summary": {
+    "totalSuites": 4,
+    "totalTests": 0,
+    "passedTests": 0,
+    "failedTests": 0,
+    "successRate": 0,
+    "totalDuration": 11978,
+    "results": [
+      {
+        "suite": {
+          "name": "Onboarding Data Persistence",
+          "file": "onboarding-data-persistence.test.ts",
+          "description": "測試 Onboarding 數據持久性和流程完整性"
+        },
+        "result": {
+          "success": false,
+          "error": "Command failed: npx jest \"E:\\vibe\\athelete-ally\\tests\\e2e\\onboarding-data-persistence.test.ts\" --config=\"E:\\vibe\\athelete-ally\\tests\\e2e\\jest.config.js\" --verbose --no-coverage",
+          "duration": 3152,
+          "testCount": 0,
+          "failedCount": 0
+        }
+      },
+      {
+        "suite": {
+          "name": "Weight Conversion",
+          "file": "weight-conversion.test.ts",
+          "description": "測試科學化重量單位轉換邏輯"
+        },
+        "result": {
+          "success": false,
+          "error": "Command failed: npx jest \"E:\\vibe\\athelete-ally\\tests\\e2e\\weight-conversion.test.ts\" --config=\"E:\\vibe\\athelete-ally\\tests\\e2e\\jest.config.js\" --verbose --no-coverage",
+          "duration": 3369,
+          "testCount": 0,
+          "failedCount": 0
+        }
+      },
+      {
+        "suite": {
+          "name": "RPE Trigger Logic",
+          "file": "rpe-trigger-logic.test.ts",
+          "description": "測試條件觸發式 RPE 評分邏輯"
+        },
+        "result": {
+          "success": false,
+          "error": "Command failed: npx jest \"E:\\vibe\\athelete-ally\\tests\\e2e\\rpe-trigger-logic.test.ts\" --config=\"E:\\vibe\\athelete-ally\\tests\\e2e\\jest.config.js\" --verbose --no-coverage",
+          "duration": 2871,
+          "testCount": 0,
+          "failedCount": 0
+        }
+      },
+      {
+        "suite": {
+          "name": "Responsive Layout",
+          "file": "responsive-layout.test.ts",
+          "description": "測試響應式佈局和加載狀態"
+        },
+        "result": {
+          "success": false,
+          "error": "Command failed: npx jest \"E:\\vibe\\athelete-ally\\tests\\e2e\\responsive-layout.test.ts\" --config=\"E:\\vibe\\athelete-ally\\tests\\e2e\\jest.config.js\" --verbose --no-coverage",
+          "duration": 2586,
+          "testCount": 0,
+          "failedCount": 0
+        }
+      }
+    ]
+  },
+  "environment": {
+    "nodeVersion": "v22.19.0",
+    "platform": "win32",
+    "arch": "x64"
+  }
+}

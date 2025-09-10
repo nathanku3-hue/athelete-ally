@@ -1,24 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Athlete Ally - Your Intelligent Training Coach
 
-## Getting Started
+AI-powered strength & conditioning platform with scientific periodization, customized for individual athletes.
 
-First, run the development server:
+## 🚀 Local Development Environment
+
+**⚠️ IMPORTANT: The ONLY official way to run this project for development and testing is by using the Docker Compose-based preview environment.**
+
+This ensures that all microservices, databases, and infrastructure are running in a consistent, isolated, and production-like context.
+
+### Quick Start
+
+**To start the entire system, run the following single command from the project root:**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run preview:up
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Do NOT run `npm run dev` in individual service or app directories, as this will lead to an incomplete and inconsistent environment.**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Service URLs
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Once started, you can access:
+- **Frontend**: http://localhost:3000
+- **Gateway BFF**: http://localhost:4000
+- **API Docs**: http://localhost:4000/documentation
+- **Jaeger Tracing**: http://localhost:16686
+- **Prometheus Metrics**: http://localhost:9090
+- **Grafana Dashboards**: http://localhost:3001
+
+### Development Workflow
+
+1. **Start the environment**: `npm run preview:up`
+2. **Make code changes**: All changes are hot-reloaded automatically
+3. **Test functionality**: Use the frontend at http://localhost:3000
+4. **Stop the environment**: `npm run preview:down`
+
+### Architecture
+
+This project uses a microservices architecture with:
+- **Frontend**: Next.js 14 with TypeScript
+- **Gateway BFF**: API gateway and orchestration
+- **Profile Onboarding**: User profile and preferences management
+- **Planning Engine**: AI-powered workout plan generation
+- **Exercises Service**: Exercise database and management
+- **Fatigue Service**: Recovery and fatigue tracking
+- **Monitoring**: Prometheus, Grafana, and Jaeger for observability
 
 ## Learn More
 

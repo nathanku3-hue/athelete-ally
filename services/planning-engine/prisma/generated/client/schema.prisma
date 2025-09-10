@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated/client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PLANNING_DATABASE_URL")
+}
+
+model Plan {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId  String
+  version Int    @default(1)
+  status  String // draft, generating, completed, failed
+
+  // Plan metadata
+  name        String?
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+
+  // Plan content (JSON for flexibility)
+  content Json? // structured plan data
+
+  // Relations
+  microcycles Microcycle[]
+
+  @@map("plans")
+}
+
+model Microcycle {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  // Microcycle metadata
+  weekNumber Int
+  name       String?
+  phase      String? // preparation, competition, recovery
+
+  // Relations
+  sessions Session[]
+
+  @@map("microcycles")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  microcycleId String
+  microcycle   Microcycle @relation(fields: [microcycleId], references: [id], onDelete: Cascade)
+
+  // Session metadata
+  dayOfWeek Int // 1-7 (Monday-Sunday)
+  name      String?
+  duration  Int? // minutes
+
+  // Relations
+  exercises Exercise[]
+
+  @@map("sessions")
+}
+
+model Exercise {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Exercise data
+  name     String
+  category String? // strength, conditioning, mobility
+  sets     Int?
+  reps     String? // "8-12" or "30s"
+  weight   String? // "bodyweight" or "80% 1RM"
+  notes    String?
+  order    Int     @default(0)
+
+  @@map("exercises")
+}

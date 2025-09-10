@@ -1,0 +1,96 @@
+groups:
+  - name: athlete-ally-alerts
+    rules:
+      # 业务指标告警
+      - alert: HighOnboardingFailureRate
+        expr: rate(onboarding_completions_total[5m]) / rate(onboarding_requests_total[5m]) < 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Onboarding completion rate is below 80%"
+          description: "Onboarding completion rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      - alert: HighPlanGenerationFailureRate
+        expr: rate(plan_generation_failures_total[5m]) / rate(plan_generation_requests_total[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Plan generation failure rate is above 5%"
+          description: "Plan generation failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      - alert: SlowPlanGeneration
+        expr: histogram_quantile(0.95, rate(plan_generation_duration_seconds_bucket[5m])) > 30
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Plan generation is slow"
+          description: "95th percentile plan generation time is {{ $value }}s"
+
+      # 技术指标告警
+      - alert: HighAPIErrorRate
+        expr: rate(api_errors_total[5m]) / rate(api_requests_total[5m]) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API error rate is above 1%"
+          description: "API error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      - alert: SlowAPIResponse
+        expr: histogram_quantile(0.95, rate(api_response_time_seconds_bucket[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API response time is slow"
+          description: "95th percentile API response time is {{ $value }}s"
+
+      - alert: HighLLMResponseTime
+        expr: histogram_quantile(0.95, rate(llm_response_time_seconds_bucket[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM response time is slow"
+          description: "95th percentile LLM response time is {{ $value }}s"
+
+      - alert: HighDatabaseQueryTime
+        expr: histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database queries are slow"
+          description: "95th percentile database query time is {{ $value }}s"
+
+      # 系统资源告警
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}MB for service {{ $labels.job }}"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }} for service {{ $labels.job }}"
+
