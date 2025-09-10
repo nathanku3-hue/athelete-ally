@@ -46,6 +46,23 @@ jobs:
       - name: Type check
         run: npx turbo run type-check
 
+      - name: Check for build artifacts
+        run: |
+          echo "🔍 Checking for accidentally committed build artifacts..."
+          
+          # 检查是否提交了构建产物
+          if git ls-files | grep -E "(node_modules|dist|\.turbo|build)/" | head -10; then
+            echo "❌ ERROR: Build artifacts detected in repository!"
+            echo "The following build artifacts were found:"
+            git ls-files | grep -E "(node_modules|dist|\.turbo|build)/" | head -20
+            echo ""
+            echo "Please remove these files and update .gitignore to prevent future commits."
+            echo "Run: git rm -r --cached <file> for each file"
+            exit 1
+          else
+            echo "✅ No build artifacts found in repository"
+          fi
+
   # 单元测试
   test:
     name: Unit Tests
@@ -214,10 +231,34 @@ jobs:
         run: npm ci
 
       - name: Run security audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
 
       - name: Run dependency check
         run: npx audit-ci --config audit-ci.json || true
+
+      - name: Check for high-risk dependencies
+        run: |
+          echo "🔍 Checking for high-risk dependencies..."
+          npm audit --audit-level=high --json > audit-results.json || true
+          
+          # 检查是否有高危漏洞
+          if [ -f audit-results.json ]; then
+            HIGH_RISK=$(node -e "
+              const fs = require('fs');
+              const audit = JSON.parse(fs.readFileSync('audit-results.json', 'utf8'));
+              const vulnerabilities = audit.vulnerabilities || {};
+              const highRisk = Object.values(vulnerabilities).filter(v => v.severity === 'high' || v.severity === 'critical');
+              console.log(highRisk.length);
+            ")
+            
+            if [ "$HIGH_RISK" -gt 0 ]; then
+              echo "❌ Found $HIGH_RISK high-risk vulnerabilities!"
+              echo "Please review and update dependencies before merging."
+              exit 1
+            else
+              echo "✅ No high-risk vulnerabilities found"
+            fi
+          fi
 
   # 性能测试 (可选)
   performance:
