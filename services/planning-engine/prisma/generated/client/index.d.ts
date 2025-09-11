@@ -33,6 +33,11 @@ export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
  * 
  */
 export type Exercise = $Result.DefaultSelection<Prisma.$ExercisePayload>
+/**
+ * Model PlanJob
+ * 
+ */
+export type PlanJob = $Result.DefaultSelection<Prisma.$PlanJobPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -196,6 +201,16 @@ export class PrismaClient<
     * ```
     */
   get exercise(): Prisma.ExerciseDelegate<ExtArgs>;
+
+  /**
+   * `prisma.planJob`: Exposes CRUD operations for the **PlanJob** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PlanJobs
+    * const planJobs = await prisma.planJob.findMany()
+    * ```
+    */
+  get planJob(): Prisma.PlanJobDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -640,7 +655,8 @@ export namespace Prisma {
     Plan: 'Plan',
     Microcycle: 'Microcycle',
     Session: 'Session',
-    Exercise: 'Exercise'
+    Exercise: 'Exercise',
+    PlanJob: 'PlanJob'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -656,7 +672,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "plan" | "microcycle" | "session" | "exercise"
+      modelProps: "plan" | "microcycle" | "session" | "exercise" | "planJob"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -937,6 +953,76 @@ export namespace Prisma {
           count: {
             args: Prisma.ExerciseCountArgs<ExtArgs>
             result: $Utils.Optional<ExerciseCountAggregateOutputType> | number
+          }
+        }
+      }
+      PlanJob: {
+        payload: Prisma.$PlanJobPayload<ExtArgs>
+        fields: Prisma.PlanJobFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PlanJobFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PlanJobFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>
+          }
+          findFirst: {
+            args: Prisma.PlanJobFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PlanJobFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>
+          }
+          findMany: {
+            args: Prisma.PlanJobFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>[]
+          }
+          create: {
+            args: Prisma.PlanJobCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>
+          }
+          createMany: {
+            args: Prisma.PlanJobCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PlanJobCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>[]
+          }
+          delete: {
+            args: Prisma.PlanJobDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>
+          }
+          update: {
+            args: Prisma.PlanJobUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>
+          }
+          deleteMany: {
+            args: Prisma.PlanJobDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PlanJobUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PlanJobUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlanJobPayload>
+          }
+          aggregate: {
+            args: Prisma.PlanJobAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePlanJob>
+          }
+          groupBy: {
+            args: Prisma.PlanJobGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PlanJobGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PlanJobCountArgs<ExtArgs>
+            result: $Utils.Optional<PlanJobCountAggregateOutputType> | number
           }
         }
       }
@@ -5325,6 +5411,1022 @@ export namespace Prisma {
 
 
   /**
+   * Model PlanJob
+   */
+
+  export type AggregatePlanJob = {
+    _count: PlanJobCountAggregateOutputType | null
+    _avg: PlanJobAvgAggregateOutputType | null
+    _sum: PlanJobSumAggregateOutputType | null
+    _min: PlanJobMinAggregateOutputType | null
+    _max: PlanJobMaxAggregateOutputType | null
+  }
+
+  export type PlanJobAvgAggregateOutputType = {
+    progress: number | null
+    retryCount: number | null
+    maxRetries: number | null
+  }
+
+  export type PlanJobSumAggregateOutputType = {
+    progress: number | null
+    retryCount: number | null
+    maxRetries: number | null
+  }
+
+  export type PlanJobMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    jobId: string | null
+    userId: string | null
+    status: string | null
+    progress: number | null
+    startedAt: Date | null
+    completedAt: Date | null
+    retryCount: number | null
+    maxRetries: number | null
+  }
+
+  export type PlanJobMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    jobId: string | null
+    userId: string | null
+    status: string | null
+    progress: number | null
+    startedAt: Date | null
+    completedAt: Date | null
+    retryCount: number | null
+    maxRetries: number | null
+  }
+
+  export type PlanJobCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    jobId: number
+    userId: number
+    status: number
+    progress: number
+    requestData: number
+    resultData: number
+    errorData: number
+    startedAt: number
+    completedAt: number
+    retryCount: number
+    maxRetries: number
+    _all: number
+  }
+
+
+  export type PlanJobAvgAggregateInputType = {
+    progress?: true
+    retryCount?: true
+    maxRetries?: true
+  }
+
+  export type PlanJobSumAggregateInputType = {
+    progress?: true
+    retryCount?: true
+    maxRetries?: true
+  }
+
+  export type PlanJobMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    jobId?: true
+    userId?: true
+    status?: true
+    progress?: true
+    startedAt?: true
+    completedAt?: true
+    retryCount?: true
+    maxRetries?: true
+  }
+
+  export type PlanJobMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    jobId?: true
+    userId?: true
+    status?: true
+    progress?: true
+    startedAt?: true
+    completedAt?: true
+    retryCount?: true
+    maxRetries?: true
+  }
+
+  export type PlanJobCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    jobId?: true
+    userId?: true
+    status?: true
+    progress?: true
+    requestData?: true
+    resultData?: true
+    errorData?: true
+    startedAt?: true
+    completedAt?: true
+    retryCount?: true
+    maxRetries?: true
+    _all?: true
+  }
+
+  export type PlanJobAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PlanJob to aggregate.
+     */
+    where?: PlanJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlanJobs to fetch.
+     */
+    orderBy?: PlanJobOrderByWithRelationInput | PlanJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PlanJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlanJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlanJobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PlanJobs
+    **/
+    _count?: true | PlanJobCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PlanJobAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PlanJobSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PlanJobMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PlanJobMaxAggregateInputType
+  }
+
+  export type GetPlanJobAggregateType<T extends PlanJobAggregateArgs> = {
+        [P in keyof T & keyof AggregatePlanJob]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePlanJob[P]>
+      : GetScalarType<T[P], AggregatePlanJob[P]>
+  }
+
+
+
+
+  export type PlanJobGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PlanJobWhereInput
+    orderBy?: PlanJobOrderByWithAggregationInput | PlanJobOrderByWithAggregationInput[]
+    by: PlanJobScalarFieldEnum[] | PlanJobScalarFieldEnum
+    having?: PlanJobScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PlanJobCountAggregateInputType | true
+    _avg?: PlanJobAvgAggregateInputType
+    _sum?: PlanJobSumAggregateInputType
+    _min?: PlanJobMinAggregateInputType
+    _max?: PlanJobMaxAggregateInputType
+  }
+
+  export type PlanJobGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    jobId: string
+    userId: string
+    status: string
+    progress: number
+    requestData: JsonValue
+    resultData: JsonValue | null
+    errorData: JsonValue | null
+    startedAt: Date | null
+    completedAt: Date | null
+    retryCount: number
+    maxRetries: number
+    _count: PlanJobCountAggregateOutputType | null
+    _avg: PlanJobAvgAggregateOutputType | null
+    _sum: PlanJobSumAggregateOutputType | null
+    _min: PlanJobMinAggregateOutputType | null
+    _max: PlanJobMaxAggregateOutputType | null
+  }
+
+  type GetPlanJobGroupByPayload<T extends PlanJobGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PlanJobGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PlanJobGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PlanJobGroupByOutputType[P]>
+            : GetScalarType<T[P], PlanJobGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PlanJobSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    jobId?: boolean
+    userId?: boolean
+    status?: boolean
+    progress?: boolean
+    requestData?: boolean
+    resultData?: boolean
+    errorData?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    retryCount?: boolean
+    maxRetries?: boolean
+  }, ExtArgs["result"]["planJob"]>
+
+  export type PlanJobSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    jobId?: boolean
+    userId?: boolean
+    status?: boolean
+    progress?: boolean
+    requestData?: boolean
+    resultData?: boolean
+    errorData?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    retryCount?: boolean
+    maxRetries?: boolean
+  }, ExtArgs["result"]["planJob"]>
+
+  export type PlanJobSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    jobId?: boolean
+    userId?: boolean
+    status?: boolean
+    progress?: boolean
+    requestData?: boolean
+    resultData?: boolean
+    errorData?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    retryCount?: boolean
+    maxRetries?: boolean
+  }
+
+
+  export type $PlanJobPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PlanJob"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      jobId: string
+      userId: string
+      status: string
+      progress: number
+      requestData: Prisma.JsonValue
+      resultData: Prisma.JsonValue | null
+      errorData: Prisma.JsonValue | null
+      startedAt: Date | null
+      completedAt: Date | null
+      retryCount: number
+      maxRetries: number
+    }, ExtArgs["result"]["planJob"]>
+    composites: {}
+  }
+
+  type PlanJobGetPayload<S extends boolean | null | undefined | PlanJobDefaultArgs> = $Result.GetResult<Prisma.$PlanJobPayload, S>
+
+  type PlanJobCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PlanJobFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PlanJobCountAggregateInputType | true
+    }
+
+  export interface PlanJobDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PlanJob'], meta: { name: 'PlanJob' } }
+    /**
+     * Find zero or one PlanJob that matches the filter.
+     * @param {PlanJobFindUniqueArgs} args - Arguments to find a PlanJob
+     * @example
+     * // Get one PlanJob
+     * const planJob = await prisma.planJob.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PlanJobFindUniqueArgs>(args: SelectSubset<T, PlanJobFindUniqueArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PlanJob that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PlanJobFindUniqueOrThrowArgs} args - Arguments to find a PlanJob
+     * @example
+     * // Get one PlanJob
+     * const planJob = await prisma.planJob.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PlanJobFindUniqueOrThrowArgs>(args: SelectSubset<T, PlanJobFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PlanJob that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobFindFirstArgs} args - Arguments to find a PlanJob
+     * @example
+     * // Get one PlanJob
+     * const planJob = await prisma.planJob.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PlanJobFindFirstArgs>(args?: SelectSubset<T, PlanJobFindFirstArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PlanJob that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobFindFirstOrThrowArgs} args - Arguments to find a PlanJob
+     * @example
+     * // Get one PlanJob
+     * const planJob = await prisma.planJob.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PlanJobFindFirstOrThrowArgs>(args?: SelectSubset<T, PlanJobFindFirstOrThrowArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PlanJobs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PlanJobs
+     * const planJobs = await prisma.planJob.findMany()
+     * 
+     * // Get first 10 PlanJobs
+     * const planJobs = await prisma.planJob.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const planJobWithIdOnly = await prisma.planJob.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PlanJobFindManyArgs>(args?: SelectSubset<T, PlanJobFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PlanJob.
+     * @param {PlanJobCreateArgs} args - Arguments to create a PlanJob.
+     * @example
+     * // Create one PlanJob
+     * const PlanJob = await prisma.planJob.create({
+     *   data: {
+     *     // ... data to create a PlanJob
+     *   }
+     * })
+     * 
+     */
+    create<T extends PlanJobCreateArgs>(args: SelectSubset<T, PlanJobCreateArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PlanJobs.
+     * @param {PlanJobCreateManyArgs} args - Arguments to create many PlanJobs.
+     * @example
+     * // Create many PlanJobs
+     * const planJob = await prisma.planJob.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PlanJobCreateManyArgs>(args?: SelectSubset<T, PlanJobCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PlanJobs and returns the data saved in the database.
+     * @param {PlanJobCreateManyAndReturnArgs} args - Arguments to create many PlanJobs.
+     * @example
+     * // Create many PlanJobs
+     * const planJob = await prisma.planJob.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PlanJobs and only return the `id`
+     * const planJobWithIdOnly = await prisma.planJob.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PlanJobCreateManyAndReturnArgs>(args?: SelectSubset<T, PlanJobCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PlanJob.
+     * @param {PlanJobDeleteArgs} args - Arguments to delete one PlanJob.
+     * @example
+     * // Delete one PlanJob
+     * const PlanJob = await prisma.planJob.delete({
+     *   where: {
+     *     // ... filter to delete one PlanJob
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PlanJobDeleteArgs>(args: SelectSubset<T, PlanJobDeleteArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PlanJob.
+     * @param {PlanJobUpdateArgs} args - Arguments to update one PlanJob.
+     * @example
+     * // Update one PlanJob
+     * const planJob = await prisma.planJob.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PlanJobUpdateArgs>(args: SelectSubset<T, PlanJobUpdateArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PlanJobs.
+     * @param {PlanJobDeleteManyArgs} args - Arguments to filter PlanJobs to delete.
+     * @example
+     * // Delete a few PlanJobs
+     * const { count } = await prisma.planJob.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PlanJobDeleteManyArgs>(args?: SelectSubset<T, PlanJobDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PlanJobs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PlanJobs
+     * const planJob = await prisma.planJob.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PlanJobUpdateManyArgs>(args: SelectSubset<T, PlanJobUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PlanJob.
+     * @param {PlanJobUpsertArgs} args - Arguments to update or create a PlanJob.
+     * @example
+     * // Update or create a PlanJob
+     * const planJob = await prisma.planJob.upsert({
+     *   create: {
+     *     // ... data to create a PlanJob
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PlanJob we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PlanJobUpsertArgs>(args: SelectSubset<T, PlanJobUpsertArgs<ExtArgs>>): Prisma__PlanJobClient<$Result.GetResult<Prisma.$PlanJobPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PlanJobs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobCountArgs} args - Arguments to filter PlanJobs to count.
+     * @example
+     * // Count the number of PlanJobs
+     * const count = await prisma.planJob.count({
+     *   where: {
+     *     // ... the filter for the PlanJobs we want to count
+     *   }
+     * })
+    **/
+    count<T extends PlanJobCountArgs>(
+      args?: Subset<T, PlanJobCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PlanJobCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PlanJob.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PlanJobAggregateArgs>(args: Subset<T, PlanJobAggregateArgs>): Prisma.PrismaPromise<GetPlanJobAggregateType<T>>
+
+    /**
+     * Group by PlanJob.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PlanJobGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PlanJobGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PlanJobGroupByArgs['orderBy'] }
+        : { orderBy?: PlanJobGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PlanJobGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPlanJobGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PlanJob model
+   */
+  readonly fields: PlanJobFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PlanJob.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PlanJobClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PlanJob model
+   */ 
+  interface PlanJobFieldRefs {
+    readonly id: FieldRef<"PlanJob", 'String'>
+    readonly createdAt: FieldRef<"PlanJob", 'DateTime'>
+    readonly updatedAt: FieldRef<"PlanJob", 'DateTime'>
+    readonly jobId: FieldRef<"PlanJob", 'String'>
+    readonly userId: FieldRef<"PlanJob", 'String'>
+    readonly status: FieldRef<"PlanJob", 'String'>
+    readonly progress: FieldRef<"PlanJob", 'Int'>
+    readonly requestData: FieldRef<"PlanJob", 'Json'>
+    readonly resultData: FieldRef<"PlanJob", 'Json'>
+    readonly errorData: FieldRef<"PlanJob", 'Json'>
+    readonly startedAt: FieldRef<"PlanJob", 'DateTime'>
+    readonly completedAt: FieldRef<"PlanJob", 'DateTime'>
+    readonly retryCount: FieldRef<"PlanJob", 'Int'>
+    readonly maxRetries: FieldRef<"PlanJob", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PlanJob findUnique
+   */
+  export type PlanJobFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * Filter, which PlanJob to fetch.
+     */
+    where: PlanJobWhereUniqueInput
+  }
+
+  /**
+   * PlanJob findUniqueOrThrow
+   */
+  export type PlanJobFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * Filter, which PlanJob to fetch.
+     */
+    where: PlanJobWhereUniqueInput
+  }
+
+  /**
+   * PlanJob findFirst
+   */
+  export type PlanJobFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * Filter, which PlanJob to fetch.
+     */
+    where?: PlanJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlanJobs to fetch.
+     */
+    orderBy?: PlanJobOrderByWithRelationInput | PlanJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PlanJobs.
+     */
+    cursor?: PlanJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlanJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlanJobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PlanJobs.
+     */
+    distinct?: PlanJobScalarFieldEnum | PlanJobScalarFieldEnum[]
+  }
+
+  /**
+   * PlanJob findFirstOrThrow
+   */
+  export type PlanJobFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * Filter, which PlanJob to fetch.
+     */
+    where?: PlanJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlanJobs to fetch.
+     */
+    orderBy?: PlanJobOrderByWithRelationInput | PlanJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PlanJobs.
+     */
+    cursor?: PlanJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlanJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlanJobs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PlanJobs.
+     */
+    distinct?: PlanJobScalarFieldEnum | PlanJobScalarFieldEnum[]
+  }
+
+  /**
+   * PlanJob findMany
+   */
+  export type PlanJobFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * Filter, which PlanJobs to fetch.
+     */
+    where?: PlanJobWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PlanJobs to fetch.
+     */
+    orderBy?: PlanJobOrderByWithRelationInput | PlanJobOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PlanJobs.
+     */
+    cursor?: PlanJobWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PlanJobs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PlanJobs.
+     */
+    skip?: number
+    distinct?: PlanJobScalarFieldEnum | PlanJobScalarFieldEnum[]
+  }
+
+  /**
+   * PlanJob create
+   */
+  export type PlanJobCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * The data needed to create a PlanJob.
+     */
+    data: XOR<PlanJobCreateInput, PlanJobUncheckedCreateInput>
+  }
+
+  /**
+   * PlanJob createMany
+   */
+  export type PlanJobCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PlanJobs.
+     */
+    data: PlanJobCreateManyInput | PlanJobCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PlanJob createManyAndReturn
+   */
+  export type PlanJobCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PlanJobs.
+     */
+    data: PlanJobCreateManyInput | PlanJobCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PlanJob update
+   */
+  export type PlanJobUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * The data needed to update a PlanJob.
+     */
+    data: XOR<PlanJobUpdateInput, PlanJobUncheckedUpdateInput>
+    /**
+     * Choose, which PlanJob to update.
+     */
+    where: PlanJobWhereUniqueInput
+  }
+
+  /**
+   * PlanJob updateMany
+   */
+  export type PlanJobUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PlanJobs.
+     */
+    data: XOR<PlanJobUpdateManyMutationInput, PlanJobUncheckedUpdateManyInput>
+    /**
+     * Filter which PlanJobs to update
+     */
+    where?: PlanJobWhereInput
+  }
+
+  /**
+   * PlanJob upsert
+   */
+  export type PlanJobUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * The filter to search for the PlanJob to update in case it exists.
+     */
+    where: PlanJobWhereUniqueInput
+    /**
+     * In case the PlanJob found by the `where` argument doesn't exist, create a new PlanJob with this data.
+     */
+    create: XOR<PlanJobCreateInput, PlanJobUncheckedCreateInput>
+    /**
+     * In case the PlanJob was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PlanJobUpdateInput, PlanJobUncheckedUpdateInput>
+  }
+
+  /**
+   * PlanJob delete
+   */
+  export type PlanJobDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+    /**
+     * Filter which PlanJob to delete.
+     */
+    where: PlanJobWhereUniqueInput
+  }
+
+  /**
+   * PlanJob deleteMany
+   */
+  export type PlanJobDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PlanJobs to delete
+     */
+    where?: PlanJobWhereInput
+  }
+
+  /**
+   * PlanJob without action
+   */
+  export type PlanJobDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PlanJob
+     */
+    select?: PlanJobSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5398,6 +6500,26 @@ export namespace Prisma {
   export type ExerciseScalarFieldEnum = (typeof ExerciseScalarFieldEnum)[keyof typeof ExerciseScalarFieldEnum]
 
 
+  export const PlanJobScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    jobId: 'jobId',
+    userId: 'userId',
+    status: 'status',
+    progress: 'progress',
+    requestData: 'requestData',
+    resultData: 'resultData',
+    errorData: 'errorData',
+    startedAt: 'startedAt',
+    completedAt: 'completedAt',
+    retryCount: 'retryCount',
+    maxRetries: 'maxRetries'
+  };
+
+  export type PlanJobScalarFieldEnum = (typeof PlanJobScalarFieldEnum)[keyof typeof PlanJobScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -5412,6 +6534,13 @@ export namespace Prisma {
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -5824,6 +6953,105 @@ export namespace Prisma {
     order?: IntWithAggregatesFilter<"Exercise"> | number
   }
 
+  export type PlanJobWhereInput = {
+    AND?: PlanJobWhereInput | PlanJobWhereInput[]
+    OR?: PlanJobWhereInput[]
+    NOT?: PlanJobWhereInput | PlanJobWhereInput[]
+    id?: StringFilter<"PlanJob"> | string
+    createdAt?: DateTimeFilter<"PlanJob"> | Date | string
+    updatedAt?: DateTimeFilter<"PlanJob"> | Date | string
+    jobId?: StringFilter<"PlanJob"> | string
+    userId?: StringFilter<"PlanJob"> | string
+    status?: StringFilter<"PlanJob"> | string
+    progress?: IntFilter<"PlanJob"> | number
+    requestData?: JsonFilter<"PlanJob">
+    resultData?: JsonNullableFilter<"PlanJob">
+    errorData?: JsonNullableFilter<"PlanJob">
+    startedAt?: DateTimeNullableFilter<"PlanJob"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PlanJob"> | Date | string | null
+    retryCount?: IntFilter<"PlanJob"> | number
+    maxRetries?: IntFilter<"PlanJob"> | number
+  }
+
+  export type PlanJobOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    jobId?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    requestData?: SortOrder
+    resultData?: SortOrderInput | SortOrder
+    errorData?: SortOrderInput | SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+  }
+
+  export type PlanJobWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    jobId?: string
+    AND?: PlanJobWhereInput | PlanJobWhereInput[]
+    OR?: PlanJobWhereInput[]
+    NOT?: PlanJobWhereInput | PlanJobWhereInput[]
+    createdAt?: DateTimeFilter<"PlanJob"> | Date | string
+    updatedAt?: DateTimeFilter<"PlanJob"> | Date | string
+    userId?: StringFilter<"PlanJob"> | string
+    status?: StringFilter<"PlanJob"> | string
+    progress?: IntFilter<"PlanJob"> | number
+    requestData?: JsonFilter<"PlanJob">
+    resultData?: JsonNullableFilter<"PlanJob">
+    errorData?: JsonNullableFilter<"PlanJob">
+    startedAt?: DateTimeNullableFilter<"PlanJob"> | Date | string | null
+    completedAt?: DateTimeNullableFilter<"PlanJob"> | Date | string | null
+    retryCount?: IntFilter<"PlanJob"> | number
+    maxRetries?: IntFilter<"PlanJob"> | number
+  }, "id" | "jobId">
+
+  export type PlanJobOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    jobId?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    requestData?: SortOrder
+    resultData?: SortOrderInput | SortOrder
+    errorData?: SortOrderInput | SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrderInput | SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+    _count?: PlanJobCountOrderByAggregateInput
+    _avg?: PlanJobAvgOrderByAggregateInput
+    _max?: PlanJobMaxOrderByAggregateInput
+    _min?: PlanJobMinOrderByAggregateInput
+    _sum?: PlanJobSumOrderByAggregateInput
+  }
+
+  export type PlanJobScalarWhereWithAggregatesInput = {
+    AND?: PlanJobScalarWhereWithAggregatesInput | PlanJobScalarWhereWithAggregatesInput[]
+    OR?: PlanJobScalarWhereWithAggregatesInput[]
+    NOT?: PlanJobScalarWhereWithAggregatesInput | PlanJobScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PlanJob"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"PlanJob"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PlanJob"> | Date | string
+    jobId?: StringWithAggregatesFilter<"PlanJob"> | string
+    userId?: StringWithAggregatesFilter<"PlanJob"> | string
+    status?: StringWithAggregatesFilter<"PlanJob"> | string
+    progress?: IntWithAggregatesFilter<"PlanJob"> | number
+    requestData?: JsonWithAggregatesFilter<"PlanJob">
+    resultData?: JsonNullableWithAggregatesFilter<"PlanJob">
+    errorData?: JsonNullableWithAggregatesFilter<"PlanJob">
+    startedAt?: DateTimeNullableWithAggregatesFilter<"PlanJob"> | Date | string | null
+    completedAt?: DateTimeNullableWithAggregatesFilter<"PlanJob"> | Date | string | null
+    retryCount?: IntWithAggregatesFilter<"PlanJob"> | number
+    maxRetries?: IntWithAggregatesFilter<"PlanJob"> | number
+  }
+
   export type PlanCreateInput = {
     id?: string
     createdAt?: Date | string
@@ -6167,6 +7395,125 @@ export namespace Prisma {
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PlanJobCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    jobId: string
+    userId: string
+    status?: string
+    progress?: number
+    requestData: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    retryCount?: number
+    maxRetries?: number
+  }
+
+  export type PlanJobUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    jobId: string
+    userId: string
+    status?: string
+    progress?: number
+    requestData: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    retryCount?: number
+    maxRetries?: number
+  }
+
+  export type PlanJobUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    retryCount?: IntFieldUpdateOperationsInput | number
+    maxRetries?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PlanJobUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    retryCount?: IntFieldUpdateOperationsInput | number
+    maxRetries?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PlanJobCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    jobId: string
+    userId: string
+    status?: string
+    progress?: number
+    requestData: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    retryCount?: number
+    maxRetries?: number
+  }
+
+  export type PlanJobUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    retryCount?: IntFieldUpdateOperationsInput | number
+    maxRetries?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type PlanJobUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    progress?: IntFieldUpdateOperationsInput | number
+    requestData?: JsonNullValueInput | InputJsonValue
+    resultData?: NullableJsonNullValueInput | InputJsonValue
+    errorData?: NullableJsonNullValueInput | InputJsonValue
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    retryCount?: IntFieldUpdateOperationsInput | number
+    maxRetries?: IntFieldUpdateOperationsInput | number
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -6613,6 +7960,110 @@ export namespace Prisma {
     sets?: SortOrder
     order?: SortOrder
   }
+  export type JsonFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type PlanJobCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    jobId?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    requestData?: SortOrder
+    resultData?: SortOrder
+    errorData?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+  }
+
+  export type PlanJobAvgOrderByAggregateInput = {
+    progress?: SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+  }
+
+  export type PlanJobMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    jobId?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+  }
+
+  export type PlanJobMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    jobId?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    progress?: SortOrder
+    startedAt?: SortOrder
+    completedAt?: SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+  }
+
+  export type PlanJobSumOrderByAggregateInput = {
+    progress?: SortOrder
+    retryCount?: SortOrder
+    maxRetries?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
 
   export type MicrocycleCreateNestedManyWithoutPlanInput = {
     create?: XOR<MicrocycleCreateWithoutPlanInput, MicrocycleUncheckedCreateWithoutPlanInput> | MicrocycleCreateWithoutPlanInput[] | MicrocycleUncheckedCreateWithoutPlanInput[]
@@ -7022,6 +8473,28 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+  export type NestedJsonFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type MicrocycleCreateWithoutPlanInput = {
@@ -7556,6 +9029,10 @@ export namespace Prisma {
      * @deprecated Use ExerciseDefaultArgs instead
      */
     export type ExerciseArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ExerciseDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PlanJobDefaultArgs instead
+     */
+    export type PlanJobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PlanJobDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

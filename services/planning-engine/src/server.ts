@@ -8,9 +8,8 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-// 暫時註釋掉共享包依賴
-// import { EventBus } from '@athlete-ally/event-bus';
-// import { OnboardingCompletedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
+import { EventBus } from '@athlete-ally/event-bus';
+import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent } from '@athlete-ally/contracts';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
 
 // 定义类型和函数（从 index.ts 移动过来）
@@ -35,18 +34,8 @@ const server = Fastify({ logger: true });
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PLANNING_DATABASE_URL });
 const redis = new Redis(config.REDIS_URL);
-// 暫時註釋掉 EventBus，創建一個模擬對象
-const eventBus = {
-  connect: async (url: string) => {
-    console.log(`Mock EventBus connecting to ${url}`);
-  },
-  subscribeToOnboardingCompleted: async (handler: any) => {
-    console.log('Mock EventBus subscribing to onboarding completed');
-  },
-  publishPlanGenerated: async (event: any) => {
-    console.log('Mock EventBus publishing plan generated:', event);
-  }
-};
+// 使用真实的EventBus
+const eventBus = new EventBus();
 
 server.addHook('onReady', async () => {
   try {
@@ -70,6 +59,10 @@ server.addHook('onReady', async () => {
     // Subscribe to onboarding completed events
     await eventBus.subscribeToOnboardingCompleted(handleOnboardingCompleted);
     server.log.info('subscribed to onboarding completed events');
+    
+    // Subscribe to plan generation requested events
+    await eventBus.subscribeToPlanGenerationRequested(handlePlanGenerationRequested);
+    server.log.info('subscribed to plan generation requested events');
   } catch (e) {
     server.log.error({ err: e }, 'failed to connect event bus');
     process.exit(1);
@@ -145,6 +138,136 @@ async function handleOnboardingCompleted(event: any) {
   }
 }
 
+// Event handler for plan generation requested
+async function handlePlanGenerationRequested(event: PlanGenerationRequestedEvent) {
+  server.log.info({ eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Processing plan generation requested event');
+  
+  try {
+    // 创建PlanJob记录
+    const planJob = await prisma.planJob.create({
+      data: {
+        jobId: event.jobId,
+        userId: event.userId,
+        status: 'processing',
+        progress: 0,
+        requestData: event as any,
+        startedAt: new Date(),
+      },
+    });
+
+    // 更新进度
+    await prisma.planJob.update({
+      where: { id: planJob.id },
+      data: { progress: 25 },
+    });
+
+    // 生成计划
+    const planData = await generateTrainingPlan({
+      userId: event.userId,
+      proficiency: event.proficiency || 'intermediate',
+      season: event.season || 'offseason',
+      availabilityDays: event.availabilityDays || 3,
+      weeklyGoalDays: event.weeklyGoalDays,
+      equipment: event.equipment || ['bodyweight'],
+      purpose: event.purpose,
+    });
+
+    // 更新进度
+    await prisma.planJob.update({
+      where: { id: planJob.id },
+      data: { progress: 75 },
+    });
+
+    // 保存计划到数据库
+    const plan = await prisma.plan.create({
+      data: {
+        userId: event.userId,
+        status: 'completed',
+        name: planData.name,
+        description: planData.description,
+        content: planData,
+        microcycles: {
+          create: planData.microcycles.map((mc: any) => ({
+            weekNumber: mc.weekNumber,
+            name: mc.name,
+            phase: mc.phase,
+            sessions: {
+              create: mc.sessions.map((session: any) => ({
+                dayOfWeek: session.dayOfWeek,
+                name: session.name,
+                duration: session.duration,
+                exercises: {
+                  create: session.exercises.map((exercise: any) => ({
+                    name: exercise.name,
+                    category: exercise.category,
+                    sets: exercise.sets,
+                    reps: exercise.reps,
+                    weight: exercise.weight,
+                    notes: exercise.notes,
+                  })),
+                },
+              })),
+            },
+          })),
+        },
+      },
+    });
+
+    // 更新PlanJob为完成状态
+    await prisma.planJob.update({
+      where: { id: planJob.id },
+      data: {
+        status: 'completed',
+        progress: 100,
+        resultData: { planId: plan.id, planName: plan.name },
+        completedAt: new Date(),
+      },
+    });
+
+    // 发布计划生成完成事件
+    const planGeneratedEvent: PlanGeneratedEvent = {
+      eventId: `plan-generated-${plan.id}-${Date.now()}`,
+      userId: event.userId,
+      planId: plan.id,
+      timestamp: Date.now(),
+      planName: plan.name || 'Generated Plan',
+      status: 'completed',
+      version: plan.version,
+    };
+
+    await eventBus.publishPlanGenerated(planGeneratedEvent);
+    server.log.info({ planId: plan.id, userId: event.userId, jobId: event.jobId }, 'Plan generated successfully');
+    
+  } catch (error) {
+    server.log.error({ error, eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Failed to generate plan from event');
+    
+    // 更新PlanJob为失败状态
+    try {
+      await prisma.planJob.updateMany({
+        where: { jobId: event.jobId },
+        data: {
+          status: 'failed',
+          errorData: { error: (error as Error).message, stack: (error as Error).stack },
+          completedAt: new Date(),
+        },
+      });
+    } catch (dbError) {
+      server.log.error({ dbError }, 'Failed to update PlanJob status to failed');
+    }
+
+    // 发布计划生成失败事件
+    const planGenerationFailedEvent: PlanGenerationFailedEvent = {
+      eventId: `plan-failed-${event.jobId}-${Date.now()}`,
+      userId: event.userId,
+      jobId: event.jobId,
+      timestamp: Date.now(),
+      error: (error as Error).message,
+    };
+
+    await eventBus.publishPlanGenerationFailed(planGenerationFailedEvent);
+  }
+}
+
 server.get('/health', async () => ({ status: 'ok' }));
 
 // 查询计划生成状态
@@ -152,23 +275,26 @@ server.get('/status/:jobId', async (request, reply) => {
   const { jobId } = request.params as { jobId: string };
   
   try {
-    // 查询计划状态
-    const plan = await prisma.plan.findFirst({
-      where: {
-        // 这里需要根据jobId查找，可能需要添加jobId字段到数据库
-        userId: 'temp', // 临时实现
-      },
+    // 查询PlanJob状态
+    const planJob = await prisma.planJob.findUnique({
+      where: { jobId },
       select: {
         id: true,
+        jobId: true,
+        userId: true,
         status: true,
-        name: true,
-        version: true,
+        progress: true,
+        resultData: true,
+        errorData: true,
         createdAt: true,
-        updatedAt: true,
+        startedAt: true,
+        completedAt: true,
+        retryCount: true,
+        maxRetries: true,
       },
     });
 
-    if (!plan) {
+    if (!planJob) {
       return reply.code(404).send({
         jobId: jobId,
         status: 'not_found',
@@ -177,16 +303,20 @@ server.get('/status/:jobId', async (request, reply) => {
     }
 
     return reply.code(200).send({
-      jobId: jobId,
-      planId: plan.id,
-      status: plan.status,
-      name: plan.name,
-      version: plan.version,
-      createdAt: plan.createdAt,
-      updatedAt: plan.updatedAt,
+      jobId: planJob.jobId,
+      userId: planJob.userId,
+      status: planJob.status,
+      progress: planJob.progress,
+      resultData: planJob.resultData,
+      errorData: planJob.errorData,
+      createdAt: planJob.createdAt,
+      startedAt: planJob.startedAt,
+      completedAt: planJob.completedAt,
+      retryCount: planJob.retryCount,
+      maxRetries: planJob.maxRetries,
     });
   } catch (error) {
-    server.log.error({ error, jobId }, 'Failed to query plan status');
+    server.log.error({ error, jobId }, 'Failed to query plan job status');
     return reply.code(500).send({ error: 'status_query_failed' });
   }
 });
@@ -222,7 +352,7 @@ server.post('/generate', async (request, reply) => {
     };
 
     // 发布事件到消息队列
-    // await eventBus.publishPlanGenerationRequested(planGenerationRequest);
+    await eventBus.publishPlanGenerationRequested(planGenerationRequest);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.planGenerationDuration.record(responseTime, {

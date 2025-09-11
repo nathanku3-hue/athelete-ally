@@ -94,6 +94,40 @@ model Exercise {
   @@map("exercises")
 }
 
+model PlanJob {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Job identification
+  jobId     String   @unique
+  userId    String
+  
+  // Job status tracking
+  status    String   @default("pending") // pending, processing, completed, failed
+  progress  Int      @default(0) // 0-100 percentage
+  
+  // Request data
+  requestData Json   // PlanGenerationRequest data
+  
+  // Result data
+  resultData  Json?  // Generated plan data when completed
+  errorData   Json?  // Error information when failed
+  
+  // Timing
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Retry tracking
+  retryCount  Int     @default(0)
+  maxRetries  Int     @default(3)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("plan_jobs")
+}
+
 
 
 

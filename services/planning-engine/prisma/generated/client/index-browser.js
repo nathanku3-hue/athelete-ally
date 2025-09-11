@@ -170,6 +170,23 @@ exports.Prisma.ExerciseScalarFieldEnum = {
   order: 'order'
 };
 
+exports.Prisma.PlanJobScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  jobId: 'jobId',
+  userId: 'userId',
+  status: 'status',
+  progress: 'progress',
+  requestData: 'requestData',
+  resultData: 'resultData',
+  errorData: 'errorData',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  retryCount: 'retryCount',
+  maxRetries: 'maxRetries'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -177,6 +194,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -201,7 +222,8 @@ exports.Prisma.ModelName = {
   Plan: 'Plan',
   Microcycle: 'Microcycle',
   Session: 'Session',
-  Exercise: 'Exercise'
+  Exercise: 'Exercise',
+  PlanJob: 'PlanJob'
 };
 
 /**

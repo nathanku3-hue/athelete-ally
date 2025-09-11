@@ -77,6 +77,7 @@ export class EventBus {
       durable: 'planning-engine-onboarding-sub',
     } as any);
 
+    // 使用正确的pull消费模式 - 使用for await循环
     (async () => {
       for await (const m of psub) {
         try {
@@ -98,6 +99,7 @@ export class EventBus {
       durable: 'planning-engine-plan-gen-sub',
     } as any);
 
+    // 使用正确的pull消费模式 - 使用for await循环
     (async () => {
       for await (const m of psub) {
         try {
