@@ -45,6 +45,7 @@ export class EventProcessor {
   private isConnected = false;
   private activeSubscriptions = new Map<string, any>();
   private processingCount = new Map<string, number>();
+  private processingQueue = new Map<string, Array<() => Promise<void>>>();
 
   constructor() {
     this.eventBus = new EventBus();
@@ -86,56 +87,36 @@ export class EventProcessor {
       const startTime = Date.now();
       
       try {
-        // 并发控制
+        // 并发控制 - 修复：使用队列而不是跳过
         if (enableConcurrencyControl) {
           const currentCount = this.processingCount.get(topic) || 0;
           if (currentCount >= maxConcurrent) {
-            console.warn(`Concurrency limit reached for topic ${topic}, skipping event`);
-            eventProcessorMetrics.eventProcessingErrors.inc({
-              topic,
-              error_type: 'concurrency_limit_exceeded'
+            // 将事件加入队列而不是跳过
+            return new Promise<void>((resolve, reject) => {
+              if (!this.processingQueue.has(topic)) {
+                this.processingQueue.set(topic, []);
+              }
+              
+              this.processingQueue.get(topic)!.push(async () => {
+                try {
+                  await this.processEvent(topic, task, handler, startTime);
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              });
+              
+              console.log(`Event queued for topic ${topic}, queue length: ${this.processingQueue.get(topic)!.length}`);
             });
-            return;
           }
         }
 
-        // 更新并发计数
-        this.processingCount.set(topic, (this.processingCount.get(topic) || 0) + 1);
-        eventProcessorMetrics.concurrentProcessing.set(
-          { topic },
-          this.processingCount.get(topic) || 0
-        );
-
-        await handler(task);
-
-        const duration = (Date.now() - startTime) / 1000;
-        eventProcessorMetrics.eventProcessingDuration.observe(
-          { topic, status: 'success' },
-          duration
-        );
-        eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'success' });
+        // 直接处理事件
+        await this.processEvent(topic, task, handler, startTime);
 
       } catch (error) {
-        const duration = (Date.now() - startTime) / 1000;
-        eventProcessorMetrics.eventProcessingDuration.observe(
-          { topic, status: 'error' },
-          duration
-        );
-        eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'error' });
-        eventProcessorMetrics.eventProcessingErrors.inc({
-          topic,
-          error_type: 'handler_error'
-        });
-
-        console.error(`Error processing ${topic} event:`, error);
+        console.error(`Error in wrapped handler for ${topic}:`, error);
         throw error;
-      } finally {
-        // 减少并发计数
-        this.processingCount.set(topic, Math.max(0, (this.processingCount.get(topic) || 0) - 1));
-        eventProcessorMetrics.concurrentProcessing.set(
-          { topic },
-          this.processingCount.get(topic) || 0
-        );
       }
     };
 
@@ -172,6 +153,77 @@ export class EventProcessor {
     };
   }
 
+  /**
+   * 处理单个事件 - 核心修复方法
+   */
+  private async processEvent<T>(
+    topic: string,
+    task: Task<T>,
+    handler: (task: Task<T>) => Promise<void>,
+    startTime: number
+  ): Promise<void> {
+    try {
+      // 更新并发计数
+      this.processingCount.set(topic, (this.processingCount.get(topic) || 0) + 1);
+      eventProcessorMetrics.concurrentProcessing.set(
+        { topic },
+        this.processingCount.get(topic) || 0
+      );
+
+      await handler(task);
+
+      const duration = (Date.now() - startTime) / 1000;
+      eventProcessorMetrics.eventProcessingDuration.observe(
+        { topic, status: 'success' },
+        duration
+      );
+      eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'success' });
+
+    } catch (error) {
+      const duration = (Date.now() - startTime) / 1000;
+      eventProcessorMetrics.eventProcessingDuration.observe(
+        { topic, status: 'error' },
+        duration
+      );
+      eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'error' });
+      eventProcessorMetrics.eventProcessingErrors.inc({
+        topic,
+        error_type: 'handler_error'
+      });
+
+      console.error(`Error processing ${topic} event:`, error);
+      throw error;
+    } finally {
+      // 减少并发计数
+      this.processingCount.set(topic, Math.max(0, (this.processingCount.get(topic) || 0) - 1));
+      eventProcessorMetrics.concurrentProcessing.set(
+        { topic },
+        this.processingCount.get(topic) || 0
+      );
+
+      // 处理队列中的下一个事件
+      this.processNextInQueue(topic);
+    }
+  }
+
+  /**
+   * 处理队列中的下一个事件
+   */
+  private processNextInQueue(topic: string): void {
+    const queue = this.processingQueue.get(topic);
+    if (!queue || queue.length === 0) {
+      return;
+    }
+
+    const nextEvent = queue.shift();
+    if (nextEvent) {
+      // 异步执行下一个事件，不等待完成
+      nextEvent().catch(error => {
+        console.error(`Error processing queued event for ${topic}:`, error);
+      });
+    }
+  }
+
   async disconnect() {
     if (this.eventBus) {
       await this.eventBus.close();
@@ -179,6 +231,7 @@ export class EventProcessor {
     this.isConnected = false;
     this.activeSubscriptions.clear();
     this.processingCount.clear();
+    this.processingQueue.clear();
   }
 }
 

@@ -75,51 +75,5 @@ export const EVENT_TOPICS = {
   PLAN_GENERATION_FAILED: 'athlete-ally.plans.generation-failed',
 } as const;
 
-// Event schemas for validation
-export const OnboardingCompletedSchema = {
-  type: 'object',
-  required: ['eventId', 'userId', 'timestamp', 'equipment'],
-  properties: {
-    eventId: { type: 'string' },
-    userId: { type: 'string' },
-    timestamp: { type: 'number' },
-    // Step 1: Training Purpose
-    purpose: { 
-      type: 'string', 
-      enum: ['general_fitness', 'sport_performance', 'muscle_building', 'weight_loss', 'rehabilitation'] 
-    },
-    purposeDetails: { type: 'string' },
-    
-    // Step 2: Proficiency Level
-    proficiency: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-    
-    // Step 3: Season and Goals
-    season: { type: 'string', enum: ['offseason', 'preseason', 'inseason'] },
-    competitionDate: { type: 'string', format: 'date-time' },
-    
-    // Step 4: Availability
-    availabilityDays: { type: 'number', minimum: 1, maximum: 7 },
-    weeklyGoalDays: { type: 'number', minimum: 1, maximum: 7 },
-    
-    // Step 5: Equipment and scheduling
-    equipment: { type: 'array', items: { type: 'string' } },
-    fixedSchedules: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          day: { type: 'string' },
-          start: { type: 'string' },
-          end: { type: 'string' }
-        }
-      }
-    },
-    
-    // Step 6: Recovery habits
-    recoveryHabits: { type: 'array', items: { type: 'string' } },
-    
-    // Onboarding status
-    onboardingStep: { type: 'number', minimum: 1, maximum: 6 },
-    isOnboardingComplete: { type: 'boolean' }
-  }
-} as const;
+// Export schemas from dedicated file
+export * from './schemas.js';

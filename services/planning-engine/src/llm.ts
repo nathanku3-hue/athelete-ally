@@ -2,9 +2,12 @@ import OpenAI from 'openai';
 import { z } from 'zod';
 import { config } from './config.js';
 
-// 严格的API密钥检查
+// 严格的API密钥检查 - 生产环境必须失败
 if (!config.OPENAI_API_KEY) {
-  console.warn('⚠️  OPENAI_API_KEY not found. LLM features will use mock data.');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('🚨 CRITICAL: OPENAI_API_KEY is required in production environment. LLM service cannot operate without valid API key.');
+  }
+  console.warn('⚠️  OPENAI_API_KEY not found. LLM features will use mock data in development mode only.');
 }
 
 const openai = config.OPENAI_API_KEY ? new OpenAI({ 
@@ -70,7 +73,12 @@ export interface PlanGenerationRequest {
 
 export async function generateTrainingPlan(request: PlanGenerationRequest): Promise<TrainingPlan> {
   if (!openai) {
-    // Fallback to mock data when no API key
+    // 生产环境必须失败，不允许回退到mock数据
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('🚨 CRITICAL: LLM service is not available in production. OPENAI_API_KEY is required.');
+    }
+    // 开发环境允许使用mock数据
+    console.warn('⚠️  Using mock data in development mode. Set OPENAI_API_KEY for real LLM integration.');
     return generateMockPlan(request);
   }
 

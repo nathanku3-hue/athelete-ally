@@ -1,6 +1,7 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { config } from './config.js';
+import { EventSchemas, type EventSchemaKey } from '@athlete-ally/contracts/events/schemas';
 
 export interface ValidationResult {
   valid: boolean;
@@ -15,10 +16,16 @@ export class EventValidator {
   private cacheMisses = 0;
 
   constructor() {
+    // 生产模式使用更严格的校验
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     this.ajv = new Ajv({ 
       allErrors: true,
-      strict: false,
-      verbose: true
+      strict: isProduction, // 生产模式启用严格模式
+      verbose: true,
+      removeAdditional: isProduction ? 'all' : false, // 生产模式移除额外属性
+      useDefaults: true, // 使用默认值
+      coerceTypes: false // 不强制类型转换
     });
     addFormats(this.ajv);
   }
@@ -90,67 +97,9 @@ export class EventValidator {
   }
 
   private getTopicSchema(topic: string): any {
-    // 这里返回对应topic的JSON Schema
-    // 在实际项目中，这些schema应该从文件或数据库加载
-    const schemas: Record<string, any> = {
-      'onboarding_completed': {
-        type: 'object',
-        required: ['eventId', 'userId', 'timestamp'],
-        properties: {
-          eventId: { type: 'string' },
-          userId: { type: 'string' },
-          timestamp: { type: 'number' },
-          proficiency: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-          season: { type: 'string', enum: ['offseason', 'preseason', 'inseason'] },
-          availabilityDays: { type: 'number', minimum: 1, maximum: 7 },
-          weeklyGoalDays: { type: 'number', minimum: 1, maximum: 7 },
-          equipment: { type: 'array', items: { type: 'string' } }
-        }
-      },
-      'plan_generation_requested': {
-        type: 'object',
-        required: ['eventId', 'userId', 'timestamp', 'jobId'],
-        properties: {
-          eventId: { type: 'string' },
-          userId: { type: 'string' },
-          timestamp: { type: 'number' },
-          jobId: { type: 'string' },
-          proficiency: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-          season: { type: 'string', enum: ['offseason', 'preseason', 'inseason'] },
-          availabilityDays: { type: 'number', minimum: 1, maximum: 7 },
-          weeklyGoalDays: { type: 'number', minimum: 1, maximum: 7 },
-          equipment: { type: 'array', items: { type: 'string' } },
-          purpose: { type: 'string' }
-        }
-      },
-      'plan_generated': {
-        type: 'object',
-        required: ['eventId', 'userId', 'planId', 'timestamp'],
-        properties: {
-          eventId: { type: 'string' },
-          userId: { type: 'string' },
-          planId: { type: 'string' },
-          timestamp: { type: 'number' },
-          planName: { type: 'string' },
-          status: { type: 'string', enum: ['completed', 'failed'] },
-          version: { type: 'number' }
-        }
-      },
-      'plan_generation_failed': {
-        type: 'object',
-        required: ['eventId', 'userId', 'jobId', 'timestamp', 'error'],
-        properties: {
-          eventId: { type: 'string' },
-          userId: { type: 'string' },
-          jobId: { type: 'string' },
-          timestamp: { type: 'number' },
-          error: { type: 'string' },
-          retryCount: { type: 'number', minimum: 0 }
-        }
-      }
-    };
-
-    return schemas[topic] || null;
+    // 使用contracts包中的schema定义作为单一事实源
+    const schemaKey = topic as EventSchemaKey;
+    return EventSchemas[schemaKey] || null;
   }
 
   getCacheStatus() {

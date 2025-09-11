@@ -15,7 +15,8 @@
   "dependencies": {
     "nats": "^2.19.0",
     "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1"
+    "ajv-formats": "^2.1.1",
+    "prom-client": "^15.1.3"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

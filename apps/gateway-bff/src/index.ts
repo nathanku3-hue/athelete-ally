@@ -19,6 +19,7 @@ import { z } from 'zod';
 import fetch from 'node-fetch';
 import { config } from './config.js';
 import { businessMetrics, traceOnboardingStep, tracePlanGeneration, traceApiRequest } from './telemetry.js';
+import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
 // 暂时注释掉shared包导入，使用本地实现
 // import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 // import { SecureIdGenerator } from '@athlete-ally/shared';
@@ -35,10 +36,64 @@ class SecureIdGenerator {
   }
 }
 
-// 简化的身份验证中间件
+// 强化身份验证中间件
 async function authMiddleware(request: any, reply: any) {
-  // 暂时跳过身份验证（开发环境）
-  (request as any).user = { userId: 'dev-user-id' };
+  // 跳过健康检查和指标端点
+  if (request.url === '/health' || request.url === '/metrics') {
+    return;
+  }
+
+  try {
+    // 从Authorization header获取JWT token
+    const authHeader = request.headers.authorization || request.headers.Authorization;
+    
+    if (!authHeader) {
+      reply.code(401).send({
+        error: 'unauthorized',
+        message: 'Authorization header is required'
+      });
+      return;
+    }
+
+    // 解析Bearer token
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+      reply.code(401).send({
+        error: 'unauthorized',
+        message: 'Invalid authorization header format. Expected: Bearer <token>'
+      });
+      return;
+    }
+
+    const token = parts[1];
+    
+    // 在开发环境中，允许使用特殊的开发token
+    if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+      (request as any).user = { userId: 'dev-user-id', role: 'user' };
+      return;
+    }
+
+    // 在生产环境中，必须验证真实的JWT token
+    if (process.env.NODE_ENV === 'production') {
+      // TODO: 实现真实的JWT验证
+      // 这里应该使用JWT库验证token并提取用户信息
+      reply.code(401).send({
+        error: 'unauthorized',
+        message: 'Valid JWT token is required in production'
+      });
+      return;
+    }
+
+    // 开发环境的默认用户
+    (request as any).user = { userId: 'dev-user-id', role: 'user' };
+    
+  } catch (error) {
+    console.error('Authentication error:', error);
+    reply.code(401).send({
+      error: 'unauthorized',
+      message: 'Authentication failed'
+    });
+  }
 }
 
 async function cleanupMiddleware(request: any, reply: any) {
@@ -66,7 +121,8 @@ server.register(cors, corsConfig);
 
 // 注册全局中间件
 server.addHook('onRequest', metricsMiddleware);
-server.addHook('onRequest', rateLimitMiddleware);
+server.addHook('onRequest', userRateLimitMiddleware);
+server.addHook('onRequest', strictRateLimitMiddleware);
 server.addHook('onRequest', authMiddleware);
 server.addHook('onSend', cleanupMiddleware);
 

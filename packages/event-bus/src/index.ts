@@ -163,63 +163,110 @@ export class EventBus {
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.ONBOARDING_COMPLETED, {
       durable: 'planning-engine-onboarding-sub',
+      batch: 10,
+      expires: 1000
     } as any);
 
     const topic = 'onboarding_completed';
 
-    // 使用正确的pull消费模式 - 使用for await循环
+    // 使用正确的批量pull消费模式 - 修复消息丢失问题
     (async () => {
-      for await (const m of psub) {
-        const startTime = Date.now();
-        
+      while (true) {
         try {
-          const eventData = JSON.parse(new TextDecoder().decode(m.data));
+          // 批量拉取消息
+          const messages = await psub.fetch({ max: 10, expires: 1000 });
           
-          // Schema 校验
-          const validation = await eventValidator.validateEvent(topic, eventData);
-          eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
-          
-          if (!validation.valid) {
-            eventBusMetrics.schemaValidationFailures.inc({ 
-              topic, 
-              error_type: 'validation_failed' 
-            });
-            eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-            
-            console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
-            m.nak();
+          if (messages.length === 0) {
+            // 没有消息时短暂休眠
+            await new Promise(resolve => setTimeout(resolve, 100));
             continue;
           }
-          
-          eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
-          
-          const event = eventData as OnboardingCompletedEvent;
-          await callback(event);
-          
-          const duration = (Date.now() - startTime) / 1000;
-          eventBusMetrics.eventProcessingDuration.observe({
-            topic,
-            operation: 'consume',
-            status: 'success'
-          }, duration);
-          
-          eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-          m.ack();
+
+          console.log(`Processing batch of ${messages.length} OnboardingCompleted events`);
+
+          // 并发处理消息
+          const processingPromises = messages.map(async (m) => {
+            const startTime = Date.now();
+            
+            try {
+              const eventData = JSON.parse(new TextDecoder().decode(m.data));
+              
+              // Schema 校验
+              const validation = await eventValidator.validateEvent(topic, eventData);
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
+              
+              if (!validation.valid) {
+                eventBusMetrics.schemaValidationFailures.inc({ 
+                  topic, 
+                  error_type: 'validation_failed' 
+                });
+                eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
+                
+                console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
+                m.nak();
+                return;
+              }
+              
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
+              
+              const event = eventData as OnboardingCompletedEvent;
+              await callback(event);
+              
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'success'
+              }, duration);
+              
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
+              m.ack();
+              
+            } catch (error) {
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'error'
+              }, duration);
+              
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
+              console.error('Error processing OnboardingCompleted event:', error);
+              
+              // 根据错误类型决定是否重试
+              if (this.shouldRetry(error)) {
+                m.nak();
+              } else {
+                m.ack(); // 永久失败，确认消息
+              }
+            }
+          });
+
+          // 等待所有消息处理完成
+          await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          const duration = (Date.now() - startTime) / 1000;
-          eventBusMetrics.eventProcessingDuration.observe({
-            topic,
-            operation: 'consume',
-            status: 'error'
-          }, duration);
-          
-          eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-          console.error('Error processing OnboardingCompleted event:', error);
-          m.nak();
+          console.error('Error in OnboardingCompleted batch processing:', error);
+          // 错误时等待更长时间
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     })();
+  }
+
+  private shouldRetry(error: any): boolean {
+    // 临时错误可以重试
+    if (error.code === 'TIMEOUT' || error.code === 'CONNECTION_ERROR') {
+      return true;
+    }
+    
+    // 业务逻辑错误不重试
+    if (error.code === 'VALIDATION_ERROR' || error.code === 'BUSINESS_LOGIC_ERROR') {
+      return false;
+    }
+    
+    // 默认重试
+    return true;
   }
 
   async subscribeToPlanGenerationRequested(callback: (event: PlanGenerationRequestedEvent) => Promise<void>) {
@@ -227,60 +274,92 @@ export class EventBus {
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATION_REQUESTED, {
       durable: 'planning-engine-plan-gen-sub',
+      batch: 10,
+      expires: 1000
     } as any);
 
     const topic = 'plan_generation_requested';
 
-    // 使用正确的pull消费模式 - 使用for await循环
+    // 使用正确的批量pull消费模式 - 修复消息丢失问题
     (async () => {
-      for await (const m of psub) {
-        const startTime = Date.now();
-        
+      while (true) {
         try {
-          const eventData = JSON.parse(new TextDecoder().decode(m.data));
+          // 批量拉取消息
+          const messages = await psub.fetch({ max: 10, expires: 1000 });
           
-          // Schema 校验
-          const validation = await eventValidator.validateEvent(topic, eventData);
-          eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
-          
-          if (!validation.valid) {
-            eventBusMetrics.schemaValidationFailures.inc({ 
-              topic, 
-              error_type: 'validation_failed' 
-            });
-            eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-            
-            console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
-            m.nak();
+          if (messages.length === 0) {
+            // 没有消息时短暂休眠
+            await new Promise(resolve => setTimeout(resolve, 100));
             continue;
           }
-          
-          eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
-          
-          const event = eventData as PlanGenerationRequestedEvent;
-          await callback(event);
-          
-          const duration = (Date.now() - startTime) / 1000;
-          eventBusMetrics.eventProcessingDuration.observe({
-            topic,
-            operation: 'consume',
-            status: 'success'
-          }, duration);
-          
-          eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-          m.ack();
+
+          console.log(`Processing batch of ${messages.length} PlanGenerationRequested events`);
+
+          // 并发处理消息
+          const processingPromises = messages.map(async (m) => {
+            const startTime = Date.now();
+            
+            try {
+              const eventData = JSON.parse(new TextDecoder().decode(m.data));
+              
+              // Schema 校验
+              const validation = await eventValidator.validateEvent(topic, eventData);
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
+              
+              if (!validation.valid) {
+                eventBusMetrics.schemaValidationFailures.inc({ 
+                  topic, 
+                  error_type: 'validation_failed' 
+                });
+                eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
+                
+                console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
+                m.nak();
+                return;
+              }
+              
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
+              
+              const event = eventData as PlanGenerationRequestedEvent;
+              await callback(event);
+              
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'success'
+              }, duration);
+              
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
+              m.ack();
+              
+            } catch (error) {
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'error'
+              }, duration);
+              
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
+              console.error('Error processing PlanGenerationRequested event:', error);
+              
+              // 根据错误类型决定是否重试
+              if (this.shouldRetry(error)) {
+                m.nak();
+              } else {
+                m.ack(); // 永久失败，确认消息
+              }
+            }
+          });
+
+          // 等待所有消息处理完成
+          await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          const duration = (Date.now() - startTime) / 1000;
-          eventBusMetrics.eventProcessingDuration.observe({
-            topic,
-            operation: 'consume',
-            status: 'error'
-          }, duration);
-          
-          eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-          console.error('Error processing PlanGenerationRequested event:', error);
-          m.nak();
+          console.error('Error in PlanGenerationRequested batch processing:', error);
+          // 错误时等待更长时间
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     })();
