@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
+import { safeParseUserPreferencesUpdate } from '@athlete-ally/shared-types';
+import { logger } from '@/lib/logger';
 
 export async function PATCH(request: NextRequest) {
   try {

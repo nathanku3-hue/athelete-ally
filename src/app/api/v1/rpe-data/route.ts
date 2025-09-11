@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(rpeData);
     
   } catch (error) {
-    console.error('Failed to fetch RPE data:', error);
+    logger.error('Failed to fetch RPE data:', error);
     return NextResponse.json(
       { 
         error: 'Failed to fetch RPE data',
@@ -119,12 +119,12 @@ export async function POST(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 150));
     
-    console.log('RPE data submission result:', result);
+    logger.log('RPE data submission result:', result);
     
     return NextResponse.json(result);
     
   } catch (error) {
-    console.error('Failed to submit RPE data:', error);
+    logger.error('Failed to submit RPE data:', error);
     return NextResponse.json(
       { 
         error: 'Failed to submit RPE data',
