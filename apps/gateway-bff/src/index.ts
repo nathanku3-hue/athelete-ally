@@ -99,10 +99,50 @@ async function authMiddleware(request: any, reply: any) {
 async function cleanupMiddleware(request: any, reply: any) {
   // 清理逻辑
 }
-// 简化的 CORS 配置
+// 生产级 CORS 配置
 const corsConfig = {
-  origin: true, // 允许所有来源（开发环境）
-  credentials: true
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // 允许的域名白名单
+    const allowedOrigins = [
+      'http://localhost:3000',    // 开发环境前端
+      'http://localhost:3001',    // 开发环境前端备用端口
+      'https://athlete-ally.com', // 生产环境域名
+      'https://www.athlete-ally.com', // 生产环境www域名
+      'https://staging.athlete-ally.com', // 预发布环境
+    ];
+    
+    // 开发环境允许所有本地来源
+    if (process.env.NODE_ENV === 'development') {
+      if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        return callback(null, true);
+      }
+    }
+    
+    // 生产环境严格检查
+    if (allowedOrigins.includes(origin || '')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'X-RateLimit-Limit',
+    'X-RateLimit-Remaining',
+    'X-RateLimit-Reset'
+  ],
+  exposedHeaders: [
+    'X-RateLimit-Limit',
+    'X-RateLimit-Remaining',
+    'X-RateLimit-Reset'
+  ],
+  maxAge: 86400 // 24小时预检缓存
 };
 
 // 简化的中间件（开发环境）
@@ -114,9 +154,7 @@ const server = Fastify({ logger: true });
 // 简化的指标注册（开发环境）
 const metricsRegistry = { metrics: () => '# No metrics available in development mode' };
 
-// 使用简化的CORS配置
-
-// 注册CORS插件（开发环境简化配置）
+// 注册CORS插件（生产级安全配置）
 server.register(cors, corsConfig);
 
 // 注册全局中间件

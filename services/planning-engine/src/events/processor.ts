@@ -57,7 +57,8 @@ export class EventProcessor {
       this.isConnected = true;
       console.log('Event processor connected to NATS');
     } catch (error) {
-      console.error('Failed to connect event processor:', error);
+      const { safeLog } = await import('@athlete-ally/shared/logger');
+      safeLog.error('Failed to connect event processor', error);
       throw error;
     }
   }
@@ -115,7 +116,8 @@ export class EventProcessor {
         await this.processEvent(topic, task, handler, startTime);
 
       } catch (error) {
-        console.error(`Error in wrapped handler for ${topic}:`, error);
+        const { safeLog } = await import('@athlete-ally/shared/logger');
+        safeLog.error(`Error in wrapped handler for ${topic}`, error);
         throw error;
       }
     };
@@ -163,43 +165,44 @@ export class EventProcessor {
     startTime: number
   ): Promise<void> {
     try {
-      // 更新并发计数
-      this.processingCount.set(topic, (this.processingCount.get(topic) || 0) + 1);
-      eventProcessorMetrics.concurrentProcessing.set(
-        { topic },
-        this.processingCount.get(topic) || 0
-      );
+        // 更新并发计数
+        this.processingCount.set(topic, (this.processingCount.get(topic) || 0) + 1);
+        eventProcessorMetrics.concurrentProcessing.set(
+          { topic },
+          this.processingCount.get(topic) || 0
+        );
 
-      await handler(task);
+        await handler(task);
 
-      const duration = (Date.now() - startTime) / 1000;
-      eventProcessorMetrics.eventProcessingDuration.observe(
-        { topic, status: 'success' },
-        duration
-      );
-      eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'success' });
+        const duration = (Date.now() - startTime) / 1000;
+        eventProcessorMetrics.eventProcessingDuration.observe(
+          { topic, status: 'success' },
+          duration
+        );
+        eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'success' });
 
-    } catch (error) {
-      const duration = (Date.now() - startTime) / 1000;
-      eventProcessorMetrics.eventProcessingDuration.observe(
-        { topic, status: 'error' },
-        duration
-      );
-      eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'error' });
-      eventProcessorMetrics.eventProcessingErrors.inc({
-        topic,
-        error_type: 'handler_error'
-      });
+      } catch (error) {
+        const duration = (Date.now() - startTime) / 1000;
+        eventProcessorMetrics.eventProcessingDuration.observe(
+          { topic, status: 'error' },
+          duration
+        );
+        eventProcessorMetrics.eventsProcessed.inc({ topic, status: 'error' });
+        eventProcessorMetrics.eventProcessingErrors.inc({
+          topic,
+          error_type: 'handler_error'
+        });
 
-      console.error(`Error processing ${topic} event:`, error);
-      throw error;
-    } finally {
-      // 减少并发计数
-      this.processingCount.set(topic, Math.max(0, (this.processingCount.get(topic) || 0) - 1));
-      eventProcessorMetrics.concurrentProcessing.set(
-        { topic },
-        this.processingCount.get(topic) || 0
-      );
+        const { safeLog } = await import('@athlete-ally/shared/logger');
+      safeLog.error(`Error processing ${topic} event`, error);
+        throw error;
+      } finally {
+        // 减少并发计数
+        this.processingCount.set(topic, Math.max(0, (this.processingCount.get(topic) || 0) - 1));
+        eventProcessorMetrics.concurrentProcessing.set(
+          { topic },
+          this.processingCount.get(topic) || 0
+        );
 
       // 处理队列中的下一个事件
       this.processNextInQueue(topic);
@@ -219,7 +222,8 @@ export class EventProcessor {
     if (nextEvent) {
       // 异步执行下一个事件，不等待完成
       nextEvent().catch(error => {
-        console.error(`Error processing queued event for ${topic}:`, error);
+        const { safeLog } = await import('@athlete-ally/shared/logger');
+        safeLog.error(`Error processing queued event for ${topic}`, error);
       });
     }
   }

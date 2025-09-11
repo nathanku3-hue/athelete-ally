@@ -62,7 +62,8 @@ async function authMiddleware(request: any, reply: any) {
     (request as any).user = { userId: 'dev-user-id', role: 'user' };
     
   } catch (error) {
-    console.error('Authentication error:', error);
+    const { safeLog } = await import('@athlete-ally/shared/logger');
+    safeLog.error('Authentication error', error);
     reply.code(401).send({
       error: 'unauthorized',
       message: 'Authentication failed'
@@ -301,6 +302,7 @@ server
   .listen({ port, host: '0.0.0.0' })
   .then(() => console.log(`profile-onboarding listening on :${port}`))
   .catch((err) => {
-    console.error(err);
+    const { safeLog } = await import('@athlete-ally/shared/logger');
+    safeLog.error('Server startup error', err);
     process.exit(1);
   });
