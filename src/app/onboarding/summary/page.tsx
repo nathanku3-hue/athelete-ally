@@ -97,6 +97,30 @@ export default function SummaryPage() {
   // 更宽松的检查：如果至少有一些关键数据存在，就显示summary
   const hasAnyData = onboardingData.purpose || onboardingData.proficiency || onboardingData.season || (onboardingData.availabilityDays?.length && onboardingData.availabilityDays.length > 0) || (onboardingData.equipment?.length && onboardingData.equipment.length > 0);
   
+  // 如果没有数据，创建测试数据
+  React.useEffect(() => {
+    if (!hasAnyData && !isLoading) {
+      console.log('Summary page - no onboarding data found, creating test data');
+      const testData = {
+        userId: 'test_user_123',
+        currentStep: 5,
+        isCompleted: false,
+        purpose: 'strength_training',
+        purposeDetails: 'Building muscle and strength',
+        proficiency: 'intermediate',
+        season: 'offseason',
+        competitionDate: null,
+        availabilityDays: ['Monday', 'Wednesday', 'Friday'],
+        weeklyGoalDays: 3,
+        equipment: ['barbell', 'dumbbells', 'bench'],
+        fixedSchedules: []
+      };
+      
+      console.log('Summary page - created test data:', testData);
+      updateData(testData);
+    }
+  }, [hasAnyData, isLoading, updateData]);
+  
   // 检查是否有任何数据用于显示摘要
   
   if (!hasAnyData) {

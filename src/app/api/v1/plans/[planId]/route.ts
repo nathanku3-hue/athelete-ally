@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function GET(
       );
     }
     
-    console.log('Fetching plan details for planId:', planId);
+    logger.log('Fetching plan details for planId:', planId);
     
     // TODO: 替换为真实的后端API调用
     // 在NODE_ENV=production时，必须调用真实服务
@@ -45,7 +46,7 @@ export async function GET(
     }
     
   } catch (error) {
-    console.error('Failed to fetch plan details:', error);
+    logger.error('Failed to fetch plan details:', error);
     return NextResponse.json(
       { 
         error: 'Failed to fetch plan details',

@@ -87,8 +87,31 @@ const StatusDot = ({ status, details }: { status: 'normal' | 'moderate' | 'high'
     </div>
 );
 
-const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan; unit: Unit; onUnitChange: (unit: Unit) => void; onModifyPlan: () => void; }) => {
+const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan | null; unit: Unit; onUnitChange: (unit: Unit) => void; onModifyPlan: () => void; }) => {
     const router = useRouter();
+    
+    // 如果plan还在加载中，显示加载状态
+    if (!plan) {
+        return (
+            <div className="flex justify-between items-center mb-8 p-4 bg-gray-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-gray-500 animate-pulse"></div>
+                    <div>
+                        <h1 className="text-2xl font-bold">Loading...</h1>
+                        <p className="text-sm text-gray-400">Please wait</p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="flex p-1 bg-gray-700 rounded-md">
+                        <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
+                        <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
+                    </div>
+                    <button onClick={onModifyPlan} className="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-md text-sm font-semibold hover:bg-gray-700 hover:border-gray-500 transition-colors">Modify Plan</button>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div className="flex justify-between items-center mb-8 p-4 bg-gray-800/50 rounded-lg">
             <div className="flex items-center gap-3">

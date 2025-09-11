@@ -14,7 +14,25 @@ function GeneratingContent() {
   const jobId = searchParams.get('jobId') || 
     (typeof window !== 'undefined' ? localStorage.getItem('planGenerationJobId') : null);
   
-  // 使用轮询逻辑获取计划生成状态
+  // 调试模式：直接跳转到plans页面
+  React.useEffect(() => {
+    if (jobId) {
+      console.log('Debug mode: Direct navigation to plans page');
+      const timer = setTimeout(() => {
+        clearData();
+        // Clear the jobId from localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('planGenerationJobId');
+        }
+        // 跳转到plans页面
+        router.push(`/plans/${jobId}`);
+      }, 2000); // 2秒延迟模拟生成过程
+      
+      return () => clearTimeout(timer);
+    }
+  }, [jobId, clearData, router]);
+
+  // 使用轮询逻辑获取计划生成状态（调试模式下被跳过）
   const {
     status: planStatus,
     isLoading,
@@ -41,12 +59,12 @@ function GeneratingContent() {
     }
   });
 
-  // 使用轮询状态或默认状态
+  // 使用轮询状态或默认状态（调试模式下显示调试消息）
   const currentStatus = planStatus || {
     status: 'pending' as const,
     progress: 0,
     estimatedTime: 30,
-    message: 'Initializing your personalized training plan...'
+    message: jobId ? 'Debug mode: Generating your training plan...' : 'Initializing your personalized training plan...'
   };
 
   const handleGoBack = () => {

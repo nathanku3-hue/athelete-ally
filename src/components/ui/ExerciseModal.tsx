@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { X, Star, Clock, Target, AlertTriangle, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Exercise } from '@athlete-ally/shared-types';
+import { logger } from '@/lib/logger';
 
 interface ExerciseModalProps {
   exercise: Exercise | null;
@@ -51,7 +52,7 @@ export default function ExerciseModal({
       setUserDifficulty(0);
       setUserComment('');
     } catch (error) {
-      console.error('Failed to rate exercise:', error);
+      logger.error('Failed to rate exercise:', error);
     } finally {
       setIsRating(false);
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 
 interface PlanStatus {
   status: 'pending' | 'processing' | 'completed' | 'failed';
@@ -92,7 +93,7 @@ export function usePlanStatusPolling({
     } catch (err) {
       if (!isMountedRef.current) return;
 
-      console.error('Error polling plan status:', err);
+      logger.error('Error polling plan status:', err);
       
       if (retryCount < maxRetries) {
         const newRetryCount = retryCount + 1;

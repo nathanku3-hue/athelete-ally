@@ -1,9 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
+import { safeParseRPEDataSubmission, safeParseRPEDataQuery } from '@athlete-ally/shared-types';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching RPE data...');
+    // 验证查询参数
+    const url = new URL(request.url);
+    const queryParams = Object.fromEntries(url.searchParams.entries());
+    
+    const validationResult = safeParseRPEDataQuery(queryParams);
+    
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid query parameters', 
+          details: validationResult.error?.errors,
+          receivedParams: queryParams 
+        },
+        { status: 400 }
+      );
+    }
+    
+    logger.log('Fetching RPE data...');
     
     // 在真实实现中，这里会从数据库获取用户的RPE数据
     // 目前使用模拟数据
@@ -37,7 +56,7 @@ export async function GET(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    console.log('Returning RPE data:', { 
+    logger.log('Returning RPE data:', { 
       currentRpe: rpeData.currentRpe, 
       averageRpe: rpeData.averageRpe,
       trend: rpeData.trend 
@@ -60,9 +79,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { exerciseId, setNumber, reps, weight, rpe } = body;
     
-    console.log('Submitting RPE data:', { exerciseId, setNumber, reps, weight, rpe });
+    // 使用统一的schema验证
+    const validationResult = safeParseRPEDataSubmission(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { 
+          error: 'Validation failed', 
+          details: validationResult.error?.errors,
+          receivedData: body 
+        },
+        { status: 400 }
+      );
+    }
+    
+    const validatedData = validationResult.data!;
+    const { exerciseId, setNumber, reps, weight, rpe } = validatedData;
+    
+    logger.log('Submitting RPE data:', { exerciseId, setNumber, reps, weight, rpe });
     
     // 在真实实现中，这里会保存用户的RPE数据
     // 并可能触发AI分析来调整训练计划
