@@ -5,7 +5,6 @@ import Fastify from 'fastify';
 import { Client as PgClient } from 'pg';
 import { Redis } from 'ioredis';
 import { config } from './config.js';
-import { prisma } from './db.js';
 import { z } from 'zod';
 // 暫時註釋掉共享包依賴
 // import { EventBus } from '@athlete-ally/event-bus';
@@ -80,53 +79,78 @@ server.post('/v1/onboarding', async (request, reply) => {
         return reply.code(400).send({ error: 'invalid_payload' });
     }
     try {
-        // Create or update user with onboarding data
-        const user = await prisma.user.upsert({
-            where: { id: parsed.data.userId },
-            update: {
-                // Step 1: Training Purpose
-                purpose: parsed.data.purpose,
-                purposeDetails: parsed.data.purposeDetails,
-                // Step 2: Proficiency Level
-                proficiency: parsed.data.proficiency,
-                // Step 3: Season and Goals
-                season: parsed.data.season,
-                competitionDate: parsed.data.competitionDate ? new Date(parsed.data.competitionDate) : null,
-                // Step 4: Availability
-                availabilityDays: parsed.data.availabilityDays,
-                weeklyGoalDays: parsed.data.weeklyGoalDays,
-                // Step 5: Equipment and scheduling
-                equipment: parsed.data.equipment || [],
-                fixedSchedules: parsed.data.fixedSchedules || [],
-                // Step 6: Recovery habits
-                recoveryHabits: parsed.data.recoveryHabits || [],
-                // Onboarding status
-                onboardingStep: parsed.data.onboardingStep || 1,
-                isOnboardingComplete: parsed.data.isOnboardingComplete || false,
-            },
-            create: {
-                id: parsed.data.userId,
-                // Step 1: Training Purpose
-                purpose: parsed.data.purpose,
-                purposeDetails: parsed.data.purposeDetails,
-                // Step 2: Proficiency Level
-                proficiency: parsed.data.proficiency,
-                // Step 3: Season and Goals
-                season: parsed.data.season,
-                competitionDate: parsed.data.competitionDate ? new Date(parsed.data.competitionDate) : null,
-                // Step 4: Availability
-                availabilityDays: parsed.data.availabilityDays,
-                weeklyGoalDays: parsed.data.weeklyGoalDays,
-                // Step 5: Equipment and scheduling
-                equipment: parsed.data.equipment || [],
-                fixedSchedules: parsed.data.fixedSchedules || [],
-                // Step 6: Recovery habits
-                recoveryHabits: parsed.data.recoveryHabits || [],
-                // Onboarding status
-                onboardingStep: parsed.data.onboardingStep || 1,
-                isOnboardingComplete: parsed.data.isOnboardingComplete || false,
-            },
-        });
+        // Use native SQL query instead of Prisma
+        const userId = parsed.data.userId;
+        const now = new Date().toISOString();
+        // Check if user exists
+        const existingUser = await pg.query('SELECT id FROM users WHERE id = $1', [userId]);
+        let user;
+        if (existingUser.rows.length > 0) {
+            // Update existing user
+            const result = await pg.query(`
+        UPDATE users SET 
+          purpose = $2,
+          purpose_details = $3,
+          proficiency = $4,
+          season = $5,
+          competition_date = $6,
+          availability_days = $7,
+          weekly_goal_days = $8,
+          equipment = $9,
+          fixed_schedules = $10,
+          recovery_habits = $11,
+          onboarding_step = $12,
+          is_onboarding_complete = $13,
+          updated_at = $14
+        WHERE id = $1
+        RETURNING *
+      `, [
+                userId,
+                parsed.data.purpose,
+                parsed.data.purposeDetails,
+                parsed.data.proficiency,
+                parsed.data.season,
+                parsed.data.competitionDate ? new Date(parsed.data.competitionDate) : null,
+                parsed.data.availabilityDays,
+                parsed.data.weeklyGoalDays,
+                parsed.data.equipment || [],
+                JSON.stringify(parsed.data.fixedSchedules || []),
+                parsed.data.recoveryHabits || [],
+                parsed.data.onboardingStep || 1,
+                parsed.data.isOnboardingComplete || false,
+                now
+            ]);
+            user = result.rows[0];
+        }
+        else {
+            // Create new user
+            const result = await pg.query(`
+        INSERT INTO users (
+          id, purpose, purpose_details, proficiency, season, competition_date,
+          availability_days, weekly_goal_days, equipment, fixed_schedules,
+          recovery_habits, onboarding_step, is_onboarding_complete,
+          created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        RETURNING *
+      `, [
+                userId,
+                parsed.data.purpose,
+                parsed.data.purposeDetails,
+                parsed.data.proficiency,
+                parsed.data.season,
+                parsed.data.competitionDate ? new Date(parsed.data.competitionDate) : null,
+                parsed.data.availabilityDays,
+                parsed.data.weeklyGoalDays,
+                parsed.data.equipment || [],
+                JSON.stringify(parsed.data.fixedSchedules || []),
+                parsed.data.recoveryHabits || [],
+                parsed.data.onboardingStep || 1,
+                parsed.data.isOnboardingComplete || false,
+                now,
+                now
+            ]);
+            user = result.rows[0];
+        }
         // Publish event to trigger plan generation
         const event = {
             eventId: `onboarding-${user.id}-${Date.now()}`,

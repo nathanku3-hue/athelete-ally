@@ -8,10 +8,11 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-// 暫時註釋掉共享包依賴
-// import { EventBus } from '@athlete-ally/event-bus';
-// import { OnboardingCompletedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
-import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
+import { businessMetrics, tracePlanGeneration } from './telemetry.js';
+import { eventProcessor } from './events/processor.js';
+import { eventPublisher } from './events/publisher.js';
+import { concurrencyController } from './concurrency/controller.js';
+import { register } from 'prom-client';
 // 定义类型和函数（从 index.ts 移动过来）
 export const PlanGenerateRequest = z.object({
     userId: z.string(),
@@ -29,18 +30,6 @@ const server = Fastify({ logger: true });
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PLANNING_DATABASE_URL });
 const redis = new Redis(config.REDIS_URL);
-// 暫時註釋掉 EventBus，創建一個模擬對象
-const eventBus = {
-    connect: async (url) => {
-        console.log(`Mock EventBus connecting to ${url}`);
-    },
-    subscribeToOnboardingCompleted: async (handler) => {
-        console.log('Mock EventBus subscribing to onboarding completed');
-    },
-    publishPlanGenerated: async (event) => {
-        console.log('Mock EventBus publishing plan generated:', event);
-    }
-};
 server.addHook('onReady', async () => {
     try {
         await pg.connect();
@@ -59,19 +48,35 @@ server.addHook('onReady', async () => {
         process.exit(1);
     }
     try {
-        await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
-        server.log.info('connected to event bus');
-        // Subscribe to onboarding completed events
-        await eventBus.subscribeToOnboardingCompleted(handleOnboardingCompleted);
-        server.log.info('subscribed to onboarding completed events');
+        // 连接到事件发布器
+        await eventPublisher.connect();
+        server.log.info('connected to event publisher');
+        // 连接到新的事件处理器
+        await eventProcessor.connect();
+        server.log.info('connected to event processor');
+        // 订阅事件并启用并发控制
+        await eventProcessor.subscribe('onboarding_completed', handleOnboardingCompleted, {
+            maxConcurrent: config.EVENT_PROCESSING_MAX_CONCURRENT,
+            enableConcurrencyControl: true
+        });
+        server.log.info('subscribed to onboarding completed events with concurrency control');
+        await eventProcessor.subscribe('plan_generation_requested', handlePlanGenerationRequested, {
+            maxConcurrent: config.EVENT_PROCESSING_MAX_CONCURRENT,
+            enableConcurrencyControl: true
+        });
+        server.log.info('subscribed to plan generation requested events with concurrency control');
+        // 启动指标更新
+        eventProcessor.startMetricsUpdate();
+        server.log.info('started metrics update');
     }
     catch (e) {
-        server.log.error({ err: e }, 'failed to connect event bus');
+        server.log.error({ err: e }, 'failed to connect event processor');
         process.exit(1);
     }
 });
 // Event handler for onboarding completed
-async function handleOnboardingCompleted(event) {
+async function handleOnboardingCompleted(task) {
+    const event = task.data;
     server.log.info({ eventId: event.eventId, userId: event.userId }, 'Processing onboarding completed event');
     try {
         // Generate plan using LLM
@@ -127,58 +132,53 @@ async function handleOnboardingCompleted(event) {
             status: 'completed',
             version: plan.version,
         };
-        await eventBus.publishPlanGenerated(planGeneratedEvent);
+        await eventPublisher.publishPlanGenerated(planGeneratedEvent);
         server.log.info({ planId: plan.id, userId: event.userId }, 'Plan generated successfully');
     }
     catch (error) {
         server.log.error({ error, eventId: event.eventId, userId: event.userId }, 'Failed to generate plan from event');
     }
 }
-server.get('/health', async () => ({ status: 'ok' }));
-server.post('/generate', async (request, reply) => {
-    const startTime = Date.now();
-    const parsed = PlanGenerateRequest.safeParse(request.body);
-    if (!parsed.success) {
-        businessMetrics.planGenerationFailures.add(1, { 'error.type': 'validation_error' });
-        return reply.code(400).send({ error: 'invalid_payload' });
-    }
-    // 创建计划生成追踪
-    const planSpan = tracePlanGeneration(parsed.data.userId, request.body);
+// Event handler for plan generation requested
+async function handlePlanGenerationRequested(task) {
+    const event = task.data;
+    server.log.info({ eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Processing plan generation requested event');
     try {
-        // 记录业务指标
-        businessMetrics.planGenerationRequests.add(1, {
-            'user.id': parsed.data.userId,
+        // 创建PlanJob记录
+        const planJob = await prisma.planJob.create({
+            data: {
+                jobId: event.jobId,
+                userId: event.userId,
+                status: 'processing',
+                progress: 0,
+                requestData: event,
+                startedAt: new Date(),
+            },
         });
-        // 追踪LLM调用
-        const llmSpan = traceLLMCall('gpt-4', 1000, parsed.data.userId); // 假设prompt长度
-        // Generate plan using LLM
-        const llmStartTime = Date.now();
+        // 更新进度
+        await prisma.planJob.update({
+            where: { id: planJob.id },
+            data: { progress: 25 },
+        });
+        // 生成计划
         const planData = await generateTrainingPlan({
-            userId: parsed.data.userId,
-            proficiency: 'intermediate', // TODO: Get from user profile
-            season: 'offseason',
-            availabilityDays: 3,
-            weeklyGoalDays: 4,
-            equipment: ['bodyweight', 'dumbbells'],
+            userId: event.userId,
+            proficiency: event.proficiency || 'intermediate',
+            season: event.season || 'offseason',
+            availabilityDays: event.availabilityDays || 3,
+            weeklyGoalDays: event.weeklyGoalDays,
+            equipment: event.equipment || ['bodyweight'],
+            purpose: event.purpose,
         });
-        const llmDuration = (Date.now() - llmStartTime) / 1000;
-        businessMetrics.llmResponseTime.record(llmDuration, {
-            'user.id': parsed.data.userId,
-            'llm.model': 'gpt-4',
+        // 更新进度
+        await prisma.planJob.update({
+            where: { id: planJob.id },
+            data: { progress: 75 },
         });
-        businessMetrics.llmRequests.add(1, {
-            'user.id': parsed.data.userId,
-            'llm.model': 'gpt-4',
-        });
-        llmSpan.setStatus({ code: 1, message: 'LLM call successful' });
-        llmSpan.end();
-        // 追踪数据库操作
-        const dbSpan = traceDatabaseOperation('create', 'plans', parsed.data.userId);
-        // Save plan to database
-        const dbStartTime = Date.now();
+        // 保存计划到数据库
         const plan = await prisma.plan.create({
             data: {
-                userId: parsed.data.userId,
+                userId: event.userId,
                 status: 'completed',
                 name: planData.name,
                 description: planData.description,
@@ -209,32 +209,146 @@ server.post('/generate', async (request, reply) => {
                 },
             },
         });
-        const dbDuration = (Date.now() - dbStartTime) / 1000;
-        businessMetrics.databaseQueryDuration.record(dbDuration, {
-            'db.operation': 'create',
-            'db.table': 'plans',
+        // 更新PlanJob为完成状态
+        await prisma.planJob.update({
+            where: { id: planJob.id },
+            data: {
+                status: 'completed',
+                progress: 100,
+                resultData: { planId: plan.id, planName: plan.name },
+                completedAt: new Date(),
+            },
         });
-        businessMetrics.databaseQueries.add(1, {
-            'db.operation': 'create',
-            'db.table': 'plans',
-        });
-        dbSpan.setStatus({ code: 1, message: 'Database operation successful' });
-        dbSpan.end();
-        const totalDuration = (Date.now() - startTime) / 1000;
-        businessMetrics.planGenerationDuration.record(totalDuration, {
-            'user.id': parsed.data.userId,
-            'plan.status': 'success',
-        });
-        businessMetrics.planGenerationSuccess.add(1, {
-            'user.id': parsed.data.userId,
-        });
-        planSpan.setStatus({ code: 1, message: 'Plan generation successful' });
-        planSpan.end();
-        return reply.code(200).send({
+        // 发布计划生成完成事件
+        const planGeneratedEvent = {
+            eventId: `plan-generated-${plan.id}-${Date.now()}`,
+            userId: event.userId,
             planId: plan.id,
+            timestamp: Date.now(),
+            planName: plan.name || 'Generated Plan',
+            status: 'completed',
             version: plan.version,
-            status: plan.status,
-            name: plan.name,
+        };
+        await eventPublisher.publishPlanGenerated(planGeneratedEvent);
+        server.log.info({ planId: plan.id, userId: event.userId, jobId: event.jobId }, 'Plan generated successfully');
+    }
+    catch (error) {
+        server.log.error({ error, eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Failed to generate plan from event');
+        // 更新PlanJob为失败状态
+        try {
+            await prisma.planJob.updateMany({
+                where: { jobId: event.jobId },
+                data: {
+                    status: 'failed',
+                    errorData: { error: error.message, stack: error.stack },
+                    completedAt: new Date(),
+                },
+            });
+        }
+        catch (dbError) {
+            server.log.error({ dbError }, 'Failed to update PlanJob status to failed');
+        }
+        // 发布计划生成失败事件
+        const planGenerationFailedEvent = {
+            eventId: `plan-failed-${event.jobId}-${Date.now()}`,
+            userId: event.userId,
+            jobId: event.jobId,
+            timestamp: Date.now(),
+            error: error.message,
+            retryCount: task.retries,
+        };
+        await eventPublisher.publishPlanGenerationFailed(planGenerationFailedEvent);
+    }
+}
+server.get('/health', async () => ({ status: 'ok' }));
+// 查询计划生成状态
+server.get('/status/:jobId', async (request, reply) => {
+    const { jobId } = request.params;
+    try {
+        // 查询PlanJob状态
+        const planJob = await prisma.planJob.findUnique({
+            where: { jobId },
+            select: {
+                id: true,
+                jobId: true,
+                userId: true,
+                status: true,
+                progress: true,
+                resultData: true,
+                errorData: true,
+                createdAt: true,
+                startedAt: true,
+                completedAt: true,
+                retryCount: true,
+                maxRetries: true,
+            },
+        });
+        if (!planJob) {
+            return reply.code(404).send({
+                jobId: jobId,
+                status: 'not_found',
+                message: 'Plan generation job not found',
+            });
+        }
+        return reply.code(200).send({
+            jobId: planJob.jobId,
+            userId: planJob.userId,
+            status: planJob.status,
+            progress: planJob.progress,
+            resultData: planJob.resultData,
+            errorData: planJob.errorData,
+            createdAt: planJob.createdAt,
+            startedAt: planJob.startedAt,
+            completedAt: planJob.completedAt,
+            retryCount: planJob.retryCount,
+            maxRetries: planJob.maxRetries,
+        });
+    }
+    catch (error) {
+        server.log.error({ error, jobId }, 'Failed to query plan job status');
+        return reply.code(500).send({ error: 'status_query_failed' });
+    }
+});
+server.post('/generate', async (request, reply) => {
+    const startTime = Date.now();
+    const parsed = PlanGenerateRequest.safeParse(request.body);
+    if (!parsed.success) {
+        businessMetrics.planGenerationFailures.add(1, { 'error.type': 'validation_error' });
+        return reply.code(400).send({ error: 'invalid_payload' });
+    }
+    // 創建span用於追蹤
+    const planSpan = tracePlanGeneration(parsed.data.userId, { jobId: 'plan-generation' });
+    try {
+        // 生成唯一的jobId
+        const jobId = `plan-gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        // 创建计划生成请求事件
+        const planGenerationRequest = {
+            eventId: jobId,
+            userId: parsed.data.userId,
+            timestamp: Date.now(),
+            jobId: jobId,
+            proficiency: 'intermediate', // TODO: Get from user profile
+            season: 'offseason',
+            availabilityDays: 3,
+            weeklyGoalDays: 4,
+            equipment: ['bodyweight', 'dumbbells'],
+            purpose: 'general_fitness',
+        };
+        // 发布事件到消息队列
+        await eventPublisher.publishPlanGenerationRequested(planGenerationRequest);
+        const responseTime = (Date.now() - startTime) / 1000;
+        businessMetrics.planGenerationDuration.record(responseTime, {
+            'user.id': parsed.data.userId,
+            'plan.status': 'queued',
+        });
+        planSpan.setStatus({ code: 1, message: 'Plan generation queued successfully' });
+        planSpan.end();
+        // 立即返回jobId，让客户端可以轮询状态
+        return reply.code(202).send({
+            jobId: jobId,
+            status: 'queued',
+            message: 'Plan generation request queued successfully',
+            estimatedCompletionTime: '2-5 minutes',
         });
     }
     catch (error) {
@@ -252,6 +366,35 @@ server.post('/generate', async (request, reply) => {
         server.log.error({ error }, 'Failed to generate plan');
         return reply.code(500).send({ error: 'plan_generation_failed' });
     }
+});
+// 添加 Prometheus 指标端点
+server.get('/metrics', async (request, reply) => {
+    reply.type('text/plain');
+    return register.metrics();
+});
+// 添加健康检查端点
+server.get('/health', async (request, reply) => {
+    const concurrencyStatus = concurrencyController.getStatus();
+    const eventProcessorHealthy = eventProcessor.isHealthy();
+    return {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: process.env.npm_package_version || '1.0.0',
+        concurrency: concurrencyStatus,
+        eventProcessor: {
+            connected: eventProcessorHealthy,
+            consumers: eventProcessor.isHealthy() ? 'active' : 'disconnected'
+        }
+    };
+});
+// 添加并发状态端点
+server.get('/concurrency/status', async (request, reply) => {
+    const status = concurrencyController.getStatus();
+    return {
+        ...status,
+        timestamp: new Date().toISOString()
+    };
 });
 const port = Number(config.PORT || 4102);
 server

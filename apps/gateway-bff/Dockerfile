@@ -36,8 +36,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
-# 暴露端口
-EXPOSE 8000
+# 暴露端口 - 与配置保持一致
+EXPOSE 4000
 
 # 啟動服務器的命令
 CMD ["node", "dist/index.js"]

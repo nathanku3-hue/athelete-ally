@@ -19,9 +19,29 @@ import { z } from 'zod';
 import fetch from 'node-fetch';
 import { config } from './config.js';
 import { businessMetrics, traceOnboardingStep, tracePlanGeneration, traceApiRequest } from './telemetry.js';
+// 简化的 CORS 配置
+const corsConfig = {
+  origin: true, // 允许所有来源（开发环境）
+  credentials: true
+};
+
+// 简化的中间件（开发环境）
+const rateLimitMiddleware = async () => {};
+const metricsMiddleware = async () => {};
 
 const server = Fastify({ logger: true });
-server.register(cors, { origin: true });
+
+// 简化的指标注册（开发环境）
+const metricsRegistry = { metrics: () => '# No metrics available in development mode' };
+
+// 使用简化的CORS配置
+
+// 注册CORS插件（开发环境简化配置）
+server.register(cors, corsConfig);
+
+// 注册全局中间件
+server.addHook('onRequest', metricsMiddleware);
+server.addHook('onRequest', rateLimitMiddleware);
 
 // Swagger configuration
 server.register(swagger, {
@@ -1165,6 +1185,22 @@ server.get('/v1/plans/status', {
     span.end();
     throw error;
   }
+});
+
+// 添加 Prometheus 指标端点
+server.get('/metrics', async (request, reply) => {
+  reply.type('text/plain');
+  return metricsRegistry.metrics();
+});
+
+// 添加健康检查端点
+server.get('/health', async (request, reply) => {
+  return {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0'
+  };
 });
 
 const port = Number(config.PORT || 4000);

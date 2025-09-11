@@ -9,8 +9,8 @@ if (!config.OPENAI_API_KEY) {
 
 const openai = config.OPENAI_API_KEY ? new OpenAI({ 
   apiKey: config.OPENAI_API_KEY,
-  timeout: 30000, // 30秒超时
-  maxRetries: 2,  // 最多重试2次
+  timeout: config.LLM_TIMEOUT_MS + 5000, // 比内部超时多5秒
+  maxRetries: config.LLM_MAX_RETRIES,
 }) : null;
 
 // 严格的Zod schema用于验证LLM输出
@@ -122,11 +122,11 @@ Return the plan as structured JSON with this exact format:
       openai.chat.completions.create({
         model: "gpt-4",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 4000, // 限制输出长度
+        temperature: config.LLM_TEMPERATURE,
+        max_tokens: config.LLM_MAX_TOKENS,
         response_format: { type: "json_object" }, // 强制JSON模式
       }),
-      25000 // 25秒超时（比OpenAI客户端超时短5秒）
+      config.LLM_TIMEOUT_MS
     );
 
     const content = completion.choices[0]?.message?.content;

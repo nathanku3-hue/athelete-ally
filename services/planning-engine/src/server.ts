@@ -8,11 +8,15 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-import { EventBus } from '@athlete-ally/event-bus';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent } from '@athlete-ally/contracts';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
+import { eventProcessor } from './events/processor.js';
+import { eventPublisher } from './events/publisher.js';
+import { concurrencyController } from './concurrency/controller.js';
+import { Task } from './types/index.js';
+import { register } from 'prom-client';
 
-// 定义类型和函数（从 index.ts 移动过来）
+// 定义类型（从 index.ts 移动过来）
 export const PlanGenerateRequest = z.object({
   userId: z.string(),
   seedPlanId: z.string().optional(),
@@ -20,22 +24,11 @@ export const PlanGenerateRequest = z.object({
 
 export type PlanGenerateRequest = z.infer<typeof PlanGenerateRequest>;
 
-export async function generatePlan(req: PlanGenerateRequest) {
-  // TODO: connect llm-orchestrator, repository, queue, etc.
-  return {
-    planId: 'demo-plan',
-    version: 1,
-    status: 'generated',
-  } as const;
-}
-
 const server = Fastify({ logger: true });
 
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PLANNING_DATABASE_URL });
 const redis = new Redis(config.REDIS_URL);
-// 使用真实的EventBus
-const eventBus = new EventBus();
 
 server.addHook('onReady', async () => {
   try {
@@ -53,24 +46,40 @@ server.addHook('onReady', async () => {
     process.exit(1);
   }
   try {
-    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
-    server.log.info('connected to event bus');
+    // 连接到事件发布器
+    await eventPublisher.connect();
+    server.log.info('connected to event publisher');
     
-    // Subscribe to onboarding completed events
-    await eventBus.subscribeToOnboardingCompleted(handleOnboardingCompleted);
-    server.log.info('subscribed to onboarding completed events');
+    // 连接到新的事件处理器
+    await eventProcessor.connect();
+    server.log.info('connected to event processor');
     
-    // Subscribe to plan generation requested events
-    await eventBus.subscribeToPlanGenerationRequested(handlePlanGenerationRequested);
-    server.log.info('subscribed to plan generation requested events');
+    // 订阅事件并启用并发控制
+    await eventProcessor.subscribe('onboarding_completed', handleOnboardingCompleted, {
+      maxConcurrent: config.EVENT_PROCESSING_MAX_CONCURRENT,
+      enableConcurrencyControl: true
+    });
+    server.log.info('subscribed to onboarding completed events with concurrency control');
+    
+    await eventProcessor.subscribe('plan_generation_requested', handlePlanGenerationRequested, {
+      maxConcurrent: config.EVENT_PROCESSING_MAX_CONCURRENT,
+      enableConcurrencyControl: true
+    });
+    server.log.info('subscribed to plan generation requested events with concurrency control');
+    
+    // 启动指标更新
+    eventProcessor.startMetricsUpdate();
+    server.log.info('started metrics update');
+    
   } catch (e) {
-    server.log.error({ err: e }, 'failed to connect event bus');
+    server.log.error({ err: e }, 'failed to connect event processor');
     process.exit(1);
   }
 });
 
 // Event handler for onboarding completed
-async function handleOnboardingCompleted(event: any) {
+async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
+  const event = task.data;
   server.log.info({ eventId: event.eventId, userId: event.userId }, 'Processing onboarding completed event');
   
   try {
@@ -130,7 +139,7 @@ async function handleOnboardingCompleted(event: any) {
       version: plan.version,
     };
 
-    await eventBus.publishPlanGenerated(planGeneratedEvent);
+    await eventPublisher.publishPlanGenerated(planGeneratedEvent);
     server.log.info({ planId: plan.id, userId: event.userId }, 'Plan generated successfully');
     
   } catch (error) {
@@ -139,7 +148,8 @@ async function handleOnboardingCompleted(event: any) {
 }
 
 // Event handler for plan generation requested
-async function handlePlanGenerationRequested(event: PlanGenerationRequestedEvent) {
+async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedEvent>) {
+  const event = task.data;
   server.log.info({ eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Processing plan generation requested event');
   
   try {
@@ -235,7 +245,7 @@ async function handlePlanGenerationRequested(event: PlanGenerationRequestedEvent
       version: plan.version,
     };
 
-    await eventBus.publishPlanGenerated(planGeneratedEvent);
+    await eventPublisher.publishPlanGenerated(planGeneratedEvent);
     server.log.info({ planId: plan.id, userId: event.userId, jobId: event.jobId }, 'Plan generated successfully');
     
   } catch (error) {
@@ -262,9 +272,10 @@ async function handlePlanGenerationRequested(event: PlanGenerationRequestedEvent
       jobId: event.jobId,
       timestamp: Date.now(),
       error: (error as Error).message,
+      retryCount: task.retries,
     };
 
-    await eventBus.publishPlanGenerationFailed(planGenerationFailedEvent);
+    await eventPublisher.publishPlanGenerationFailed(planGenerationFailedEvent);
   }
 }
 
@@ -352,7 +363,7 @@ server.post('/generate', async (request, reply) => {
     };
 
     // 发布事件到消息队列
-    await eventBus.publishPlanGenerationRequested(planGenerationRequest);
+    await eventPublisher.publishPlanGenerationRequested(planGenerationRequest);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.planGenerationDuration.record(responseTime, {
@@ -387,6 +398,39 @@ server.post('/generate', async (request, reply) => {
     server.log.error({ error }, 'Failed to generate plan');
     return reply.code(500).send({ error: 'plan_generation_failed' });
   }
+});
+
+// 添加 Prometheus 指标端点
+server.get('/metrics', async (request, reply) => {
+  reply.type('text/plain');
+  return register.metrics();
+});
+
+// 添加健康检查端点
+server.get('/health', async (request, reply) => {
+  const concurrencyStatus = concurrencyController.getStatus();
+  const eventProcessorHealthy = eventProcessor.isHealthy();
+  
+  return {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0',
+    concurrency: concurrencyStatus,
+    eventProcessor: {
+      connected: eventProcessorHealthy,
+      consumers: eventProcessor.isHealthy() ? 'active' : 'disconnected'
+    }
+  };
+});
+
+// 添加并发状态端点
+server.get('/concurrency/status', async (request, reply) => {
+  const status = concurrencyController.getStatus();
+  return {
+    ...status,
+    timestamp: new Date().toISOString()
+  };
 });
 
 const port = Number(config.PORT || 4102);

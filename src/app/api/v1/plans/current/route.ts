@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
 import { convertLbsToKg } from '@/lib/weightConverter';
 
 export async function GET(request: NextRequest) {
@@ -168,12 +169,5 @@ export async function GET(request: NextRequest) {
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
+  return handleCorsOptions();
 }

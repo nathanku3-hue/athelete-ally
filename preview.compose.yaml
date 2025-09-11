@@ -37,15 +37,28 @@ services:
       - ./apps/gateway-bff:/usr/src/app
       # But, protect the container's node_modules from being overwritten
       - /usr/src/app/node_modules
-    env_file:
-      - ./.env
     ports:
-      - "${GATEWAY_BFF_PORT}:${GATEWAY_BFF_PORT}"
+      - "4000:4000"
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${GATEWAY_BFF_PORT}
-      - PROFILE_ONBOARDING_URL=${PROFILE_ONBOARDING_URL}
-      - PLANNING_ENGINE_URL=${PLANNING_ENGINE_URL}
+      - NODE_ENV=development
+      - PORT=4000
+      - PROFILE_ONBOARDING_URL=http://profile-onboarding:4101
+      - PLANNING_ENGINE_URL=http://planning-engine:4102
+      - EXERCISES_URL=http://exercises:4103
+      - FATIGUE_URL=http://fatigue:4104
+      - WORKOUTS_URL=http://workouts:4105
+      - ANALYTICS_URL=http://analytics:4106
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+      - CORS_ALLOW_CREDENTIALS=true
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
   planning-engine:
     build:
       context: ./services/planning-engine
@@ -56,17 +69,24 @@ services:
       - ./services/planning-engine:/usr/src/app
       # But, protect the container's node_modules from being overwritten
       - /usr/src/app/node_modules
-    env_file:
-      - ./.env
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PLANNING_ENGINE_PORT}
-      - PLANNING_DATABASE_URL=${PLANNING_DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
+      - NODE_ENV=development
+      - PORT=4102
+      - PLANNING_DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_planning
+      - REDIS_URL=redis://redis:6379
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - NATS_URL=${NATS_URL}
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
     ports:
-      - "${PLANNING_ENGINE_PORT}:${PLANNING_ENGINE_PORT}"
+      - "4102:4102"
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,16 +104,23 @@ services:
       - ./services/profile-onboarding:/usr/src/app
       # But, protect the container's node_modules from being overwritten
       - /usr/src/app/node_modules
-    env_file:
-      - ./.env
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PROFILE_ONBOARDING_PORT}
-      - PROFILE_DATABASE_URL=${PROFILE_DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - NATS_URL=${NATS_URL}
+      - NODE_ENV=development
+      - PORT=4101
+      - PROFILE_DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_profile
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
     ports:
-      - "${PROFILE_ONBOARDING_PORT}:${PROFILE_ONBOARDING_PORT}"
+      - "4101:4101"
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,20 +130,16 @@ services:
         condition: service_started
   redis:
     image: redis:7-alpine
-    env_file:
-      - ./.env
     ports:
-      - "${REDIS_PORT}:6379"
+      - "6379:6379"
   postgres:
     image: postgres:16-alpine
-    env_file:
-      - ./.env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "5432:5432"
     volumes:
       - ./scripts:/docker-entrypoint-initdb.d
     healthcheck:
@@ -127,10 +150,8 @@ services:
   nats:
     image: nats:2.10-alpine
     command: ["-js", "-m", "8222"]
-    env_file:
-      - ./.env
     ports:
-      - "${NATS_PORT}:4222"
+      - "4222:4222"
       - "8222:8222"
   prometheus:
     image: prom/prometheus:latest

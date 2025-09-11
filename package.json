@@ -21,7 +21,18 @@
     "test:container": "docker compose -f preview.compose.yaml run --rm",
     "preview:check": "tsx scripts/check-ports.ts",
     "preview:up": "npm run preview:check && docker compose -f preview.compose.yaml up --build",
-    "preview:down": "docker compose -f preview.compose.yaml down -v"
+    "preview:down": "docker compose -f preview.compose.yaml down -v",
+    "config:validate": "node scripts/validate-config.js",
+    "config:check": "npm run config:validate",
+    "config:test": "node scripts/test-config-integration.js",
+    "config:test-integration": "npm run config:test",
+    "config:validate-contract": "node scripts/validate-config-contract.js",
+    "config:debug": "node scripts/debug-config-integration.js",
+    "test:suite:validate": "node scripts/validate-test-suite.js",
+    "test:suite:100": "npm run test:suite:validate",
+    "db:test": "node scripts/test-db-connection.js",
+    "redis:test": "node scripts/test-redis-connection.js",
+    "services:health-check": "node scripts/health-check-all.js"
   },
   "dependencies": {
     "dotenv": "^17.2.2",

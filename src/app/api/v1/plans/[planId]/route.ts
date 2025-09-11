@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
 
 export async function GET(
   request: NextRequest,
@@ -16,200 +17,32 @@ export async function GET(
     
     console.log('Fetching plan details for planId:', planId);
     
-    // 模擬從後端獲取計劃詳情
-    // 在真實實現中，這裡會調用後端服務來獲取實際數據
-    const mockPlan = {
-      id: planId,
-      name: "Personalized Training Plan",
-      description: "A comprehensive training program designed specifically for your goals and preferences",
-      status: "completed",
-      version: 1,
-      createdAt: new Date().toISOString(),
-      content: {
-        microcycles: [
-          {
-            weekNumber: 1,
-            name: "Foundation Week",
-            phase: "preparation",
-            sessions: [
-              {
-                dayOfWeek: 1, // Monday
-                name: "Upper Body Strength",
-                duration: 60,
-                exercises: [
-                  { 
-                    id: "bench-press-1",
-                    name: "Bench Press", 
-                    category: "Push", 
-                    sets: 4, 
-                    reps: 8, 
-                    weight: 135, 
-                    notes: "Focus on controlled movement" 
-                  },
-                  { 
-                    id: "pull-ups-1",
-                    name: "Pull-ups", 
-                    category: "Pull", 
-                    sets: 3, 
-                    reps: 8, 
-                    notes: "Use assistance if needed" 
-                  },
-                  { 
-                    id: "overhead-press-1",
-                    name: "Overhead Press", 
-                    category: "Push", 
-                    sets: 3, 
-                    reps: 10, 
-                    weight: 95 
-                  },
-                  { 
-                    id: "bent-over-rows-1",
-                    name: "Bent-over Rows", 
-                    category: "Pull", 
-                    sets: 3, 
-                    reps: 10, 
-                    weight: 115 
-                  }
-                ]
-              },
-              {
-                dayOfWeek: 3, // Wednesday
-                name: "Lower Body Power",
-                duration: 45,
-                exercises: [
-                  { 
-                    id: "squats-1",
-                    name: "Squats", 
-                    category: "Legs", 
-                    sets: 4, 
-                    reps: 6, 
-                    weight: 185, 
-                    notes: "Explosive movement" 
-                  },
-                  { 
-                    id: "romanian-deadlifts-1",
-                    name: "Romanian Deadlifts", 
-                    category: "Legs", 
-                    sets: 3, 
-                    reps: 8, 
-                    weight: 155 
-                  },
-                  { 
-                    id: "jump-squats-1",
-                    name: "Jump Squats", 
-                    category: "Plyometric", 
-                    sets: 3, 
-                    reps: 12, 
-                    notes: "Max height" 
-                  },
-                  { 
-                    id: "calf-raises-1",
-                    name: "Calf Raises", 
-                    category: "Legs", 
-                    sets: 3, 
-                    reps: 15, 
-                    weight: 225 
-                  }
-                ]
-              },
-              {
-                dayOfWeek: 5, // Friday
-                name: "Full Body Conditioning",
-                duration: 50,
-                exercises: [
-                  { 
-                    id: "deadlifts-1",
-                    name: "Deadlifts", 
-                    category: "Full Body", 
-                    sets: 4, 
-                    reps: 5, 
-                    weight: 205 
-                  },
-                  { 
-                    id: "push-ups-1",
-                    name: "Push-ups", 
-                    category: "Push", 
-                    sets: 3, 
-                    reps: 15, 
-                    notes: "Perfect form" 
-                  },
-                  { 
-                    id: "lunges-1",
-                    name: "Lunges", 
-                    category: "Legs", 
-                    sets: 3, 
-                    reps: 12, 
-                    weight: 40 
-                  },
-                  { 
-                    id: "plank-1",
-                    name: "Plank", 
-                    category: "Core", 
-                    sets: 3, 
-                    reps: 1, 
-                    notes: "Hold for 60 seconds" 
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            weekNumber: 2,
-            name: "Progression Week",
-            phase: "preparation",
-            sessions: [
-              {
-                dayOfWeek: 1,
-                name: "Upper Body Strength",
-                duration: 65,
-                exercises: [
-                  { 
-                    id: "bench-press-2",
-                    name: "Bench Press", 
-                    category: "Push", 
-                    sets: 4, 
-                    reps: 8, 
-                    weight: 140, 
-                    notes: "Increase weight from last week" 
-                  },
-                  { 
-                    id: "pull-ups-2",
-                    name: "Pull-ups", 
-                    category: "Pull", 
-                    sets: 3, 
-                    reps: 9, 
-                    notes: "Add weight if possible" 
-                  },
-                  { 
-                    id: "overhead-press-2",
-                    name: "Overhead Press", 
-                    category: "Push", 
-                    sets: 3, 
-                    reps: 10, 
-                    weight: 100 
-                  },
-                  { 
-                    id: "bent-over-rows-2",
-                    name: "Bent-over Rows", 
-                    category: "Pull", 
-                    sets: 3, 
-                    reps: 10, 
-                    weight: 120 
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+    // TODO: 替换为真实的后端API调用
+    // 在NODE_ENV=production时，必须调用真实服务
+    if (process.env.NODE_ENV === 'production') {
+      // 调用planning-engine服务获取真实数据
+      const response = await fetch(`${process.env.PLANNING_ENGINE_URL}/plans/${planId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${request.headers.get('authorization') || ''}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch plan: ${response.status}`);
       }
-    };
-    
-    // 模擬 API 延遲
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    console.log('Returning plan details:', { id: planId, name: mockPlan.name });
-    
-    return NextResponse.json(mockPlan);
+      
+      const plan = await response.json();
+      return NextResponse.json(plan);
+    } else {
+      // 开发环境可以返回基础结构
+      return NextResponse.json({
+        id: planId,
+        status: 'development_mode',
+        message: 'This endpoint requires real backend integration in production'
+      });
+    }
     
   } catch (error) {
     console.error('Failed to fetch plan details:', error);
@@ -224,12 +57,5 @@ export async function GET(
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
+  return handleCorsOptions();
 }

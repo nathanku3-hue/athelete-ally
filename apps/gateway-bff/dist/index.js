@@ -17,8 +17,32 @@ import { z } from 'zod';
 import fetch from 'node-fetch';
 import { config } from './config.js';
 import { businessMetrics, traceOnboardingStep, tracePlanGeneration, traceApiRequest } from './telemetry.js';
+// 简化的 CORS 配置
+const corsConfig = {
+    origin: true, // 允许所有来源（开发环境）
+    credentials: true
+};
+// 简化的速率限制中间件
+const rateLimitMiddleware = async (request, reply) => {
+    // 暂时跳过速率限制（开发环境）
+    return;
+};
+// 简化的指标中间件
+const metricsMiddleware = async (request, reply) => {
+    // 暂时跳过指标收集（开发环境）
+    return;
+};
 const server = Fastify({ logger: true });
-server.register(cors, { origin: true });
+// 简化的指标注册（开发环境）
+const metricsRegistry = {
+    metrics: () => '# No metrics available in development mode'
+};
+// 使用简化的CORS配置
+// 注册CORS插件（开发环境简化配置）
+server.register(cors, corsConfig);
+// 注册全局中间件
+server.addHook('onRequest', metricsMiddleware);
+server.addHook('onRequest', rateLimitMiddleware);
 // Swagger configuration
 server.register(swagger, {
     openapi: {
@@ -146,22 +170,44 @@ server.post('/v1/onboarding', {
             season: parsed.data.season,
             equipmentCount: parsed.data.equipment?.length || 0,
         });
-        // 直接处理onboarding请求，不依赖profile-onboarding服务
-        const jobId = `onboarding-${parsed.data.userId}-${Date.now()}`;
-        // 模拟成功响应
-        const responseData = {
-            jobId: jobId,
-            status: 'queued',
-            userId: parsed.data.userId,
-            weeklyGoalDays: parsed.data.weeklyGoalDays || 3,
-            message: 'Onboarding data received successfully'
-        };
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(`${config.PROFILE_ONBOARDING_URL}/v1/onboarding`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(parsed.data),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+        let body = null;
+        try {
+            body = await res.json();
+        }
+        catch {
+            body = { error: { code: 'UPSTREAM_INVALID_JSON', message: 'invalid upstream json' } };
+        }
         const responseTime = (Date.now() - startTime) / 1000;
         businessMetrics.apiResponseTime.record(responseTime, {
             'http.method': 'POST',
             'http.path': '/v1/onboarding',
-            'http.status_code': '202',
+            'http.status_code': res.status.toString(),
         });
+        if (!res.ok) {
+            businessMetrics.apiErrors.add(1, {
+                'error.type': 'upstream_error',
+                'http.status_code': res.status.toString(),
+            });
+            const mapped = res.status === 400
+                ? { code: 'UPSTREAM_BAD_REQUEST', http: 400 }
+                : res.status >= 500
+                    ? { code: 'UPSTREAM_ERROR', http: 502 }
+                    : { code: 'UPSTREAM_ERROR', http: 502 };
+            span.setStatus({ code: 2, message: 'Upstream error' });
+            onboardingSpan.setStatus({ code: 2, message: 'Upstream error' });
+            onboardingSpan.end();
+            span.end();
+            return reply.code(mapped.http).send({ error: { code: mapped.code, message: 'Upstream error' } });
+        }
         // 成功完成引导
         businessMetrics.onboardingCompletions.add(1, {
             'user.id': parsed.data.userId,
@@ -171,7 +217,7 @@ server.post('/v1/onboarding', {
         onboardingSpan.end();
         span.setStatus({ code: 1, message: 'Success' });
         span.end();
-        return reply.code(202).send(responseData);
+        return reply.code(res.status).send(body);
     }
     catch (error) {
         businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
@@ -924,7 +970,7 @@ server.post('/v1/plans/generate', {
         const planSpan = tracePlanGeneration(request.body?.userId, request.body);
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5000);
-        const res = await fetch(config.PLANNING_ENGINE_URL || 'http://localhost:4102/generate', {
+        const res = await fetch(`${config.PLANNING_ENGINE_URL}/generate`, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(request.body),
@@ -989,6 +1035,83 @@ server.post('/v1/plans/generate', {
         span.end();
         throw error;
     }
+});
+// 查询计划生成状态
+server.get('/v1/plans/status', {
+    schema: {
+        description: 'Get plan generation status',
+        tags: ['plans'],
+        querystring: {
+            type: 'object',
+            required: ['jobId'],
+            properties: {
+                jobId: { type: 'string' }
+            }
+        },
+        response: {
+            200: {
+                type: 'object',
+                properties: {
+                    jobId: { type: 'string' },
+                    status: { type: 'string' },
+                    planId: { type: 'string' },
+                    message: { type: 'string' }
+                }
+            },
+            404: {
+                type: 'object',
+                properties: {
+                    error: { type: 'string' }
+                }
+            }
+        }
+    }
+}, async (request, reply) => {
+    const startTime = Date.now();
+    const { jobId } = request.query;
+    const span = traceApiRequest('GET', `/v1/plans/status?jobId=${jobId}`);
+    try {
+        const res = await fetch(`${config.PLANNING_ENGINE_URL}/status/${jobId}`, {
+            method: 'GET',
+            headers: { 'content-type': 'application/json' }
+        });
+        const responseTime = (Date.now() - startTime) / 1000;
+        businessMetrics.apiResponseTime.record(responseTime, {
+            'http.method': 'GET',
+            'http.path': '/v1/plans/status',
+            'http.status_code': res.status.toString(),
+        });
+        if (!res.ok) {
+            businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
+            span.setStatus({ code: 2, message: 'Upstream error' });
+            span.end();
+            return reply.code(res.status).send({ error: 'Failed to get plan status' });
+        }
+        const data = await res.json();
+        span.setStatus({ code: 1, message: 'Success' });
+        span.end();
+        return reply.send(data);
+    }
+    catch (error) {
+        businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
+        span.setStatus({ code: 2, message: 'Internal error' });
+        span.end();
+        throw error;
+    }
+});
+// 添加 Prometheus 指标端点
+server.get('/metrics', async (request, reply) => {
+    reply.type('text/plain');
+    return metricsRegistry.metrics();
+});
+// 添加健康检查端点
+server.get('/health', async (request, reply) => {
+    return {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: process.env.npm_package_version || '1.0.0'
+    };
 });
 const port = Number(config.PORT || 4000);
 server
