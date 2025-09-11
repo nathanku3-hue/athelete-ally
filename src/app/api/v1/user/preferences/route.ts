@@ -41,7 +41,7 @@ export async function PATCH(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Failed to update user preference:', error);
+    logger.error('Failed to update user preference:', error);
     return NextResponse.json(
       { 
         error: 'Failed to update user preference',
@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching user preferences...');
+    logger.log('Fetching user preferences...');
     
     // 在真实实现中，这里会从数据库获取用户偏好
     // 例如：const preferences = await getUserPreferences(userId);
@@ -68,12 +68,12 @@ export async function GET(request: NextRequest) {
       notifications: true,
     };
     
-    console.log('Returning user preferences:', preferences);
+    logger.log('Returning user preferences:', preferences);
     
     return NextResponse.json(preferences);
     
   } catch (error) {
-    console.error('Failed to fetch user preferences:', error);
+    logger.error('Failed to fetch user preferences:', error);
     return NextResponse.json(
       { 
         error: 'Failed to fetch user preferences',
