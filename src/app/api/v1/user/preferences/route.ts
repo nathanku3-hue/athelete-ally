@@ -6,16 +6,25 @@ import { logger } from '@/lib/logger';
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { unit } = body;
     
-    if (!unit || !['lbs', 'kg'].includes(unit)) {
+    // 使用统一的schema验证
+    const validationResult = safeParseUserPreferencesUpdate(body);
+    
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid unit. Must be "lbs" or "kg"' },
+        { 
+          error: 'Validation failed', 
+          details: validationResult.error?.errors,
+          receivedData: body 
+        },
         { status: 400 }
       );
     }
     
-    console.log('Updating user preference for unit:', unit);
+    const validatedData = validationResult.data!;
+    const { unit } = validatedData;
+    
+    logger.log('Updating user preference for unit:', unit);
     
     // 在真实实现中，这里会更新数据库中的用户偏好
     // 例如：await updateUserPreference(userId, { unit });
@@ -23,7 +32,7 @@ export async function PATCH(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    console.log('User preference updated successfully');
+    logger.log('User preference updated successfully');
     
     return NextResponse.json({ 
       success: true, 
