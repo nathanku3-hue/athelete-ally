@@ -23,6 +23,8 @@ const EnvSchema = z.object({
     LLM_MAX_TOKENS: z.string().transform((v) => Number(v)).default('4000'), // LLM 最大令牌数
     LLM_TEMPERATURE: z.string().transform((v) => Number(v)).default('0.7'), // LLM 温度
     LLM_MAX_RETRIES: z.string().transform((v) => Number(v)).default('2'), // LLM 最大重试次数
+    // 指标更新配置
+    METRICS_UPDATE_INTERVAL_MS: z.string().transform((v) => Number(v)).default('30000'), // 指标更新间隔
 });
 export const config = (() => {
     const parsed = EnvSchema.safeParse(process.env);

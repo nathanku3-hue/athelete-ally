@@ -6,6 +6,7 @@ import { Client as PgClient } from 'pg';
 import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { z } from 'zod';
+import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 // 暫時註釋掉共享包依賴
 // import { EventBus } from '@athlete-ally/event-bus';
 // import { OnboardingCompletedEvent } from '@athlete-ally/contracts';
@@ -180,6 +181,32 @@ server.post('/v1/onboarding', async (request, reply) => {
     catch (error) {
         server.log.error({ error }, 'Failed to save onboarding data');
         return reply.code(500).send({ error: 'internal_server_error' });
+    }
+});
+// 注册安全中间件
+server.addHook('onRequest', authMiddleware);
+server.addHook('onSend', cleanupMiddleware);
+// 为onboarding端点添加所有权检查
+server.addHook('preHandler', async (request, reply) => {
+    // 跳过健康检查端点
+    if (request.url === '/health') {
+        return;
+    }
+    // 为onboarding端点添加所有权检查
+    if (request.method === 'POST' && request.url === '/v1/onboarding') {
+        const user = request.user;
+        const requestUserId = user?.userId;
+        if (!requestUserId) {
+            return reply.code(401).send({ error: 'unauthorized', message: 'User authentication required' });
+        }
+        // 验证请求体中的userId与JWT token中的userId一致
+        const parsed = OnboardingPayload.safeParse(request.body);
+        if (parsed.success && parsed.data.userId !== requestUserId) {
+            return reply.code(403).send({
+                error: 'forbidden',
+                message: 'User ID in request body does not match authenticated user'
+            });
+        }
     }
 });
 const port = Number(config.PORT || 4101);

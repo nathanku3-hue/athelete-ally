@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 生成 Job ID 用於狀態輪詢
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const planId = `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // 使用安全的ID生成器
+    const jobId = `job_${crypto.randomUUID()}`;
+    const planId = `plan_${crypto.randomUUID()}`;
     
     // 這裡應該調用實際的計劃生成服務
     // 目前返回模擬響應，包含 jobId 用於狀態輪詢

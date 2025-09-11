@@ -123,8 +123,8 @@ const sdk = new NodeSDK({
     endpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
   }),
   metricReader: new PrometheusExporter({
-    port: 9467,
-    endpoint: '/metrics',
+    port: parseInt(process.env.PROMETHEUS_METRICS_PORT || '9467'),
+    endpoint: process.env.PROMETHEUS_METRICS_ENDPOINT || '/metrics',
   }),
 });
 

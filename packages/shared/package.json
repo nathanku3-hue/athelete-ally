@@ -7,12 +7,18 @@
   "exports": {
     ".": "./src/index.ts",
     "./config": "./src/config/index.ts",
-    "./config/ports": "./src/config/ports.ts"
+    "./config/ports": "./src/config/ports.ts",
+    "./logger": "./src/logger.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit"
   },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.22.4"
+  },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
     "typescript": "^5.4.5"
   }
 }

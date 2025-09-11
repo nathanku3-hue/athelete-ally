@@ -12,9 +12,4 @@ export declare const PlanGenerateRequest: z.ZodObject<{
     seedPlanId?: string | undefined;
 }>;
 export type PlanGenerateRequest = z.infer<typeof PlanGenerateRequest>;
-export declare function generatePlan(req: PlanGenerateRequest): Promise<{
-    readonly planId: "demo-plan";
-    readonly version: 1;
-    readonly status: "generated";
-}>;
 //# sourceMappingURL=server.d.ts.map

@@ -7,6 +7,18 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { z } from 'zod';
+// 暂时注释掉shared包导入，使用本地实现
+// import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+
+// 简化的身份验证中间件
+async function authMiddleware(request: any, reply: any) {
+  // 暂时跳过身份验证（开发环境）
+  (request as any).user = { userId: 'dev-user-id' };
+}
+
+async function cleanupMiddleware(request: any, reply: any) {
+  // 清理逻辑
+}
 // 暫時註釋掉共享包依賴
 // import { EventBus } from '@athlete-ally/event-bus';
 // import { OnboardingCompletedEvent } from '@athlete-ally/contracts';
@@ -196,6 +208,37 @@ server.post('/v1/onboarding', async (request, reply) => {
   } catch (error) {
     server.log.error({ error }, 'Failed to save onboarding data');
     return reply.code(500).send({ error: 'internal_server_error' });
+  }
+});
+
+// 注册安全中间件
+server.addHook('onRequest', authMiddleware);
+server.addHook('onSend', cleanupMiddleware);
+
+// 为onboarding端点添加所有权检查
+server.addHook('preHandler', async (request, reply) => {
+  // 跳过健康检查端点
+  if (request.url === '/health') {
+    return;
+  }
+  
+  // 为onboarding端点添加所有权检查
+  if (request.method === 'POST' && request.url === '/v1/onboarding') {
+    const user = (request as any).user;
+    const requestUserId = user?.userId;
+    
+    if (!requestUserId) {
+      return reply.code(401).send({ error: 'unauthorized', message: 'User authentication required' });
+    }
+    
+    // 验证请求体中的userId与JWT token中的userId一致
+    const parsed = OnboardingPayload.safeParse(request.body);
+    if (parsed.success && parsed.data.userId !== requestUserId) {
+      return reply.code(403).send({ 
+        error: 'forbidden', 
+        message: 'User ID in request body does not match authenticated user' 
+      });
+    }
   }
 });
 

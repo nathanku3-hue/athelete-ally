@@ -284,7 +284,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       return { 
         success: true, 
         planId: result.planId || result.eventId || 'plan_generated',
-        jobId: result.jobId || `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        jobId: result.jobId || `job_${crypto.randomUUID()}`
       };
 
     } catch (error) {

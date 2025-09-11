@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         progress: 100,
         estimatedTime: 0,
         message: 'Your training plan is ready!',
-        planId: `plan_${jobId}_${Date.now()}`
+        planId: `plan_${jobId.split('_').pop() || 'unknown'}_${Date.now()}`
       }
     ];
     

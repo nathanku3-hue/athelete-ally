@@ -12,20 +12,13 @@ import { businessMetrics, tracePlanGeneration } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
 import { concurrencyController } from './concurrency/controller.js';
+import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { register } from 'prom-client';
-// 定义类型和函数（从 index.ts 移动过来）
+// 定义类型（从 index.ts 移动过来）
 export const PlanGenerateRequest = z.object({
     userId: z.string(),
     seedPlanId: z.string().optional(),
 });
-export async function generatePlan(req) {
-    // TODO: connect llm-orchestrator, repository, queue, etc.
-    return {
-        planId: 'demo-plan',
-        version: 1,
-        status: 'generated',
-    };
-}
 const server = Fastify({ logger: true });
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PLANNING_DATABASE_URL });
@@ -65,9 +58,8 @@ server.addHook('onReady', async () => {
             enableConcurrencyControl: true
         });
         server.log.info('subscribed to plan generation requested events with concurrency control');
-        // 启动指标更新
-        eventProcessor.startMetricsUpdate();
-        server.log.info('started metrics update');
+        // 指标更新已移除 - 使用OpenTelemetry自动指标收集
+        server.log.info('event processor connected successfully');
     }
     catch (e) {
         server.log.error({ err: e }, 'failed to connect event processor');
@@ -260,10 +252,13 @@ async function handlePlanGenerationRequested(task) {
         await eventPublisher.publishPlanGenerationFailed(planGenerationFailedEvent);
     }
 }
-server.get('/health', async () => ({ status: 'ok' }));
+// 健康检查端点已移至下方，提供更详细的状态信息
 // 查询计划生成状态
 server.get('/status/:jobId', async (request, reply) => {
     const { jobId } = request.params;
+    // 从JWT token获取用户身份
+    const user = request.user;
+    const userId = user.userId;
     try {
         // 查询PlanJob状态
         const planJob = await prisma.planJob.findUnique({
@@ -288,6 +283,13 @@ server.get('/status/:jobId', async (request, reply) => {
                 jobId: jobId,
                 status: 'not_found',
                 message: 'Plan generation job not found',
+            });
+        }
+        // 安全验证：确保用户只能访问自己的job
+        if (planJob.userId !== userId) {
+            return reply.code(403).send({
+                error: 'forbidden',
+                message: 'Access denied: You can only access your own jobs'
             });
         }
         return reply.code(200).send({
@@ -396,12 +398,31 @@ server.get('/concurrency/status', async (request, reply) => {
         timestamp: new Date().toISOString()
     };
 });
+// 注册安全中间件
+server.addHook('onRequest', authMiddleware);
+server.addHook('onSend', cleanupMiddleware);
+// 为需要所有权检查的端点添加中间件
+server.addHook('preHandler', async (request, reply) => {
+    // 跳过健康检查和指标端点
+    if (request.url === '/health' || request.url === '/metrics' || request.url === '/concurrency/status') {
+        return;
+    }
+    // 为需要用户身份验证的端点添加所有权检查
+    if (request.method === 'POST' && request.url === '/generate') {
+        const user = request.user;
+        const requestUserId = user?.userId;
+        if (!requestUserId) {
+            return reply.code(401).send({ error: 'unauthorized', message: 'User authentication required' });
+        }
+    }
+});
 const port = Number(config.PORT || 4102);
 server
     .listen({ port, host: '0.0.0.0' })
     .then(() => console.log(`planning-engine listening on :${port}`))
     .catch((err) => {
-    console.error(err);
+    const { safeLog } = await import('@athlete-ally/shared/logger');
+    safeLog.error('Server startup error', err);
     process.exit(1);
 });
 //# sourceMappingURL=server.js.map

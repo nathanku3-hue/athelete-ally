@@ -152,12 +152,7 @@ export class EventProcessor {
     console.log(`Subscribed to ${topic} events with maxConcurrent=${maxConcurrent}`);
   }
 
-  startMetricsUpdate() {
-    // 定期更新指标
-    setInterval(() => {
-      // 这里可以添加定期更新的逻辑
-    }, config.METRICS_UPDATE_INTERVAL_MS);
-  }
+  // 指标更新器已移除 - 使用OpenTelemetry自动指标收集
 
   isHealthy(): boolean {
     return this.isConnected && this.activeSubscriptions.size > 0;

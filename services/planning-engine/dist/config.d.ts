@@ -16,6 +16,7 @@ export declare const config: {
     LLM_MAX_TOKENS: number;
     LLM_TEMPERATURE: number;
     LLM_MAX_RETRIES: number;
+    METRICS_UPDATE_INTERVAL_MS: number;
     OPENAI_API_KEY?: string | undefined;
 };
 //# sourceMappingURL=config.d.ts.map
