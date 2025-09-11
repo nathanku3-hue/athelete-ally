@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, Star, Clock, Target, AlertTriangle, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Exercise } from '@athlete-ally/shared-types';
 
@@ -132,11 +133,14 @@ export default function ExerciseModal({
                   </button>
                 </div>
               ) : exercise.imageUrl ? (
-                <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-                  <img
+                <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center relative overflow-hidden">
+                  <Image
                     src={exercise.imageUrl}
                     alt={exercise.name}
-                    className="max-w-full max-h-full object-contain rounded-lg"
+                    fill
+                    className="object-contain rounded-lg"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority
                   />
                 </div>
               ) : null}

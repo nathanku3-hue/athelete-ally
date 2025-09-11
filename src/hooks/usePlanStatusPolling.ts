@@ -43,7 +43,7 @@ export function usePlanStatusPolling({
   const [retryCount, setRetryCount] = useState(0);
   const [isPolling, setIsPolling] = useState(true);
   
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
 
   // 计算指数退避间隔

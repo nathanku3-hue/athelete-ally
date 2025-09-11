@@ -121,3 +121,6 @@ export interface OnboardingContextType {
   getStepProgress: () => { current: number; total: number; percentage: number };
   submitData: () => Promise<{ success: boolean; planId?: string; jobId?: string; error?: string }>;
 }
+
+// 导出统一的Onboarding Schema
+export * from './schemas/onboarding';

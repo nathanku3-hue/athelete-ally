@@ -1,38 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
+import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '@athlete-ally/shared-types';
 
 export async function POST(request: NextRequest) {
   try {
     const onboardingData = await request.json();
     
-    // 处理引导数据
+    // 使用统一的schema验证
+    const validationResult = safeParseOnboardingPayload(onboardingData);
     
-    // 验证必需字段
-    const requiredFields = ['userId', 'proficiency', 'availabilityDays'];
-    const missingFields = requiredFields.filter(field => !onboardingData[field]);
-    
-    if (missingFields.length > 0) {
+    if (!validationResult.success) {
       return NextResponse.json(
         { 
-          error: 'Missing required fields', 
-          missingFields,
+          error: 'Validation failed', 
+          details: validationResult.error?.errors,
           receivedData: onboardingData 
         },
         { status: 400 }
       );
     }
     
-    // 验证数据格式
-    if (!Array.isArray(onboardingData.availabilityDays)) {
+    const validatedData = validationResult.data!;
+    
+    // 验证必需字段
+    const requiredFields = ['userId', 'proficiency', 'availabilityDays'];
+    const missingFields = requiredFields.filter(field => !validatedData[field as keyof typeof validatedData]);
+    
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { error: 'availabilityDays must be an array' },
+        { 
+          error: 'Missing required fields', 
+          missingFields,
+          receivedData: validatedData 
+        },
         { status: 400 }
       );
     }
     
-    if (onboardingData.availabilityDays.length === 0) {
+    // 验证availabilityDays（现在应该是数字）
+    if (typeof validatedData.availabilityDays !== 'number' || validatedData.availabilityDays < 1 || validatedData.availabilityDays > 7) {
       return NextResponse.json(
-        { error: 'At least one availability day is required' },
+        { error: 'availabilityDays must be a number between 1 and 7' },
         { status: 400 }
       );
     }
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest) {
       jobId: jobId, // 添加 jobId 用於狀態輪詢
       message: 'Training plan generation started successfully',
       data: {
-        userId: onboardingData.userId,
+        userId: validatedData.userId,
         planId: planId,
         jobId: jobId,
         createdAt: new Date().toISOString(),

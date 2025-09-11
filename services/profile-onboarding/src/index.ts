@@ -7,6 +7,7 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { z } from 'zod';
+import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '@athlete-ally/shared-types';
 // 暂时注释掉shared包导入，使用本地实现
 // import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 
@@ -117,46 +118,22 @@ server.addHook('onReady', async () => {
   }
 });
 
-const OnboardingPayload = z.object({
-  userId: z.string(),
-  // Step 1: Training Purpose
-  purpose: z.enum(['general_fitness', 'sport_performance', 'muscle_building', 'weight_loss', 'rehabilitation']).optional(),
-  purposeDetails: z.string().optional(),
-  
-  // Step 2: Proficiency Level
-  proficiency: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  
-  // Step 3: Season and Goals
-  season: z.enum(['offseason', 'preseason', 'inseason']).optional(),
-  competitionDate: z.string().datetime().optional(),
-  
-  // Step 4: Availability
-  availabilityDays: z.number().int().min(1).max(7).optional(),
-  weeklyGoalDays: z.number().int().min(1).max(7).optional(),
-  
-  // Step 5: Equipment and scheduling
-  equipment: z.array(z.string()).optional(),
-  fixedSchedules: z
-    .array(
-      z.object({ day: z.string(), start: z.string(), end: z.string() })
-    )
-    .optional(),
-  
-  // Step 6: Recovery habits (optional)
-  recoveryHabits: z.array(z.string()).optional(),
-  
-  // Onboarding status
-  onboardingStep: z.number().int().min(1).max(6).optional(),
-  isOnboardingComplete: z.boolean().optional(),
-});
+// 使用统一的OnboardingPayloadSchema
+const OnboardingPayload = OnboardingPayloadSchema;
 
 server.get('/health', async () => ({ status: 'ok' }));
 
 server.post('/v1/onboarding', async (request, reply) => {
-  const parsed = OnboardingPayload.safeParse(request.body);
-  if (!parsed.success) {
-    return reply.code(400).send({ error: 'invalid_payload' });
+  // 使用统一的schema验证
+  const validationResult = safeParseOnboardingPayload(request.body);
+  if (!validationResult.success) {
+    return reply.code(400).send({ 
+      error: 'validation_failed',
+      details: validationResult.error?.errors 
+    });
   }
+  
+  const parsed = { success: true, data: validationResult.data! };
 
   try {
     // Use native SQL query instead of Prisma

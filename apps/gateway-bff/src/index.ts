@@ -20,6 +20,7 @@ import fetch from 'node-fetch';
 import { config } from './config.js';
 import { businessMetrics, traceOnboardingStep, tracePlanGeneration, traceApiRequest } from './telemetry.js';
 import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
+import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '@athlete-ally/shared-types';
 // 暂时注释掉shared包导入，使用本地实现
 // import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 // import { SecureIdGenerator } from '@athlete-ally/shared';
@@ -218,20 +219,8 @@ server.get('/documentation', async (_req, reply) => {
   reply.type('text/html').send(html);
 });
 
-const OnboardingPayload = z.object({
-  userId: z.string(),
-  purpose: z.string().optional(),
-  proficiency: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  season: z.enum(['offseason', 'preseason', 'inseason']).optional(),
-  availabilityDays: z.number().int().min(1).max(7).optional(),
-  weeklyGoalDays: z.number().int().min(1).max(7).optional(),
-  equipment: z.array(z.string()).optional(),
-  fixedSchedules: z
-    .array(
-      z.object({ day: z.string(), start: z.string(), end: z.string() })
-    )
-    .optional(),
-});
+// 使用统一的OnboardingPayloadSchema
+const OnboardingPayload = OnboardingPayloadSchema;
 
 server.post('/v1/onboarding', {
   schema: {
@@ -292,13 +281,19 @@ server.post('/v1/onboarding', {
       'onboarding.purpose': (request.body as any)?.purpose || 'unknown',
     });
 
-    const parsed = OnboardingPayload.safeParse(request.body);
-    if (!parsed.success) {
+    // 使用统一的schema验证
+    const validationResult = safeParseOnboardingPayload(request.body);
+    if (!validationResult.success) {
       businessMetrics.apiErrors.add(1, { 'error.type': 'validation_error' });
       span.setStatus({ code: 2, message: 'Validation failed' });
       span.end();
-      return reply.code(400).send({ error: 'invalid_payload' });
+      return reply.code(400).send({ 
+        error: 'validation_failed',
+        details: validationResult.error?.errors 
+      });
     }
+    
+    const parsed = { success: true, data: validationResult.data! };
 
     // 安全验证：确保请求体中的userId与JWT token中的userId一致
     if (parsed.data.userId !== userId) {
