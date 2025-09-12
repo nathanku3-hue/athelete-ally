@@ -1,5 +1,5 @@
-// Protocol Engine Prisma Schema
-// Core concepts: Protocol and Block for advanced training plan management
+// Protocol Engine Prisma Schema V2
+// Enhanced with Security, Permissions, and Multi-tenancy
 
 generator client {
   provider = "prisma-client-js"
@@ -13,15 +13,74 @@ datasource db {
 }
 
 // ===========================================
-// PROTOCOL MODELS
+// MULTI-TENANCY SUPPORT
+// ===========================================
+
+/// Tenant represents an organization or team
+model Tenant {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Tenant identification
+  name        String   @unique
+  domain      String?  @unique
+  isActive    Boolean  @default(true)
+  
+  // Tenant configuration
+  settings    Json?    // Tenant-specific settings
+  maxUsers    Int      @default(100)
+  maxProtocols Int     @default(1000)
+  
+  // Relations
+  protocols   Protocol[]
+  users       User[]
+  executions  ProtocolExecution[]
+  
+  @@map("tenants")
+}
+
+/// User represents a user within a tenant
+model User {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User identification
+  email       String   @unique
+  name        String?
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // User status
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  
+  // Relations
+  protocols   Protocol[]
+  executions  ProtocolExecution[]
+  permissions ProtocolPermission[]
+  sharedProtocols ProtocolShare[] @relation("ProtocolSharedBy")
+  receivedProtocols ProtocolShare[] @relation("ProtocolSharedWith")
+  
+  @@index([tenantId, isActive])
+  @@index([email])
+  @@map("users")
+}
+
+// ===========================================
+// ENHANCED PROTOCOL MODELS
 // ===========================================
 
 /// A Protocol represents a complete training methodology or system
-/// Examples: "5/3/1", "Starting Strength", "Westside Conjugate", "DUP"
 model Protocol {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  // Multi-tenant support
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   // Protocol identification
   name        String   @unique
@@ -34,10 +93,14 @@ model Protocol {
   duration    Int?     // weeks
   frequency   Int?     // sessions per week
   
+  // Security and permissions
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  visibility  Visibility @default(PRIVATE)
+  
   // Protocol configuration
   isActive    Boolean  @default(true)
   isPublic    Boolean  @default(false)
-  createdBy   String?  // userId of creator
   
   // Protocol content
   overview    String?  // Detailed description
@@ -48,11 +111,14 @@ model Protocol {
   blocks      Block[]
   templates   ProtocolTemplate[]
   executions  ProtocolExecution[]
+  permissions ProtocolPermission[]
+  shares      ProtocolShare[]
   
   // Indexing
-  @@index([category])
-  @@index([difficulty])
-  @@index([isActive, isPublic])
+  @@index([tenantId, isActive])
+  @@index([tenantId, category, difficulty])
+  @@index([ownerId, isActive])
+  @@index([visibility, isPublic])
   @@map("protocols")
 }
 
@@ -84,6 +150,7 @@ model Block {
   // Relations
   sessions    BlockSession[]
   progressions BlockProgression[]
+  executions  BlockExecution[]
   
   // Indexing
   @@index([protocolId, order])
@@ -141,6 +208,72 @@ model BlockProgression {
 }
 
 // ===========================================
+// PERMISSIONS & SECURITY
+// ===========================================
+
+/// ProtocolPermission manages fine-grained access control
+model ProtocolPermission {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Resource identification
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  // User and role
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        PermissionRole
+  
+  // Permissions
+  permissions Permission[]
+  
+  // Grant information
+  grantedBy   String
+  grantedAt   DateTime
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  
+  // Indexing
+  @@unique([protocolId, userId])
+  @@index([userId, isActive])
+  @@index([protocolId, role])
+  @@map("protocol_permissions")
+}
+
+/// AuditLog tracks all security-relevant operations
+model AuditLog {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  
+  // Operation details
+  action      String   // CREATE, READ, UPDATE, DELETE, SHARE, etc.
+  resourceType String  // PROTOCOL, BLOCK, SESSION, etc.
+  resourceId  String
+  
+  // User context
+  userId      String
+  tenantId    String
+  
+  // Request context
+  ip          String?
+  userAgent   String?
+  sessionId   String?
+  
+  // Operation details
+  details     Json?    // Additional operation-specific data
+  result      String   // SUCCESS, FAILURE, DENIED
+  
+  // Indexing
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([tenantId, createdAt])
+  @@map("audit_logs")
+}
+
+// ===========================================
 // PROTOCOL TEMPLATES
 // ===========================================
 
@@ -157,7 +290,7 @@ model ProtocolTemplate {
   name        String
   description String?
   
-  // Template parameters
+  // Template parameters (encrypted for sensitive data)
   parameters  Json     // Template-specific configuration
   isDefault   Boolean  @default(false)
   
@@ -178,10 +311,15 @@ model ProtocolExecution {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  // Multi-tenant support
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
   protocolId  String
   protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
   
   userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   templateId  String?  // Optional template used
   
   // Execution status
@@ -189,9 +327,13 @@ model ProtocolExecution {
   startDate   DateTime
   endDate     DateTime?
   
-  // Execution configuration
+  // Execution configuration (encrypted for sensitive data)
   parameters  Json     // User-specific parameters
   adaptations Json?    // Adaptations made during execution
+  
+  // Data classification
+  dataClassification DataClassification @default(PERSONAL)
+  retentionUntil DateTime?
   
   // Progress tracking
   currentBlockId String?
@@ -203,8 +345,9 @@ model ProtocolExecution {
   sessions        SessionExecution[]
   
   // Indexing
-  @@index([userId, status])
+  @@index([tenantId, userId, status])
   @@index([protocolId])
+  @@index([dataClassification])
   @@map("protocol_executions")
 }
 
@@ -240,7 +383,7 @@ model BlockExecution {
 
 /// A SessionExecution represents execution of a specific training session
 model SessionExecution {
-  id          String   @default(cuid())
+  id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -306,11 +449,15 @@ model ProtocolShare {
   updatedAt   DateTime @updatedAt
   
   protocolId  String
-  sharedBy    String   // userId
-  sharedWith  String   // userId
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  sharedBy    String
+  sharedByUser User    @relation("ProtocolSharedBy", fields: [sharedBy], references: [id], onDelete: Cascade)
+  sharedWith  String
+  sharedWithUser User  @relation("ProtocolSharedWith", fields: [sharedWith], references: [id], onDelete: Cascade)
   
   // Share permissions
-  permissions String[] // read, write, execute, share
+  permissions Permission[]
   expiresAt   DateTime?
   
   // Share status
@@ -321,4 +468,40 @@ model ProtocolShare {
   @@index([sharedBy])
   @@index([sharedWith])
   @@map("protocol_shares")
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum Visibility {
+  PRIVATE
+  TENANT
+  PUBLIC
+}
+
+enum PermissionRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+  GUEST
+}
+
+enum Permission {
+  READ
+  WRITE
+  EXECUTE
+  SHARE
+  DELETE
+  ANALYTICS
+  EXPORT
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  PERSONAL
+  SENSITIVE
 }
