@@ -22,10 +22,10 @@
     "lint:fix": "eslint src/**/*.ts --fix"
   },
   "dependencies": {
-    "@athlete-ally/contracts": "workspace:*",
-    "@athlete-ally/event-bus": "workspace:*",
-    "@athlete-ally/shared": "workspace:*",
-    "@athlete-ally/shared-types": "workspace:*",
+    "@athlete-ally/contracts": "^0.1.0",
+    "@athlete-ally/event-bus": "^0.1.0",
+    "@athlete-ally/shared": "^0.1.0",
+    "@athlete-ally/shared-types": "^0.1.0",
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/auto-instrumentations-node": "^0.40.3",
     "@opentelemetry/exporter-jaeger": "^1.18.1",
