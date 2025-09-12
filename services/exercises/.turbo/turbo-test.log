@@ -2,12 +2,3 @@
 > exercises-service@1.0.0 test
 > jest --passWithNoTests
 
-PASS src/__tests__/integration.test.ts
-  Exercises Service
-    √ should be able to run tests (3 ms)
-
-Test Suites: 1 passed, 1 total
-Tests:       1 passed, 1 total
-Snapshots:   0 total
-Time:        1.016 s
-Ran all test suites.

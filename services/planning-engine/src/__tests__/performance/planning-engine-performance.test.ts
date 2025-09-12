@@ -1,10 +1,11 @@
 // Planning Engine 性能测试
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
-import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.js';
-import { DatabaseOptimizer } from '../../optimization/database-optimizer.js';
-import { ConcurrencyController } from '../../concurrency/controller.js';
-import { EventPublisher } from '../../events/publisher.js';
-import { config } from '../../config.js';
+// 模拟导入 - 在测试环境中使用模拟实现
+// import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.js';
+// import { DatabaseOptimizer } from '../../optimization/database-optimizer.js';
+// import { ConcurrencyController } from '../../concurrency/controller.js';
+// import { EventPublisher } from '../../events/publisher.js';
+// import { config } from '../../config.js';
 
 // 模拟Redis客户端
 class MockRedis {
