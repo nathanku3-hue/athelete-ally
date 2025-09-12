@@ -2,22 +2,20 @@
 > gateway-bff@0.1.0 test
 > jest --passWithNoTests
 
-ReferenceError: module is not defined in ES module scope
-This file is being treated as an ES module because it has a '.js' file extension and 'E:\vibe\athelete-ally\apps\gateway-bff\package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
-    at file:///E:/vibe/athelete-ally/apps/gateway-bff/jest.config.js:1:1
-    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:458:37)
-    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:433:47)
-    at loadESMFromCJS (node:internal/modules/cjs/loader:1537:24)
-    at Module._compile (node:internal/modules/cjs/loader:1688:5)
-    at Object..js (node:internal/modules/cjs/loader:1839:10)
-    at Module.load (node:internal/modules/cjs/loader:1441:32)
-    at Function._load (node:internal/modules/cjs/loader:1263:12)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
-npm error Lifecycle script `test` failed with error:
-npm error code 1
-npm error path E:\vibe\athelete-ally\apps\gateway-bff
-npm error workspace gateway-bff@0.1.0
-npm error location E:\vibe\athelete-ally\apps\gateway-bff
-npm error command failed
-npm error command C:\WINDOWS\system32\cmd.exe /d /s /c jest --passWithNoTests
+● Validation Warning:
+
+  Unknown option "moduleNameMapping" with value {"^@/(.*)$": "<rootDir>/src/$1", "^@apps/(.*)$": "<rootDir>/../../apps/$1", "^@packages/(.*)$": "<rootDir>/../../packages/$1", "^@services/(.*)$": "<rootDir>/../../services/$1"} was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+● Validation Warning:
+
+  Unknown option "moduleNameMapping" with value {"^@/(.*)$": "<rootDir>/src/$1", "^@apps/(.*)$": "<rootDir>/../../apps/$1", "^@packages/(.*)$": "<rootDir>/../../packages/$1", "^@services/(.*)$": "<rootDir>/../../services/$1"} was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+No tests found, exiting with code 0

@@ -123,7 +123,7 @@ export interface OnboardingContextType {
 }
 
 // 导出统一的Onboarding Schema
-export * from './schemas/onboarding';
+export * from './schemas/onboarding.js';
 
 // 导出RPE和User Preferences Schema
-export * from './schemas/rpe';
+export * from './schemas/rpe.js';
