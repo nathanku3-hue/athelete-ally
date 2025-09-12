@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { generateTrainingPlan } from '../../llm.js';
 
 describe('End-to-End Integration Tests', () => {

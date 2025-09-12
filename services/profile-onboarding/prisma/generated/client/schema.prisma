@@ -14,34 +14,34 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Onboarding data - Step 1: Training Purpose
-  purpose        String? // general_fitness, sport_performance, muscle_building, weight_loss, rehabilitation
-  purposeDetails String? // Additional details about their specific goals
+  purpose        String? @map("purpose") // general_fitness, sport_performance, muscle_building, weight_loss, rehabilitation
+  purposeDetails String? @map("purpose_details") // Additional details about their specific goals
 
   // Step 2: Proficiency Level
-  proficiency String? // beginner, intermediate, advanced
+  proficiency String? @map("proficiency") // beginner, intermediate, advanced
 
   // Step 3: Season and Goals
-  season          String? // offseason, preseason, inseason
-  competitionDate DateTime? // When their main competition/event is
+  season          String?   @map("season") // offseason, preseason, inseason
+  competitionDate DateTime? @map("competition_date") // When their main competition/event is
 
   // Step 4: Availability
-  availabilityDays Int? // How many days per week they can train
-  weeklyGoalDays   Int? @default(3) // User preferred weekly training goal days
+  availabilityDays Int? @map("availability_days") // How many days per week they can train
+  weeklyGoalDays   Int? @default(3) @map("weekly_goal_days") // User preferred weekly training goal days
 
   // Step 5: Equipment and scheduling
-  equipment      String[] // array of equipment names
-  fixedSchedules Json? // array of {day, start, end} objects
+  equipment      String[] @map("equipment") // array of equipment names
+  fixedSchedules Json?    @map("fixed_schedules") // array of {day, start, end} objects
 
   // Step 6: Recovery habits (optional)
-  recoveryHabits String[] // array of recovery practices they use
+  recoveryHabits String[] @map("recovery_habits") // array of recovery practices they use
 
   // Onboarding status
-  onboardingStep       Int     @default(1) // Track which step they're on
-  isOnboardingComplete Boolean @default(false)
+  onboardingStep       Int     @default(1) @map("onboarding_step") // Track which step they're on
+  isOnboardingComplete Boolean @default(false) @map("is_onboarding_complete")
 
   // Relations
   profiles Profile[]

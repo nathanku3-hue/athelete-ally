@@ -2,4 +2,3 @@
 > fatigue-service@1.0.0 test
 > jest --passWithNoTests
 
-No tests found, exiting with code 0

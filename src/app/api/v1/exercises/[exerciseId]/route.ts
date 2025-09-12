@@ -311,6 +311,6 @@ function getExerciseVideoUrl(exerciseId: string): string {
   return `https://example.com/videos/${exerciseId}.mp4`;
 }
 
-export async function OPTIONS() {
-  return handleCorsOptions();
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsOptions(request);
 }

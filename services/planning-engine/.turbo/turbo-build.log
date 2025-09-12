@@ -2,3 +2,25 @@
 > planning-engine@0.1.0 build
 > tsc -p tsconfig.json
 
+src/events/jetstream-consumer.ts(90,9): error TS2322: Type '"explicit"' is not assignable to type 'AckPolicy'.
+src/events/jetstream-consumer.ts(94,9): error TS2322: Type '"all"' is not assignable to type 'DeliverPolicy'.
+src/events/jetstream-consumer.ts(95,9): error TS2322: Type '"instant"' is not assignable to type 'ReplayPolicy'.
+src/events/jetstream-consumer.ts(125,9): error TS2322: Type 'string' is not assignable to type '(name: string) => ConsumerOptsBuilder'.
+src/events/processor.ts(60,40): error TS2307: Cannot find module '@athlete-ally/shared/logger' or its corresponding type declarations.
+  There are types at 'E:/vibe/athelete-ally/node_modules/@athlete-ally/shared/src/logger.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+src/events/processor.ts(119,42): error TS2307: Cannot find module '@athlete-ally/shared/logger' or its corresponding type declarations.
+  There are types at 'E:/vibe/athelete-ally/node_modules/@athlete-ally/shared/src/logger.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+src/events/processor.ts(196,42): error TS2307: Cannot find module '@athlete-ally/shared/logger' or its corresponding type declarations.
+  There are types at 'E:/vibe/athelete-ally/node_modules/@athlete-ally/shared/src/logger.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+src/events/processor.ts(225,29): error TS1308: 'await' expressions are only allowed within async functions and at the top levels of modules.
+src/events/processor.ts(225,42): error TS2307: Cannot find module '@athlete-ally/shared/logger' or its corresponding type declarations.
+  There are types at 'E:/vibe/athelete-ally/node_modules/@athlete-ally/shared/src/logger.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+src/server.ts(550,38): error TS2307: Cannot find module '@athlete-ally/shared/logger' or its corresponding type declarations.
+  There are types at 'E:/vibe/athelete-ally/node_modules/@athlete-ally/shared/src/logger.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path E:\vibe\athelete-ally\services\planning-engine
+npm error workspace planning-engine@0.1.0
+npm error location E:\vibe\athelete-ally\services\planning-engine
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c tsc -p tsconfig.json

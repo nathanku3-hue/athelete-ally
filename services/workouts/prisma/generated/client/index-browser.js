@@ -145,6 +145,27 @@ exports.Prisma.WorkoutSessionScalarFieldEnum = {
   temperature: 'temperature'
 };
 
+exports.Prisma.UserSummaryScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId',
+  weekStart: 'weekStart',
+  weekEnd: 'weekEnd',
+  totalWorkouts: 'totalWorkouts',
+  completedWorkouts: 'completedWorkouts',
+  totalVolume: 'totalVolume',
+  averageSessionDuration: 'averageSessionDuration',
+  averageFatigueLevel: 'averageFatigueLevel',
+  fatigueAssessmentCount: 'fatigueAssessmentCount',
+  personalRecordsSet: 'personalRecordsSet',
+  newPersonalRecords: 'newPersonalRecords',
+  weeklyGoalCompletion: 'weeklyGoalCompletion',
+  consistencyScore: 'consistencyScore',
+  lastUpdated: 'lastUpdated',
+  dataVersion: 'dataVersion'
+};
+
 exports.Prisma.WorkoutExerciseScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -280,6 +301,7 @@ exports.Prisma.JsonNullValueFilter = {
 
 exports.Prisma.ModelName = {
   WorkoutSession: 'WorkoutSession',
+  UserSummary: 'UserSummary',
   WorkoutExercise: 'WorkoutExercise',
   WorkoutRecord: 'WorkoutRecord',
   PersonalRecord: 'PersonalRecord',

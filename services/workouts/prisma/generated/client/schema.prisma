@@ -49,6 +49,41 @@ model WorkoutSession {
   @@map("workout_sessions")
 }
 
+model UserSummary {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  weekStart DateTime
+  weekEnd   DateTime
+
+  // 训练数据
+  totalWorkouts          Int
+  completedWorkouts      Int
+  totalVolume            Float
+  averageSessionDuration Int
+
+  // 疲劳数据
+  averageFatigueLevel    Float
+  fatigueAssessmentCount Int
+
+  // 个人记录
+  personalRecordsSet Int
+  newPersonalRecords String[] // JSON array of new PRs
+
+  // 进度指标
+  weeklyGoalCompletion Int
+  consistencyScore     Int
+
+  // 元数据
+  lastUpdated DateTime
+  dataVersion Int      @default(1)
+
+  @@unique([userId, weekStart])
+  @@map("user_summaries")
+}
+
 model WorkoutExercise {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())

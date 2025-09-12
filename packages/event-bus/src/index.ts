@@ -174,7 +174,7 @@ export class EventBus {
       while (true) {
         try {
           // 批量拉取消息
-          const messages = await psub.fetch({ max: 10, expires: 1000 });
+          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -185,7 +185,7 @@ export class EventBus {
           console.log(`Processing batch of ${messages.length} OnboardingCompleted events`);
 
           // 并发处理消息
-          const processingPromises = messages.map(async (m) => {
+          const processingPromises = messages.map(async (m: any) => {
             const startTime = Date.now();
             
             try {
@@ -285,7 +285,7 @@ export class EventBus {
       while (true) {
         try {
           // 批量拉取消息
-          const messages = await psub.fetch({ max: 10, expires: 1000 });
+          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -296,7 +296,7 @@ export class EventBus {
           console.log(`Processing batch of ${messages.length} PlanGenerationRequested events`);
 
           // 并发处理消息
-          const processingPromises = messages.map(async (m) => {
+          const processingPromises = messages.map(async (m: any) => {
             const startTime = Date.now();
             
             try {

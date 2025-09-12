@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type WorkoutSession = $Result.DefaultSelection<Prisma.$WorkoutSessionPayload>
 /**
+ * Model UserSummary
+ * 
+ */
+export type UserSummary = $Result.DefaultSelection<Prisma.$UserSummaryPayload>
+/**
  * Model WorkoutExercise
  * 
  */
@@ -176,6 +181,16 @@ export class PrismaClient<
     * ```
     */
   get workoutSession(): Prisma.WorkoutSessionDelegate<ExtArgs>;
+
+  /**
+   * `prisma.userSummary`: Exposes CRUD operations for the **UserSummary** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserSummaries
+    * const userSummaries = await prisma.userSummary.findMany()
+    * ```
+    */
+  get userSummary(): Prisma.UserSummaryDelegate<ExtArgs>;
 
   /**
    * `prisma.workoutExercise`: Exposes CRUD operations for the **WorkoutExercise** model.
@@ -668,6 +683,7 @@ export namespace Prisma {
 
   export const ModelName: {
     WorkoutSession: 'WorkoutSession',
+    UserSummary: 'UserSummary',
     WorkoutExercise: 'WorkoutExercise',
     WorkoutRecord: 'WorkoutRecord',
     PersonalRecord: 'PersonalRecord',
@@ -688,7 +704,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "workoutSession" | "workoutExercise" | "workoutRecord" | "personalRecord" | "workoutTemplate" | "workoutGoal"
+      modelProps: "workoutSession" | "userSummary" | "workoutExercise" | "workoutRecord" | "personalRecord" | "workoutTemplate" | "workoutGoal"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -759,6 +775,76 @@ export namespace Prisma {
           count: {
             args: Prisma.WorkoutSessionCountArgs<ExtArgs>
             result: $Utils.Optional<WorkoutSessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      UserSummary: {
+        payload: Prisma.$UserSummaryPayload<ExtArgs>
+        fields: Prisma.UserSummaryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserSummaryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserSummaryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>
+          }
+          findFirst: {
+            args: Prisma.UserSummaryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserSummaryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>
+          }
+          findMany: {
+            args: Prisma.UserSummaryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>[]
+          }
+          create: {
+            args: Prisma.UserSummaryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>
+          }
+          createMany: {
+            args: Prisma.UserSummaryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserSummaryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>[]
+          }
+          delete: {
+            args: Prisma.UserSummaryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>
+          }
+          update: {
+            args: Prisma.UserSummaryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserSummaryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserSummaryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.UserSummaryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserSummaryPayload>
+          }
+          aggregate: {
+            args: Prisma.UserSummaryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserSummary>
+          }
+          groupBy: {
+            args: Prisma.UserSummaryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserSummaryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserSummaryCountArgs<ExtArgs>
+            result: $Utils.Optional<UserSummaryCountAggregateOutputType> | number
           }
         }
       }
@@ -2546,6 +2632,1106 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: WorkoutSessionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserSummary
+   */
+
+  export type AggregateUserSummary = {
+    _count: UserSummaryCountAggregateOutputType | null
+    _avg: UserSummaryAvgAggregateOutputType | null
+    _sum: UserSummarySumAggregateOutputType | null
+    _min: UserSummaryMinAggregateOutputType | null
+    _max: UserSummaryMaxAggregateOutputType | null
+  }
+
+  export type UserSummaryAvgAggregateOutputType = {
+    totalWorkouts: number | null
+    completedWorkouts: number | null
+    totalVolume: number | null
+    averageSessionDuration: number | null
+    averageFatigueLevel: number | null
+    fatigueAssessmentCount: number | null
+    personalRecordsSet: number | null
+    weeklyGoalCompletion: number | null
+    consistencyScore: number | null
+    dataVersion: number | null
+  }
+
+  export type UserSummarySumAggregateOutputType = {
+    totalWorkouts: number | null
+    completedWorkouts: number | null
+    totalVolume: number | null
+    averageSessionDuration: number | null
+    averageFatigueLevel: number | null
+    fatigueAssessmentCount: number | null
+    personalRecordsSet: number | null
+    weeklyGoalCompletion: number | null
+    consistencyScore: number | null
+    dataVersion: number | null
+  }
+
+  export type UserSummaryMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    userId: string | null
+    weekStart: Date | null
+    weekEnd: Date | null
+    totalWorkouts: number | null
+    completedWorkouts: number | null
+    totalVolume: number | null
+    averageSessionDuration: number | null
+    averageFatigueLevel: number | null
+    fatigueAssessmentCount: number | null
+    personalRecordsSet: number | null
+    weeklyGoalCompletion: number | null
+    consistencyScore: number | null
+    lastUpdated: Date | null
+    dataVersion: number | null
+  }
+
+  export type UserSummaryMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    userId: string | null
+    weekStart: Date | null
+    weekEnd: Date | null
+    totalWorkouts: number | null
+    completedWorkouts: number | null
+    totalVolume: number | null
+    averageSessionDuration: number | null
+    averageFatigueLevel: number | null
+    fatigueAssessmentCount: number | null
+    personalRecordsSet: number | null
+    weeklyGoalCompletion: number | null
+    consistencyScore: number | null
+    lastUpdated: Date | null
+    dataVersion: number | null
+  }
+
+  export type UserSummaryCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    userId: number
+    weekStart: number
+    weekEnd: number
+    totalWorkouts: number
+    completedWorkouts: number
+    totalVolume: number
+    averageSessionDuration: number
+    averageFatigueLevel: number
+    fatigueAssessmentCount: number
+    personalRecordsSet: number
+    newPersonalRecords: number
+    weeklyGoalCompletion: number
+    consistencyScore: number
+    lastUpdated: number
+    dataVersion: number
+    _all: number
+  }
+
+
+  export type UserSummaryAvgAggregateInputType = {
+    totalWorkouts?: true
+    completedWorkouts?: true
+    totalVolume?: true
+    averageSessionDuration?: true
+    averageFatigueLevel?: true
+    fatigueAssessmentCount?: true
+    personalRecordsSet?: true
+    weeklyGoalCompletion?: true
+    consistencyScore?: true
+    dataVersion?: true
+  }
+
+  export type UserSummarySumAggregateInputType = {
+    totalWorkouts?: true
+    completedWorkouts?: true
+    totalVolume?: true
+    averageSessionDuration?: true
+    averageFatigueLevel?: true
+    fatigueAssessmentCount?: true
+    personalRecordsSet?: true
+    weeklyGoalCompletion?: true
+    consistencyScore?: true
+    dataVersion?: true
+  }
+
+  export type UserSummaryMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    userId?: true
+    weekStart?: true
+    weekEnd?: true
+    totalWorkouts?: true
+    completedWorkouts?: true
+    totalVolume?: true
+    averageSessionDuration?: true
+    averageFatigueLevel?: true
+    fatigueAssessmentCount?: true
+    personalRecordsSet?: true
+    weeklyGoalCompletion?: true
+    consistencyScore?: true
+    lastUpdated?: true
+    dataVersion?: true
+  }
+
+  export type UserSummaryMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    userId?: true
+    weekStart?: true
+    weekEnd?: true
+    totalWorkouts?: true
+    completedWorkouts?: true
+    totalVolume?: true
+    averageSessionDuration?: true
+    averageFatigueLevel?: true
+    fatigueAssessmentCount?: true
+    personalRecordsSet?: true
+    weeklyGoalCompletion?: true
+    consistencyScore?: true
+    lastUpdated?: true
+    dataVersion?: true
+  }
+
+  export type UserSummaryCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    userId?: true
+    weekStart?: true
+    weekEnd?: true
+    totalWorkouts?: true
+    completedWorkouts?: true
+    totalVolume?: true
+    averageSessionDuration?: true
+    averageFatigueLevel?: true
+    fatigueAssessmentCount?: true
+    personalRecordsSet?: true
+    newPersonalRecords?: true
+    weeklyGoalCompletion?: true
+    consistencyScore?: true
+    lastUpdated?: true
+    dataVersion?: true
+    _all?: true
+  }
+
+  export type UserSummaryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserSummary to aggregate.
+     */
+    where?: UserSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserSummaries to fetch.
+     */
+    orderBy?: UserSummaryOrderByWithRelationInput | UserSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserSummaries
+    **/
+    _count?: true | UserSummaryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: UserSummaryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserSummarySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserSummaryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserSummaryMaxAggregateInputType
+  }
+
+  export type GetUserSummaryAggregateType<T extends UserSummaryAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserSummary]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserSummary[P]>
+      : GetScalarType<T[P], AggregateUserSummary[P]>
+  }
+
+
+
+
+  export type UserSummaryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserSummaryWhereInput
+    orderBy?: UserSummaryOrderByWithAggregationInput | UserSummaryOrderByWithAggregationInput[]
+    by: UserSummaryScalarFieldEnum[] | UserSummaryScalarFieldEnum
+    having?: UserSummaryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserSummaryCountAggregateInputType | true
+    _avg?: UserSummaryAvgAggregateInputType
+    _sum?: UserSummarySumAggregateInputType
+    _min?: UserSummaryMinAggregateInputType
+    _max?: UserSummaryMaxAggregateInputType
+  }
+
+  export type UserSummaryGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    userId: string
+    weekStart: Date
+    weekEnd: Date
+    totalWorkouts: number
+    completedWorkouts: number
+    totalVolume: number
+    averageSessionDuration: number
+    averageFatigueLevel: number
+    fatigueAssessmentCount: number
+    personalRecordsSet: number
+    newPersonalRecords: string[]
+    weeklyGoalCompletion: number
+    consistencyScore: number
+    lastUpdated: Date
+    dataVersion: number
+    _count: UserSummaryCountAggregateOutputType | null
+    _avg: UserSummaryAvgAggregateOutputType | null
+    _sum: UserSummarySumAggregateOutputType | null
+    _min: UserSummaryMinAggregateOutputType | null
+    _max: UserSummaryMaxAggregateOutputType | null
+  }
+
+  type GetUserSummaryGroupByPayload<T extends UserSummaryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserSummaryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserSummaryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserSummaryGroupByOutputType[P]>
+            : GetScalarType<T[P], UserSummaryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserSummarySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    userId?: boolean
+    weekStart?: boolean
+    weekEnd?: boolean
+    totalWorkouts?: boolean
+    completedWorkouts?: boolean
+    totalVolume?: boolean
+    averageSessionDuration?: boolean
+    averageFatigueLevel?: boolean
+    fatigueAssessmentCount?: boolean
+    personalRecordsSet?: boolean
+    newPersonalRecords?: boolean
+    weeklyGoalCompletion?: boolean
+    consistencyScore?: boolean
+    lastUpdated?: boolean
+    dataVersion?: boolean
+  }, ExtArgs["result"]["userSummary"]>
+
+  export type UserSummarySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    userId?: boolean
+    weekStart?: boolean
+    weekEnd?: boolean
+    totalWorkouts?: boolean
+    completedWorkouts?: boolean
+    totalVolume?: boolean
+    averageSessionDuration?: boolean
+    averageFatigueLevel?: boolean
+    fatigueAssessmentCount?: boolean
+    personalRecordsSet?: boolean
+    newPersonalRecords?: boolean
+    weeklyGoalCompletion?: boolean
+    consistencyScore?: boolean
+    lastUpdated?: boolean
+    dataVersion?: boolean
+  }, ExtArgs["result"]["userSummary"]>
+
+  export type UserSummarySelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    userId?: boolean
+    weekStart?: boolean
+    weekEnd?: boolean
+    totalWorkouts?: boolean
+    completedWorkouts?: boolean
+    totalVolume?: boolean
+    averageSessionDuration?: boolean
+    averageFatigueLevel?: boolean
+    fatigueAssessmentCount?: boolean
+    personalRecordsSet?: boolean
+    newPersonalRecords?: boolean
+    weeklyGoalCompletion?: boolean
+    consistencyScore?: boolean
+    lastUpdated?: boolean
+    dataVersion?: boolean
+  }
+
+
+  export type $UserSummaryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserSummary"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      userId: string
+      weekStart: Date
+      weekEnd: Date
+      totalWorkouts: number
+      completedWorkouts: number
+      totalVolume: number
+      averageSessionDuration: number
+      averageFatigueLevel: number
+      fatigueAssessmentCount: number
+      personalRecordsSet: number
+      newPersonalRecords: string[]
+      weeklyGoalCompletion: number
+      consistencyScore: number
+      lastUpdated: Date
+      dataVersion: number
+    }, ExtArgs["result"]["userSummary"]>
+    composites: {}
+  }
+
+  type UserSummaryGetPayload<S extends boolean | null | undefined | UserSummaryDefaultArgs> = $Result.GetResult<Prisma.$UserSummaryPayload, S>
+
+  type UserSummaryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<UserSummaryFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: UserSummaryCountAggregateInputType | true
+    }
+
+  export interface UserSummaryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserSummary'], meta: { name: 'UserSummary' } }
+    /**
+     * Find zero or one UserSummary that matches the filter.
+     * @param {UserSummaryFindUniqueArgs} args - Arguments to find a UserSummary
+     * @example
+     * // Get one UserSummary
+     * const userSummary = await prisma.userSummary.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserSummaryFindUniqueArgs>(args: SelectSubset<T, UserSummaryFindUniqueArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one UserSummary that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {UserSummaryFindUniqueOrThrowArgs} args - Arguments to find a UserSummary
+     * @example
+     * // Get one UserSummary
+     * const userSummary = await prisma.userSummary.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserSummaryFindUniqueOrThrowArgs>(args: SelectSubset<T, UserSummaryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first UserSummary that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryFindFirstArgs} args - Arguments to find a UserSummary
+     * @example
+     * // Get one UserSummary
+     * const userSummary = await prisma.userSummary.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserSummaryFindFirstArgs>(args?: SelectSubset<T, UserSummaryFindFirstArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first UserSummary that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryFindFirstOrThrowArgs} args - Arguments to find a UserSummary
+     * @example
+     * // Get one UserSummary
+     * const userSummary = await prisma.userSummary.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserSummaryFindFirstOrThrowArgs>(args?: SelectSubset<T, UserSummaryFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more UserSummaries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserSummaries
+     * const userSummaries = await prisma.userSummary.findMany()
+     * 
+     * // Get first 10 UserSummaries
+     * const userSummaries = await prisma.userSummary.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userSummaryWithIdOnly = await prisma.userSummary.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserSummaryFindManyArgs>(args?: SelectSubset<T, UserSummaryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a UserSummary.
+     * @param {UserSummaryCreateArgs} args - Arguments to create a UserSummary.
+     * @example
+     * // Create one UserSummary
+     * const UserSummary = await prisma.userSummary.create({
+     *   data: {
+     *     // ... data to create a UserSummary
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserSummaryCreateArgs>(args: SelectSubset<T, UserSummaryCreateArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many UserSummaries.
+     * @param {UserSummaryCreateManyArgs} args - Arguments to create many UserSummaries.
+     * @example
+     * // Create many UserSummaries
+     * const userSummary = await prisma.userSummary.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserSummaryCreateManyArgs>(args?: SelectSubset<T, UserSummaryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserSummaries and returns the data saved in the database.
+     * @param {UserSummaryCreateManyAndReturnArgs} args - Arguments to create many UserSummaries.
+     * @example
+     * // Create many UserSummaries
+     * const userSummary = await prisma.userSummary.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserSummaries and only return the `id`
+     * const userSummaryWithIdOnly = await prisma.userSummary.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserSummaryCreateManyAndReturnArgs>(args?: SelectSubset<T, UserSummaryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a UserSummary.
+     * @param {UserSummaryDeleteArgs} args - Arguments to delete one UserSummary.
+     * @example
+     * // Delete one UserSummary
+     * const UserSummary = await prisma.userSummary.delete({
+     *   where: {
+     *     // ... filter to delete one UserSummary
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserSummaryDeleteArgs>(args: SelectSubset<T, UserSummaryDeleteArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one UserSummary.
+     * @param {UserSummaryUpdateArgs} args - Arguments to update one UserSummary.
+     * @example
+     * // Update one UserSummary
+     * const userSummary = await prisma.userSummary.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserSummaryUpdateArgs>(args: SelectSubset<T, UserSummaryUpdateArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more UserSummaries.
+     * @param {UserSummaryDeleteManyArgs} args - Arguments to filter UserSummaries to delete.
+     * @example
+     * // Delete a few UserSummaries
+     * const { count } = await prisma.userSummary.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserSummaryDeleteManyArgs>(args?: SelectSubset<T, UserSummaryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserSummaries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserSummaries
+     * const userSummary = await prisma.userSummary.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserSummaryUpdateManyArgs>(args: SelectSubset<T, UserSummaryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one UserSummary.
+     * @param {UserSummaryUpsertArgs} args - Arguments to update or create a UserSummary.
+     * @example
+     * // Update or create a UserSummary
+     * const userSummary = await prisma.userSummary.upsert({
+     *   create: {
+     *     // ... data to create a UserSummary
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserSummary we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserSummaryUpsertArgs>(args: SelectSubset<T, UserSummaryUpsertArgs<ExtArgs>>): Prisma__UserSummaryClient<$Result.GetResult<Prisma.$UserSummaryPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of UserSummaries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryCountArgs} args - Arguments to filter UserSummaries to count.
+     * @example
+     * // Count the number of UserSummaries
+     * const count = await prisma.userSummary.count({
+     *   where: {
+     *     // ... the filter for the UserSummaries we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserSummaryCountArgs>(
+      args?: Subset<T, UserSummaryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserSummaryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserSummary.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserSummaryAggregateArgs>(args: Subset<T, UserSummaryAggregateArgs>): Prisma.PrismaPromise<GetUserSummaryAggregateType<T>>
+
+    /**
+     * Group by UserSummary.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserSummaryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserSummaryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserSummaryGroupByArgs['orderBy'] }
+        : { orderBy?: UserSummaryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserSummaryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserSummaryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserSummary model
+   */
+  readonly fields: UserSummaryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserSummary.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserSummaryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserSummary model
+   */ 
+  interface UserSummaryFieldRefs {
+    readonly id: FieldRef<"UserSummary", 'String'>
+    readonly createdAt: FieldRef<"UserSummary", 'DateTime'>
+    readonly updatedAt: FieldRef<"UserSummary", 'DateTime'>
+    readonly userId: FieldRef<"UserSummary", 'String'>
+    readonly weekStart: FieldRef<"UserSummary", 'DateTime'>
+    readonly weekEnd: FieldRef<"UserSummary", 'DateTime'>
+    readonly totalWorkouts: FieldRef<"UserSummary", 'Int'>
+    readonly completedWorkouts: FieldRef<"UserSummary", 'Int'>
+    readonly totalVolume: FieldRef<"UserSummary", 'Float'>
+    readonly averageSessionDuration: FieldRef<"UserSummary", 'Int'>
+    readonly averageFatigueLevel: FieldRef<"UserSummary", 'Float'>
+    readonly fatigueAssessmentCount: FieldRef<"UserSummary", 'Int'>
+    readonly personalRecordsSet: FieldRef<"UserSummary", 'Int'>
+    readonly newPersonalRecords: FieldRef<"UserSummary", 'String[]'>
+    readonly weeklyGoalCompletion: FieldRef<"UserSummary", 'Int'>
+    readonly consistencyScore: FieldRef<"UserSummary", 'Int'>
+    readonly lastUpdated: FieldRef<"UserSummary", 'DateTime'>
+    readonly dataVersion: FieldRef<"UserSummary", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserSummary findUnique
+   */
+  export type UserSummaryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * Filter, which UserSummary to fetch.
+     */
+    where: UserSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserSummary findUniqueOrThrow
+   */
+  export type UserSummaryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * Filter, which UserSummary to fetch.
+     */
+    where: UserSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserSummary findFirst
+   */
+  export type UserSummaryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * Filter, which UserSummary to fetch.
+     */
+    where?: UserSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserSummaries to fetch.
+     */
+    orderBy?: UserSummaryOrderByWithRelationInput | UserSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserSummaries.
+     */
+    cursor?: UserSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserSummaries.
+     */
+    distinct?: UserSummaryScalarFieldEnum | UserSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * UserSummary findFirstOrThrow
+   */
+  export type UserSummaryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * Filter, which UserSummary to fetch.
+     */
+    where?: UserSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserSummaries to fetch.
+     */
+    orderBy?: UserSummaryOrderByWithRelationInput | UserSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserSummaries.
+     */
+    cursor?: UserSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserSummaries.
+     */
+    distinct?: UserSummaryScalarFieldEnum | UserSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * UserSummary findMany
+   */
+  export type UserSummaryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * Filter, which UserSummaries to fetch.
+     */
+    where?: UserSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserSummaries to fetch.
+     */
+    orderBy?: UserSummaryOrderByWithRelationInput | UserSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserSummaries.
+     */
+    cursor?: UserSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserSummaries.
+     */
+    skip?: number
+    distinct?: UserSummaryScalarFieldEnum | UserSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * UserSummary create
+   */
+  export type UserSummaryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * The data needed to create a UserSummary.
+     */
+    data: XOR<UserSummaryCreateInput, UserSummaryUncheckedCreateInput>
+  }
+
+  /**
+   * UserSummary createMany
+   */
+  export type UserSummaryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserSummaries.
+     */
+    data: UserSummaryCreateManyInput | UserSummaryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserSummary createManyAndReturn
+   */
+  export type UserSummaryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many UserSummaries.
+     */
+    data: UserSummaryCreateManyInput | UserSummaryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserSummary update
+   */
+  export type UserSummaryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * The data needed to update a UserSummary.
+     */
+    data: XOR<UserSummaryUpdateInput, UserSummaryUncheckedUpdateInput>
+    /**
+     * Choose, which UserSummary to update.
+     */
+    where: UserSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserSummary updateMany
+   */
+  export type UserSummaryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserSummaries.
+     */
+    data: XOR<UserSummaryUpdateManyMutationInput, UserSummaryUncheckedUpdateManyInput>
+    /**
+     * Filter which UserSummaries to update
+     */
+    where?: UserSummaryWhereInput
+  }
+
+  /**
+   * UserSummary upsert
+   */
+  export type UserSummaryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * The filter to search for the UserSummary to update in case it exists.
+     */
+    where: UserSummaryWhereUniqueInput
+    /**
+     * In case the UserSummary found by the `where` argument doesn't exist, create a new UserSummary with this data.
+     */
+    create: XOR<UserSummaryCreateInput, UserSummaryUncheckedCreateInput>
+    /**
+     * In case the UserSummary was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserSummaryUpdateInput, UserSummaryUncheckedUpdateInput>
+  }
+
+  /**
+   * UserSummary delete
+   */
+  export type UserSummaryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
+    /**
+     * Filter which UserSummary to delete.
+     */
+    where: UserSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserSummary deleteMany
+   */
+  export type UserSummaryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserSummaries to delete
+     */
+    where?: UserSummaryWhereInput
+  }
+
+  /**
+   * UserSummary without action
+   */
+  export type UserSummaryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserSummary
+     */
+    select?: UserSummarySelect<ExtArgs> | null
   }
 
 
@@ -8135,6 +9321,30 @@ export namespace Prisma {
   export type WorkoutSessionScalarFieldEnum = (typeof WorkoutSessionScalarFieldEnum)[keyof typeof WorkoutSessionScalarFieldEnum]
 
 
+  export const UserSummaryScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    userId: 'userId',
+    weekStart: 'weekStart',
+    weekEnd: 'weekEnd',
+    totalWorkouts: 'totalWorkouts',
+    completedWorkouts: 'completedWorkouts',
+    totalVolume: 'totalVolume',
+    averageSessionDuration: 'averageSessionDuration',
+    averageFatigueLevel: 'averageFatigueLevel',
+    fatigueAssessmentCount: 'fatigueAssessmentCount',
+    personalRecordsSet: 'personalRecordsSet',
+    newPersonalRecords: 'newPersonalRecords',
+    weeklyGoalCompletion: 'weeklyGoalCompletion',
+    consistencyScore: 'consistencyScore',
+    lastUpdated: 'lastUpdated',
+    dataVersion: 'dataVersion'
+  };
+
+  export type UserSummaryScalarFieldEnum = (typeof UserSummaryScalarFieldEnum)[keyof typeof UserSummaryScalarFieldEnum]
+
+
   export const WorkoutExerciseScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -8511,6 +9721,126 @@ export namespace Prisma {
     location?: StringNullableWithAggregatesFilter<"WorkoutSession"> | string | null
     weather?: StringNullableWithAggregatesFilter<"WorkoutSession"> | string | null
     temperature?: FloatNullableWithAggregatesFilter<"WorkoutSession"> | number | null
+  }
+
+  export type UserSummaryWhereInput = {
+    AND?: UserSummaryWhereInput | UserSummaryWhereInput[]
+    OR?: UserSummaryWhereInput[]
+    NOT?: UserSummaryWhereInput | UserSummaryWhereInput[]
+    id?: StringFilter<"UserSummary"> | string
+    createdAt?: DateTimeFilter<"UserSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"UserSummary"> | Date | string
+    userId?: StringFilter<"UserSummary"> | string
+    weekStart?: DateTimeFilter<"UserSummary"> | Date | string
+    weekEnd?: DateTimeFilter<"UserSummary"> | Date | string
+    totalWorkouts?: IntFilter<"UserSummary"> | number
+    completedWorkouts?: IntFilter<"UserSummary"> | number
+    totalVolume?: FloatFilter<"UserSummary"> | number
+    averageSessionDuration?: IntFilter<"UserSummary"> | number
+    averageFatigueLevel?: FloatFilter<"UserSummary"> | number
+    fatigueAssessmentCount?: IntFilter<"UserSummary"> | number
+    personalRecordsSet?: IntFilter<"UserSummary"> | number
+    newPersonalRecords?: StringNullableListFilter<"UserSummary">
+    weeklyGoalCompletion?: IntFilter<"UserSummary"> | number
+    consistencyScore?: IntFilter<"UserSummary"> | number
+    lastUpdated?: DateTimeFilter<"UserSummary"> | Date | string
+    dataVersion?: IntFilter<"UserSummary"> | number
+  }
+
+  export type UserSummaryOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    weekStart?: SortOrder
+    weekEnd?: SortOrder
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    newPersonalRecords?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    lastUpdated?: SortOrder
+    dataVersion?: SortOrder
+  }
+
+  export type UserSummaryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_weekStart?: UserSummaryUserIdWeekStartCompoundUniqueInput
+    AND?: UserSummaryWhereInput | UserSummaryWhereInput[]
+    OR?: UserSummaryWhereInput[]
+    NOT?: UserSummaryWhereInput | UserSummaryWhereInput[]
+    createdAt?: DateTimeFilter<"UserSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"UserSummary"> | Date | string
+    userId?: StringFilter<"UserSummary"> | string
+    weekStart?: DateTimeFilter<"UserSummary"> | Date | string
+    weekEnd?: DateTimeFilter<"UserSummary"> | Date | string
+    totalWorkouts?: IntFilter<"UserSummary"> | number
+    completedWorkouts?: IntFilter<"UserSummary"> | number
+    totalVolume?: FloatFilter<"UserSummary"> | number
+    averageSessionDuration?: IntFilter<"UserSummary"> | number
+    averageFatigueLevel?: FloatFilter<"UserSummary"> | number
+    fatigueAssessmentCount?: IntFilter<"UserSummary"> | number
+    personalRecordsSet?: IntFilter<"UserSummary"> | number
+    newPersonalRecords?: StringNullableListFilter<"UserSummary">
+    weeklyGoalCompletion?: IntFilter<"UserSummary"> | number
+    consistencyScore?: IntFilter<"UserSummary"> | number
+    lastUpdated?: DateTimeFilter<"UserSummary"> | Date | string
+    dataVersion?: IntFilter<"UserSummary"> | number
+  }, "id" | "userId_weekStart">
+
+  export type UserSummaryOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    weekStart?: SortOrder
+    weekEnd?: SortOrder
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    newPersonalRecords?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    lastUpdated?: SortOrder
+    dataVersion?: SortOrder
+    _count?: UserSummaryCountOrderByAggregateInput
+    _avg?: UserSummaryAvgOrderByAggregateInput
+    _max?: UserSummaryMaxOrderByAggregateInput
+    _min?: UserSummaryMinOrderByAggregateInput
+    _sum?: UserSummarySumOrderByAggregateInput
+  }
+
+  export type UserSummaryScalarWhereWithAggregatesInput = {
+    AND?: UserSummaryScalarWhereWithAggregatesInput | UserSummaryScalarWhereWithAggregatesInput[]
+    OR?: UserSummaryScalarWhereWithAggregatesInput[]
+    NOT?: UserSummaryScalarWhereWithAggregatesInput | UserSummaryScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"UserSummary"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"UserSummary"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"UserSummary"> | Date | string
+    userId?: StringWithAggregatesFilter<"UserSummary"> | string
+    weekStart?: DateTimeWithAggregatesFilter<"UserSummary"> | Date | string
+    weekEnd?: DateTimeWithAggregatesFilter<"UserSummary"> | Date | string
+    totalWorkouts?: IntWithAggregatesFilter<"UserSummary"> | number
+    completedWorkouts?: IntWithAggregatesFilter<"UserSummary"> | number
+    totalVolume?: FloatWithAggregatesFilter<"UserSummary"> | number
+    averageSessionDuration?: IntWithAggregatesFilter<"UserSummary"> | number
+    averageFatigueLevel?: FloatWithAggregatesFilter<"UserSummary"> | number
+    fatigueAssessmentCount?: IntWithAggregatesFilter<"UserSummary"> | number
+    personalRecordsSet?: IntWithAggregatesFilter<"UserSummary"> | number
+    newPersonalRecords?: StringNullableListFilter<"UserSummary">
+    weeklyGoalCompletion?: IntWithAggregatesFilter<"UserSummary"> | number
+    consistencyScore?: IntWithAggregatesFilter<"UserSummary"> | number
+    lastUpdated?: DateTimeWithAggregatesFilter<"UserSummary"> | Date | string
+    dataVersion?: IntWithAggregatesFilter<"UserSummary"> | number
   }
 
   export type WorkoutExerciseWhereInput = {
@@ -9273,6 +10603,153 @@ export namespace Prisma {
     location?: NullableStringFieldUpdateOperationsInput | string | null
     weather?: NullableStringFieldUpdateOperationsInput | string | null
     temperature?: NullableFloatFieldUpdateOperationsInput | number | null
+  }
+
+  export type UserSummaryCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    weekStart: Date | string
+    weekEnd: Date | string
+    totalWorkouts: number
+    completedWorkouts: number
+    totalVolume: number
+    averageSessionDuration: number
+    averageFatigueLevel: number
+    fatigueAssessmentCount: number
+    personalRecordsSet: number
+    newPersonalRecords?: UserSummaryCreatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion: number
+    consistencyScore: number
+    lastUpdated: Date | string
+    dataVersion?: number
+  }
+
+  export type UserSummaryUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    weekStart: Date | string
+    weekEnd: Date | string
+    totalWorkouts: number
+    completedWorkouts: number
+    totalVolume: number
+    averageSessionDuration: number
+    averageFatigueLevel: number
+    fatigueAssessmentCount: number
+    personalRecordsSet: number
+    newPersonalRecords?: UserSummaryCreatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion: number
+    consistencyScore: number
+    lastUpdated: Date | string
+    dataVersion?: number
+  }
+
+  export type UserSummaryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    weekStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    weekEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalWorkouts?: IntFieldUpdateOperationsInput | number
+    completedWorkouts?: IntFieldUpdateOperationsInput | number
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageSessionDuration?: IntFieldUpdateOperationsInput | number
+    averageFatigueLevel?: FloatFieldUpdateOperationsInput | number
+    fatigueAssessmentCount?: IntFieldUpdateOperationsInput | number
+    personalRecordsSet?: IntFieldUpdateOperationsInput | number
+    newPersonalRecords?: UserSummaryUpdatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion?: IntFieldUpdateOperationsInput | number
+    consistencyScore?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    dataVersion?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type UserSummaryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    weekStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    weekEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalWorkouts?: IntFieldUpdateOperationsInput | number
+    completedWorkouts?: IntFieldUpdateOperationsInput | number
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageSessionDuration?: IntFieldUpdateOperationsInput | number
+    averageFatigueLevel?: FloatFieldUpdateOperationsInput | number
+    fatigueAssessmentCount?: IntFieldUpdateOperationsInput | number
+    personalRecordsSet?: IntFieldUpdateOperationsInput | number
+    newPersonalRecords?: UserSummaryUpdatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion?: IntFieldUpdateOperationsInput | number
+    consistencyScore?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    dataVersion?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type UserSummaryCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    weekStart: Date | string
+    weekEnd: Date | string
+    totalWorkouts: number
+    completedWorkouts: number
+    totalVolume: number
+    averageSessionDuration: number
+    averageFatigueLevel: number
+    fatigueAssessmentCount: number
+    personalRecordsSet: number
+    newPersonalRecords?: UserSummaryCreatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion: number
+    consistencyScore: number
+    lastUpdated: Date | string
+    dataVersion?: number
+  }
+
+  export type UserSummaryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    weekStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    weekEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalWorkouts?: IntFieldUpdateOperationsInput | number
+    completedWorkouts?: IntFieldUpdateOperationsInput | number
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageSessionDuration?: IntFieldUpdateOperationsInput | number
+    averageFatigueLevel?: FloatFieldUpdateOperationsInput | number
+    fatigueAssessmentCount?: IntFieldUpdateOperationsInput | number
+    personalRecordsSet?: IntFieldUpdateOperationsInput | number
+    newPersonalRecords?: UserSummaryUpdatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion?: IntFieldUpdateOperationsInput | number
+    consistencyScore?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    dataVersion?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type UserSummaryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    weekStart?: DateTimeFieldUpdateOperationsInput | Date | string
+    weekEnd?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalWorkouts?: IntFieldUpdateOperationsInput | number
+    completedWorkouts?: IntFieldUpdateOperationsInput | number
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageSessionDuration?: IntFieldUpdateOperationsInput | number
+    averageFatigueLevel?: FloatFieldUpdateOperationsInput | number
+    fatigueAssessmentCount?: IntFieldUpdateOperationsInput | number
+    personalRecordsSet?: IntFieldUpdateOperationsInput | number
+    newPersonalRecords?: UserSummaryUpdatenewPersonalRecordsInput | string[]
+    weeklyGoalCompletion?: IntFieldUpdateOperationsInput | number
+    consistencyScore?: IntFieldUpdateOperationsInput | number
+    lastUpdated?: DateTimeFieldUpdateOperationsInput | Date | string
+    dataVersion?: IntFieldUpdateOperationsInput | number
   }
 
   export type WorkoutExerciseCreateInput = {
@@ -10296,6 +11773,149 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type UserSummaryUserIdWeekStartCompoundUniqueInput = {
+    userId: string
+    weekStart: Date | string
+  }
+
+  export type UserSummaryCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    weekStart?: SortOrder
+    weekEnd?: SortOrder
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    newPersonalRecords?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    lastUpdated?: SortOrder
+    dataVersion?: SortOrder
+  }
+
+  export type UserSummaryAvgOrderByAggregateInput = {
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    dataVersion?: SortOrder
+  }
+
+  export type UserSummaryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    weekStart?: SortOrder
+    weekEnd?: SortOrder
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    lastUpdated?: SortOrder
+    dataVersion?: SortOrder
+  }
+
+  export type UserSummaryMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    userId?: SortOrder
+    weekStart?: SortOrder
+    weekEnd?: SortOrder
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    lastUpdated?: SortOrder
+    dataVersion?: SortOrder
+  }
+
+  export type UserSummarySumOrderByAggregateInput = {
+    totalWorkouts?: SortOrder
+    completedWorkouts?: SortOrder
+    totalVolume?: SortOrder
+    averageSessionDuration?: SortOrder
+    averageFatigueLevel?: SortOrder
+    fatigueAssessmentCount?: SortOrder
+    personalRecordsSet?: SortOrder
+    weeklyGoalCompletion?: SortOrder
+    consistencyScore?: SortOrder
+    dataVersion?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type WorkoutSessionRelationFilter = {
     is?: WorkoutSessionWhereInput
     isNot?: WorkoutSessionWhereInput
@@ -10421,22 +12041,6 @@ export namespace Prisma {
     minRPE?: SortOrder
   }
 
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
   export type WorkoutExerciseRelationFilter = {
     is?: WorkoutExerciseWhereInput
     isNot?: WorkoutExerciseWhereInput
@@ -10539,17 +12143,6 @@ export namespace Prisma {
     difficulty?: SortOrder
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type PersonalRecordUserIdExerciseIdRecordTypeCompoundUniqueInput = {
     userId: string
     exerciseId: string
@@ -10616,22 +12209,6 @@ export namespace Prisma {
     value?: SortOrder
     setNumber?: SortOrder
   }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
-  }
   export type JsonFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -10653,14 +12230,6 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
   }
 
   export type WorkoutTemplateCountOrderByAggregateInput = {
@@ -10973,6 +12542,31 @@ export namespace Prisma {
     deleteMany?: WorkoutExerciseScalarWhereInput | WorkoutExerciseScalarWhereInput[]
   }
 
+  export type UserSummaryCreatenewPersonalRecordsInput = {
+    set: string[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserSummaryUpdatenewPersonalRecordsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
   export type WorkoutSessionCreateNestedOneWithoutExercisesInput = {
     create?: XOR<WorkoutSessionCreateWithoutExercisesInput, WorkoutSessionUncheckedCreateWithoutExercisesInput>
     connectOrCreate?: WorkoutSessionCreateOrConnectWithoutExercisesInput
@@ -10991,14 +12585,6 @@ export namespace Prisma {
     connectOrCreate?: WorkoutRecordCreateOrConnectWithoutExerciseInput | WorkoutRecordCreateOrConnectWithoutExerciseInput[]
     createMany?: WorkoutRecordCreateManyExerciseInputEnvelope
     connect?: WorkoutRecordWhereUniqueInput | WorkoutRecordWhereUniqueInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type WorkoutSessionUpdateOneRequiredWithoutExercisesNestedInput = {
@@ -11063,14 +12649,6 @@ export namespace Prisma {
     upsert?: WorkoutExerciseUpsertWithoutRecordsInput
     connect?: WorkoutExerciseWhereUniqueInput
     update?: XOR<XOR<WorkoutExerciseUpdateToOneWithWhereWithoutRecordsInput, WorkoutExerciseUpdateWithoutRecordsInput>, WorkoutExerciseUncheckedUpdateWithoutRecordsInput>
-  }
-
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type WorkoutTemplateCreatetagsInput = {
@@ -11272,6 +12850,17 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -11286,17 +12875,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -12293,6 +13871,10 @@ export namespace Prisma {
      * @deprecated Use WorkoutSessionDefaultArgs instead
      */
     export type WorkoutSessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = WorkoutSessionDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use UserSummaryDefaultArgs instead
+     */
+    export type UserSummaryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserSummaryDefaultArgs<ExtArgs>
     /**
      * @deprecated Use WorkoutExerciseDefaultArgs instead
      */

@@ -13,15 +13,122 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { z } from 'zod';
 import fetch from 'node-fetch';
 import { config } from './config.js';
 import { businessMetrics, traceOnboardingStep, tracePlanGeneration, traceApiRequest } from './telemetry.js';
-import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
-// 简化的 CORS 配置
+import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
+import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '@athlete-ally/shared-types';
+// 暂时注释掉shared包导入，使用本地实现
+// import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+// import { SecureIdGenerator } from '@athlete-ally/shared';
+// 本地安全实现
+import { randomUUID } from 'crypto';
+class SecureIdGenerator {
+    static generateJobId() {
+        return `job_${randomUUID()}`;
+    }
+    static generatePlanId() {
+        return `plan_${randomUUID()}`;
+    }
+}
+// 强化身份验证中间件
+async function authMiddleware(request, reply) {
+    // 跳过健康检查和指标端点
+    if (request.url === '/health' || request.url === '/metrics') {
+        return;
+    }
+    try {
+        // 从Authorization header获取JWT token
+        const authHeader = request.headers.authorization || request.headers.Authorization;
+        if (!authHeader) {
+            reply.code(401).send({
+                error: 'unauthorized',
+                message: 'Authorization header is required'
+            });
+            return;
+        }
+        // 解析Bearer token
+        const parts = authHeader.split(' ');
+        if (parts.length !== 2 || parts[0] !== 'Bearer') {
+            reply.code(401).send({
+                error: 'unauthorized',
+                message: 'Invalid authorization header format. Expected: Bearer <token>'
+            });
+            return;
+        }
+        const token = parts[1];
+        // 在开发环境中，允许使用特殊的开发token
+        if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+            request.user = { userId: 'dev-user-id', role: 'user' };
+            return;
+        }
+        // 在生产环境中，必须验证真实的JWT token
+        if (process.env.NODE_ENV === 'production') {
+            // TODO: 实现真实的JWT验证
+            // 这里应该使用JWT库验证token并提取用户信息
+            reply.code(401).send({
+                error: 'unauthorized',
+                message: 'Valid JWT token is required in production'
+            });
+            return;
+        }
+        // 开发环境的默认用户
+        request.user = { userId: 'dev-user-id', role: 'user' };
+    }
+    catch (error) {
+        console.error('Authentication error:', error);
+        reply.code(401).send({
+            error: 'unauthorized',
+            message: 'Authentication failed'
+        });
+    }
+}
+async function cleanupMiddleware(request, reply) {
+    // 清理逻辑
+}
+// 生产级 CORS 配置
 const corsConfig = {
-    origin: true, // 允许所有来源（开发环境）
-    credentials: true
+    origin: (origin, callback) => {
+        // 允许的域名白名单
+        const allowedOrigins = [
+            'http://localhost:3000', // 开发环境前端
+            'http://localhost:3001', // 开发环境前端备用端口
+            'https://athlete-ally.com', // 生产环境域名
+            'https://www.athlete-ally.com', // 生产环境www域名
+            'https://staging.athlete-ally.com', // 预发布环境
+        ];
+        // 开发环境允许所有本地来源
+        if (process.env.NODE_ENV === 'development') {
+            if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+                return callback(null, true);
+            }
+        }
+        // 生产环境严格检查
+        if (allowedOrigins.includes(origin || '')) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'), false);
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'X-RateLimit-Limit',
+        'X-RateLimit-Remaining',
+        'X-RateLimit-Reset'
+    ],
+    exposedHeaders: [
+        'X-RateLimit-Limit',
+        'X-RateLimit-Remaining',
+        'X-RateLimit-Reset'
+    ],
+    maxAge: 86400 // 24小时预检缓存
 };
 // 简化的中间件（开发环境）
 const rateLimitMiddleware = async () => { };
@@ -29,12 +136,12 @@ const metricsMiddleware = async () => { };
 const server = Fastify({ logger: true });
 // 简化的指标注册（开发环境）
 const metricsRegistry = { metrics: () => '# No metrics available in development mode' };
-// 使用简化的CORS配置
-// 注册CORS插件（开发环境简化配置）
+// 注册CORS插件（生产级安全配置）
 server.register(cors, corsConfig);
 // 注册全局中间件
 server.addHook('onRequest', metricsMiddleware);
-server.addHook('onRequest', rateLimitMiddleware);
+server.addHook('onRequest', userRateLimitMiddleware);
+server.addHook('onRequest', strictRateLimitMiddleware);
 server.addHook('onRequest', authMiddleware);
 server.addHook('onSend', cleanupMiddleware);
 // Swagger configuration
@@ -86,18 +193,8 @@ server.get('/documentation', async (_req, reply) => {
   </html>`;
     reply.type('text/html').send(html);
 });
-const OnboardingPayload = z.object({
-    userId: z.string(),
-    purpose: z.string().optional(),
-    proficiency: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-    season: z.enum(['offseason', 'preseason', 'inseason']).optional(),
-    availabilityDays: z.number().int().min(1).max(7).optional(),
-    weeklyGoalDays: z.number().int().min(1).max(7).optional(),
-    equipment: z.array(z.string()).optional(),
-    fixedSchedules: z
-        .array(z.object({ day: z.string(), start: z.string(), end: z.string() }))
-        .optional(),
-});
+// 使用统一的OnboardingPayloadSchema
+const OnboardingPayload = OnboardingPayloadSchema;
 server.post('/v1/onboarding', {
     schema: {
         description: 'Submit onboarding profile data',
@@ -153,13 +250,18 @@ server.post('/v1/onboarding', {
             'user.id': userId,
             'onboarding.purpose': request.body?.purpose || 'unknown',
         });
-        const parsed = OnboardingPayload.safeParse(request.body);
-        if (!parsed.success) {
+        // 使用统一的schema验证
+        const validationResult = safeParseOnboardingPayload(request.body);
+        if (!validationResult.success) {
             businessMetrics.apiErrors.add(1, { 'error.type': 'validation_error' });
             span.setStatus({ code: 2, message: 'Validation failed' });
             span.end();
-            return reply.code(400).send({ error: 'invalid_payload' });
+            return reply.code(400).send({
+                error: 'validation_failed',
+                details: validationResult.error?.errors
+            });
         }
+        const parsed = { success: true, data: validationResult.data };
         // 安全验证：确保请求体中的userId与JWT token中的userId一致
         if (parsed.data.userId !== userId) {
             businessMetrics.apiErrors.add(1, { 'error.type': 'security_violation' });

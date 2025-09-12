@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { handleCorsOptions, addCorsHeaders, isOriginAllowed, getCorsConfig } from './lib/cors';
+import { handleCorsOptions, addCorsHeaders, isOriginAllowed, getCurrentCorsConfig } from './lib/cors';
 
 // 需要CORS处理的API路由模式
 const API_ROUTES = [
@@ -31,7 +31,7 @@ export function middleware(request: NextRequest) {
   }
   
   const origin = request.headers.get('origin');
-  const config = getCorsConfig();
+  const config = getCurrentCorsConfig();
   
   // 检查来源是否被允许
   if (origin && !isOriginAllowed(origin, config.origins)) {

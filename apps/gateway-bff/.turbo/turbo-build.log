@@ -2,3 +2,36 @@
 > gateway-bff@0.1.0 build
 > tsc -p tsconfig.json
 
+src/index.ts(159,8): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(plugin: FastifyPluginCallback<FastifyCorsOptions | FastifyCorsOptionsDelegate, RawServerDefault, FastifyTypeProviderDefault, FastifyBaseLogger>, opts?: FastifyRegisterOptions<...> | undefined): FastifyInstance<...> & PromiseLike<...>', gave the following error.
+    Argument of type '{ origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void; credentials: boolean; methods: string[]; allowedHeaders: string[]; exposedHeaders: string[]; maxAge: number; }' is not assignable to parameter of type 'FastifyRegisterOptions<FastifyCorsOptions | FastifyCorsOptionsDelegate> | undefined'.
+      Type '{ origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void; credentials: boolean; methods: string[]; allowedHeaders: string[]; exposedHeaders: string[]; maxAge: number; }' is not assignable to type 'RegisterOptions & FastifyCorsOptions'.
+        Type '{ origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void; credentials: boolean; methods: string[]; allowedHeaders: string[]; exposedHeaders: string[]; maxAge: number; }' is not assignable to type 'FastifyCorsOptions'.
+          Types of property 'origin' are incompatible.
+            Type '(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void' is not assignable to type 'ValueOrArray<OriginType> | OriginFunction | undefined'.
+              Type '(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void' is not assignable to type 'OriginFunction'.
+                Types of parameters 'callback' and 'callback' are incompatible.
+                  Types of parameters 'origin' and 'allow' are incompatible.
+                    Type 'boolean | undefined' is not assignable to type 'ValueOrArray<OriginType>'.
+                      Type 'undefined' is not assignable to type 'ValueOrArray<OriginType>'.
+  Overload 2 of 3, '(plugin: FastifyPluginAsync<FastifyCorsOptions | FastifyCorsOptionsDelegate, RawServerDefault, FastifyTypeProviderDefault, FastifyBaseLogger>, opts?: FastifyRegisterOptions<...> | undefined): FastifyInstance<...> & PromiseLike<...>', gave the following error.
+    Argument of type 'typeof fastifyCors' is not assignable to parameter of type 'FastifyPluginAsync<FastifyCorsOptions | FastifyCorsOptionsDelegate, RawServerDefault, FastifyTypeProviderDefault, FastifyBaseLogger>'.
+      Target signature provides too few arguments. Expected 3 or more, but got 2.
+  Overload 3 of 3, '(plugin: FastifyPluginCallback<FastifyCorsOptions | FastifyCorsOptionsDelegate, RawServerDefault, FastifyTypeProviderDefault, FastifyBaseLogger> | FastifyPluginAsync<...> | Promise<...> | Promise<...>, opts?: FastifyRegisterOptions<...> | undefined): FastifyInstance<...> & PromiseLike<...>', gave the following error.
+    Argument of type '{ origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void; credentials: boolean; methods: string[]; allowedHeaders: string[]; exposedHeaders: string[]; maxAge: number; }' is not assignable to parameter of type 'FastifyRegisterOptions<FastifyCorsOptions | FastifyCorsOptionsDelegate> | undefined'.
+      Type '{ origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void; credentials: boolean; methods: string[]; allowedHeaders: string[]; exposedHeaders: string[]; maxAge: number; }' is not assignable to type 'RegisterOptions & FastifyCorsOptions'.
+        Type '{ origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void; credentials: boolean; methods: string[]; allowedHeaders: string[]; exposedHeaders: string[]; maxAge: number; }' is not assignable to type 'FastifyCorsOptions'.
+          Types of property 'origin' are incompatible.
+            Type '(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void' is not assignable to type 'ValueOrArray<OriginType> | OriginFunction | undefined'.
+              Type '(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void' is not assignable to type 'OriginFunction'.
+                Types of parameters 'callback' and 'callback' are incompatible.
+                  Types of parameters 'origin' and 'allow' are incompatible.
+                    Type 'boolean | undefined' is not assignable to type 'ValueOrArray<OriginType>'.
+                      Type 'undefined' is not assignable to type 'ValueOrArray<OriginType>'.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path E:\vibe\athelete-ally\apps\gateway-bff
+npm error workspace gateway-bff@0.1.0
+npm error location E:\vibe\athelete-ally\apps\gateway-bff
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c tsc -p tsconfig.json

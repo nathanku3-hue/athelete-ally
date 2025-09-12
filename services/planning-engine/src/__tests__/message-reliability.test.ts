@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EventProcessor } from '../events/processor.js';
 

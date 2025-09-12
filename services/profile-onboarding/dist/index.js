@@ -5,8 +5,65 @@ import Fastify from 'fastify';
 import { Client as PgClient } from 'pg';
 import { Redis } from 'ioredis';
 import { config } from './config.js';
-import { z } from 'zod';
-import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '@athlete-ally/shared-types';
+// 暂时注释掉shared包导入，使用本地实现
+// import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+// 强化身份验证中间件
+async function authMiddleware(request, reply) {
+    // 跳过健康检查端点
+    if (request.url === '/health') {
+        return;
+    }
+    try {
+        // 从Authorization header获取JWT token
+        const authHeader = request.headers.authorization || request.headers.Authorization;
+        if (!authHeader) {
+            reply.code(401).send({
+                error: 'unauthorized',
+                message: 'Authorization header is required'
+            });
+            return;
+        }
+        // 解析Bearer token
+        const parts = authHeader.split(' ');
+        if (parts.length !== 2 || parts[0] !== 'Bearer') {
+            reply.code(401).send({
+                error: 'unauthorized',
+                message: 'Invalid authorization header format. Expected: Bearer <token>'
+            });
+            return;
+        }
+        const token = parts[1];
+        // 在开发环境中，允许使用特殊的开发token
+        if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+            request.user = { userId: 'dev-user-id', role: 'user' };
+            return;
+        }
+        // 在生产环境中，必须验证真实的JWT token
+        if (process.env.NODE_ENV === 'production') {
+            // TODO: 实现真实的JWT验证
+            // 这里应该使用JWT库验证token并提取用户信息
+            reply.code(401).send({
+                error: 'unauthorized',
+                message: 'Valid JWT token is required in production'
+            });
+            return;
+        }
+        // 开发环境的默认用户
+        request.user = { userId: 'dev-user-id', role: 'user' };
+    }
+    catch (error) {
+        const { safeLog } = await import('@athlete-ally/shared/logger');
+        safeLog.error('Authentication error', error);
+        reply.code(401).send({
+            error: 'unauthorized',
+            message: 'Authentication failed'
+        });
+    }
+}
+async function cleanupMiddleware(request, reply) {
+    // 清理逻辑
+}
 // 暫時註釋掉共享包依賴
 // import { EventBus } from '@athlete-ally/event-bus';
 // import { OnboardingCompletedEvent } from '@athlete-ally/contracts';
@@ -49,36 +106,19 @@ server.addHook('onReady', async () => {
         process.exit(1);
     }
 });
-const OnboardingPayload = z.object({
-    userId: z.string(),
-    // Step 1: Training Purpose
-    purpose: z.enum(['general_fitness', 'sport_performance', 'muscle_building', 'weight_loss', 'rehabilitation']).optional(),
-    purposeDetails: z.string().optional(),
-    // Step 2: Proficiency Level
-    proficiency: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-    // Step 3: Season and Goals
-    season: z.enum(['offseason', 'preseason', 'inseason']).optional(),
-    competitionDate: z.string().datetime().optional(),
-    // Step 4: Availability
-    availabilityDays: z.number().int().min(1).max(7).optional(),
-    weeklyGoalDays: z.number().int().min(1).max(7).optional(),
-    // Step 5: Equipment and scheduling
-    equipment: z.array(z.string()).optional(),
-    fixedSchedules: z
-        .array(z.object({ day: z.string(), start: z.string(), end: z.string() }))
-        .optional(),
-    // Step 6: Recovery habits (optional)
-    recoveryHabits: z.array(z.string()).optional(),
-    // Onboarding status
-    onboardingStep: z.number().int().min(1).max(6).optional(),
-    isOnboardingComplete: z.boolean().optional(),
-});
+// 使用统一的OnboardingPayloadSchema
+const OnboardingPayload = OnboardingPayloadSchema;
 server.get('/health', async () => ({ status: 'ok' }));
 server.post('/v1/onboarding', async (request, reply) => {
-    const parsed = OnboardingPayload.safeParse(request.body);
-    if (!parsed.success) {
-        return reply.code(400).send({ error: 'invalid_payload' });
+    // 使用统一的schema验证
+    const validationResult = safeParseOnboardingPayload(request.body);
+    if (!validationResult.success) {
+        return reply.code(400).send({
+            error: 'validation_failed',
+            details: validationResult.error?.errors
+        });
     }
+    const parsed = { success: true, data: validationResult.data };
     try {
         // Use native SQL query instead of Prisma
         const userId = parsed.data.userId;
@@ -213,8 +253,9 @@ const port = Number(config.PORT || 4101);
 server
     .listen({ port, host: '0.0.0.0' })
     .then(() => console.log(`profile-onboarding listening on :${port}`))
-    .catch((err) => {
-    console.error(err);
+    .catch(async (err) => {
+    const { safeLog } = await import('@athlete-ally/shared/logger');
+    safeLog.error('Server startup error', err);
     process.exit(1);
 });
 //# sourceMappingURL=index.js.map

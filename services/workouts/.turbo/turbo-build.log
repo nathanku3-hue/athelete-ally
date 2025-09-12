@@ -2,17 +2,3 @@
 > workouts-service@1.0.0 build
 > tsc
 
-../../packages/shared/src/auth/jwt.ts(25,16): error TS2769: No overload matches this call.
-  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
-    Argument of type 'string' is not assignable to parameter of type 'null'.
-  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Buffer<ArrayBufferLike> | Secret | PrivateKeyInput | JsonWebKeyInput, options?: SignOptions | undefined): string', gave the following error.
-    Type 'string' is not assignable to type 'number | StringValue | undefined'.
-  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Buffer<ArrayBufferLike> | Secret | PrivateKeyInput | JsonWebKeyInput, callback: SignCallback): void', gave the following error.
-    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
-../../src/app/api/v1/exercises/[exerciseId]/route.ts(2,51): error TS2307: Cannot find module '@/lib/cors' or its corresponding type declarations.
-../../src/app/api/v1/fatigue/status/route.ts(2,51): error TS2307: Cannot find module '@/lib/cors' or its corresponding type declarations.
-../../src/app/api/v1/onboarding/error/route.ts(2,51): error TS2307: Cannot find module '@/lib/cors' or its corresponding type declarations.
-../../src/app/api/v1/onboarding/route.ts(2,51): error TS2307: Cannot find module '@/lib/cors' or its corresponding type declarations.
-npm error Lifecycle script `build` failed with error:
-../../src/app/api/v1/onboarding/step/route.ts(2,51): error TS2307: Cannot find module '@/lib/cors' or its corresponding type declarations.
-../../src/app/api/v1/plans/[planId]/route.ts(2,51): error TS2307: Cannot find module '@/lib/cors' or its corresponding type declarations.

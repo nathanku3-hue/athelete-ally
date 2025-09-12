@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { EventProcessor } from '../events/processor.js';
 import { JetStreamConsumer } from '../events/jetstream-consumer.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
