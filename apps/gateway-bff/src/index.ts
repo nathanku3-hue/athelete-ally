@@ -102,7 +102,7 @@ async function cleanupMiddleware(request: any, reply: any) {
 }
 // 生产级 CORS 配置
 const corsConfig = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow: boolean) => void) => {
     // 允许的域名白名单
     const allowedOrigins = [
       'http://localhost:3000',    // 开发环境前端

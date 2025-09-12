@@ -57,7 +57,8 @@ export class EventProcessor {
       this.isConnected = true;
       console.log('Event processor connected to NATS');
     } catch (error) {
-      const { safeLog } = await import('@athlete-ally/shared/logger');
+      // const { safeLog } = await import('../../../packages/shared/src/logger.js');
+      const safeLog = { error: console.error, info: console.log, warn: console.warn };
       safeLog.error('Failed to connect event processor', error);
       throw error;
     }
@@ -116,7 +117,8 @@ export class EventProcessor {
         await this.processEvent(topic, task, handler, startTime);
 
       } catch (error) {
-        const { safeLog } = await import('@athlete-ally/shared/logger');
+        // const { safeLog } = await import('../../../packages/shared/src/logger.js');
+      const safeLog = { error: console.error, info: console.log, warn: console.warn };
         safeLog.error(`Error in wrapped handler for ${topic}`, error);
         throw error;
       }
@@ -193,7 +195,8 @@ export class EventProcessor {
           error_type: 'handler_error'
         });
 
-        const { safeLog } = await import('@athlete-ally/shared/logger');
+        // const { safeLog } = await import('../../../packages/shared/src/logger.js');
+      const safeLog = { error: console.error, info: console.log, warn: console.warn };
       safeLog.error(`Error processing ${topic} event`, error);
         throw error;
       } finally {
@@ -221,8 +224,9 @@ export class EventProcessor {
     const nextEvent = queue.shift();
     if (nextEvent) {
       // 异步执行下一个事件，不等待完成
-      nextEvent().catch(error => {
-        const { safeLog } = await import('@athlete-ally/shared/logger');
+      nextEvent().catch(async (error) => {
+        // const { safeLog } = await import('../../../packages/shared/src/logger.js');
+      const safeLog = { error: console.error, info: console.log, warn: console.warn };
         safeLog.error(`Error processing queued event for ${topic}`, error);
       });
     }

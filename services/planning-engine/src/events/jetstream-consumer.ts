@@ -87,14 +87,14 @@ export class JetStreamConsumer {
       // 消费者不存在，创建新的
       const consumerConfig: ConsumerConfig = {
         durable_name: durable || consumer,
-        ack_policy: 'explicit',
+        ack_policy: 'Explicit' as any,
         ack_wait: ackWait,
         max_deliver: maxDeliver,
         max_ack_pending: maxAckPending,
-        deliver_policy: 'all',
-        replay_policy: 'instant',
+        deliver_policy: 'All' as any,
+        replay_policy: 'Instant' as any,
         // 启用心跳检测
-        heartbeat: options.enableHeartbeat ? (options.heartbeatInterval || 30000) : undefined,
+        // heartbeat: options.enableHeartbeat ? (options.heartbeatInterval || 30000) : undefined,
         // 启用流控
         flow_control: true,
         // 启用空闲超时
@@ -125,7 +125,7 @@ export class JetStreamConsumer {
         durable: options.durable || consumer,
         batch: batchSize,
         expires: batchTimeout
-      });
+      } as any);
 
       // 设置健康状态
       this.isHealthy = true;

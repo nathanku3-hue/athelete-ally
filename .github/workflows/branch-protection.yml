@@ -1,0 +1,62 @@
+name: Branch Protection Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to protect'
+        required: true
+        default: 'main'
+      require_status_checks:
+        description: 'Require status checks to pass before merging'
+        type: boolean
+        default: true
+      required_status_checks:
+        description: 'Required status checks (comma-separated)'
+        required: true
+        default: 'Build Check (Blocking),Test Check (Blocking),Code Quality,Security Scan'
+
+jobs:
+  setup-protection:
+    name: Setup Branch Protection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Branch Protection
+        run: |
+          echo "🔒 设置分支保护规则..."
+          
+          # 检查是否在GitHub Actions环境中
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "❌ GITHUB_TOKEN 未设置，无法设置分支保护"
+            exit 1
+          fi
+          
+          # 设置分支保护规则
+          curl -X PUT \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/branches/${{ github.event.inputs.branch }}/protection" \
+            -d '{
+              "required_status_checks": {
+                "strict": true,
+                "contexts": ["'${{ github.event.inputs.required_status_checks }}'"]
+              },
+              "enforce_admins": true,
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": false
+              },
+              "restrictions": null,
+              "allow_force_pushes": false,
+              "allow_deletions": false
+            }'
+          
+          echo "✅ 分支保护规则设置完成！"
+          echo "受保护的检查：${{ github.event.inputs.required_status_checks }}"

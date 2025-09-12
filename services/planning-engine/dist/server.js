@@ -485,7 +485,8 @@ server
     .listen({ port, host: '0.0.0.0' })
     .then(() => console.log(`planning-engine listening on :${port}`))
     .catch(async (err) => {
-    const { safeLog } = await import('@athlete-ally/shared/logger');
+    // const { safeLog } = await import('../../packages/shared/src/logger.js');
+    const safeLog = { error: console.error, info: console.log, warn: console.warn };
     safeLog.error('Server startup error', err);
     process.exit(1);
 });
