@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-09-12T12:50:38.491Z",
+  "summary": {
+    "total": 4,
+    "passed": 0,
+    "failed": 4
+  },
+  "results": {
+    "redis": {
+      "status": "failed",
+      "details": [
+        "❌ 错误: NOAUTH Authentication required."
+      ]
+    },
+    "vault": {
+      "status": "failed",
+      "details": [
+        "❌ 错误: Request failed with status code 502"
+      ]
+    },
+    "database": {
+      "status": "failed",
+      "details": [
+        "❌ 错误: password authentication failed for user \"athlete_ally_user\""
+      ]
+    },
+    "rls": {
+      "status": "failed",
+      "details": [
+        "❌ 错误: password authentication failed for user \"athlete_ally_user\""
+      ]
+    }
+  }
+}

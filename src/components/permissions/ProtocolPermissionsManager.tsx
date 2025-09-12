@@ -7,6 +7,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Protocol, ProtocolShare, Permission } from '@athlete-ally/protocol-types';
 import { useProtocolStore, useProtocolActions } from '@/stores/protocolStore';
 import { useProtocols } from '@/hooks/useProtocols';
+import { 
+  useProtocolShares, 
+  useShareProtocol, 
+  useUpdateProtocolShare, 
+  useRevokeProtocolShare,
+  useSetProtocolPublic,
+  useSearchUsers,
+  usePermissionUtils
+} from '@/hooks/usePermissions';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -107,26 +116,15 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ protocol, onShare, isOpen, on
     message: ''
   });
   
-  const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; email: string }>>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  // 模拟用户token（实际应用中应该从认证上下文获取）
+  const token = 'mock-token';
   
-  const handleUserSearch = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-    
-    setIsSearching(true);
-    try {
-      // 在实际实现中，这里应该调用用户搜索API
-      const results = await searchUsers(query);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('User search failed:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+  // 使用用户搜索hook
+  const { data: searchResults = [], isLoading: isSearching } = useSearchUsers(
+    shareData.sharedWith,
+    token,
+    shareData.sharedWith.length > 2
+  );
   
   const handlePermissionChange = (permission: Permission, checked: boolean) => {
     setShareData(prev => ({
@@ -263,84 +261,85 @@ const ProtocolPermissionsManager: React.FC<ProtocolPermissionsManagerProps> = ({
   className = ''
 }) => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [shares, setShares] = useState<ProtocolShare[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { setSelectedProtocol } = useProtocolActions();
-  const { data: protocolShares, isLoading: sharesLoading } = useProtocols();
+  // 模拟用户token（实际应用中应该从认证上下文获取）
+  const token = 'mock-token';
   
-  // 加载分享数据
-  useEffect(() => {
-    const loadShares = async () => {
-      setIsLoading(true);
-      try {
-        // 在实际实现中，这里应该调用API获取分享数据
-        const sharesData = await fetchProtocolShares(protocol.id);
-        setShares(sharesData);
-      } catch (err) {
-        setError('加载分享数据失败');
-        console.error('Failed to load shares:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadShares();
-  }, [protocol.id]);
+  const { setSelectedProtocol } = useProtocolActions();
+  
+  // 使用权限相关的hooks
+  const { data: shares = [], isLoading: sharesLoading, error: sharesError } = useProtocolShares(
+    protocol.id,
+    token
+  );
+  
+  const shareProtocolMutation = useShareProtocol();
+  const updateShareMutation = useUpdateProtocolShare();
+  const revokeShareMutation = useRevokeProtocolShare();
+  const setPublicMutation = useSetProtocolPublic();
+  const { hasPermission, getPermissionLevel } = usePermissionUtils();
   
   // 处理分享
   const handleShare = useCallback(async (shareData: ShareData) => {
     try {
-      // 在实际实现中，这里应该调用API创建分享
-      const newShare = await createProtocolShare({
-        protocolId: protocol.id,
-        ...shareData
+      await shareProtocolMutation.mutateAsync({
+        shareData: {
+          protocolId: protocol.id,
+          sharedWith: shareData.sharedWith,
+          permissions: shareData.permissions,
+          expiresAt: shareData.expiresAt,
+          message: shareData.message,
+        },
+        token
       });
       
-      setShares(prev => [...prev, newShare]);
       onShareChange?.(shares);
     } catch (err) {
       setError('分享失败');
       console.error('Failed to share protocol:', err);
     }
-  }, [protocol.id, shares, onShareChange]);
+  }, [protocol.id, shares, onShareChange, shareProtocolMutation, token]);
   
   // 处理权限修改
   const handlePermissionUpdate = useCallback(async (shareId: string, permissions: Permission[]) => {
     try {
-      // 在实际实现中，这里应该调用API更新权限
-      await updateProtocolShare(shareId, { permissions });
+      await updateShareMutation.mutateAsync({
+        shareId,
+        updateData: { permissions },
+        token
+      });
       
-      setShares(prev => prev.map(share => 
-        share.id === shareId ? { ...share, permissions } : share
-      ));
       onShareChange?.(shares);
     } catch (err) {
       setError('权限更新失败');
       console.error('Failed to update permissions:', err);
     }
-  }, [shares, onShareChange]);
+  }, [shares, onShareChange, updateShareMutation, token]);
   
   // 处理分享撤销
   const handleRevokeShare = useCallback(async (shareId: string) => {
     try {
-      // 在实际实现中，这里应该调用API撤销分享
-      await revokeProtocolShare(shareId);
+      await revokeShareMutation.mutateAsync({
+        shareId,
+        token
+      });
       
-      setShares(prev => prev.filter(share => share.id !== shareId));
       onShareChange?.(shares);
     } catch (err) {
       setError('撤销分享失败');
       console.error('Failed to revoke share:', err);
     }
-  }, [shares, onShareChange]);
+  }, [shares, onShareChange, revokeShareMutation, token]);
   
   // 处理公开状态切换
   const handlePublicToggle = useCallback(async (isPublic: boolean) => {
     try {
-      // 在实际实现中，这里应该调用API更新公开状态
-      await updateProtocol(protocol.id, { isPublic });
+      await setPublicMutation.mutateAsync({
+        protocolId: protocol.id,
+        isPublic,
+        token
+      });
       
       // 更新本地状态
       setSelectedProtocol({ ...protocol, isPublic });
@@ -348,9 +347,12 @@ const ProtocolPermissionsManager: React.FC<ProtocolPermissionsManagerProps> = ({
       setError('公开状态更新失败');
       console.error('Failed to update public status:', err);
     }
-  }, [protocol, setSelectedProtocol]);
+  }, [protocol, setSelectedProtocol, setPublicMutation, token]);
   
-  if (isLoading) {
+  // 处理错误状态
+  const currentError = error || sharesError?.message;
+  
+  if (sharesLoading) {
     return (
       <Card className={className}>
         <CardContent className="p-6">
@@ -524,11 +526,11 @@ const ProtocolPermissionsManager: React.FC<ProtocolPermissionsManagerProps> = ({
           </Tabs>
         </CardContent>
         
-        {error && (
+        {currentError && (
           <CardFooter>
             <div className="flex items-center gap-2 text-red-600 text-sm">
               <X className="h-4 w-4" />
-              <span>{error}</span>
+              <span>{currentError}</span>
             </div>
           </CardFooter>
         )}

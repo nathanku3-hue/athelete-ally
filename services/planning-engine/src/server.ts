@@ -14,6 +14,8 @@ import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
 import { concurrencyController } from './concurrency/controller.js';
 import { Task } from './types/index.js';
+import { AsyncPlanGenerator } from './optimization/async-plan-generator.js';
+import { DatabaseOptimizer } from './optimization/database-optimizer.js';
 // 暂时注释掉shared包导入，使用本地实现
 // import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 // import { SecureIdGenerator } from '@athlete-ally/shared';
@@ -105,6 +107,10 @@ const server = Fastify({ logger: true });
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PLANNING_DATABASE_URL });
 const redis = new Redis(config.REDIS_URL);
+
+// 初始化优化组件
+const databaseOptimizer = new DatabaseOptimizer();
+const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, eventPublisher);
 
 server.addHook('onReady', async () => {
   try {
@@ -222,7 +228,7 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
   }
 }
 
-// Event handler for plan generation requested
+// Event handler for plan generation requested (优化版本)
 async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedEvent>) {
   const event = task.data;
   server.log.info({ eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Processing plan generation requested event');
@@ -233,21 +239,15 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
       data: {
         jobId: event.jobId,
         userId: event.userId,
-        status: 'processing',
+        status: 'queued',
         progress: 0,
         requestData: event as any,
         startedAt: new Date(),
       },
     });
 
-    // 更新进度
-    await prisma.planJob.update({
-      where: { id: planJob.id },
-      data: { progress: 25 },
-    });
-
-    // 生成计划
-    const planData = await generateTrainingPlan({
+    // 使用异步生成器处理计划生成
+    const request: any = {
       userId: event.userId,
       proficiency: event.proficiency || 'intermediate',
       season: event.season || 'offseason',
@@ -255,102 +255,30 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
       weeklyGoalDays: event.weeklyGoalDays,
       equipment: event.equipment || ['bodyweight'],
       purpose: event.purpose,
-    });
-
-    // 更新进度
-    await prisma.planJob.update({
-      where: { id: planJob.id },
-      data: { progress: 75 },
-    });
-
-    // 保存计划到数据库
-    const plan = await prisma.plan.create({
-      data: {
-        userId: event.userId,
-        status: 'completed',
-        name: planData.name,
-        description: planData.description,
-        content: planData,
-        microcycles: {
-          create: planData.microcycles.map((mc: any) => ({
-            weekNumber: mc.weekNumber,
-            name: mc.name,
-            phase: mc.phase,
-            sessions: {
-              create: mc.sessions.map((session: any) => ({
-                dayOfWeek: session.dayOfWeek,
-                name: session.name,
-                duration: session.duration,
-                exercises: {
-                  create: session.exercises.map((exercise: any) => ({
-                    name: exercise.name,
-                    category: exercise.category,
-                    sets: exercise.sets,
-                    reps: exercise.reps,
-                    weight: exercise.weight,
-                    notes: exercise.notes,
-                  })),
-                },
-              })),
-            },
-          })),
-        },
-      },
-    });
-
-    // 更新PlanJob为完成状态
-    await prisma.planJob.update({
-      where: { id: planJob.id },
-      data: {
-        status: 'completed',
-        progress: 100,
-        resultData: { planId: plan.id, planName: plan.name },
-        completedAt: new Date(),
-      },
-    });
-
-    // 发布计划生成完成事件
-    const planGeneratedEvent: PlanGeneratedEvent = {
-      eventId: `plan-generated-${plan.id}-${Date.now()}`,
-      userId: event.userId,
-      planId: plan.id,
-      timestamp: Date.now(),
-      planName: plan.name || 'Generated Plan',
-      status: 'completed',
-      version: plan.version,
     };
 
-    await eventPublisher.publishPlanGenerated(planGeneratedEvent);
-    server.log.info({ planId: plan.id, userId: event.userId, jobId: event.jobId }, 'Plan generated successfully');
+    // 异步生成计划（非阻塞）
+    await asyncPlanGenerator.generatePlanAsync(
+      event.jobId,
+      request,
+      1 // 优先级
+    );
+
+    server.log.info({ jobId: event.jobId, userId: event.userId }, 'Plan generation queued successfully');
     
   } catch (error) {
-    server.log.error({ error, eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Failed to generate plan from event');
+    server.log.error({ error, eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Failed to queue plan generation');
     
-    // 更新PlanJob为失败状态
-    try {
-      await prisma.planJob.updateMany({
-        where: { jobId: event.jobId },
-        data: {
-          status: 'failed',
-          errorData: { error: (error as Error).message, stack: (error as Error).stack },
-          completedAt: new Date(),
-        },
-      });
-    } catch (dbError) {
-      server.log.error({ dbError }, 'Failed to update PlanJob status to failed');
-    }
-
-    // 发布计划生成失败事件
-    const planGenerationFailedEvent: PlanGenerationFailedEvent = {
-      eventId: `plan-failed-${event.jobId}-${Date.now()}`,
-      userId: event.userId,
-      jobId: event.jobId,
-      timestamp: Date.now(),
-      error: (error as Error).message,
-      retryCount: task.retries,
-    };
-
-    await eventPublisher.publishPlanGenerationFailed(planGenerationFailedEvent);
+    // 更新任务状态为失败
+    await prisma.planJob.updateMany({
+      where: { jobId: event.jobId },
+      data: { 
+        status: 'failed', 
+        progress: 0,
+        completedAt: new Date(),
+        errorData: { error: (error as Error).message, stack: (error as Error).stack },
+      },
+    });
   }
 }
 
@@ -518,6 +446,40 @@ server.get('/concurrency/status', async (request, reply) => {
     ...status,
     timestamp: new Date().toISOString()
   };
+});
+
+// 获取队列状态端点
+server.get('/queue/status', async (request, reply) => {
+  try {
+    const queueStatus = asyncPlanGenerator.getQueueStatus();
+    const dbMetrics = await databaseOptimizer.getPerformanceMetrics();
+    
+    return reply.send({
+      queue: queueStatus,
+      database: dbMetrics,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    server.log.error({ error }, 'Failed to get queue status');
+    return reply.code(500).send({ error: 'queue_status_failed' });
+  }
+});
+
+// 清理缓存端点
+server.post('/cache/cleanup', async (request, reply) => {
+  try {
+    await asyncPlanGenerator.cleanupCache();
+    const cleanupResult = await databaseOptimizer.cleanupExpiredData();
+    
+    return reply.send({
+      message: 'Cache cleanup completed',
+      cleanup: cleanupResult,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    server.log.error({ error }, 'Failed to cleanup cache');
+    return reply.code(500).send({ error: 'cache_cleanup_failed' });
+  }
 });
 
 // 注册安全中间件

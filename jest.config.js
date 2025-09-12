@@ -29,7 +29,7 @@ module.exports = {
   ],
   
   // 模块解析配置
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@packages/(.*)$': '<rootDir>/packages/$1',
     '^@services/(.*)$': '<rootDir>/services/$1',
