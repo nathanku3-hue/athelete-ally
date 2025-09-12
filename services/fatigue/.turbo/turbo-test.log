@@ -4,10 +4,10 @@
 
 PASS src/__tests__/integration.test.ts
   Fatigue Service
-    √ should be able to run tests (9 ms)
+    √ should be able to run tests (7 ms)
 
 Test Suites: 1 passed, 1 total
 Tests:       1 passed, 1 total
 Snapshots:   0 total
-Time:        0.878 s, estimated 1 s
+Time:        1.956 s
 Ran all test suites.
