@@ -1,0 +1,224 @@
+{
+  "id": null,
+  "title": "Athlete Ally - Product Analytics Dashboard",
+  "tags": ["athlete-ally", "product", "analytics"],
+  "style": "dark",
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "User Growth Metrics",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(user_registrations_total[24h]))",
+          "legendFormat": "New Users (24h)"
+        },
+        {
+          "expr": "sum(rate(user_activations_total[24h]))",
+          "legendFormat": "Activated Users (24h)"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "title": "User Retention",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "user_retention_1d",
+          "legendFormat": "1-Day Retention"
+        },
+        {
+          "expr": "user_retention_7d",
+          "legendFormat": "7-Day Retention"
+        },
+        {
+          "expr": "user_retention_30d",
+          "legendFormat": "30-Day Retention"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+    },
+    {
+      "id": 3,
+      "title": "Training Engagement",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(workout_sessions_started_total[5m])",
+          "legendFormat": "Sessions Started"
+        },
+        {
+          "expr": "rate(workout_sessions_completed_total[5m])",
+          "legendFormat": "Sessions Completed"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+    },
+    {
+      "id": 4,
+      "title": "RPE Distribution",
+      "type": "histogram",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, workout_rpe_bucket)",
+          "legendFormat": "Median RPE"
+        },
+        {
+          "expr": "histogram_quantile(0.95, workout_rpe_bucket)",
+          "legendFormat": "P95 RPE"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+    },
+    {
+      "id": 5,
+      "title": "Training Volume Trends",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "sum(workout_volume_total) by (exercise_category)",
+          "legendFormat": "{{exercise_category}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+    },
+    {
+      "id": 6,
+      "title": "Feature Adoption",
+      "type": "piechart",
+      "targets": [
+        {
+          "expr": "sum(feature_usage_total) by (feature_name)",
+          "legendFormat": "{{feature_name}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+    },
+    {
+      "id": 7,
+      "title": "User Journey Funnel",
+      "type": "bargauge",
+      "targets": [
+        {
+          "expr": "user_journey_registration",
+          "legendFormat": "Registration"
+        },
+        {
+          "expr": "user_journey_onboarding_complete",
+          "legendFormat": "Onboarding Complete"
+        },
+        {
+          "expr": "user_journey_first_workout",
+          "legendFormat": "First Workout"
+        },
+        {
+          "expr": "user_journey_plan_generated",
+          "legendFormat": "Plan Generated"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+    },
+    {
+      "id": 8,
+      "title": "Personal Records",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(personal_records_set_total[24h]))",
+          "legendFormat": "PRs Set (24h)"
+        },
+        {
+          "expr": "sum(personal_records_total) by (record_type)",
+          "legendFormat": "{{record_type}}"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+    },
+    {
+      "id": 9,
+      "title": "Plan Generation Success",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(plan_generation_success_total[5m]) / rate(plan_generation_requests_total[5m]) * 100",
+          "legendFormat": "Success Rate %"
+        },
+        {
+          "expr": "histogram_quantile(0.95, plan_generation_duration_seconds_bucket)",
+          "legendFormat": "P95 Generation Time"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+    },
+    {
+      "id": 10,
+      "title": "User Satisfaction",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "avg(user_satisfaction_score)",
+          "legendFormat": "Average Satisfaction"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40}
+    },
+    {
+      "id": 11,
+      "title": "Churn Risk Analysis",
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "user_churn_risk_score",
+          "legendFormat": "Churn Risk"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40}
+    }
+  ],
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "annotations": {
+    "list": [
+      {
+        "name": "Feature Releases",
+        "datasource": "Prometheus",
+        "enable": true,
+        "expr": "feature_release_events",
+        "iconColor": "blue"
+      },
+      {
+        "name": "System Alerts",
+        "datasource": "Prometheus",
+        "enable": true,
+        "expr": "ALERTS",
+        "iconColor": "red"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "user_segment",
+        "type": "query",
+        "query": "label_values(user_segment)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true
+      },
+      {
+        "name": "exercise_category",
+        "type": "query",
+        "query": "label_values(exercise_category)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  }
+}

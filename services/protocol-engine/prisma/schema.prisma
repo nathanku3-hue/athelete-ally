@@ -1,0 +1,324 @@
+// Protocol Engine Prisma Schema
+// Core concepts: Protocol and Block for advanced training plan management
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PROTOCOL_DATABASE_URL")
+}
+
+// ===========================================
+// PROTOCOL MODELS
+// ===========================================
+
+/// A Protocol represents a complete training methodology or system
+/// Examples: "5/3/1", "Starting Strength", "Westside Conjugate", "DUP"
+model Protocol {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Protocol identification
+  name        String   @unique
+  version     String   @default("1.0.0")
+  description String?
+  
+  // Protocol metadata
+  category    String   // strength, hypertrophy, powerlifting, bodybuilding, general_fitness
+  difficulty  String   // beginner, intermediate, advanced, elite
+  duration    Int?     // weeks
+  frequency   Int?     // sessions per week
+  
+  // Protocol configuration
+  isActive    Boolean  @default(true)
+  isPublic    Boolean  @default(false)
+  createdBy   String?  // userId of creator
+  
+  // Protocol content
+  overview    String?  // Detailed description
+  principles  String[] // Core training principles
+  requirements String[] // Equipment, time, experience requirements
+  
+  // Relations
+  blocks      Block[]
+  templates   ProtocolTemplate[]
+  executions  ProtocolExecution[]
+  
+  // Indexing
+  @@index([category])
+  @@index([difficulty])
+  @@index([isActive, isPublic])
+  @@map("protocols")
+}
+
+/// A Block represents a specific phase or period within a Protocol
+/// Examples: "Base Building", "Peak Phase", "Deload Week", "Strength Block"
+model Block {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Block identification
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  order       Int      // Order within the protocol
+  
+  // Block configuration
+  duration    Int      // weeks
+  phase       String   // base, build, peak, deload, transition
+  intensity   String   // low, moderate, high, very_high
+  volume      String   // low, moderate, high, very_high
+  
+  // Block parameters
+  parameters  Json?    // Flexible configuration (sets, reps, percentages, etc.)
+  rules       Json?    // Progression rules, deload triggers, etc.
+  
+  // Relations
+  sessions    BlockSession[]
+  progressions BlockProgression[]
+  
+  // Indexing
+  @@index([protocolId, order])
+  @@index([phase])
+  @@map("blocks")
+}
+
+/// A BlockSession represents a specific training session within a Block
+model BlockSession {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  blockId     String
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  // Session configuration
+  name        String
+  dayOfWeek   Int      // 1-7 (Monday-Sunday)
+  order       Int      // Order within the block
+  
+  // Session content
+  exercises   Json     // Array of exercise configurations
+  duration    Int?     // Estimated duration in minutes
+  notes       String?
+  
+  // Session parameters
+  intensity   Float?   // 0.0-1.0 scale
+  volume      Float?   // Total volume metric
+  rpe         Float?   // Target RPE
+  
+  @@index([blockId, dayOfWeek, order])
+  @@map("block_sessions")
+}
+
+/// A BlockProgression defines how a Block progresses over time
+model BlockProgression {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  blockId     String
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  // Progression configuration
+  week        Int      // Week within the block
+  parameters  Json     // Week-specific parameters
+  
+  // Progression rules
+  rules       Json?    // Progression logic
+  triggers    Json?    // Conditions for progression
+  
+  @@unique([blockId, week])
+  @@map("block_progressions")
+}
+
+// ===========================================
+// PROTOCOL TEMPLATES
+// ===========================================
+
+/// A ProtocolTemplate is a pre-configured Protocol with specific parameters
+model ProtocolTemplate {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  // Template configuration
+  name        String
+  description String?
+  
+  // Template parameters
+  parameters  Json     // Template-specific configuration
+  isDefault   Boolean  @default(false)
+  
+  // Usage tracking
+  usageCount  Int      @default(0)
+  
+  @@index([protocolId])
+  @@map("protocol_templates")
+}
+
+// ===========================================
+// PROTOCOL EXECUTIONS
+// ===========================================
+
+/// A ProtocolExecution represents a user's execution of a Protocol
+model ProtocolExecution {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  templateId  String?  // Optional template used
+  
+  // Execution status
+  status      String   @default("active") // active, paused, completed, abandoned
+  startDate   DateTime
+  endDate     DateTime?
+  
+  // Execution configuration
+  parameters  Json     // User-specific parameters
+  adaptations Json?    // Adaptations made during execution
+  
+  // Progress tracking
+  currentBlockId String?
+  currentWeek    Int     @default(1)
+  progress       Float   @default(0.0) // 0.0-1.0
+  
+  // Relations
+  blockExecutions BlockExecution[]
+  sessions        SessionExecution[]
+  
+  // Indexing
+  @@index([userId, status])
+  @@index([protocolId])
+  @@map("protocol_executions")
+}
+
+/// A BlockExecution represents execution of a specific Block
+model BlockExecution {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  executionId String
+  execution   ProtocolExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  
+  blockId     String
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  // Execution status
+  status      String   @default("pending") // pending, active, completed, skipped
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Execution data
+  adaptations Json?    // Block-specific adaptations
+  notes       String?
+  
+  // Progress tracking
+  currentWeek Int      @default(1)
+  progress    Float    @default(0.0)
+  
+  @@index([executionId])
+  @@index([blockId])
+  @@map("block_executions")
+}
+
+/// A SessionExecution represents execution of a specific training session
+model SessionExecution {
+  id          String   @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  executionId String
+  execution   ProtocolExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  
+  sessionId   String   // Reference to BlockSession
+  
+  // Execution status
+  status      String   @default("scheduled") // scheduled, in_progress, completed, skipped
+  scheduledDate DateTime
+  actualDate  DateTime?
+  
+  // Execution data
+  exercises   Json?    // Actual exercise data
+  adaptations Json?    // Session-specific adaptations
+  notes       String?
+  
+  // Performance metrics
+  duration    Int?     // Actual duration in minutes
+  rpe         Float?   // Actual RPE
+  volume      Float?   // Actual volume
+  
+  @@index([executionId, scheduledDate])
+  @@map("session_executions")
+}
+
+// ===========================================
+// PROTOCOL ANALYTICS
+// ===========================================
+
+/// ProtocolAnalytics tracks performance and usage metrics
+model ProtocolAnalytics {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  userId      String?
+  
+  // Analytics data
+  metrics     Json     // Performance metrics
+  insights    Json?    // AI-generated insights
+  recommendations Json? // Recommendations for improvement
+  
+  // Time period
+  periodStart DateTime
+  periodEnd   DateTime
+  
+  @@index([protocolId, periodStart])
+  @@index([userId])
+  @@map("protocol_analytics")
+}
+
+// ===========================================
+// PROTOCOL SHARING & COLLABORATION
+// ===========================================
+
+/// ProtocolShare represents shared protocols between users
+model ProtocolShare {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  sharedBy    String   // userId
+  sharedWith  String   // userId
+  
+  // Share permissions
+  permissions String[] // read, write, execute, share
+  expiresAt   DateTime?
+  
+  // Share status
+  isActive    Boolean  @default(true)
+  acceptedAt  DateTime?
+  
+  @@unique([protocolId, sharedWith])
+  @@index([sharedBy])
+  @@index([sharedWith])
+  @@map("protocol_shares")
+}

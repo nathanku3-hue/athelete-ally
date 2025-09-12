@@ -1,0 +1,256 @@
+# Athlete Ally 产品指标配置
+# 用于Prometheus抓取产品分析数据
+
+# 用户增长指标
+user_registrations_total:
+  type: counter
+  help: "Total number of user registrations"
+  labels: [source, device, user_agent]
+
+user_activations_total:
+  type: counter
+  help: "Total number of user activations (completed onboarding)"
+  labels: [user_id, activation_time]
+
+user_churn_total:
+  type: counter
+  help: "Total number of user churns"
+  labels: [user_id, churn_reason, last_activity]
+
+# 用户参与度指标
+user_engagement_score:
+  type: gauge
+  help: "User engagement score (0-1)"
+  labels: [user_id, segment, time_window]
+
+user_session_frequency:
+  type: histogram
+  help: "User session frequency distribution"
+  labels: [user_id, time_period]
+  buckets: [1, 2, 3, 4, 5, 7, 10, 14, 21, 30]
+
+user_feature_adoption:
+  type: counter
+  help: "Feature adoption by users"
+  labels: [user_id, feature_name, feature_category]
+
+# 训练行为指标
+workout_sessions_started_total:
+  type: counter
+  help: "Total number of workout sessions started"
+  labels: [user_id, plan_id, phase, equipment]
+
+workout_sessions_completed_total:
+  type: counter
+  help: "Total number of workout sessions completed"
+  labels: [user_id, plan_id, phase, duration]
+
+workout_sessions_abandoned_total:
+  type: counter
+  help: "Total number of workout sessions abandoned"
+  labels: [user_id, plan_id, phase, abandon_reason]
+
+workout_duration_seconds:
+  type: histogram
+  help: "Workout session duration in seconds"
+  labels: [user_id, plan_id, phase]
+  buckets: [300, 600, 900, 1200, 1800, 2700, 3600, 5400, 7200]
+
+# RPE和性能指标
+workout_rpe:
+  type: histogram
+  help: "Rate of Perceived Exertion distribution"
+  labels: [user_id, exercise_id, exercise_category]
+  buckets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+workout_volume_total:
+  type: counter
+  help: "Total workout volume (weight * reps)"
+  labels: [user_id, exercise_id, exercise_category, session_id]
+
+workout_strength_progression:
+  type: gauge
+  help: "Strength progression percentage"
+  labels: [user_id, exercise_id, time_period]
+
+workout_volume_progression:
+  type: gauge
+  help: "Volume progression percentage"
+  labels: [user_id, exercise_id, time_period]
+
+# 个人记录指标
+personal_records_set_total:
+  type: counter
+  help: "Total number of personal records set"
+  labels: [user_id, exercise_id, record_type, value, unit]
+
+personal_records_total:
+  type: gauge
+  help: "Current personal records count"
+  labels: [user_id, record_type]
+
+# 计划生成指标
+plan_generation_requests_total:
+  type: counter
+  help: "Total number of plan generation requests"
+  labels: [user_id, plan_type, complexity]
+
+plan_generation_success_total:
+  type: counter
+  help: "Total number of successful plan generations"
+  labels: [user_id, plan_type, complexity]
+
+plan_generation_duration_seconds:
+  type: histogram
+  help: "Plan generation duration in seconds"
+  labels: [user_id, plan_type, complexity]
+  buckets: [1, 2, 5, 10, 20, 30, 60, 120, 300]
+
+plan_acceptance_rate:
+  type: gauge
+  help: "Plan acceptance rate by user"
+  labels: [user_id, plan_type]
+
+plan_modification_rate:
+  type: gauge
+  help: "Plan modification rate by user"
+  labels: [user_id, plan_type]
+
+# 用户满意度指标
+user_satisfaction_score:
+  type: gauge
+  help: "User satisfaction score (1-5)"
+  labels: [user_id, category, time_period]
+
+user_feedback_total:
+  type: counter
+  help: "Total number of user feedback submissions"
+  labels: [user_id, feedback_type, rating, category]
+
+# 功能使用指标
+feature_usage_total:
+  type: counter
+  help: "Total feature usage count"
+  labels: [user_id, feature_name, feature_category, success]
+
+feature_completion_rate:
+  type: gauge
+  help: "Feature completion rate"
+  labels: [feature_name, feature_category, user_segment]
+
+feature_abandonment_rate:
+  type: gauge
+  help: "Feature abandonment rate"
+  labels: [feature_name, feature_category, user_segment]
+
+# 内容消费指标
+exercise_views_total:
+  type: counter
+  help: "Total exercise views"
+  labels: [user_id, exercise_id, exercise_category, source]
+
+plan_views_total:
+  type: counter
+  help: "Total plan views"
+  labels: [user_id, plan_id, plan_type, source]
+
+content_search_total:
+  type: counter
+  help: "Total content searches"
+  labels: [user_id, search_term, category, results_count]
+
+# 用户旅程指标
+user_journey_registration:
+  type: counter
+  help: "User journey - registration step"
+  labels: [source, device]
+
+user_journey_onboarding_start:
+  type: counter
+  help: "User journey - onboarding start"
+  labels: [user_id, source]
+
+user_journey_onboarding_complete:
+  type: counter
+  help: "User journey - onboarding complete"
+  labels: [user_id, completion_time, steps_completed]
+
+user_journey_first_workout:
+  type: counter
+  help: "User journey - first workout"
+  labels: [user_id, days_since_registration, plan_id]
+
+user_journey_plan_generated:
+  type: counter
+  help: "User journey - plan generated"
+  labels: [user_id, days_since_registration, plan_type]
+
+# 流失风险指标
+user_churn_risk_score:
+  type: gauge
+  help: "User churn risk score (0-1)"
+  labels: [user_id, segment, risk_factors]
+
+user_activity_score:
+  type: gauge
+  help: "User activity score based on recent actions"
+  labels: [user_id, time_window]
+
+user_retention_1d:
+  type: gauge
+  help: "1-day user retention rate"
+  labels: [cohort_date, segment]
+
+user_retention_7d:
+  type: gauge
+  help: "7-day user retention rate"
+  labels: [cohort_date, segment]
+
+user_retention_30d:
+  type: gauge
+  help: "30-day user retention rate"
+  labels: [cohort_date, segment]
+
+# 系统性能指标
+api_response_time_seconds:
+  type: histogram
+  help: "API response time in seconds"
+  labels: [endpoint, method, status_code]
+  buckets: [0.1, 0.2, 0.5, 1, 2, 5, 10, 30]
+
+api_requests_total:
+  type: counter
+  help: "Total API requests"
+  labels: [endpoint, method, status_code, user_id]
+
+api_errors_total:
+  type: counter
+  help: "Total API errors"
+  labels: [endpoint, method, error_type, user_id]
+
+# 数据质量指标
+data_validation_errors_total:
+  type: counter
+  help: "Total data validation errors"
+  labels: [field_name, validation_type, user_id]
+
+data_completeness_score:
+  type: gauge
+  help: "Data completeness score (0-1)"
+  labels: [table_name, field_name, time_period]
+
+# 业务指标
+revenue_total:
+  type: counter
+  help: "Total revenue generated"
+  labels: [user_id, source, plan_type]
+
+subscription_conversions_total:
+  type: counter
+  help: "Total subscription conversions"
+  labels: [user_id, plan_type, source, trial_days]
+
+feature_upgrade_total:
+  type: counter
+  help: "Total feature upgrades"
+  labels: [user_id, from_feature, to_feature, upgrade_reason]

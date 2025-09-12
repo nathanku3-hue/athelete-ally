@@ -1,0 +1,31 @@
+{
+  "name": "@athlete-ally/protocol-types",
+  "version": "1.0.0",
+  "description": "TypeScript types for Protocol Engine - Protocol and Block concepts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "protocol",
+    "block",
+    "training",
+    "fitness",
+    "typescript",
+    "types"
+  ],
+  "author": "Athlete Ally Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
