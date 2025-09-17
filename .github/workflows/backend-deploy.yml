@@ -23,7 +23,7 @@ jobs:
       
       - name: Install dependencies
         working-directory: ./services/planning-engine
-        run: npm ci
+        run: npm install --no-audit --no-fund
       
       - name: Run linting
         working-directory: ./services/planning-engine

@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/contracts
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Run contract tests
         run: |
@@ -77,7 +77,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/contracts
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Run database tests
         run: |
@@ -110,7 +110,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/contracts
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Run API tests
         run: |
@@ -165,7 +165,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/contracts
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Start test services
         run: |
@@ -215,7 +215,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/contracts
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Run performance tests
         run: |
@@ -269,7 +269,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/contracts
-          npm ci
+          npm install --no-audit --no-fund
 
       - name: Run ESLint
         run: |
