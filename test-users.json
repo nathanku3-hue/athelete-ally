@@ -1,0 +1,187 @@
+{
+  "testUsers": [
+    {
+      "id": "test-user-1",
+      "email": "test1@athleteally.com",
+      "name": "张三",
+      "role": "athlete",
+      "profile": {
+        "age": 25,
+        "gender": "male",
+        "experience": "intermediate",
+        "goals": ["strength", "muscle_gain"],
+        "equipment": ["barbell", "dumbbells", "bench"],
+        "availability": {
+          "daysPerWeek": 4,
+          "sessionDuration": 60,
+          "preferredTimes": ["morning", "evening"]
+        }
+      },
+      "preferences": {
+        "unit": "kg",
+        "language": "zh-CN",
+        "notifications": true
+      }
+    },
+    {
+      "id": "test-user-2", 
+      "email": "test2@athleteally.com",
+      "name": "李四",
+      "role": "athlete",
+      "profile": {
+        "age": 30,
+        "gender": "female",
+        "experience": "beginner",
+        "goals": ["weight_loss", "endurance"],
+        "equipment": ["bodyweight", "resistance_bands"],
+        "availability": {
+          "daysPerWeek": 3,
+          "sessionDuration": 45,
+          "preferredTimes": ["evening"]
+        }
+      },
+      "preferences": {
+        "unit": "lbs",
+        "language": "en-US",
+        "notifications": false
+      }
+    },
+    {
+      "id": "test-user-3",
+      "email": "test3@athleteally.com", 
+      "name": "王五",
+      "role": "athlete",
+      "profile": {
+        "age": 35,
+        "gender": "male",
+        "experience": "advanced",
+        "goals": ["powerlifting", "strength"],
+        "equipment": ["barbell", "dumbbells", "rack", "plates"],
+        "availability": {
+          "daysPerWeek": 5,
+          "sessionDuration": 90,
+          "preferredTimes": ["morning"]
+        }
+      },
+      "preferences": {
+        "unit": "kg",
+        "language": "zh-CN",
+        "notifications": true
+      }
+    }
+  ],
+  "testPlans": [
+    {
+      "id": "test-plan-1",
+      "userId": "test-user-1",
+      "name": "中级力量训练计划",
+      "description": "适合有1-2年训练经验的用户",
+      "duration": 12,
+      "frequency": 4,
+      "difficulty": "intermediate",
+      "goals": ["strength", "muscle_gain"],
+      "exercises": [
+        {
+          "id": "squat",
+          "name": "深蹲",
+          "sets": 4,
+          "reps": "8-10",
+          "weight": "80kg",
+          "rest": 120
+        },
+        {
+          "id": "bench-press",
+          "name": "卧推",
+          "sets": 4,
+          "reps": "8-10", 
+          "weight": "60kg",
+          "rest": 120
+        },
+        {
+          "id": "deadlift",
+          "name": "硬拉",
+          "sets": 3,
+          "reps": "5-6",
+          "weight": "100kg",
+          "rest": 180
+        }
+      ]
+    },
+    {
+      "id": "test-plan-2",
+      "userId": "test-user-2", 
+      "name": "初学者减脂计划",
+      "description": "适合刚开始健身的用户",
+      "duration": 8,
+      "frequency": 3,
+      "difficulty": "beginner",
+      "goals": ["weight_loss", "endurance"],
+      "exercises": [
+        {
+          "id": "bodyweight-squat",
+          "name": "自重深蹲",
+          "sets": 3,
+          "reps": "15-20",
+          "weight": "bodyweight",
+          "rest": 60
+        },
+        {
+          "id": "push-ups",
+          "name": "俯卧撑",
+          "sets": 3,
+          "reps": "10-15",
+          "weight": "bodyweight",
+          "rest": 60
+        },
+        {
+          "id": "plank",
+          "name": "平板支撑",
+          "sets": 3,
+          "reps": "30-45s",
+          "weight": "bodyweight",
+          "rest": 60
+        }
+      ]
+    }
+  ],
+  "testSessions": [
+    {
+      "id": "test-session-1",
+      "planId": "test-plan-1",
+      "userId": "test-user-1",
+      "date": "2024-12-19",
+      "status": "completed",
+      "exercises": [
+        {
+          "exerciseId": "squat",
+          "sets": [
+            {"set": 1, "reps": 10, "weight": "80kg", "rpe": 7},
+            {"set": 2, "reps": 9, "weight": "80kg", "rpe": 8},
+            {"set": 3, "reps": 8, "weight": "80kg", "rpe": 8},
+            {"set": 4, "reps": 8, "weight": "80kg", "rpe": 9}
+          ]
+        },
+        {
+          "exerciseId": "bench-press",
+          "sets": [
+            {"set": 1, "reps": 10, "weight": "60kg", "rpe": 6},
+            {"set": 2, "reps": 9, "weight": "60kg", "rpe": 7},
+            {"set": 3, "reps": 8, "weight": "60kg", "rpe": 8},
+            {"set": 4, "reps": 8, "weight": "60kg", "rpe": 8}
+          ]
+        }
+      ],
+      "notes": "训练感觉很好，重量适中",
+      "duration": 75,
+      "rpe": 8
+    }
+  ]
+}
+
+
+
+
+
+
+
+

@@ -187,6 +187,46 @@ exports.Prisma.PlanJobScalarFieldEnum = {
   maxRetries: 'maxRetries'
 };
 
+exports.Prisma.RPEFeedbackScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  sessionId: 'sessionId',
+  exerciseId: 'exerciseId',
+  rpe: 'rpe',
+  completionRate: 'completionRate',
+  notes: 'notes',
+  timestamp: 'timestamp'
+};
+
+exports.Prisma.PerformanceMetricsScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  sessionId: 'sessionId',
+  totalVolume: 'totalVolume',
+  averageRPE: 'averageRPE',
+  completionRate: 'completionRate',
+  recoveryTime: 'recoveryTime',
+  sleepQuality: 'sleepQuality',
+  stressLevel: 'stressLevel',
+  timestamp: 'timestamp'
+};
+
+exports.Prisma.AdaptationRecordScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  planId: 'planId',
+  sessionId: 'sessionId',
+  type: 'type',
+  changes: 'changes',
+  rationale: 'rationale',
+  confidence: 'confidence',
+  implemented: 'implemented',
+  appliedAt: 'appliedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -223,7 +263,10 @@ exports.Prisma.ModelName = {
   Microcycle: 'Microcycle',
   Session: 'Session',
   Exercise: 'Exercise',
-  PlanJob: 'PlanJob'
+  PlanJob: 'PlanJob',
+  RPEFeedback: 'RPEFeedback',
+  PerformanceMetrics: 'PerformanceMetrics',
+  AdaptationRecord: 'AdaptationRecord'
 };
 
 /**

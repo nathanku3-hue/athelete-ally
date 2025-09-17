@@ -2,3 +2,39 @@
 > fatigue-service@1.0.0 build
 > tsc
 
+../../.next/types/validator.ts(243,31): error TS2344: Type 'typeof import("E:/vibe/athlete-ally-original/src/app/api/v1/exercises/[exerciseId]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/v1/exercises/[exerciseId]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { exerciseId: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ id: string; name: string; description: string; instructions: string[]; ... 5 more ...; videoUrl: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ exerciseId: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ exerciseId: string; }>; }' is not assignable to type '{ params: { exerciseId: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'exerciseId' is missing in type 'Promise<{ exerciseId: string; }>' but required in type '{ exerciseId: string; }'.
+../../.next/types/validator.ts(261,31): error TS2344: Type 'typeof import("E:/vibe/athlete-ally-original/src/app/api/v1/plans/[planId]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/v1/plans/[planId]">'.
+  Types of property 'GET' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { planId: string; }; }) => Promise<NextResponse<any>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ planId: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ planId: string; }>; }' is not assignable to type '{ params: { planId: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'planId' is missing in type 'Promise<{ planId: string; }>' but required in type '{ planId: string; }'.
+../../packages/shared/src/error-handler.ts(67,33): error TS2339: Property 'PrismaClientKnownRequestError' does not exist on type 'typeof Prisma'.
+../../packages/shared/src/error-handler.ts(68,21): error TS2339: Property 'code' does not exist on type 'Error'.
+../../packages/shared/src/error-handler.ts(91,33): error TS2339: Property 'PrismaClientInitializationError' does not exist on type 'typeof Prisma'.
+../../src/__tests__/components/AdvancedSearch.test.tsx(2,23): error TS2307: Cannot find module '@testing-library/user-event' or its corresponding type declarations.
+../../src/__tests__/e2e/frontend-e2e.test.ts(184,47): error TS2345: Argument of type '{ success: string; data: { test: string; }; status: string; }' is not assignable to parameter of type 'APIResponse<any>'.
+  Types of property 'success' are incompatible.
+    Type 'string' is not assignable to type 'boolean'.
+../../src/__tests__/permissions/ProtocolPermissionsManager.test.tsx(9,10): error TS2614: Module '"@/components/permissions/ProtocolPermissionsManager"' has no exported member 'ProtocolPermissionsManager'. Did you mean to use 'import ProtocolPermissionsManager from "@/components/permissions/ProtocolPermissionsManager"' instead?
+../../src/__tests__/permissions/ProtocolPermissionsManager.test.tsx(40,32): error TS2345: Argument of type '"DELETE"' is not assignable to parameter of type 'Permission'.
+../../src/__tests__/permissions/ProtocolPermissionsManager.test.tsx(41,32): error TS2345: Argument of type '"SHARE"' is not assignable to parameter of type 'Permission'.
+../../src/__tests__/permissions/ProtocolPermissionsManager.test.tsx(42,32): error TS2345: Argument of type '"WRITE"' is not assignable to parameter of type 'Permission'.
+../../src/__tests__/permissions/ProtocolPermissionsManager.test.tsx(43,32): error TS2345: Argument of type '"READ"' is not assignable to parameter of type 'Permission'.
+../../src/__tests__/permissions/ProtocolPermissionsManager.test.tsx(79,3): error TS2353: Object literal may only specify known properties, and 'ownerId' does not exist in type 'Protocol'.
+../../src/__tests__/setup.ts(68,1): error TS2322: Type 'typeof IntersectionObserver' is not assignable to type '{ new (callback: IntersectionObserverCallback, options?: IntersectionObserverInit | undefined): IntersectionObserver; prototype: IntersectionObserver; }'.
+  Types of property 'prototype' are incompatible.
+    Type 'IntersectionObserver' is missing the following properties from type 'IntersectionObserver': root, rootMargin, thresholds, takeRecords
+../../src/app/api/health/route.ts(2,10): error TS2305: Module '"@athlete-ally/shared"' has no exported member 'AppError'.
+../../src/app/api/health/route.ts(2,20): error TS2305: Module '"@athlete-ally/shared"' has no exported member 'ErrorCode'.
+../../src/app/api/health/route.ts(285,42): error TS18046: 'error' is of type 'unknown'.
+../../src/app/training/plans/page.tsx(19,12): error TS18046: 'plans' is of type 'unknown'.
+../../src/app/training/plans/page.tsx(19,25): error TS7006: Parameter 'plan' implicitly has an 'any' type.
+../../src/app/training/plans/page.tsx(177,31): error TS7006: Parameter 'plan' implicitly has an 'any' type.

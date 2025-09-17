@@ -21,7 +21,7 @@ export const usePermissionCheck = (
     queryFn: () => permissionsAPI.checkPermission(resourceId, resourceType, permission, token),
     enabled: enabled && !!resourceId && !!token,
     staleTime: 2 * 60 * 1000, // 2分钟缓存
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
     retry: 2,
   });
 };
@@ -38,7 +38,7 @@ export const useUserPermissions = (
     queryFn: () => permissionsAPI.getUserPermissions(resourceId, resourceType, token),
     enabled: enabled && !!resourceId && !!token,
     staleTime: 2 * 60 * 1000,
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -49,7 +49,7 @@ export const useProtocolShares = (protocolId: string, token: string, enabled = t
     queryFn: () => permissionsAPI.getProtocolShares(protocolId, token),
     enabled: enabled && !!protocolId && !!token,
     staleTime: 1 * 60 * 1000, // 1分钟缓存
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -68,8 +68,8 @@ export const useShareProtocol = () => {
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocol-shares', shareData.protocolId]);
-      queryClient.invalidateQueries(['permissions', shareData.protocolId]);
+      queryClient.invalidateQueries({ queryKey: ['protocol-shares', shareData.protocolId] });
+      queryClient.invalidateQueries({ queryKey: ['permissions', shareData.protocolId] });
     },
     onError: (error) => {
       console.error('Failed to share protocol:', error);
@@ -92,8 +92,8 @@ export const useUpdateProtocolShare = () => {
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocol-shares', updatedShare.protocolId]);
-      queryClient.invalidateQueries(['permissions', updatedShare.protocolId]);
+      queryClient.invalidateQueries({ queryKey: ['protocol-shares', updatedShare.protocolId] });
+      queryClient.invalidateQueries({ queryKey: ['permissions', updatedShare.protocolId] });
     },
     onError: (error) => {
       console.error('Failed to update protocol share:', error);
@@ -110,14 +110,14 @@ export const useRevokeProtocolShare = () => {
       permissionsAPI.revokeProtocolShare(shareId, token),
     onSuccess: (_, { shareId }) => {
       // 从所有相关缓存中移除
-      queryClient.setQueriesData(['protocol-shares'], (old: ShareResponse[] | undefined) => {
+      queryClient.setQueriesData({ queryKey: ['protocol-shares'] }, (old: ShareResponse[] | undefined) => {
         if (!old) return old;
         return old.filter(share => share.id !== shareId);
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocol-shares']);
-      queryClient.invalidateQueries(['permissions']);
+      queryClient.invalidateQueries({ queryKey: ['protocol-shares'] });
+      queryClient.invalidateQueries({ queryKey: ['permissions'] });
     },
     onError: (error) => {
       console.error('Failed to revoke protocol share:', error);
@@ -140,9 +140,9 @@ export const useAcceptProtocolShare = () => {
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocol-shares']);
-      queryClient.invalidateQueries(['permissions']);
-      queryClient.invalidateQueries(['protocols']); // 刷新协议列表
+      queryClient.invalidateQueries({ queryKey: ['protocol-shares'] });
+      queryClient.invalidateQueries({ queryKey: ['permissions'] });
+      queryClient.invalidateQueries({ queryKey: ['protocols'] }); // 刷新协议列表
     },
     onError: (error) => {
       console.error('Failed to accept protocol share:', error);
@@ -159,13 +159,13 @@ export const useRejectProtocolShare = () => {
       permissionsAPI.rejectProtocolShare(shareId, token),
     onSuccess: (_, { shareId }) => {
       // 从缓存中移除
-      queryClient.setQueriesData(['protocol-shares'], (old: ShareResponse[] | undefined) => {
+      queryClient.setQueriesData({ queryKey: ['protocol-shares'] }, (old: ShareResponse[] | undefined) => {
         if (!old) return old;
         return old.filter(share => share.id !== shareId);
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocol-shares']);
+      queryClient.invalidateQueries({ queryKey: ['protocol-shares'] });
     },
     onError: (error) => {
       console.error('Failed to reject protocol share:', error);
@@ -180,7 +180,7 @@ export const useReceivedShares = (token: string, enabled = true) => {
     queryFn: () => permissionsAPI.getReceivedShares(token),
     enabled: enabled && !!token,
     staleTime: 1 * 60 * 1000,
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -191,7 +191,7 @@ export const useSentShares = (token: string, enabled = true) => {
     queryFn: () => permissionsAPI.getSentShares(token),
     enabled: enabled && !!token,
     staleTime: 1 * 60 * 1000,
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -216,8 +216,8 @@ export const useSetProtocolPublic = () => {
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocols']);
-      queryClient.invalidateQueries(['protocol', updatedProtocol.id]);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
+      queryClient.invalidateQueries({ queryKey: ['protocol', updatedProtocol.id] });
     },
     onError: (error) => {
       console.error('Failed to set protocol public status:', error);
@@ -247,7 +247,7 @@ export const useCopyPublicProtocol = () => {
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocols']);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
     },
     onError: (error) => {
       console.error('Failed to copy public protocol:', error);
@@ -267,7 +267,7 @@ export const usePublicProtocols = (params?: {
     queryKey: ['public-protocols', params],
     queryFn: () => permissionsAPI.getPublicProtocols(params),
     staleTime: 5 * 60 * 1000, // 5分钟缓存
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -278,7 +278,7 @@ export const useSearchUsers = (query: string, token: string, enabled = true) => 
     queryFn: () => permissionsAPI.searchUsers(query, token),
     enabled: enabled && query.length > 2 && !!token,
     staleTime: 2 * 60 * 1000,
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -289,7 +289,7 @@ export const usePermissionStats = (token: string, enabled = true) => {
     queryFn: () => permissionsAPI.getPermissionStats(token),
     enabled: enabled && !!token,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 15 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 };
 
@@ -342,10 +342,10 @@ export const usePermissionUtils = () => {
   }, []);
   
   const getPermissionLevel = useCallback((permissions: Permission[]): 'none' | 'read' | 'write' | 'admin' | 'owner' => {
-    if (permissions.includes('DELETE')) return 'owner';
-    if (permissions.includes('SHARE')) return 'admin';
-    if (permissions.includes('WRITE')) return 'write';
-    if (permissions.includes('READ')) return 'read';
+    if (permissions.includes('DELETE' as Permission)) return 'owner';
+    if (permissions.includes('SHARE' as Permission)) return 'admin';
+    if (permissions.includes('WRITE' as Permission)) return 'write';
+    if (permissions.includes('READ' as Permission)) return 'read';
     return 'none';
   }, []);
   

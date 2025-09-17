@@ -8,7 +8,31 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent } from '@athlete-ally/contracts';
+// 临时类型定义
+interface OnboardingCompletedEvent {
+  userId: string;
+  profileData: any;
+  timestamp: Date;
+}
+
+interface PlanGeneratedEvent {
+  planId: string;
+  userId: string;
+  planData: any;
+  timestamp: Date;
+}
+
+interface PlanGenerationRequestedEvent {
+  userId: string;
+  requestData: any;
+  timestamp: Date;
+}
+
+interface PlanGenerationFailedEvent {
+  userId: string;
+  error: string;
+  timestamp: Date;
+}
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
@@ -16,6 +40,11 @@ import { concurrencyController } from './concurrency/controller.js';
 import { Task } from './types/index.js';
 import { AsyncPlanGenerator } from './optimization/async-plan-generator.js';
 import { DatabaseOptimizer } from './optimization/database-optimizer.js';
+import { SimpleHealthChecker, setupSimpleHealthRoutes } from './simple-health.js';
+import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
+import apiDocsRoutes from './routes/api-docs.js';
+import { ErrorHandler } from './middleware/error-handler.js';
+import { PerformanceMonitor } from './middleware/performance.js';
 // 暂时注释掉shared包导入，使用本地实现
 // import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 // import { SecureIdGenerator } from '@athlete-ally/shared';
@@ -112,6 +141,15 @@ const redis = new Redis(config.REDIS_URL);
 const databaseOptimizer = new DatabaseOptimizer();
 const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, eventPublisher);
 
+// 初始化健康检查器
+const healthChecker = new SimpleHealthChecker(prisma, redis);
+
+// 初始化错误处理器
+const errorHandler = new ErrorHandler(server);
+
+// 初始化性能监控器
+const performanceMonitor = new PerformanceMonitor(server);
+
 server.addHook('onReady', async () => {
   try {
     await pg.connect();
@@ -151,6 +189,18 @@ server.addHook('onReady', async () => {
     
     // 指标更新已移除 - 使用OpenTelemetry自动指标收集
     server.log.info('event processor connected successfully');
+    
+    // 设置健康检查路由
+    setupSimpleHealthRoutes(server, healthChecker);
+    server.log.info('health check routes registered');
+    
+    // 注册增强计划API路由
+    await server.register(enhancedPlanRoutes);
+    server.log.info('enhanced plan routes registered');
+    
+    // 注册API文档路由
+    await server.register(apiDocsRoutes);
+    server.log.info('API documentation routes registered');
     
   } catch (e) {
     server.log.error({ err: e }, 'failed to connect event processor');
@@ -421,23 +471,7 @@ server.get('/metrics', async (request, reply) => {
   return register.metrics();
 });
 
-// 添加健康检查端点
-server.get('/health', async (request, reply) => {
-  const concurrencyStatus = concurrencyController.getStatus();
-  const eventProcessorHealthy = eventProcessor.isHealthy();
-  
-  return {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    version: process.env.npm_package_version || '1.0.0',
-    concurrency: concurrencyStatus,
-    eventProcessor: {
-      connected: eventProcessorHealthy,
-      consumers: eventProcessor.isHealthy() ? 'active' : 'disconnected'
-    }
-  };
-});
+// 健康检查端点已移至 health.ts 中的 setupHealthRoutes
 
 // 添加并发状态端点
 server.get('/concurrency/status', async (request, reply) => {

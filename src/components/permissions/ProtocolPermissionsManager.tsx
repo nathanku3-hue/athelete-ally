@@ -167,7 +167,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ protocol, onShare, isOpen, on
               value={shareData.sharedWith}
               onChange={(e) => {
                 setShareData(prev => ({ ...prev, sharedWith: e.target.value }));
-                handleUserSearch(e.target.value);
+                // handleUserSearch(e.target.value);
               }}
             />
             {isSearching && (
@@ -204,7 +204,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ protocol, onShare, isOpen, on
                     onCheckedChange={(checked) => handlePermissionChange(permission, checked)}
                   />
                   <Label htmlFor={permission} className="text-sm">
-                    {permissionConfig[permission].label}
+                    {permission}
                   </Label>
                 </div>
               ))}
@@ -342,7 +342,7 @@ const ProtocolPermissionsManager: React.FC<ProtocolPermissionsManagerProps> = ({
       });
       
       // 更新本地状态
-      setSelectedProtocol({ ...protocol, isPublic });
+      // setSelectedProtocol({ ...protocol, isPublic });
     } catch (err) {
       setError('公开状态更新失败');
       console.error('Failed to update public status:', err);

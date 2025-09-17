@@ -3,7 +3,7 @@
  * 提供Protocol和Block的权限验证功能
  */
 
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply } from '../../types/fastify';
 import { Protocol, Block, Permission } from '@athlete-ally/protocol-types';
 
 // 权限验证上下文
@@ -20,6 +20,7 @@ interface PermissionResult {
   hasPermission: boolean;
   reason?: string;
   permissions?: Permission[];
+  timestamp?: number;
 }
 
 // 权限验证错误
@@ -61,7 +62,7 @@ export class PermissionsMiddleware {
     
     // 检查缓存
     const cached = this.permissionCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+    if (cached && cached.timestamp && Date.now() - cached.timestamp < this.cacheExpiry) {
       return cached;
     }
 

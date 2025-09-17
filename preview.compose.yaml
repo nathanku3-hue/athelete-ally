@@ -187,5 +187,129 @@ services:
       - "14268:14268"
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+  exercises:
+    build:
+      context: ./services/exercises
+    command: npm run dev
+    volumes:
+      - ./services/exercises:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=4103
+      - EXERCISES_DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_exercises
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
+    ports:
+      - "4103:4103"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      redis:
+        condition: service_started
+  fatigue:
+    build:
+      context: ./services/fatigue
+    command: npm run dev
+    volumes:
+      - ./services/fatigue:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=4104
+      - FATIGUE_DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_fatigue
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
+    ports:
+      - "4104:4104"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      redis:
+        condition: service_started
+  workouts:
+    build:
+      context: ./services/workouts
+    command: npm run dev
+    volumes:
+      - ./services/workouts:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=4105
+      - WORKOUTS_DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_workouts
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
+    ports:
+      - "4105:4105"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      redis:
+        condition: service_started
+  analytics:
+    build:
+      context: ./services/analytics
+    command: npm run dev
+    volumes:
+      - ./services/analytics:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=4106
+      - ANALYTICS_DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_analytics
+      - REDIS_URL=redis://redis:6379
+      - NATS_URL=nats://nats:4222
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NATS_HOST=nats
+      - NATS_PORT=4222
+    ports:
+      - "4106:4106"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+      redis:
+        condition: service_started
 
 

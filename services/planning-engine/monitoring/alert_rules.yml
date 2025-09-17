@@ -1,0 +1,47 @@
+groups:
+  - name: planning-engine-alerts
+    rules:
+      - alert: PlanningEngineDown
+        expr: up{job="planning-engine"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Planning Engine is down"
+          description: "Planning Engine has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="planning-engine",status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="planning-engine"}[5m])) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time"
+          description: "95th percentile response time is {{ $value }} seconds"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total{job="planning-engine"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes{job="planning-engine"} / 1024 / 1024 > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }} MB"

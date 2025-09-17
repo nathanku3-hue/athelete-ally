@@ -1,7 +1,12 @@
 // 数据库优化服务 - 改善Planning Engine数据库操作性能
-import { prisma } from '../prisma/client.js';
+import { prisma } from '../db.js';
 import { config } from '../config.js';
-import { logger } from '../logger.js';
+// 临时禁用logger
+const logger = {
+  info: (...args: any[]) => console.log(...args),
+  warn: (...args: any[]) => console.warn(...args),
+  error: (...args: any[]) => console.error(...args),
+};
 import { TrainingPlan } from '../llm.js';
 
 // 批量操作接口
@@ -33,7 +38,7 @@ export class DatabaseOptimizer {
 
     try {
       // 使用事务确保数据一致性
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         // 1. 创建主计划记录
         const plan = await tx.plan.create({
           data: {
@@ -67,7 +72,7 @@ export class DatabaseOptimizer {
         const sessionData: any[] = [];
         for (const mc of planData.microcycles) {
           const microcycle = createdMicrocycles.find(
-            (cmc) => cmc.weekNumber === mc.weekNumber
+            (cmc: any) => cmc.weekNumber === mc.weekNumber
           );
           if (microcycle) {
             for (const session of mc.sessions) {
@@ -95,12 +100,12 @@ export class DatabaseOptimizer {
         const exerciseData: any[] = [];
         for (const mc of planData.microcycles) {
           const microcycle = createdMicrocycles.find(
-            (cmc) => cmc.weekNumber === mc.weekNumber
+            (cmc: any) => cmc.weekNumber === mc.weekNumber
           );
           if (microcycle) {
             for (const session of mc.sessions) {
               const createdSession = createdSessions.find(
-                (cs) =>
+                (cs: any) =>
                   cs.microcycleId === microcycle.id &&
                   cs.dayOfWeek === session.dayOfWeek
               );

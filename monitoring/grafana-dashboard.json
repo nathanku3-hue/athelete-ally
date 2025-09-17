@@ -1,0 +1,306 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Athlete Ally Planning Engine",
+    "tags": ["athlete-ally", "planning-engine", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health Overview",
+        "type": "stat",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "up{job=\"planning-engine\"}",
+            "legendFormat": "Planning Engine",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"postgres\"}",
+            "legendFormat": "PostgreSQL",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"redis\"}",
+            "legendFormat": "Redis",
+            "refId": "C"
+          },
+          {
+            "expr": "up{job=\"nats\"}",
+            "legendFormat": "NATS",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "Requests/sec",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Response Time (95th percentile)",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (s)",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m])",
+            "legendFormat": "5xx errors/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..\"}[5m])",
+            "legendFormat": "4xx errors/sec",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        },
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes / 1024 / 1024",
+            "legendFormat": "Memory (MB)",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Memory (MB)",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        },
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[5m]) * 100",
+            "legendFormat": "CPU %",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "CPU %",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Database Health",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        },
+        "targets": [
+          {
+            "expr": "planning_engine_database_health",
+            "legendFormat": "Database Health",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Health Status",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Redis Health",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        },
+        "targets": [
+          {
+            "expr": "planning_engine_redis_health",
+            "legendFormat": "Redis Health",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Health Status",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Cache Hit Rate",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        },
+        "targets": [
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) * 100",
+            "legendFormat": "Cache Hit Rate %",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Hit Rate %",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Active Connections",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        },
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "PostgreSQL Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "Redis Connections",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Connections",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1,
+    "links": []
+  }
+}

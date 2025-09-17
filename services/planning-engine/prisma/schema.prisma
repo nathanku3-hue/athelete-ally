@@ -128,6 +128,85 @@ model PlanJob {
   @@map("plan_jobs")
 }
 
+// RPE反馈表
+model RPEFeedback {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 关联信息
+  sessionId String
+  exerciseId String
+  
+  // RPE数据
+  rpe            Int     // 1-10 RPE评分
+  completionRate Int     // 0-100 完成率百分比
+  notes          String? // 用户备注
+  
+  // 时间戳
+  timestamp      DateTime @default(now())
+  
+  // 索引
+  @@index([sessionId])
+  @@index([exerciseId])
+  @@index([timestamp])
+  @@map("rpe_feedback")
+}
+
+// 性能指标表
+model PerformanceMetrics {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 关联信息
+  sessionId String
+  
+  // 性能数据
+  totalVolume    Float   // 总训练量
+  averageRPE     Float   // 平均RPE (1-10)
+  completionRate Int     // 完成率 (0-100)
+  recoveryTime   Float   // 恢复时间 (小时)
+  sleepQuality   Int     // 睡眠质量 (1-10)
+  stressLevel    Int     // 压力水平 (1-10)
+  
+  // 时间戳
+  timestamp      DateTime @default(now())
+  
+  // 索引
+  @@index([sessionId])
+  @@index([timestamp])
+  @@map("performance_metrics")
+}
+
+// 适应性调整记录表
+model AdaptationRecord {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 关联信息
+  planId    String
+  sessionId String?
+  
+  // 调整信息
+  type        String  // recovery, intensity_reduction, volume_reduction, etc.
+  changes     Json    // 具体调整内容
+  rationale   String  // 调整原因
+  confidence  Float   // 置信度 (0-1)
+  
+  // 实施信息
+  implemented Boolean @default(false)
+  appliedAt   DateTime?
+  
+  // 索引
+  @@index([planId])
+  @@index([sessionId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("adaptation_records")
+}
+
 
 
 

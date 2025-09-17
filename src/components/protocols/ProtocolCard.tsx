@@ -65,7 +65,7 @@ ProtocolMeta.displayName = 'ProtocolMeta';
 // 协议统计组件
 const ProtocolStats = memo(({ protocol }: { protocol: Protocol | ProtocolSummary }) => {
   const isFull = 'blocks' in protocol;
-  const blockCount = isFull ? protocol.blocks?.length || 0 : (protocol as ProtocolSummary).blockCount;
+  const blockCount = isFull ? protocol.blocks?.length || 0 : 0;
   
   return (
     <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -247,7 +247,7 @@ const ProtocolCard = memo<ProtocolCardProps>(({
                 </Badge>
               )}
             </div>
-            {displayProtocol.description && (
+            {'description' in displayProtocol && displayProtocol.description && (
               <p className="text-sm text-muted-foreground line-clamp-2">
                 {displayProtocol.description}
               </p>

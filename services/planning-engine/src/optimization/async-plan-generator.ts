@@ -1,10 +1,15 @@
 // 异步计划生成器 - 优化Planning Engine性能
 import { generateTrainingPlan, PlanGenerationRequest, TrainingPlan } from '../llm.js';
-import { prisma } from '../prisma/client.js';
+import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
-import { logger } from '../logger.js';
+// 临时禁用logger
+const logger = {
+  info: (...args: any[]) => console.log(...args),
+  warn: (...args: any[]) => console.warn(...args),
+  error: (...args: any[]) => console.error(...args),
+};
 
 // 缓存接口
 interface PlanCache {
@@ -186,7 +191,12 @@ export class AsyncPlanGenerator {
       // 使用并发控制器执行生成
       await this.concurrencyController.execute(
         'plan_generation',
-        { id: jobId, data: request },
+        { 
+          data: request,
+          retries: 0,
+          maxRetries: 3,
+          createdAt: new Date()
+        },
         async (task) => {
           await this.generateAndSavePlan(jobId, request);
         }

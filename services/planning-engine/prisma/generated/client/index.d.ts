@@ -38,6 +38,21 @@ export type Exercise = $Result.DefaultSelection<Prisma.$ExercisePayload>
  * 
  */
 export type PlanJob = $Result.DefaultSelection<Prisma.$PlanJobPayload>
+/**
+ * Model RPEFeedback
+ * 
+ */
+export type RPEFeedback = $Result.DefaultSelection<Prisma.$RPEFeedbackPayload>
+/**
+ * Model PerformanceMetrics
+ * 
+ */
+export type PerformanceMetrics = $Result.DefaultSelection<Prisma.$PerformanceMetricsPayload>
+/**
+ * Model AdaptationRecord
+ * 
+ */
+export type AdaptationRecord = $Result.DefaultSelection<Prisma.$AdaptationRecordPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -211,6 +226,36 @@ export class PrismaClient<
     * ```
     */
   get planJob(): Prisma.PlanJobDelegate<ExtArgs>;
+
+  /**
+   * `prisma.rPEFeedback`: Exposes CRUD operations for the **RPEFeedback** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RPEFeedbacks
+    * const rPEFeedbacks = await prisma.rPEFeedback.findMany()
+    * ```
+    */
+  get rPEFeedback(): Prisma.RPEFeedbackDelegate<ExtArgs>;
+
+  /**
+   * `prisma.performanceMetrics`: Exposes CRUD operations for the **PerformanceMetrics** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PerformanceMetrics
+    * const performanceMetrics = await prisma.performanceMetrics.findMany()
+    * ```
+    */
+  get performanceMetrics(): Prisma.PerformanceMetricsDelegate<ExtArgs>;
+
+  /**
+   * `prisma.adaptationRecord`: Exposes CRUD operations for the **AdaptationRecord** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdaptationRecords
+    * const adaptationRecords = await prisma.adaptationRecord.findMany()
+    * ```
+    */
+  get adaptationRecord(): Prisma.AdaptationRecordDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -656,7 +701,10 @@ export namespace Prisma {
     Microcycle: 'Microcycle',
     Session: 'Session',
     Exercise: 'Exercise',
-    PlanJob: 'PlanJob'
+    PlanJob: 'PlanJob',
+    RPEFeedback: 'RPEFeedback',
+    PerformanceMetrics: 'PerformanceMetrics',
+    AdaptationRecord: 'AdaptationRecord'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -672,7 +720,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "plan" | "microcycle" | "session" | "exercise" | "planJob"
+      modelProps: "plan" | "microcycle" | "session" | "exercise" | "planJob" | "rPEFeedback" | "performanceMetrics" | "adaptationRecord"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1023,6 +1071,216 @@ export namespace Prisma {
           count: {
             args: Prisma.PlanJobCountArgs<ExtArgs>
             result: $Utils.Optional<PlanJobCountAggregateOutputType> | number
+          }
+        }
+      }
+      RPEFeedback: {
+        payload: Prisma.$RPEFeedbackPayload<ExtArgs>
+        fields: Prisma.RPEFeedbackFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RPEFeedbackFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RPEFeedbackFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>
+          }
+          findFirst: {
+            args: Prisma.RPEFeedbackFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RPEFeedbackFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>
+          }
+          findMany: {
+            args: Prisma.RPEFeedbackFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>[]
+          }
+          create: {
+            args: Prisma.RPEFeedbackCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>
+          }
+          createMany: {
+            args: Prisma.RPEFeedbackCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RPEFeedbackCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>[]
+          }
+          delete: {
+            args: Prisma.RPEFeedbackDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>
+          }
+          update: {
+            args: Prisma.RPEFeedbackUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>
+          }
+          deleteMany: {
+            args: Prisma.RPEFeedbackDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RPEFeedbackUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.RPEFeedbackUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RPEFeedbackPayload>
+          }
+          aggregate: {
+            args: Prisma.RPEFeedbackAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRPEFeedback>
+          }
+          groupBy: {
+            args: Prisma.RPEFeedbackGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RPEFeedbackGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RPEFeedbackCountArgs<ExtArgs>
+            result: $Utils.Optional<RPEFeedbackCountAggregateOutputType> | number
+          }
+        }
+      }
+      PerformanceMetrics: {
+        payload: Prisma.$PerformanceMetricsPayload<ExtArgs>
+        fields: Prisma.PerformanceMetricsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PerformanceMetricsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PerformanceMetricsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>
+          }
+          findFirst: {
+            args: Prisma.PerformanceMetricsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PerformanceMetricsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>
+          }
+          findMany: {
+            args: Prisma.PerformanceMetricsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>[]
+          }
+          create: {
+            args: Prisma.PerformanceMetricsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>
+          }
+          createMany: {
+            args: Prisma.PerformanceMetricsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PerformanceMetricsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>[]
+          }
+          delete: {
+            args: Prisma.PerformanceMetricsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>
+          }
+          update: {
+            args: Prisma.PerformanceMetricsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>
+          }
+          deleteMany: {
+            args: Prisma.PerformanceMetricsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PerformanceMetricsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PerformanceMetricsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PerformanceMetricsPayload>
+          }
+          aggregate: {
+            args: Prisma.PerformanceMetricsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePerformanceMetrics>
+          }
+          groupBy: {
+            args: Prisma.PerformanceMetricsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PerformanceMetricsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PerformanceMetricsCountArgs<ExtArgs>
+            result: $Utils.Optional<PerformanceMetricsCountAggregateOutputType> | number
+          }
+        }
+      }
+      AdaptationRecord: {
+        payload: Prisma.$AdaptationRecordPayload<ExtArgs>
+        fields: Prisma.AdaptationRecordFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdaptationRecordFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdaptationRecordFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>
+          }
+          findFirst: {
+            args: Prisma.AdaptationRecordFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdaptationRecordFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>
+          }
+          findMany: {
+            args: Prisma.AdaptationRecordFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>[]
+          }
+          create: {
+            args: Prisma.AdaptationRecordCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>
+          }
+          createMany: {
+            args: Prisma.AdaptationRecordCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdaptationRecordCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>[]
+          }
+          delete: {
+            args: Prisma.AdaptationRecordDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>
+          }
+          update: {
+            args: Prisma.AdaptationRecordUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdaptationRecordDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdaptationRecordUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AdaptationRecordUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdaptationRecordPayload>
+          }
+          aggregate: {
+            args: Prisma.AdaptationRecordAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdaptationRecord>
+          }
+          groupBy: {
+            args: Prisma.AdaptationRecordGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdaptationRecordGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdaptationRecordCountArgs<ExtArgs>
+            result: $Utils.Optional<AdaptationRecordCountAggregateOutputType> | number
           }
         }
       }
@@ -6427,6 +6685,2954 @@ export namespace Prisma {
 
 
   /**
+   * Model RPEFeedback
+   */
+
+  export type AggregateRPEFeedback = {
+    _count: RPEFeedbackCountAggregateOutputType | null
+    _avg: RPEFeedbackAvgAggregateOutputType | null
+    _sum: RPEFeedbackSumAggregateOutputType | null
+    _min: RPEFeedbackMinAggregateOutputType | null
+    _max: RPEFeedbackMaxAggregateOutputType | null
+  }
+
+  export type RPEFeedbackAvgAggregateOutputType = {
+    rpe: number | null
+    completionRate: number | null
+  }
+
+  export type RPEFeedbackSumAggregateOutputType = {
+    rpe: number | null
+    completionRate: number | null
+  }
+
+  export type RPEFeedbackMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    sessionId: string | null
+    exerciseId: string | null
+    rpe: number | null
+    completionRate: number | null
+    notes: string | null
+    timestamp: Date | null
+  }
+
+  export type RPEFeedbackMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    sessionId: string | null
+    exerciseId: string | null
+    rpe: number | null
+    completionRate: number | null
+    notes: string | null
+    timestamp: Date | null
+  }
+
+  export type RPEFeedbackCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    sessionId: number
+    exerciseId: number
+    rpe: number
+    completionRate: number
+    notes: number
+    timestamp: number
+    _all: number
+  }
+
+
+  export type RPEFeedbackAvgAggregateInputType = {
+    rpe?: true
+    completionRate?: true
+  }
+
+  export type RPEFeedbackSumAggregateInputType = {
+    rpe?: true
+    completionRate?: true
+  }
+
+  export type RPEFeedbackMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    sessionId?: true
+    exerciseId?: true
+    rpe?: true
+    completionRate?: true
+    notes?: true
+    timestamp?: true
+  }
+
+  export type RPEFeedbackMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    sessionId?: true
+    exerciseId?: true
+    rpe?: true
+    completionRate?: true
+    notes?: true
+    timestamp?: true
+  }
+
+  export type RPEFeedbackCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    sessionId?: true
+    exerciseId?: true
+    rpe?: true
+    completionRate?: true
+    notes?: true
+    timestamp?: true
+    _all?: true
+  }
+
+  export type RPEFeedbackAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RPEFeedback to aggregate.
+     */
+    where?: RPEFeedbackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RPEFeedbacks to fetch.
+     */
+    orderBy?: RPEFeedbackOrderByWithRelationInput | RPEFeedbackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RPEFeedbackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RPEFeedbacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RPEFeedbacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RPEFeedbacks
+    **/
+    _count?: true | RPEFeedbackCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RPEFeedbackAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RPEFeedbackSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RPEFeedbackMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RPEFeedbackMaxAggregateInputType
+  }
+
+  export type GetRPEFeedbackAggregateType<T extends RPEFeedbackAggregateArgs> = {
+        [P in keyof T & keyof AggregateRPEFeedback]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRPEFeedback[P]>
+      : GetScalarType<T[P], AggregateRPEFeedback[P]>
+  }
+
+
+
+
+  export type RPEFeedbackGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RPEFeedbackWhereInput
+    orderBy?: RPEFeedbackOrderByWithAggregationInput | RPEFeedbackOrderByWithAggregationInput[]
+    by: RPEFeedbackScalarFieldEnum[] | RPEFeedbackScalarFieldEnum
+    having?: RPEFeedbackScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RPEFeedbackCountAggregateInputType | true
+    _avg?: RPEFeedbackAvgAggregateInputType
+    _sum?: RPEFeedbackSumAggregateInputType
+    _min?: RPEFeedbackMinAggregateInputType
+    _max?: RPEFeedbackMaxAggregateInputType
+  }
+
+  export type RPEFeedbackGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    sessionId: string
+    exerciseId: string
+    rpe: number
+    completionRate: number
+    notes: string | null
+    timestamp: Date
+    _count: RPEFeedbackCountAggregateOutputType | null
+    _avg: RPEFeedbackAvgAggregateOutputType | null
+    _sum: RPEFeedbackSumAggregateOutputType | null
+    _min: RPEFeedbackMinAggregateOutputType | null
+    _max: RPEFeedbackMaxAggregateOutputType | null
+  }
+
+  type GetRPEFeedbackGroupByPayload<T extends RPEFeedbackGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RPEFeedbackGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RPEFeedbackGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RPEFeedbackGroupByOutputType[P]>
+            : GetScalarType<T[P], RPEFeedbackGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RPEFeedbackSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sessionId?: boolean
+    exerciseId?: boolean
+    rpe?: boolean
+    completionRate?: boolean
+    notes?: boolean
+    timestamp?: boolean
+  }, ExtArgs["result"]["rPEFeedback"]>
+
+  export type RPEFeedbackSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sessionId?: boolean
+    exerciseId?: boolean
+    rpe?: boolean
+    completionRate?: boolean
+    notes?: boolean
+    timestamp?: boolean
+  }, ExtArgs["result"]["rPEFeedback"]>
+
+  export type RPEFeedbackSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sessionId?: boolean
+    exerciseId?: boolean
+    rpe?: boolean
+    completionRate?: boolean
+    notes?: boolean
+    timestamp?: boolean
+  }
+
+
+  export type $RPEFeedbackPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RPEFeedback"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      sessionId: string
+      exerciseId: string
+      rpe: number
+      completionRate: number
+      notes: string | null
+      timestamp: Date
+    }, ExtArgs["result"]["rPEFeedback"]>
+    composites: {}
+  }
+
+  type RPEFeedbackGetPayload<S extends boolean | null | undefined | RPEFeedbackDefaultArgs> = $Result.GetResult<Prisma.$RPEFeedbackPayload, S>
+
+  type RPEFeedbackCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<RPEFeedbackFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: RPEFeedbackCountAggregateInputType | true
+    }
+
+  export interface RPEFeedbackDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RPEFeedback'], meta: { name: 'RPEFeedback' } }
+    /**
+     * Find zero or one RPEFeedback that matches the filter.
+     * @param {RPEFeedbackFindUniqueArgs} args - Arguments to find a RPEFeedback
+     * @example
+     * // Get one RPEFeedback
+     * const rPEFeedback = await prisma.rPEFeedback.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RPEFeedbackFindUniqueArgs>(args: SelectSubset<T, RPEFeedbackFindUniqueArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one RPEFeedback that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {RPEFeedbackFindUniqueOrThrowArgs} args - Arguments to find a RPEFeedback
+     * @example
+     * // Get one RPEFeedback
+     * const rPEFeedback = await prisma.rPEFeedback.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RPEFeedbackFindUniqueOrThrowArgs>(args: SelectSubset<T, RPEFeedbackFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first RPEFeedback that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackFindFirstArgs} args - Arguments to find a RPEFeedback
+     * @example
+     * // Get one RPEFeedback
+     * const rPEFeedback = await prisma.rPEFeedback.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RPEFeedbackFindFirstArgs>(args?: SelectSubset<T, RPEFeedbackFindFirstArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first RPEFeedback that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackFindFirstOrThrowArgs} args - Arguments to find a RPEFeedback
+     * @example
+     * // Get one RPEFeedback
+     * const rPEFeedback = await prisma.rPEFeedback.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RPEFeedbackFindFirstOrThrowArgs>(args?: SelectSubset<T, RPEFeedbackFindFirstOrThrowArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more RPEFeedbacks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RPEFeedbacks
+     * const rPEFeedbacks = await prisma.rPEFeedback.findMany()
+     * 
+     * // Get first 10 RPEFeedbacks
+     * const rPEFeedbacks = await prisma.rPEFeedback.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const rPEFeedbackWithIdOnly = await prisma.rPEFeedback.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RPEFeedbackFindManyArgs>(args?: SelectSubset<T, RPEFeedbackFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a RPEFeedback.
+     * @param {RPEFeedbackCreateArgs} args - Arguments to create a RPEFeedback.
+     * @example
+     * // Create one RPEFeedback
+     * const RPEFeedback = await prisma.rPEFeedback.create({
+     *   data: {
+     *     // ... data to create a RPEFeedback
+     *   }
+     * })
+     * 
+     */
+    create<T extends RPEFeedbackCreateArgs>(args: SelectSubset<T, RPEFeedbackCreateArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many RPEFeedbacks.
+     * @param {RPEFeedbackCreateManyArgs} args - Arguments to create many RPEFeedbacks.
+     * @example
+     * // Create many RPEFeedbacks
+     * const rPEFeedback = await prisma.rPEFeedback.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RPEFeedbackCreateManyArgs>(args?: SelectSubset<T, RPEFeedbackCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RPEFeedbacks and returns the data saved in the database.
+     * @param {RPEFeedbackCreateManyAndReturnArgs} args - Arguments to create many RPEFeedbacks.
+     * @example
+     * // Create many RPEFeedbacks
+     * const rPEFeedback = await prisma.rPEFeedback.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RPEFeedbacks and only return the `id`
+     * const rPEFeedbackWithIdOnly = await prisma.rPEFeedback.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RPEFeedbackCreateManyAndReturnArgs>(args?: SelectSubset<T, RPEFeedbackCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a RPEFeedback.
+     * @param {RPEFeedbackDeleteArgs} args - Arguments to delete one RPEFeedback.
+     * @example
+     * // Delete one RPEFeedback
+     * const RPEFeedback = await prisma.rPEFeedback.delete({
+     *   where: {
+     *     // ... filter to delete one RPEFeedback
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RPEFeedbackDeleteArgs>(args: SelectSubset<T, RPEFeedbackDeleteArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one RPEFeedback.
+     * @param {RPEFeedbackUpdateArgs} args - Arguments to update one RPEFeedback.
+     * @example
+     * // Update one RPEFeedback
+     * const rPEFeedback = await prisma.rPEFeedback.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RPEFeedbackUpdateArgs>(args: SelectSubset<T, RPEFeedbackUpdateArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more RPEFeedbacks.
+     * @param {RPEFeedbackDeleteManyArgs} args - Arguments to filter RPEFeedbacks to delete.
+     * @example
+     * // Delete a few RPEFeedbacks
+     * const { count } = await prisma.rPEFeedback.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RPEFeedbackDeleteManyArgs>(args?: SelectSubset<T, RPEFeedbackDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RPEFeedbacks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RPEFeedbacks
+     * const rPEFeedback = await prisma.rPEFeedback.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RPEFeedbackUpdateManyArgs>(args: SelectSubset<T, RPEFeedbackUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one RPEFeedback.
+     * @param {RPEFeedbackUpsertArgs} args - Arguments to update or create a RPEFeedback.
+     * @example
+     * // Update or create a RPEFeedback
+     * const rPEFeedback = await prisma.rPEFeedback.upsert({
+     *   create: {
+     *     // ... data to create a RPEFeedback
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RPEFeedback we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RPEFeedbackUpsertArgs>(args: SelectSubset<T, RPEFeedbackUpsertArgs<ExtArgs>>): Prisma__RPEFeedbackClient<$Result.GetResult<Prisma.$RPEFeedbackPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of RPEFeedbacks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackCountArgs} args - Arguments to filter RPEFeedbacks to count.
+     * @example
+     * // Count the number of RPEFeedbacks
+     * const count = await prisma.rPEFeedback.count({
+     *   where: {
+     *     // ... the filter for the RPEFeedbacks we want to count
+     *   }
+     * })
+    **/
+    count<T extends RPEFeedbackCountArgs>(
+      args?: Subset<T, RPEFeedbackCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RPEFeedbackCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RPEFeedback.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RPEFeedbackAggregateArgs>(args: Subset<T, RPEFeedbackAggregateArgs>): Prisma.PrismaPromise<GetRPEFeedbackAggregateType<T>>
+
+    /**
+     * Group by RPEFeedback.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RPEFeedbackGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RPEFeedbackGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RPEFeedbackGroupByArgs['orderBy'] }
+        : { orderBy?: RPEFeedbackGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RPEFeedbackGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRPEFeedbackGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RPEFeedback model
+   */
+  readonly fields: RPEFeedbackFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RPEFeedback.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RPEFeedbackClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RPEFeedback model
+   */ 
+  interface RPEFeedbackFieldRefs {
+    readonly id: FieldRef<"RPEFeedback", 'String'>
+    readonly createdAt: FieldRef<"RPEFeedback", 'DateTime'>
+    readonly updatedAt: FieldRef<"RPEFeedback", 'DateTime'>
+    readonly sessionId: FieldRef<"RPEFeedback", 'String'>
+    readonly exerciseId: FieldRef<"RPEFeedback", 'String'>
+    readonly rpe: FieldRef<"RPEFeedback", 'Int'>
+    readonly completionRate: FieldRef<"RPEFeedback", 'Int'>
+    readonly notes: FieldRef<"RPEFeedback", 'String'>
+    readonly timestamp: FieldRef<"RPEFeedback", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RPEFeedback findUnique
+   */
+  export type RPEFeedbackFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * Filter, which RPEFeedback to fetch.
+     */
+    where: RPEFeedbackWhereUniqueInput
+  }
+
+  /**
+   * RPEFeedback findUniqueOrThrow
+   */
+  export type RPEFeedbackFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * Filter, which RPEFeedback to fetch.
+     */
+    where: RPEFeedbackWhereUniqueInput
+  }
+
+  /**
+   * RPEFeedback findFirst
+   */
+  export type RPEFeedbackFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * Filter, which RPEFeedback to fetch.
+     */
+    where?: RPEFeedbackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RPEFeedbacks to fetch.
+     */
+    orderBy?: RPEFeedbackOrderByWithRelationInput | RPEFeedbackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RPEFeedbacks.
+     */
+    cursor?: RPEFeedbackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RPEFeedbacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RPEFeedbacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RPEFeedbacks.
+     */
+    distinct?: RPEFeedbackScalarFieldEnum | RPEFeedbackScalarFieldEnum[]
+  }
+
+  /**
+   * RPEFeedback findFirstOrThrow
+   */
+  export type RPEFeedbackFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * Filter, which RPEFeedback to fetch.
+     */
+    where?: RPEFeedbackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RPEFeedbacks to fetch.
+     */
+    orderBy?: RPEFeedbackOrderByWithRelationInput | RPEFeedbackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RPEFeedbacks.
+     */
+    cursor?: RPEFeedbackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RPEFeedbacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RPEFeedbacks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RPEFeedbacks.
+     */
+    distinct?: RPEFeedbackScalarFieldEnum | RPEFeedbackScalarFieldEnum[]
+  }
+
+  /**
+   * RPEFeedback findMany
+   */
+  export type RPEFeedbackFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * Filter, which RPEFeedbacks to fetch.
+     */
+    where?: RPEFeedbackWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RPEFeedbacks to fetch.
+     */
+    orderBy?: RPEFeedbackOrderByWithRelationInput | RPEFeedbackOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RPEFeedbacks.
+     */
+    cursor?: RPEFeedbackWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RPEFeedbacks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RPEFeedbacks.
+     */
+    skip?: number
+    distinct?: RPEFeedbackScalarFieldEnum | RPEFeedbackScalarFieldEnum[]
+  }
+
+  /**
+   * RPEFeedback create
+   */
+  export type RPEFeedbackCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * The data needed to create a RPEFeedback.
+     */
+    data: XOR<RPEFeedbackCreateInput, RPEFeedbackUncheckedCreateInput>
+  }
+
+  /**
+   * RPEFeedback createMany
+   */
+  export type RPEFeedbackCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RPEFeedbacks.
+     */
+    data: RPEFeedbackCreateManyInput | RPEFeedbackCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RPEFeedback createManyAndReturn
+   */
+  export type RPEFeedbackCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many RPEFeedbacks.
+     */
+    data: RPEFeedbackCreateManyInput | RPEFeedbackCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RPEFeedback update
+   */
+  export type RPEFeedbackUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * The data needed to update a RPEFeedback.
+     */
+    data: XOR<RPEFeedbackUpdateInput, RPEFeedbackUncheckedUpdateInput>
+    /**
+     * Choose, which RPEFeedback to update.
+     */
+    where: RPEFeedbackWhereUniqueInput
+  }
+
+  /**
+   * RPEFeedback updateMany
+   */
+  export type RPEFeedbackUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RPEFeedbacks.
+     */
+    data: XOR<RPEFeedbackUpdateManyMutationInput, RPEFeedbackUncheckedUpdateManyInput>
+    /**
+     * Filter which RPEFeedbacks to update
+     */
+    where?: RPEFeedbackWhereInput
+  }
+
+  /**
+   * RPEFeedback upsert
+   */
+  export type RPEFeedbackUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * The filter to search for the RPEFeedback to update in case it exists.
+     */
+    where: RPEFeedbackWhereUniqueInput
+    /**
+     * In case the RPEFeedback found by the `where` argument doesn't exist, create a new RPEFeedback with this data.
+     */
+    create: XOR<RPEFeedbackCreateInput, RPEFeedbackUncheckedCreateInput>
+    /**
+     * In case the RPEFeedback was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RPEFeedbackUpdateInput, RPEFeedbackUncheckedUpdateInput>
+  }
+
+  /**
+   * RPEFeedback delete
+   */
+  export type RPEFeedbackDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+    /**
+     * Filter which RPEFeedback to delete.
+     */
+    where: RPEFeedbackWhereUniqueInput
+  }
+
+  /**
+   * RPEFeedback deleteMany
+   */
+  export type RPEFeedbackDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RPEFeedbacks to delete
+     */
+    where?: RPEFeedbackWhereInput
+  }
+
+  /**
+   * RPEFeedback without action
+   */
+  export type RPEFeedbackDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RPEFeedback
+     */
+    select?: RPEFeedbackSelect<ExtArgs> | null
+  }
+
+
+  /**
+   * Model PerformanceMetrics
+   */
+
+  export type AggregatePerformanceMetrics = {
+    _count: PerformanceMetricsCountAggregateOutputType | null
+    _avg: PerformanceMetricsAvgAggregateOutputType | null
+    _sum: PerformanceMetricsSumAggregateOutputType | null
+    _min: PerformanceMetricsMinAggregateOutputType | null
+    _max: PerformanceMetricsMaxAggregateOutputType | null
+  }
+
+  export type PerformanceMetricsAvgAggregateOutputType = {
+    totalVolume: number | null
+    averageRPE: number | null
+    completionRate: number | null
+    recoveryTime: number | null
+    sleepQuality: number | null
+    stressLevel: number | null
+  }
+
+  export type PerformanceMetricsSumAggregateOutputType = {
+    totalVolume: number | null
+    averageRPE: number | null
+    completionRate: number | null
+    recoveryTime: number | null
+    sleepQuality: number | null
+    stressLevel: number | null
+  }
+
+  export type PerformanceMetricsMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    sessionId: string | null
+    totalVolume: number | null
+    averageRPE: number | null
+    completionRate: number | null
+    recoveryTime: number | null
+    sleepQuality: number | null
+    stressLevel: number | null
+    timestamp: Date | null
+  }
+
+  export type PerformanceMetricsMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    sessionId: string | null
+    totalVolume: number | null
+    averageRPE: number | null
+    completionRate: number | null
+    recoveryTime: number | null
+    sleepQuality: number | null
+    stressLevel: number | null
+    timestamp: Date | null
+  }
+
+  export type PerformanceMetricsCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    sessionId: number
+    totalVolume: number
+    averageRPE: number
+    completionRate: number
+    recoveryTime: number
+    sleepQuality: number
+    stressLevel: number
+    timestamp: number
+    _all: number
+  }
+
+
+  export type PerformanceMetricsAvgAggregateInputType = {
+    totalVolume?: true
+    averageRPE?: true
+    completionRate?: true
+    recoveryTime?: true
+    sleepQuality?: true
+    stressLevel?: true
+  }
+
+  export type PerformanceMetricsSumAggregateInputType = {
+    totalVolume?: true
+    averageRPE?: true
+    completionRate?: true
+    recoveryTime?: true
+    sleepQuality?: true
+    stressLevel?: true
+  }
+
+  export type PerformanceMetricsMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    sessionId?: true
+    totalVolume?: true
+    averageRPE?: true
+    completionRate?: true
+    recoveryTime?: true
+    sleepQuality?: true
+    stressLevel?: true
+    timestamp?: true
+  }
+
+  export type PerformanceMetricsMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    sessionId?: true
+    totalVolume?: true
+    averageRPE?: true
+    completionRate?: true
+    recoveryTime?: true
+    sleepQuality?: true
+    stressLevel?: true
+    timestamp?: true
+  }
+
+  export type PerformanceMetricsCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    sessionId?: true
+    totalVolume?: true
+    averageRPE?: true
+    completionRate?: true
+    recoveryTime?: true
+    sleepQuality?: true
+    stressLevel?: true
+    timestamp?: true
+    _all?: true
+  }
+
+  export type PerformanceMetricsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PerformanceMetrics to aggregate.
+     */
+    where?: PerformanceMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PerformanceMetrics to fetch.
+     */
+    orderBy?: PerformanceMetricsOrderByWithRelationInput | PerformanceMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PerformanceMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PerformanceMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PerformanceMetrics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PerformanceMetrics
+    **/
+    _count?: true | PerformanceMetricsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PerformanceMetricsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PerformanceMetricsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PerformanceMetricsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PerformanceMetricsMaxAggregateInputType
+  }
+
+  export type GetPerformanceMetricsAggregateType<T extends PerformanceMetricsAggregateArgs> = {
+        [P in keyof T & keyof AggregatePerformanceMetrics]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePerformanceMetrics[P]>
+      : GetScalarType<T[P], AggregatePerformanceMetrics[P]>
+  }
+
+
+
+
+  export type PerformanceMetricsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PerformanceMetricsWhereInput
+    orderBy?: PerformanceMetricsOrderByWithAggregationInput | PerformanceMetricsOrderByWithAggregationInput[]
+    by: PerformanceMetricsScalarFieldEnum[] | PerformanceMetricsScalarFieldEnum
+    having?: PerformanceMetricsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PerformanceMetricsCountAggregateInputType | true
+    _avg?: PerformanceMetricsAvgAggregateInputType
+    _sum?: PerformanceMetricsSumAggregateInputType
+    _min?: PerformanceMetricsMinAggregateInputType
+    _max?: PerformanceMetricsMaxAggregateInputType
+  }
+
+  export type PerformanceMetricsGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    sessionId: string
+    totalVolume: number
+    averageRPE: number
+    completionRate: number
+    recoveryTime: number
+    sleepQuality: number
+    stressLevel: number
+    timestamp: Date
+    _count: PerformanceMetricsCountAggregateOutputType | null
+    _avg: PerformanceMetricsAvgAggregateOutputType | null
+    _sum: PerformanceMetricsSumAggregateOutputType | null
+    _min: PerformanceMetricsMinAggregateOutputType | null
+    _max: PerformanceMetricsMaxAggregateOutputType | null
+  }
+
+  type GetPerformanceMetricsGroupByPayload<T extends PerformanceMetricsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PerformanceMetricsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PerformanceMetricsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PerformanceMetricsGroupByOutputType[P]>
+            : GetScalarType<T[P], PerformanceMetricsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PerformanceMetricsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sessionId?: boolean
+    totalVolume?: boolean
+    averageRPE?: boolean
+    completionRate?: boolean
+    recoveryTime?: boolean
+    sleepQuality?: boolean
+    stressLevel?: boolean
+    timestamp?: boolean
+  }, ExtArgs["result"]["performanceMetrics"]>
+
+  export type PerformanceMetricsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sessionId?: boolean
+    totalVolume?: boolean
+    averageRPE?: boolean
+    completionRate?: boolean
+    recoveryTime?: boolean
+    sleepQuality?: boolean
+    stressLevel?: boolean
+    timestamp?: boolean
+  }, ExtArgs["result"]["performanceMetrics"]>
+
+  export type PerformanceMetricsSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    sessionId?: boolean
+    totalVolume?: boolean
+    averageRPE?: boolean
+    completionRate?: boolean
+    recoveryTime?: boolean
+    sleepQuality?: boolean
+    stressLevel?: boolean
+    timestamp?: boolean
+  }
+
+
+  export type $PerformanceMetricsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PerformanceMetrics"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      sessionId: string
+      totalVolume: number
+      averageRPE: number
+      completionRate: number
+      recoveryTime: number
+      sleepQuality: number
+      stressLevel: number
+      timestamp: Date
+    }, ExtArgs["result"]["performanceMetrics"]>
+    composites: {}
+  }
+
+  type PerformanceMetricsGetPayload<S extends boolean | null | undefined | PerformanceMetricsDefaultArgs> = $Result.GetResult<Prisma.$PerformanceMetricsPayload, S>
+
+  type PerformanceMetricsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PerformanceMetricsFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PerformanceMetricsCountAggregateInputType | true
+    }
+
+  export interface PerformanceMetricsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PerformanceMetrics'], meta: { name: 'PerformanceMetrics' } }
+    /**
+     * Find zero or one PerformanceMetrics that matches the filter.
+     * @param {PerformanceMetricsFindUniqueArgs} args - Arguments to find a PerformanceMetrics
+     * @example
+     * // Get one PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PerformanceMetricsFindUniqueArgs>(args: SelectSubset<T, PerformanceMetricsFindUniqueArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PerformanceMetrics that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PerformanceMetricsFindUniqueOrThrowArgs} args - Arguments to find a PerformanceMetrics
+     * @example
+     * // Get one PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PerformanceMetricsFindUniqueOrThrowArgs>(args: SelectSubset<T, PerformanceMetricsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PerformanceMetrics that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsFindFirstArgs} args - Arguments to find a PerformanceMetrics
+     * @example
+     * // Get one PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PerformanceMetricsFindFirstArgs>(args?: SelectSubset<T, PerformanceMetricsFindFirstArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PerformanceMetrics that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsFindFirstOrThrowArgs} args - Arguments to find a PerformanceMetrics
+     * @example
+     * // Get one PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PerformanceMetricsFindFirstOrThrowArgs>(args?: SelectSubset<T, PerformanceMetricsFindFirstOrThrowArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PerformanceMetrics that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.findMany()
+     * 
+     * // Get first 10 PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const performanceMetricsWithIdOnly = await prisma.performanceMetrics.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PerformanceMetricsFindManyArgs>(args?: SelectSubset<T, PerformanceMetricsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PerformanceMetrics.
+     * @param {PerformanceMetricsCreateArgs} args - Arguments to create a PerformanceMetrics.
+     * @example
+     * // Create one PerformanceMetrics
+     * const PerformanceMetrics = await prisma.performanceMetrics.create({
+     *   data: {
+     *     // ... data to create a PerformanceMetrics
+     *   }
+     * })
+     * 
+     */
+    create<T extends PerformanceMetricsCreateArgs>(args: SelectSubset<T, PerformanceMetricsCreateArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PerformanceMetrics.
+     * @param {PerformanceMetricsCreateManyArgs} args - Arguments to create many PerformanceMetrics.
+     * @example
+     * // Create many PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PerformanceMetricsCreateManyArgs>(args?: SelectSubset<T, PerformanceMetricsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PerformanceMetrics and returns the data saved in the database.
+     * @param {PerformanceMetricsCreateManyAndReturnArgs} args - Arguments to create many PerformanceMetrics.
+     * @example
+     * // Create many PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PerformanceMetrics and only return the `id`
+     * const performanceMetricsWithIdOnly = await prisma.performanceMetrics.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PerformanceMetricsCreateManyAndReturnArgs>(args?: SelectSubset<T, PerformanceMetricsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PerformanceMetrics.
+     * @param {PerformanceMetricsDeleteArgs} args - Arguments to delete one PerformanceMetrics.
+     * @example
+     * // Delete one PerformanceMetrics
+     * const PerformanceMetrics = await prisma.performanceMetrics.delete({
+     *   where: {
+     *     // ... filter to delete one PerformanceMetrics
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PerformanceMetricsDeleteArgs>(args: SelectSubset<T, PerformanceMetricsDeleteArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PerformanceMetrics.
+     * @param {PerformanceMetricsUpdateArgs} args - Arguments to update one PerformanceMetrics.
+     * @example
+     * // Update one PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PerformanceMetricsUpdateArgs>(args: SelectSubset<T, PerformanceMetricsUpdateArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PerformanceMetrics.
+     * @param {PerformanceMetricsDeleteManyArgs} args - Arguments to filter PerformanceMetrics to delete.
+     * @example
+     * // Delete a few PerformanceMetrics
+     * const { count } = await prisma.performanceMetrics.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PerformanceMetricsDeleteManyArgs>(args?: SelectSubset<T, PerformanceMetricsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PerformanceMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PerformanceMetricsUpdateManyArgs>(args: SelectSubset<T, PerformanceMetricsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PerformanceMetrics.
+     * @param {PerformanceMetricsUpsertArgs} args - Arguments to update or create a PerformanceMetrics.
+     * @example
+     * // Update or create a PerformanceMetrics
+     * const performanceMetrics = await prisma.performanceMetrics.upsert({
+     *   create: {
+     *     // ... data to create a PerformanceMetrics
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PerformanceMetrics we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PerformanceMetricsUpsertArgs>(args: SelectSubset<T, PerformanceMetricsUpsertArgs<ExtArgs>>): Prisma__PerformanceMetricsClient<$Result.GetResult<Prisma.$PerformanceMetricsPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PerformanceMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsCountArgs} args - Arguments to filter PerformanceMetrics to count.
+     * @example
+     * // Count the number of PerformanceMetrics
+     * const count = await prisma.performanceMetrics.count({
+     *   where: {
+     *     // ... the filter for the PerformanceMetrics we want to count
+     *   }
+     * })
+    **/
+    count<T extends PerformanceMetricsCountArgs>(
+      args?: Subset<T, PerformanceMetricsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PerformanceMetricsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PerformanceMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PerformanceMetricsAggregateArgs>(args: Subset<T, PerformanceMetricsAggregateArgs>): Prisma.PrismaPromise<GetPerformanceMetricsAggregateType<T>>
+
+    /**
+     * Group by PerformanceMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PerformanceMetricsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PerformanceMetricsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PerformanceMetricsGroupByArgs['orderBy'] }
+        : { orderBy?: PerformanceMetricsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PerformanceMetricsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPerformanceMetricsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PerformanceMetrics model
+   */
+  readonly fields: PerformanceMetricsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PerformanceMetrics.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PerformanceMetricsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PerformanceMetrics model
+   */ 
+  interface PerformanceMetricsFieldRefs {
+    readonly id: FieldRef<"PerformanceMetrics", 'String'>
+    readonly createdAt: FieldRef<"PerformanceMetrics", 'DateTime'>
+    readonly updatedAt: FieldRef<"PerformanceMetrics", 'DateTime'>
+    readonly sessionId: FieldRef<"PerformanceMetrics", 'String'>
+    readonly totalVolume: FieldRef<"PerformanceMetrics", 'Float'>
+    readonly averageRPE: FieldRef<"PerformanceMetrics", 'Float'>
+    readonly completionRate: FieldRef<"PerformanceMetrics", 'Int'>
+    readonly recoveryTime: FieldRef<"PerformanceMetrics", 'Float'>
+    readonly sleepQuality: FieldRef<"PerformanceMetrics", 'Int'>
+    readonly stressLevel: FieldRef<"PerformanceMetrics", 'Int'>
+    readonly timestamp: FieldRef<"PerformanceMetrics", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PerformanceMetrics findUnique
+   */
+  export type PerformanceMetricsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * Filter, which PerformanceMetrics to fetch.
+     */
+    where: PerformanceMetricsWhereUniqueInput
+  }
+
+  /**
+   * PerformanceMetrics findUniqueOrThrow
+   */
+  export type PerformanceMetricsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * Filter, which PerformanceMetrics to fetch.
+     */
+    where: PerformanceMetricsWhereUniqueInput
+  }
+
+  /**
+   * PerformanceMetrics findFirst
+   */
+  export type PerformanceMetricsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * Filter, which PerformanceMetrics to fetch.
+     */
+    where?: PerformanceMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PerformanceMetrics to fetch.
+     */
+    orderBy?: PerformanceMetricsOrderByWithRelationInput | PerformanceMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PerformanceMetrics.
+     */
+    cursor?: PerformanceMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PerformanceMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PerformanceMetrics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PerformanceMetrics.
+     */
+    distinct?: PerformanceMetricsScalarFieldEnum | PerformanceMetricsScalarFieldEnum[]
+  }
+
+  /**
+   * PerformanceMetrics findFirstOrThrow
+   */
+  export type PerformanceMetricsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * Filter, which PerformanceMetrics to fetch.
+     */
+    where?: PerformanceMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PerformanceMetrics to fetch.
+     */
+    orderBy?: PerformanceMetricsOrderByWithRelationInput | PerformanceMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PerformanceMetrics.
+     */
+    cursor?: PerformanceMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PerformanceMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PerformanceMetrics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PerformanceMetrics.
+     */
+    distinct?: PerformanceMetricsScalarFieldEnum | PerformanceMetricsScalarFieldEnum[]
+  }
+
+  /**
+   * PerformanceMetrics findMany
+   */
+  export type PerformanceMetricsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * Filter, which PerformanceMetrics to fetch.
+     */
+    where?: PerformanceMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PerformanceMetrics to fetch.
+     */
+    orderBy?: PerformanceMetricsOrderByWithRelationInput | PerformanceMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PerformanceMetrics.
+     */
+    cursor?: PerformanceMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PerformanceMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PerformanceMetrics.
+     */
+    skip?: number
+    distinct?: PerformanceMetricsScalarFieldEnum | PerformanceMetricsScalarFieldEnum[]
+  }
+
+  /**
+   * PerformanceMetrics create
+   */
+  export type PerformanceMetricsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * The data needed to create a PerformanceMetrics.
+     */
+    data: XOR<PerformanceMetricsCreateInput, PerformanceMetricsUncheckedCreateInput>
+  }
+
+  /**
+   * PerformanceMetrics createMany
+   */
+  export type PerformanceMetricsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PerformanceMetrics.
+     */
+    data: PerformanceMetricsCreateManyInput | PerformanceMetricsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PerformanceMetrics createManyAndReturn
+   */
+  export type PerformanceMetricsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PerformanceMetrics.
+     */
+    data: PerformanceMetricsCreateManyInput | PerformanceMetricsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PerformanceMetrics update
+   */
+  export type PerformanceMetricsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * The data needed to update a PerformanceMetrics.
+     */
+    data: XOR<PerformanceMetricsUpdateInput, PerformanceMetricsUncheckedUpdateInput>
+    /**
+     * Choose, which PerformanceMetrics to update.
+     */
+    where: PerformanceMetricsWhereUniqueInput
+  }
+
+  /**
+   * PerformanceMetrics updateMany
+   */
+  export type PerformanceMetricsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PerformanceMetrics.
+     */
+    data: XOR<PerformanceMetricsUpdateManyMutationInput, PerformanceMetricsUncheckedUpdateManyInput>
+    /**
+     * Filter which PerformanceMetrics to update
+     */
+    where?: PerformanceMetricsWhereInput
+  }
+
+  /**
+   * PerformanceMetrics upsert
+   */
+  export type PerformanceMetricsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * The filter to search for the PerformanceMetrics to update in case it exists.
+     */
+    where: PerformanceMetricsWhereUniqueInput
+    /**
+     * In case the PerformanceMetrics found by the `where` argument doesn't exist, create a new PerformanceMetrics with this data.
+     */
+    create: XOR<PerformanceMetricsCreateInput, PerformanceMetricsUncheckedCreateInput>
+    /**
+     * In case the PerformanceMetrics was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PerformanceMetricsUpdateInput, PerformanceMetricsUncheckedUpdateInput>
+  }
+
+  /**
+   * PerformanceMetrics delete
+   */
+  export type PerformanceMetricsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+    /**
+     * Filter which PerformanceMetrics to delete.
+     */
+    where: PerformanceMetricsWhereUniqueInput
+  }
+
+  /**
+   * PerformanceMetrics deleteMany
+   */
+  export type PerformanceMetricsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PerformanceMetrics to delete
+     */
+    where?: PerformanceMetricsWhereInput
+  }
+
+  /**
+   * PerformanceMetrics without action
+   */
+  export type PerformanceMetricsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PerformanceMetrics
+     */
+    select?: PerformanceMetricsSelect<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdaptationRecord
+   */
+
+  export type AggregateAdaptationRecord = {
+    _count: AdaptationRecordCountAggregateOutputType | null
+    _avg: AdaptationRecordAvgAggregateOutputType | null
+    _sum: AdaptationRecordSumAggregateOutputType | null
+    _min: AdaptationRecordMinAggregateOutputType | null
+    _max: AdaptationRecordMaxAggregateOutputType | null
+  }
+
+  export type AdaptationRecordAvgAggregateOutputType = {
+    confidence: number | null
+  }
+
+  export type AdaptationRecordSumAggregateOutputType = {
+    confidence: number | null
+  }
+
+  export type AdaptationRecordMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    planId: string | null
+    sessionId: string | null
+    type: string | null
+    rationale: string | null
+    confidence: number | null
+    implemented: boolean | null
+    appliedAt: Date | null
+  }
+
+  export type AdaptationRecordMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    planId: string | null
+    sessionId: string | null
+    type: string | null
+    rationale: string | null
+    confidence: number | null
+    implemented: boolean | null
+    appliedAt: Date | null
+  }
+
+  export type AdaptationRecordCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    planId: number
+    sessionId: number
+    type: number
+    changes: number
+    rationale: number
+    confidence: number
+    implemented: number
+    appliedAt: number
+    _all: number
+  }
+
+
+  export type AdaptationRecordAvgAggregateInputType = {
+    confidence?: true
+  }
+
+  export type AdaptationRecordSumAggregateInputType = {
+    confidence?: true
+  }
+
+  export type AdaptationRecordMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    planId?: true
+    sessionId?: true
+    type?: true
+    rationale?: true
+    confidence?: true
+    implemented?: true
+    appliedAt?: true
+  }
+
+  export type AdaptationRecordMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    planId?: true
+    sessionId?: true
+    type?: true
+    rationale?: true
+    confidence?: true
+    implemented?: true
+    appliedAt?: true
+  }
+
+  export type AdaptationRecordCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    planId?: true
+    sessionId?: true
+    type?: true
+    changes?: true
+    rationale?: true
+    confidence?: true
+    implemented?: true
+    appliedAt?: true
+    _all?: true
+  }
+
+  export type AdaptationRecordAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdaptationRecord to aggregate.
+     */
+    where?: AdaptationRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdaptationRecords to fetch.
+     */
+    orderBy?: AdaptationRecordOrderByWithRelationInput | AdaptationRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdaptationRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdaptationRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdaptationRecords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdaptationRecords
+    **/
+    _count?: true | AdaptationRecordCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AdaptationRecordAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AdaptationRecordSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdaptationRecordMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdaptationRecordMaxAggregateInputType
+  }
+
+  export type GetAdaptationRecordAggregateType<T extends AdaptationRecordAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdaptationRecord]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdaptationRecord[P]>
+      : GetScalarType<T[P], AggregateAdaptationRecord[P]>
+  }
+
+
+
+
+  export type AdaptationRecordGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdaptationRecordWhereInput
+    orderBy?: AdaptationRecordOrderByWithAggregationInput | AdaptationRecordOrderByWithAggregationInput[]
+    by: AdaptationRecordScalarFieldEnum[] | AdaptationRecordScalarFieldEnum
+    having?: AdaptationRecordScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdaptationRecordCountAggregateInputType | true
+    _avg?: AdaptationRecordAvgAggregateInputType
+    _sum?: AdaptationRecordSumAggregateInputType
+    _min?: AdaptationRecordMinAggregateInputType
+    _max?: AdaptationRecordMaxAggregateInputType
+  }
+
+  export type AdaptationRecordGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    planId: string
+    sessionId: string | null
+    type: string
+    changes: JsonValue
+    rationale: string
+    confidence: number
+    implemented: boolean
+    appliedAt: Date | null
+    _count: AdaptationRecordCountAggregateOutputType | null
+    _avg: AdaptationRecordAvgAggregateOutputType | null
+    _sum: AdaptationRecordSumAggregateOutputType | null
+    _min: AdaptationRecordMinAggregateOutputType | null
+    _max: AdaptationRecordMaxAggregateOutputType | null
+  }
+
+  type GetAdaptationRecordGroupByPayload<T extends AdaptationRecordGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdaptationRecordGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdaptationRecordGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdaptationRecordGroupByOutputType[P]>
+            : GetScalarType<T[P], AdaptationRecordGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdaptationRecordSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    planId?: boolean
+    sessionId?: boolean
+    type?: boolean
+    changes?: boolean
+    rationale?: boolean
+    confidence?: boolean
+    implemented?: boolean
+    appliedAt?: boolean
+  }, ExtArgs["result"]["adaptationRecord"]>
+
+  export type AdaptationRecordSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    planId?: boolean
+    sessionId?: boolean
+    type?: boolean
+    changes?: boolean
+    rationale?: boolean
+    confidence?: boolean
+    implemented?: boolean
+    appliedAt?: boolean
+  }, ExtArgs["result"]["adaptationRecord"]>
+
+  export type AdaptationRecordSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    planId?: boolean
+    sessionId?: boolean
+    type?: boolean
+    changes?: boolean
+    rationale?: boolean
+    confidence?: boolean
+    implemented?: boolean
+    appliedAt?: boolean
+  }
+
+
+  export type $AdaptationRecordPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdaptationRecord"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      planId: string
+      sessionId: string | null
+      type: string
+      changes: Prisma.JsonValue
+      rationale: string
+      confidence: number
+      implemented: boolean
+      appliedAt: Date | null
+    }, ExtArgs["result"]["adaptationRecord"]>
+    composites: {}
+  }
+
+  type AdaptationRecordGetPayload<S extends boolean | null | undefined | AdaptationRecordDefaultArgs> = $Result.GetResult<Prisma.$AdaptationRecordPayload, S>
+
+  type AdaptationRecordCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<AdaptationRecordFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: AdaptationRecordCountAggregateInputType | true
+    }
+
+  export interface AdaptationRecordDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdaptationRecord'], meta: { name: 'AdaptationRecord' } }
+    /**
+     * Find zero or one AdaptationRecord that matches the filter.
+     * @param {AdaptationRecordFindUniqueArgs} args - Arguments to find a AdaptationRecord
+     * @example
+     * // Get one AdaptationRecord
+     * const adaptationRecord = await prisma.adaptationRecord.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdaptationRecordFindUniqueArgs>(args: SelectSubset<T, AdaptationRecordFindUniqueArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one AdaptationRecord that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {AdaptationRecordFindUniqueOrThrowArgs} args - Arguments to find a AdaptationRecord
+     * @example
+     * // Get one AdaptationRecord
+     * const adaptationRecord = await prisma.adaptationRecord.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdaptationRecordFindUniqueOrThrowArgs>(args: SelectSubset<T, AdaptationRecordFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first AdaptationRecord that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordFindFirstArgs} args - Arguments to find a AdaptationRecord
+     * @example
+     * // Get one AdaptationRecord
+     * const adaptationRecord = await prisma.adaptationRecord.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdaptationRecordFindFirstArgs>(args?: SelectSubset<T, AdaptationRecordFindFirstArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first AdaptationRecord that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordFindFirstOrThrowArgs} args - Arguments to find a AdaptationRecord
+     * @example
+     * // Get one AdaptationRecord
+     * const adaptationRecord = await prisma.adaptationRecord.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdaptationRecordFindFirstOrThrowArgs>(args?: SelectSubset<T, AdaptationRecordFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more AdaptationRecords that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdaptationRecords
+     * const adaptationRecords = await prisma.adaptationRecord.findMany()
+     * 
+     * // Get first 10 AdaptationRecords
+     * const adaptationRecords = await prisma.adaptationRecord.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const adaptationRecordWithIdOnly = await prisma.adaptationRecord.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AdaptationRecordFindManyArgs>(args?: SelectSubset<T, AdaptationRecordFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a AdaptationRecord.
+     * @param {AdaptationRecordCreateArgs} args - Arguments to create a AdaptationRecord.
+     * @example
+     * // Create one AdaptationRecord
+     * const AdaptationRecord = await prisma.adaptationRecord.create({
+     *   data: {
+     *     // ... data to create a AdaptationRecord
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdaptationRecordCreateArgs>(args: SelectSubset<T, AdaptationRecordCreateArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many AdaptationRecords.
+     * @param {AdaptationRecordCreateManyArgs} args - Arguments to create many AdaptationRecords.
+     * @example
+     * // Create many AdaptationRecords
+     * const adaptationRecord = await prisma.adaptationRecord.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdaptationRecordCreateManyArgs>(args?: SelectSubset<T, AdaptationRecordCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdaptationRecords and returns the data saved in the database.
+     * @param {AdaptationRecordCreateManyAndReturnArgs} args - Arguments to create many AdaptationRecords.
+     * @example
+     * // Create many AdaptationRecords
+     * const adaptationRecord = await prisma.adaptationRecord.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdaptationRecords and only return the `id`
+     * const adaptationRecordWithIdOnly = await prisma.adaptationRecord.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdaptationRecordCreateManyAndReturnArgs>(args?: SelectSubset<T, AdaptationRecordCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a AdaptationRecord.
+     * @param {AdaptationRecordDeleteArgs} args - Arguments to delete one AdaptationRecord.
+     * @example
+     * // Delete one AdaptationRecord
+     * const AdaptationRecord = await prisma.adaptationRecord.delete({
+     *   where: {
+     *     // ... filter to delete one AdaptationRecord
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdaptationRecordDeleteArgs>(args: SelectSubset<T, AdaptationRecordDeleteArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one AdaptationRecord.
+     * @param {AdaptationRecordUpdateArgs} args - Arguments to update one AdaptationRecord.
+     * @example
+     * // Update one AdaptationRecord
+     * const adaptationRecord = await prisma.adaptationRecord.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdaptationRecordUpdateArgs>(args: SelectSubset<T, AdaptationRecordUpdateArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more AdaptationRecords.
+     * @param {AdaptationRecordDeleteManyArgs} args - Arguments to filter AdaptationRecords to delete.
+     * @example
+     * // Delete a few AdaptationRecords
+     * const { count } = await prisma.adaptationRecord.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdaptationRecordDeleteManyArgs>(args?: SelectSubset<T, AdaptationRecordDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdaptationRecords.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdaptationRecords
+     * const adaptationRecord = await prisma.adaptationRecord.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdaptationRecordUpdateManyArgs>(args: SelectSubset<T, AdaptationRecordUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AdaptationRecord.
+     * @param {AdaptationRecordUpsertArgs} args - Arguments to update or create a AdaptationRecord.
+     * @example
+     * // Update or create a AdaptationRecord
+     * const adaptationRecord = await prisma.adaptationRecord.upsert({
+     *   create: {
+     *     // ... data to create a AdaptationRecord
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdaptationRecord we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdaptationRecordUpsertArgs>(args: SelectSubset<T, AdaptationRecordUpsertArgs<ExtArgs>>): Prisma__AdaptationRecordClient<$Result.GetResult<Prisma.$AdaptationRecordPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of AdaptationRecords.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordCountArgs} args - Arguments to filter AdaptationRecords to count.
+     * @example
+     * // Count the number of AdaptationRecords
+     * const count = await prisma.adaptationRecord.count({
+     *   where: {
+     *     // ... the filter for the AdaptationRecords we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdaptationRecordCountArgs>(
+      args?: Subset<T, AdaptationRecordCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdaptationRecordCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdaptationRecord.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdaptationRecordAggregateArgs>(args: Subset<T, AdaptationRecordAggregateArgs>): Prisma.PrismaPromise<GetAdaptationRecordAggregateType<T>>
+
+    /**
+     * Group by AdaptationRecord.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdaptationRecordGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdaptationRecordGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdaptationRecordGroupByArgs['orderBy'] }
+        : { orderBy?: AdaptationRecordGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdaptationRecordGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdaptationRecordGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdaptationRecord model
+   */
+  readonly fields: AdaptationRecordFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdaptationRecord.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdaptationRecordClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdaptationRecord model
+   */ 
+  interface AdaptationRecordFieldRefs {
+    readonly id: FieldRef<"AdaptationRecord", 'String'>
+    readonly createdAt: FieldRef<"AdaptationRecord", 'DateTime'>
+    readonly updatedAt: FieldRef<"AdaptationRecord", 'DateTime'>
+    readonly planId: FieldRef<"AdaptationRecord", 'String'>
+    readonly sessionId: FieldRef<"AdaptationRecord", 'String'>
+    readonly type: FieldRef<"AdaptationRecord", 'String'>
+    readonly changes: FieldRef<"AdaptationRecord", 'Json'>
+    readonly rationale: FieldRef<"AdaptationRecord", 'String'>
+    readonly confidence: FieldRef<"AdaptationRecord", 'Float'>
+    readonly implemented: FieldRef<"AdaptationRecord", 'Boolean'>
+    readonly appliedAt: FieldRef<"AdaptationRecord", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdaptationRecord findUnique
+   */
+  export type AdaptationRecordFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * Filter, which AdaptationRecord to fetch.
+     */
+    where: AdaptationRecordWhereUniqueInput
+  }
+
+  /**
+   * AdaptationRecord findUniqueOrThrow
+   */
+  export type AdaptationRecordFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * Filter, which AdaptationRecord to fetch.
+     */
+    where: AdaptationRecordWhereUniqueInput
+  }
+
+  /**
+   * AdaptationRecord findFirst
+   */
+  export type AdaptationRecordFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * Filter, which AdaptationRecord to fetch.
+     */
+    where?: AdaptationRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdaptationRecords to fetch.
+     */
+    orderBy?: AdaptationRecordOrderByWithRelationInput | AdaptationRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdaptationRecords.
+     */
+    cursor?: AdaptationRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdaptationRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdaptationRecords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdaptationRecords.
+     */
+    distinct?: AdaptationRecordScalarFieldEnum | AdaptationRecordScalarFieldEnum[]
+  }
+
+  /**
+   * AdaptationRecord findFirstOrThrow
+   */
+  export type AdaptationRecordFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * Filter, which AdaptationRecord to fetch.
+     */
+    where?: AdaptationRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdaptationRecords to fetch.
+     */
+    orderBy?: AdaptationRecordOrderByWithRelationInput | AdaptationRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdaptationRecords.
+     */
+    cursor?: AdaptationRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdaptationRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdaptationRecords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdaptationRecords.
+     */
+    distinct?: AdaptationRecordScalarFieldEnum | AdaptationRecordScalarFieldEnum[]
+  }
+
+  /**
+   * AdaptationRecord findMany
+   */
+  export type AdaptationRecordFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * Filter, which AdaptationRecords to fetch.
+     */
+    where?: AdaptationRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdaptationRecords to fetch.
+     */
+    orderBy?: AdaptationRecordOrderByWithRelationInput | AdaptationRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdaptationRecords.
+     */
+    cursor?: AdaptationRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdaptationRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdaptationRecords.
+     */
+    skip?: number
+    distinct?: AdaptationRecordScalarFieldEnum | AdaptationRecordScalarFieldEnum[]
+  }
+
+  /**
+   * AdaptationRecord create
+   */
+  export type AdaptationRecordCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * The data needed to create a AdaptationRecord.
+     */
+    data: XOR<AdaptationRecordCreateInput, AdaptationRecordUncheckedCreateInput>
+  }
+
+  /**
+   * AdaptationRecord createMany
+   */
+  export type AdaptationRecordCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdaptationRecords.
+     */
+    data: AdaptationRecordCreateManyInput | AdaptationRecordCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdaptationRecord createManyAndReturn
+   */
+  export type AdaptationRecordCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many AdaptationRecords.
+     */
+    data: AdaptationRecordCreateManyInput | AdaptationRecordCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdaptationRecord update
+   */
+  export type AdaptationRecordUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * The data needed to update a AdaptationRecord.
+     */
+    data: XOR<AdaptationRecordUpdateInput, AdaptationRecordUncheckedUpdateInput>
+    /**
+     * Choose, which AdaptationRecord to update.
+     */
+    where: AdaptationRecordWhereUniqueInput
+  }
+
+  /**
+   * AdaptationRecord updateMany
+   */
+  export type AdaptationRecordUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdaptationRecords.
+     */
+    data: XOR<AdaptationRecordUpdateManyMutationInput, AdaptationRecordUncheckedUpdateManyInput>
+    /**
+     * Filter which AdaptationRecords to update
+     */
+    where?: AdaptationRecordWhereInput
+  }
+
+  /**
+   * AdaptationRecord upsert
+   */
+  export type AdaptationRecordUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * The filter to search for the AdaptationRecord to update in case it exists.
+     */
+    where: AdaptationRecordWhereUniqueInput
+    /**
+     * In case the AdaptationRecord found by the `where` argument doesn't exist, create a new AdaptationRecord with this data.
+     */
+    create: XOR<AdaptationRecordCreateInput, AdaptationRecordUncheckedCreateInput>
+    /**
+     * In case the AdaptationRecord was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdaptationRecordUpdateInput, AdaptationRecordUncheckedUpdateInput>
+  }
+
+  /**
+   * AdaptationRecord delete
+   */
+  export type AdaptationRecordDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+    /**
+     * Filter which AdaptationRecord to delete.
+     */
+    where: AdaptationRecordWhereUniqueInput
+  }
+
+  /**
+   * AdaptationRecord deleteMany
+   */
+  export type AdaptationRecordDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdaptationRecords to delete
+     */
+    where?: AdaptationRecordWhereInput
+  }
+
+  /**
+   * AdaptationRecord without action
+   */
+  export type AdaptationRecordDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdaptationRecord
+     */
+    select?: AdaptationRecordSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -6518,6 +9724,55 @@ export namespace Prisma {
   };
 
   export type PlanJobScalarFieldEnum = (typeof PlanJobScalarFieldEnum)[keyof typeof PlanJobScalarFieldEnum]
+
+
+  export const RPEFeedbackScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    sessionId: 'sessionId',
+    exerciseId: 'exerciseId',
+    rpe: 'rpe',
+    completionRate: 'completionRate',
+    notes: 'notes',
+    timestamp: 'timestamp'
+  };
+
+  export type RPEFeedbackScalarFieldEnum = (typeof RPEFeedbackScalarFieldEnum)[keyof typeof RPEFeedbackScalarFieldEnum]
+
+
+  export const PerformanceMetricsScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    sessionId: 'sessionId',
+    totalVolume: 'totalVolume',
+    averageRPE: 'averageRPE',
+    completionRate: 'completionRate',
+    recoveryTime: 'recoveryTime',
+    sleepQuality: 'sleepQuality',
+    stressLevel: 'stressLevel',
+    timestamp: 'timestamp'
+  };
+
+  export type PerformanceMetricsScalarFieldEnum = (typeof PerformanceMetricsScalarFieldEnum)[keyof typeof PerformanceMetricsScalarFieldEnum]
+
+
+  export const AdaptationRecordScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    planId: 'planId',
+    sessionId: 'sessionId',
+    type: 'type',
+    changes: 'changes',
+    rationale: 'rationale',
+    confidence: 'confidence',
+    implemented: 'implemented',
+    appliedAt: 'appliedAt'
+  };
+
+  export type AdaptationRecordScalarFieldEnum = (typeof AdaptationRecordScalarFieldEnum)[keyof typeof AdaptationRecordScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -6633,6 +9888,13 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
   /**
    * Deep Input Types
@@ -7050,6 +10312,248 @@ export namespace Prisma {
     completedAt?: DateTimeNullableWithAggregatesFilter<"PlanJob"> | Date | string | null
     retryCount?: IntWithAggregatesFilter<"PlanJob"> | number
     maxRetries?: IntWithAggregatesFilter<"PlanJob"> | number
+  }
+
+  export type RPEFeedbackWhereInput = {
+    AND?: RPEFeedbackWhereInput | RPEFeedbackWhereInput[]
+    OR?: RPEFeedbackWhereInput[]
+    NOT?: RPEFeedbackWhereInput | RPEFeedbackWhereInput[]
+    id?: StringFilter<"RPEFeedback"> | string
+    createdAt?: DateTimeFilter<"RPEFeedback"> | Date | string
+    updatedAt?: DateTimeFilter<"RPEFeedback"> | Date | string
+    sessionId?: StringFilter<"RPEFeedback"> | string
+    exerciseId?: StringFilter<"RPEFeedback"> | string
+    rpe?: IntFilter<"RPEFeedback"> | number
+    completionRate?: IntFilter<"RPEFeedback"> | number
+    notes?: StringNullableFilter<"RPEFeedback"> | string | null
+    timestamp?: DateTimeFilter<"RPEFeedback"> | Date | string
+  }
+
+  export type RPEFeedbackOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    exerciseId?: SortOrder
+    rpe?: SortOrder
+    completionRate?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type RPEFeedbackWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: RPEFeedbackWhereInput | RPEFeedbackWhereInput[]
+    OR?: RPEFeedbackWhereInput[]
+    NOT?: RPEFeedbackWhereInput | RPEFeedbackWhereInput[]
+    createdAt?: DateTimeFilter<"RPEFeedback"> | Date | string
+    updatedAt?: DateTimeFilter<"RPEFeedback"> | Date | string
+    sessionId?: StringFilter<"RPEFeedback"> | string
+    exerciseId?: StringFilter<"RPEFeedback"> | string
+    rpe?: IntFilter<"RPEFeedback"> | number
+    completionRate?: IntFilter<"RPEFeedback"> | number
+    notes?: StringNullableFilter<"RPEFeedback"> | string | null
+    timestamp?: DateTimeFilter<"RPEFeedback"> | Date | string
+  }, "id">
+
+  export type RPEFeedbackOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    exerciseId?: SortOrder
+    rpe?: SortOrder
+    completionRate?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    timestamp?: SortOrder
+    _count?: RPEFeedbackCountOrderByAggregateInput
+    _avg?: RPEFeedbackAvgOrderByAggregateInput
+    _max?: RPEFeedbackMaxOrderByAggregateInput
+    _min?: RPEFeedbackMinOrderByAggregateInput
+    _sum?: RPEFeedbackSumOrderByAggregateInput
+  }
+
+  export type RPEFeedbackScalarWhereWithAggregatesInput = {
+    AND?: RPEFeedbackScalarWhereWithAggregatesInput | RPEFeedbackScalarWhereWithAggregatesInput[]
+    OR?: RPEFeedbackScalarWhereWithAggregatesInput[]
+    NOT?: RPEFeedbackScalarWhereWithAggregatesInput | RPEFeedbackScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RPEFeedback"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"RPEFeedback"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RPEFeedback"> | Date | string
+    sessionId?: StringWithAggregatesFilter<"RPEFeedback"> | string
+    exerciseId?: StringWithAggregatesFilter<"RPEFeedback"> | string
+    rpe?: IntWithAggregatesFilter<"RPEFeedback"> | number
+    completionRate?: IntWithAggregatesFilter<"RPEFeedback"> | number
+    notes?: StringNullableWithAggregatesFilter<"RPEFeedback"> | string | null
+    timestamp?: DateTimeWithAggregatesFilter<"RPEFeedback"> | Date | string
+  }
+
+  export type PerformanceMetricsWhereInput = {
+    AND?: PerformanceMetricsWhereInput | PerformanceMetricsWhereInput[]
+    OR?: PerformanceMetricsWhereInput[]
+    NOT?: PerformanceMetricsWhereInput | PerformanceMetricsWhereInput[]
+    id?: StringFilter<"PerformanceMetrics"> | string
+    createdAt?: DateTimeFilter<"PerformanceMetrics"> | Date | string
+    updatedAt?: DateTimeFilter<"PerformanceMetrics"> | Date | string
+    sessionId?: StringFilter<"PerformanceMetrics"> | string
+    totalVolume?: FloatFilter<"PerformanceMetrics"> | number
+    averageRPE?: FloatFilter<"PerformanceMetrics"> | number
+    completionRate?: IntFilter<"PerformanceMetrics"> | number
+    recoveryTime?: FloatFilter<"PerformanceMetrics"> | number
+    sleepQuality?: IntFilter<"PerformanceMetrics"> | number
+    stressLevel?: IntFilter<"PerformanceMetrics"> | number
+    timestamp?: DateTimeFilter<"PerformanceMetrics"> | Date | string
+  }
+
+  export type PerformanceMetricsOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type PerformanceMetricsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PerformanceMetricsWhereInput | PerformanceMetricsWhereInput[]
+    OR?: PerformanceMetricsWhereInput[]
+    NOT?: PerformanceMetricsWhereInput | PerformanceMetricsWhereInput[]
+    createdAt?: DateTimeFilter<"PerformanceMetrics"> | Date | string
+    updatedAt?: DateTimeFilter<"PerformanceMetrics"> | Date | string
+    sessionId?: StringFilter<"PerformanceMetrics"> | string
+    totalVolume?: FloatFilter<"PerformanceMetrics"> | number
+    averageRPE?: FloatFilter<"PerformanceMetrics"> | number
+    completionRate?: IntFilter<"PerformanceMetrics"> | number
+    recoveryTime?: FloatFilter<"PerformanceMetrics"> | number
+    sleepQuality?: IntFilter<"PerformanceMetrics"> | number
+    stressLevel?: IntFilter<"PerformanceMetrics"> | number
+    timestamp?: DateTimeFilter<"PerformanceMetrics"> | Date | string
+  }, "id">
+
+  export type PerformanceMetricsOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+    timestamp?: SortOrder
+    _count?: PerformanceMetricsCountOrderByAggregateInput
+    _avg?: PerformanceMetricsAvgOrderByAggregateInput
+    _max?: PerformanceMetricsMaxOrderByAggregateInput
+    _min?: PerformanceMetricsMinOrderByAggregateInput
+    _sum?: PerformanceMetricsSumOrderByAggregateInput
+  }
+
+  export type PerformanceMetricsScalarWhereWithAggregatesInput = {
+    AND?: PerformanceMetricsScalarWhereWithAggregatesInput | PerformanceMetricsScalarWhereWithAggregatesInput[]
+    OR?: PerformanceMetricsScalarWhereWithAggregatesInput[]
+    NOT?: PerformanceMetricsScalarWhereWithAggregatesInput | PerformanceMetricsScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PerformanceMetrics"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"PerformanceMetrics"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PerformanceMetrics"> | Date | string
+    sessionId?: StringWithAggregatesFilter<"PerformanceMetrics"> | string
+    totalVolume?: FloatWithAggregatesFilter<"PerformanceMetrics"> | number
+    averageRPE?: FloatWithAggregatesFilter<"PerformanceMetrics"> | number
+    completionRate?: IntWithAggregatesFilter<"PerformanceMetrics"> | number
+    recoveryTime?: FloatWithAggregatesFilter<"PerformanceMetrics"> | number
+    sleepQuality?: IntWithAggregatesFilter<"PerformanceMetrics"> | number
+    stressLevel?: IntWithAggregatesFilter<"PerformanceMetrics"> | number
+    timestamp?: DateTimeWithAggregatesFilter<"PerformanceMetrics"> | Date | string
+  }
+
+  export type AdaptationRecordWhereInput = {
+    AND?: AdaptationRecordWhereInput | AdaptationRecordWhereInput[]
+    OR?: AdaptationRecordWhereInput[]
+    NOT?: AdaptationRecordWhereInput | AdaptationRecordWhereInput[]
+    id?: StringFilter<"AdaptationRecord"> | string
+    createdAt?: DateTimeFilter<"AdaptationRecord"> | Date | string
+    updatedAt?: DateTimeFilter<"AdaptationRecord"> | Date | string
+    planId?: StringFilter<"AdaptationRecord"> | string
+    sessionId?: StringNullableFilter<"AdaptationRecord"> | string | null
+    type?: StringFilter<"AdaptationRecord"> | string
+    changes?: JsonFilter<"AdaptationRecord">
+    rationale?: StringFilter<"AdaptationRecord"> | string
+    confidence?: FloatFilter<"AdaptationRecord"> | number
+    implemented?: BoolFilter<"AdaptationRecord"> | boolean
+    appliedAt?: DateTimeNullableFilter<"AdaptationRecord"> | Date | string | null
+  }
+
+  export type AdaptationRecordOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    planId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    changes?: SortOrder
+    rationale?: SortOrder
+    confidence?: SortOrder
+    implemented?: SortOrder
+    appliedAt?: SortOrderInput | SortOrder
+  }
+
+  export type AdaptationRecordWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AdaptationRecordWhereInput | AdaptationRecordWhereInput[]
+    OR?: AdaptationRecordWhereInput[]
+    NOT?: AdaptationRecordWhereInput | AdaptationRecordWhereInput[]
+    createdAt?: DateTimeFilter<"AdaptationRecord"> | Date | string
+    updatedAt?: DateTimeFilter<"AdaptationRecord"> | Date | string
+    planId?: StringFilter<"AdaptationRecord"> | string
+    sessionId?: StringNullableFilter<"AdaptationRecord"> | string | null
+    type?: StringFilter<"AdaptationRecord"> | string
+    changes?: JsonFilter<"AdaptationRecord">
+    rationale?: StringFilter<"AdaptationRecord"> | string
+    confidence?: FloatFilter<"AdaptationRecord"> | number
+    implemented?: BoolFilter<"AdaptationRecord"> | boolean
+    appliedAt?: DateTimeNullableFilter<"AdaptationRecord"> | Date | string | null
+  }, "id">
+
+  export type AdaptationRecordOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    planId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    type?: SortOrder
+    changes?: SortOrder
+    rationale?: SortOrder
+    confidence?: SortOrder
+    implemented?: SortOrder
+    appliedAt?: SortOrderInput | SortOrder
+    _count?: AdaptationRecordCountOrderByAggregateInput
+    _avg?: AdaptationRecordAvgOrderByAggregateInput
+    _max?: AdaptationRecordMaxOrderByAggregateInput
+    _min?: AdaptationRecordMinOrderByAggregateInput
+    _sum?: AdaptationRecordSumOrderByAggregateInput
+  }
+
+  export type AdaptationRecordScalarWhereWithAggregatesInput = {
+    AND?: AdaptationRecordScalarWhereWithAggregatesInput | AdaptationRecordScalarWhereWithAggregatesInput[]
+    OR?: AdaptationRecordScalarWhereWithAggregatesInput[]
+    NOT?: AdaptationRecordScalarWhereWithAggregatesInput | AdaptationRecordScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AdaptationRecord"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"AdaptationRecord"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AdaptationRecord"> | Date | string
+    planId?: StringWithAggregatesFilter<"AdaptationRecord"> | string
+    sessionId?: StringNullableWithAggregatesFilter<"AdaptationRecord"> | string | null
+    type?: StringWithAggregatesFilter<"AdaptationRecord"> | string
+    changes?: JsonWithAggregatesFilter<"AdaptationRecord">
+    rationale?: StringWithAggregatesFilter<"AdaptationRecord"> | string
+    confidence?: FloatWithAggregatesFilter<"AdaptationRecord"> | number
+    implemented?: BoolWithAggregatesFilter<"AdaptationRecord"> | boolean
+    appliedAt?: DateTimeNullableWithAggregatesFilter<"AdaptationRecord"> | Date | string | null
   }
 
   export type PlanCreateInput = {
@@ -7514,6 +11018,286 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     retryCount?: IntFieldUpdateOperationsInput | number
     maxRetries?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type RPEFeedbackCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessionId: string
+    exerciseId: string
+    rpe: number
+    completionRate: number
+    notes?: string | null
+    timestamp?: Date | string
+  }
+
+  export type RPEFeedbackUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessionId: string
+    exerciseId: string
+    rpe: number
+    completionRate: number
+    notes?: string | null
+    timestamp?: Date | string
+  }
+
+  export type RPEFeedbackUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    exerciseId?: StringFieldUpdateOperationsInput | string
+    rpe?: IntFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RPEFeedbackUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    exerciseId?: StringFieldUpdateOperationsInput | string
+    rpe?: IntFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RPEFeedbackCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessionId: string
+    exerciseId: string
+    rpe: number
+    completionRate: number
+    notes?: string | null
+    timestamp?: Date | string
+  }
+
+  export type RPEFeedbackUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    exerciseId?: StringFieldUpdateOperationsInput | string
+    rpe?: IntFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RPEFeedbackUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    exerciseId?: StringFieldUpdateOperationsInput | string
+    rpe?: IntFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PerformanceMetricsCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessionId: string
+    totalVolume: number
+    averageRPE: number
+    completionRate: number
+    recoveryTime: number
+    sleepQuality: number
+    stressLevel: number
+    timestamp?: Date | string
+  }
+
+  export type PerformanceMetricsUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessionId: string
+    totalVolume: number
+    averageRPE: number
+    completionRate: number
+    recoveryTime: number
+    sleepQuality: number
+    stressLevel: number
+    timestamp?: Date | string
+  }
+
+  export type PerformanceMetricsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageRPE?: FloatFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    recoveryTime?: FloatFieldUpdateOperationsInput | number
+    sleepQuality?: IntFieldUpdateOperationsInput | number
+    stressLevel?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PerformanceMetricsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageRPE?: FloatFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    recoveryTime?: FloatFieldUpdateOperationsInput | number
+    sleepQuality?: IntFieldUpdateOperationsInput | number
+    stressLevel?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PerformanceMetricsCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessionId: string
+    totalVolume: number
+    averageRPE: number
+    completionRate: number
+    recoveryTime: number
+    sleepQuality: number
+    stressLevel: number
+    timestamp?: Date | string
+  }
+
+  export type PerformanceMetricsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageRPE?: FloatFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    recoveryTime?: FloatFieldUpdateOperationsInput | number
+    sleepQuality?: IntFieldUpdateOperationsInput | number
+    stressLevel?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PerformanceMetricsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessionId?: StringFieldUpdateOperationsInput | string
+    totalVolume?: FloatFieldUpdateOperationsInput | number
+    averageRPE?: FloatFieldUpdateOperationsInput | number
+    completionRate?: IntFieldUpdateOperationsInput | number
+    recoveryTime?: FloatFieldUpdateOperationsInput | number
+    sleepQuality?: IntFieldUpdateOperationsInput | number
+    stressLevel?: IntFieldUpdateOperationsInput | number
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdaptationRecordCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    planId: string
+    sessionId?: string | null
+    type: string
+    changes: JsonNullValueInput | InputJsonValue
+    rationale: string
+    confidence: number
+    implemented?: boolean
+    appliedAt?: Date | string | null
+  }
+
+  export type AdaptationRecordUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    planId: string
+    sessionId?: string | null
+    type: string
+    changes: JsonNullValueInput | InputJsonValue
+    rationale: string
+    confidence: number
+    implemented?: boolean
+    appliedAt?: Date | string | null
+  }
+
+  export type AdaptationRecordUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    planId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    changes?: JsonNullValueInput | InputJsonValue
+    rationale?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    implemented?: BoolFieldUpdateOperationsInput | boolean
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AdaptationRecordUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    planId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    changes?: JsonNullValueInput | InputJsonValue
+    rationale?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    implemented?: BoolFieldUpdateOperationsInput | boolean
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AdaptationRecordCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    planId: string
+    sessionId?: string | null
+    type: string
+    changes: JsonNullValueInput | InputJsonValue
+    rationale: string
+    confidence: number
+    implemented?: boolean
+    appliedAt?: Date | string | null
+  }
+
+  export type AdaptationRecordUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    planId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    changes?: JsonNullValueInput | InputJsonValue
+    rationale?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    implemented?: BoolFieldUpdateOperationsInput | boolean
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AdaptationRecordUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    planId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    changes?: JsonNullValueInput | InputJsonValue
+    rationale?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    implemented?: BoolFieldUpdateOperationsInput | boolean
+    appliedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -8065,6 +11849,200 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
+  export type RPEFeedbackCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    exerciseId?: SortOrder
+    rpe?: SortOrder
+    completionRate?: SortOrder
+    notes?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type RPEFeedbackAvgOrderByAggregateInput = {
+    rpe?: SortOrder
+    completionRate?: SortOrder
+  }
+
+  export type RPEFeedbackMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    exerciseId?: SortOrder
+    rpe?: SortOrder
+    completionRate?: SortOrder
+    notes?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type RPEFeedbackMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    exerciseId?: SortOrder
+    rpe?: SortOrder
+    completionRate?: SortOrder
+    notes?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type RPEFeedbackSumOrderByAggregateInput = {
+    rpe?: SortOrder
+    completionRate?: SortOrder
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type PerformanceMetricsCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type PerformanceMetricsAvgOrderByAggregateInput = {
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+  }
+
+  export type PerformanceMetricsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type PerformanceMetricsMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    sessionId?: SortOrder
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type PerformanceMetricsSumOrderByAggregateInput = {
+    totalVolume?: SortOrder
+    averageRPE?: SortOrder
+    completionRate?: SortOrder
+    recoveryTime?: SortOrder
+    sleepQuality?: SortOrder
+    stressLevel?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type AdaptationRecordCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    planId?: SortOrder
+    sessionId?: SortOrder
+    type?: SortOrder
+    changes?: SortOrder
+    rationale?: SortOrder
+    confidence?: SortOrder
+    implemented?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type AdaptationRecordAvgOrderByAggregateInput = {
+    confidence?: SortOrder
+  }
+
+  export type AdaptationRecordMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    planId?: SortOrder
+    sessionId?: SortOrder
+    type?: SortOrder
+    rationale?: SortOrder
+    confidence?: SortOrder
+    implemented?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type AdaptationRecordMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    planId?: SortOrder
+    sessionId?: SortOrder
+    type?: SortOrder
+    rationale?: SortOrder
+    confidence?: SortOrder
+    implemented?: SortOrder
+    appliedAt?: SortOrder
+  }
+
+  export type AdaptationRecordSumOrderByAggregateInput = {
+    confidence?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type MicrocycleCreateNestedManyWithoutPlanInput = {
     create?: XOR<MicrocycleCreateWithoutPlanInput, MicrocycleUncheckedCreateWithoutPlanInput> | MicrocycleCreateWithoutPlanInput[] | MicrocycleUncheckedCreateWithoutPlanInput[]
     connectOrCreate?: MicrocycleCreateOrConnectWithoutPlanInput | MicrocycleCreateOrConnectWithoutPlanInput[]
@@ -8263,6 +12241,18 @@ export namespace Prisma {
     upsert?: SessionUpsertWithoutExercisesInput
     connect?: SessionWhereUniqueInput
     update?: XOR<XOR<SessionUpdateToOneWithWhereWithoutExercisesInput, SessionUpdateWithoutExercisesInput>, SessionUncheckedUpdateWithoutExercisesInput>
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -8495,6 +12485,35 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type MicrocycleCreateWithoutPlanInput = {
@@ -9033,6 +13052,18 @@ export namespace Prisma {
      * @deprecated Use PlanJobDefaultArgs instead
      */
     export type PlanJobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PlanJobDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use RPEFeedbackDefaultArgs instead
+     */
+    export type RPEFeedbackArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RPEFeedbackDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PerformanceMetricsDefaultArgs instead
+     */
+    export type PerformanceMetricsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PerformanceMetricsDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AdaptationRecordDefaultArgs instead
+     */
+    export type AdaptationRecordArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AdaptationRecordDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

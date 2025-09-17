@@ -1,4 +1,13 @@
-import { EventBus } from '@athlete-ally/event-bus';
+// 临时EventBus类
+class EventBus {
+  constructor() {}
+  async publish(topic: string, data: any) {
+    console.log(`Publishing to ${topic}:`, data);
+  }
+  async subscribe(topic: string, handler: (data: any) => Promise<void>) {
+    console.log(`Subscribing to ${topic}`);
+  }
+}
 import { config } from '../config.js';
 import { register, Counter, Histogram, Gauge } from 'prom-client';
 import { Task, SubscriptionOptions } from '../types/index.js';

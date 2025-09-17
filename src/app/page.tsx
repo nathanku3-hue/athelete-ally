@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import React, { useEffect, useRef } from 'react';
+import { NavBar } from '@/components/navigation/NavBar';
 
 // ============================================================================
 // 動態視覺化組件 (Dynamic Visualizer Component)
@@ -130,7 +131,9 @@ const DynamicVisualizer = () => {
 // ============================================================================
 export default function Home() {
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-900 text-white p-8 md:p-12">
+    <>
+      <NavBar />
+      <main className="flex items-center justify-center min-h-screen bg-gray-900 text-white p-8 md:p-12">
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         
         {/* 左欄：文本內容和 CTA */}
@@ -167,5 +170,6 @@ export default function Home() {
 
       </div>
     </main>
+    </>
   );
 }

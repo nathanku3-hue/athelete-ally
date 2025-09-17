@@ -73,7 +73,7 @@ export const useProtocols = (filters: ProtocolFilters = {}) => {
     queryKey: ['protocols', filters],
     queryFn: () => protocolAPI.getProtocols(filters),
     staleTime: 5 * 60 * 1000, // 5分钟缓存
-    cacheTime: 10 * 60 * 1000, // 10分钟缓存
+    gcTime: 10 * 60 * 1000, // 10分钟缓存
     retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
@@ -88,7 +88,7 @@ export const useProtocol = (id: string, includeBlocks = false) => {
     queryFn: () => protocolAPI.getProtocol(id, includeBlocks),
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -102,13 +102,14 @@ export const useInfiniteProtocols = (filters: ProtocolFilters = {}) => {
       ...filters,
       page: pageParam,
     }),
+    initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       return lastPage.pagination.page < lastPage.pagination.totalPages
         ? lastPage.pagination.page + 1
         : undefined;
     },
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
@@ -121,7 +122,7 @@ export const useSearchProtocols = (query: string, filters: ProtocolFilters = {})
     queryFn: () => protocolAPI.searchProtocols(query, filters),
     enabled: query.length > 2,
     staleTime: 2 * 60 * 1000, // 2分钟缓存
-    cacheTime: 5 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -148,7 +149,7 @@ export const useCreateProtocol = () => {
       });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocols']);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
     },
     onError: (error) => {
       console.error('Failed to create protocol:', error);
@@ -167,8 +168,8 @@ export const useUpdateProtocol = () => {
       protocolAPI.updateProtocol(id, data),
     onMutate: async ({ id, data }) => {
       // 取消正在进行的查询
-      await queryClient.cancelQueries(['protocols']);
-      await queryClient.cancelQueries(['protocol', id]);
+      await queryClient.cancelQueries({ queryKey: ['protocols'] });
+      await queryClient.cancelQueries({ queryKey: ['protocol', id] });
       
       // 保存之前的数据
       const previousProtocols = queryClient.getQueryData(['protocols']);
@@ -201,8 +202,8 @@ export const useUpdateProtocol = () => {
     },
     onSettled: (data, error, { id }) => {
       // 重新验证查询
-      queryClient.invalidateQueries(['protocols']);
-      queryClient.invalidateQueries(['protocol', id]);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
+      queryClient.invalidateQueries({ queryKey: ['protocol', id] });
     },
   });
 };
@@ -230,10 +231,10 @@ export const useDeleteProtocol = () => {
       });
       
       // 移除单个协议缓存
-      queryClient.removeQueries(['protocol', id]);
+      queryClient.removeQueries({ queryKey: ['protocol', id] });
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocols']);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
     },
     onError: (error) => {
       console.error('Failed to delete protocol:', error);
@@ -301,10 +302,10 @@ export const useBatchProtocolOperations = () => {
       });
       
       // 移除单个协议缓存
-      ids.forEach(id => queryClient.removeQueries(['protocol', id]));
+      ids.forEach(id => queryClient.removeQueries({ queryKey: ['protocol', id] }));
       
       // 使相关查询失效
-      queryClient.invalidateQueries(['protocols']);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
     },
   });
   
@@ -324,7 +325,7 @@ export const useBatchProtocolOperations = () => {
     },
     onSuccess: () => {
       // 使所有协议查询失效
-      queryClient.invalidateQueries(['protocols']);
+      queryClient.invalidateQueries({ queryKey: ['protocols'] });
     },
   });
   
@@ -343,6 +344,6 @@ export const useProtocolStats = () => {
       return response.json();
     },
     staleTime: 10 * 60 * 1000, // 10分钟缓存
-    cacheTime: 30 * 60 * 1000, // 30分钟缓存
+    gcTime: 30 * 60 * 1000, // 30分钟缓存
   });
 };

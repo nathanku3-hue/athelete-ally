@@ -19,39 +19,39 @@ declare const PlanSchema: z.ZodObject<{
                 weight: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
                 notes?: string | undefined;
             }, {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
                 notes?: string | undefined;
             }>, "many">;
         }, "strip", z.ZodTypeAny, {
+            duration: number;
             name: string;
             dayOfWeek: number;
-            duration: number;
             exercises: {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
                 notes?: string | undefined;
             }[];
         }, {
+            duration: number;
             name: string;
             dayOfWeek: number;
-            duration: number;
             exercises: {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
@@ -61,14 +61,14 @@ declare const PlanSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         name: string;
         weekNumber: number;
-        phase: "preparation" | "competition" | "recovery" | "transition";
+        phase: "recovery" | "preparation" | "competition" | "transition";
         sessions: {
+            duration: number;
             name: string;
             dayOfWeek: number;
-            duration: number;
             exercises: {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
@@ -78,14 +78,14 @@ declare const PlanSchema: z.ZodObject<{
     }, {
         name: string;
         weekNumber: number;
-        phase: "preparation" | "competition" | "recovery" | "transition";
+        phase: "recovery" | "preparation" | "competition" | "transition";
         sessions: {
+            duration: number;
             name: string;
             dayOfWeek: number;
-            duration: number;
             exercises: {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
@@ -94,20 +94,20 @@ declare const PlanSchema: z.ZodObject<{
         }[];
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
-    description: string;
-    name: string;
     duration: number;
+    name: string;
+    description: string;
     microcycles: {
         name: string;
         weekNumber: number;
-        phase: "preparation" | "competition" | "recovery" | "transition";
+        phase: "recovery" | "preparation" | "competition" | "transition";
         sessions: {
+            duration: number;
             name: string;
             dayOfWeek: number;
-            duration: number;
             exercises: {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;
@@ -116,20 +116,20 @@ declare const PlanSchema: z.ZodObject<{
         }[];
     }[];
 }, {
-    description: string;
-    name: string;
     duration: number;
+    name: string;
+    description: string;
     microcycles: {
         name: string;
         weekNumber: number;
-        phase: "preparation" | "competition" | "recovery" | "transition";
+        phase: "recovery" | "preparation" | "competition" | "transition";
         sessions: {
+            duration: number;
             name: string;
             dayOfWeek: number;
-            duration: number;
             exercises: {
-                category: "strength" | "mobility" | "cardio" | "flexibility" | "power" | "endurance";
                 name: string;
+                category: "strength" | "endurance" | "flexibility" | "cardio" | "power" | "mobility";
                 sets: number;
                 reps: string;
                 weight: string;

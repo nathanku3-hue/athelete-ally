@@ -1,84 +1,144 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 啟用為 Docker 優化的獨立輸出模式
-  output: 'standalone',
-  // 圖片域名配置
+  // 基础配置
+  reactStrictMode: true,
+  
+  // 性能优化
+  compress: true,
+  poweredByHeader: false,
+  
+  // 图片优化
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'example.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    domains: ['localhost', 'your-domain.com'],
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // 前端構建時排除所有後端相關的模塊
-      config.resolve.fallback = {
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-        stream: false,
-        util: false,
-        url: false,
-        assert: false,
-        http: false,
-        https: false,
-        zlib: false,
-        path: false,
-        os: false,
-        child_process: false,
-        // 排除 Prisma 相關模塊
-        '@prisma/client': false,
-        'prisma': false,
+  
+  // 实验性功能
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  
+  // 环境变量
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  
+  // 重写规则
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.API_BASE_URL || 'http://localhost:4000'}/api/:path*`,
+      },
+    ];
+  },
+  
+  // 重定向规则
+  async redirects() {
+    return [
+      {
+        source: '/old-path',
+        destination: '/new-path',
+        permanent: true,
+      },
+    ];
+  },
+  
+  // 头部配置
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, s-maxage=86400',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+  
+  // Webpack配置
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // 生产环境优化
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
       };
-      
-      // 確保 Prisma 相關包不會被包含在客戶端構建中
-      config.externals = config.externals || [];
-      if (Array.isArray(config.externals)) {
-        config.externals.push({
-          '@prisma/client': 'commonjs @prisma/client',
-          'prisma': 'commonjs prisma',
-        });
-      }
     }
-    
-    // 排除 services 目錄，確保前端不會意外導入後端代碼
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      // 將 services 目錄重定向到空對象，防止意外導入
-      '@/services': false,
-      '../services': false,
-      '../../services': false,
-    };
     
     return config;
   },
-  // 確保只有必要的實驗性功能
-  experimental: {
-    esmExternals: 'loose',
+  
+  // 构建配置
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
   },
+  
+  // 输出配置
+  output: 'standalone',
+  
+  // 国际化配置 (App Router不支持i18n配置)
+  // i18n: {
+  //   locales: ['en', 'zh-CN'],
+  //   defaultLocale: 'en',
+  //   localeDetection: true,
+  // },
+  
+  // 实验性功能
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  
+  // 服务器外部包
+  serverExternalPackages: ['@prisma/client'],
 };
 
 export default nextConfig;

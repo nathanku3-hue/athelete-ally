@@ -1,62 +1,105 @@
-# Athlete Ally - Your Intelligent Training Coach
+# Athlete Ally
 
-AI-powered strength & conditioning platform with scientific periodization, customized for individual athletes.
+## 概述
+Athlete Ally 是一个AI驱动的运动训练平台，提供个性化的训练计划生成、优化和管理服务。
 
-## 🚀 Local Development Environment
+## 项目结构
 
-**⚠️ IMPORTANT: The ONLY official way to run this project for development and testing is by using the Docker Compose-based preview environment.**
-
-This ensures that all microservices, databases, and infrastructure are running in a consistent, isolated, and production-like context.
-
-### Quick Start
-
-**To start the entire system, run the following single command from the project root:**
-
-```bash
-npm run preview:up
+```
+athlete-ally/
+├── apps/                    # 前端应用
+│   └── gateway-bff/        # API网关
+├── services/               # 后端服务
+│   ├── planning-engine/    # 训练计划引擎
+│   ├── profile-onboarding/ # 用户档案
+│   ├── exercises/          # 运动数据库
+│   └── fatigue/            # 疲劳管理
+├── packages/               # 共享包
+│   ├── shared/            # 共享工具
+│   ├── contracts/         # API合约
+│   └── protocol-types/    # 协议类型
+├── monitoring/             # 监控配置
+├── docs/                   # 项目文档
+└── infrastructure/         # 基础设施
 ```
 
-**Do NOT run `npm run dev` in individual service or app directories, as this will lead to an incomplete and inconsistent environment.**
+## 快速启动
 
-### Service URLs
+### 开发环境
+```bash
+# 安装依赖
+npm install
 
-Once started, you can access:
-- **Frontend**: http://localhost:3000
-- **Gateway BFF**: http://localhost:4000
-- **API Docs**: http://localhost:4000/documentation
-- **Jaeger Tracing**: http://localhost:16686
-- **Prometheus Metrics**: http://localhost:9090
-- **Grafana Dashboards**: http://localhost:3001
+# 启动开发环境
+npm run dev
 
-### Development Workflow
+# 启动ELK Stack
+cd services/planning-engine/elk
+docker compose up -d
+```
 
-1. **Start the environment**: `npm run preview:up`
-2. **Make code changes**: All changes are hot-reloaded automatically
-3. **Test functionality**: Use the frontend at http://localhost:3000
-4. **Stop the environment**: `npm run preview:down`
+### 生产部署
+```bash
+# 构建所有服务
+npm run build:all
 
-### Architecture
+# 启动生产环境
+docker compose -f docker-compose.production.yml up -d
+```
 
-This project uses a microservices architecture with:
-- **Frontend**: Next.js 14 with TypeScript
-- **Gateway BFF**: API gateway and orchestration
-- **Profile Onboarding**: User profile and preferences management
-- **Planning Engine**: AI-powered workout plan generation
-- **Exercises Service**: Exercise database and management
-- **Fatigue Service**: Recovery and fatigue tracking
-- **Monitoring**: Prometheus, Grafana, and Jaeger for observability
+## 核心功能
 
-## Learn More
+- **训练计划生成**: AI驱动的个性化训练计划
+- **用户档案管理**: 完整的用户信息和偏好设置
+- **运动数据库**: 丰富的运动动作库
+- **疲劳管理**: 智能的疲劳监测和恢复建议
+- **日志监控**: 完整的ELK Stack日志管理
+- **安全防护**: 企业级安全配置
 
-To learn more about Next.js, take a look at the following resources:
+## 技术栈
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **前端**: Next.js, React, TypeScript, Tailwind CSS
+- **后端**: Node.js, Express, TypeScript
+- **数据库**: PostgreSQL, Redis
+- **消息队列**: NATS
+- **监控**: ELK Stack, Prometheus, Grafana
+- **容器化**: Docker, Docker Compose
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 访问地址
 
-## Deploy on Vercel
+- **前端应用**: http://localhost:3000
+- **API网关**: http://localhost:3001
+- **Planning Engine**: http://localhost:4102
+- **Kibana**: http://localhost:5601
+- **Elasticsearch**: http://localhost:9200
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 文档
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Phase 2 交付文档](docs/PHASE_2_DELIVERY.md)
+- [用户指南](docs/USER_GUIDE.md)
+- [技术文档](docs/TECHNICAL_DOCS.md)
+- [Planning Engine 文档](services/planning-engine/README.md)
+
+## 开发指南
+
+### 代码规范
+- 使用 TypeScript
+- 遵循 ESLint 配置
+- 编写单元测试
+- 提交前运行 `npm run lint`
+
+### 环境变量
+复制 `env.example` 到 `.env` 并配置必要的环境变量。
+
+### 数据库迁移
+```bash
+# 生成Prisma客户端
+npx turbo run db:generate
+
+# 运行数据库迁移
+npx turbo run db:migrate
+```
+
+## 许可证
+
+MIT License

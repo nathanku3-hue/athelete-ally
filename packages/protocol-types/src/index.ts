@@ -609,6 +609,38 @@ export interface CreateProtocolRequest {
   blocks: CreateBlockRequest[];
 }
 
+export interface UpdateProtocolRequest {
+  name?: string;
+  description?: string;
+  category?: ProtocolCategory;
+  difficulty?: DifficultyLevel;
+  duration?: number;
+  frequency?: number;
+  overview?: string;
+  principles?: string[];
+  requirements?: string[];
+  isActive?: boolean;
+  isPublic?: boolean;
+}
+
+export interface ProtocolFilters {
+  category?: string;
+  difficulty?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export interface CreateBlockRequest {
   name: string;
   description?: string;

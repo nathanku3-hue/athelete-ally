@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ProtocolPermissionsManager } from '@/components/permissions/ProtocolPermissionsManager';
+import ProtocolPermissionsManager from '@/components/permissions/ProtocolPermissionsManager';
 import { Protocol, Permission } from '@athlete-ally/protocol-types';
 
 // 模拟权限API
@@ -37,10 +37,10 @@ jest.mock('@/hooks/usePermissions', () => ({
       permissions.includes(required)
     ),
     getPermissionLevel: jest.fn((permissions: Permission[]) => {
-      if (permissions.includes('DELETE')) return 'owner';
-      if (permissions.includes('SHARE')) return 'admin';
-      if (permissions.includes('WRITE')) return 'write';
-      if (permissions.includes('READ')) return 'read';
+      if (permissions.includes('delete' as Permission)) return 'owner';
+      if (permissions.includes('share' as Permission)) return 'admin';
+      if (permissions.includes('write' as Permission)) return 'write';
+      if (permissions.includes('read' as Permission)) return 'read';
       return 'none';
     }),
   })),
@@ -69,6 +69,7 @@ const createTestQueryClient = () => new QueryClient({
 const mockProtocol: Protocol = {
   id: 'test-protocol-1',
   name: '测试协议',
+  version: '1.0.0',
   description: '这是一个测试协议',
   category: 'strength',
   difficulty: 'intermediate',
@@ -76,12 +77,9 @@ const mockProtocol: Protocol = {
   isActive: true,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-  ownerId: 'user-1',
-  tenantId: 'tenant-1',
-  visibility: 'PRIVATE',
-  dataClassification: 'PERSONAL',
-  parameters: {},
-  adaptations: null,
+  createdBy: 'user-1',
+  principles: ['测试原则1', '测试原则2'],
+  requirements: ['测试要求1', '测试要求2'],
   blocks: [],
 };
 

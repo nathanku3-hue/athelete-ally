@@ -12,6 +12,13 @@ import { businessMetrics, tracePlanGeneration } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
 import { concurrencyController } from './concurrency/controller.js';
+import { AsyncPlanGenerator } from './optimization/async-plan-generator.js';
+import { DatabaseOptimizer } from './optimization/database-optimizer.js';
+import { SimpleHealthChecker, setupSimpleHealthRoutes } from './simple-health.js';
+import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
+import apiDocsRoutes from './routes/api-docs.js';
+import { ErrorHandler } from './middleware/error-handler.js';
+import { PerformanceMonitor } from './middleware/performance.js';
 // 暂时注释掉shared包导入，使用本地实现
 // import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 // import { SecureIdGenerator } from '@athlete-ally/shared';
@@ -87,6 +94,15 @@ const server = Fastify({ logger: true });
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PLANNING_DATABASE_URL });
 const redis = new Redis(config.REDIS_URL);
+// 初始化优化组件
+const databaseOptimizer = new DatabaseOptimizer();
+const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, eventPublisher);
+// 初始化健康检查器
+const healthChecker = new SimpleHealthChecker(prisma, redis);
+// 初始化错误处理器
+const errorHandler = new ErrorHandler(server);
+// 初始化性能监控器
+const performanceMonitor = new PerformanceMonitor(server);
 server.addHook('onReady', async () => {
     try {
         await pg.connect();
@@ -124,6 +140,15 @@ server.addHook('onReady', async () => {
         server.log.info('subscribed to plan generation requested events with concurrency control');
         // 指标更新已移除 - 使用OpenTelemetry自动指标收集
         server.log.info('event processor connected successfully');
+        // 设置健康检查路由
+        setupSimpleHealthRoutes(server, healthChecker);
+        server.log.info('health check routes registered');
+        // 注册增强计划API路由
+        await server.register(enhancedPlanRoutes);
+        server.log.info('enhanced plan routes registered');
+        // 注册API文档路由
+        await server.register(apiDocsRoutes);
+        server.log.info('API documentation routes registered');
     }
     catch (e) {
         server.log.error({ err: e }, 'failed to connect event processor');
@@ -195,7 +220,7 @@ async function handleOnboardingCompleted(task) {
         server.log.error({ error, eventId: event.eventId, userId: event.userId }, 'Failed to generate plan from event');
     }
 }
-// Event handler for plan generation requested
+// Event handler for plan generation requested (优化版本)
 async function handlePlanGenerationRequested(task) {
     const event = task.data;
     server.log.info({ eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Processing plan generation requested event');
@@ -205,19 +230,14 @@ async function handlePlanGenerationRequested(task) {
             data: {
                 jobId: event.jobId,
                 userId: event.userId,
-                status: 'processing',
+                status: 'queued',
                 progress: 0,
                 requestData: event,
                 startedAt: new Date(),
             },
         });
-        // 更新进度
-        await prisma.planJob.update({
-            where: { id: planJob.id },
-            data: { progress: 25 },
-        });
-        // 生成计划
-        const planData = await generateTrainingPlan({
+        // 使用异步生成器处理计划生成
+        const request = {
             userId: event.userId,
             proficiency: event.proficiency || 'intermediate',
             season: event.season || 'offseason',
@@ -225,95 +245,24 @@ async function handlePlanGenerationRequested(task) {
             weeklyGoalDays: event.weeklyGoalDays,
             equipment: event.equipment || ['bodyweight'],
             purpose: event.purpose,
-        });
-        // 更新进度
-        await prisma.planJob.update({
-            where: { id: planJob.id },
-            data: { progress: 75 },
-        });
-        // 保存计划到数据库
-        const plan = await prisma.plan.create({
-            data: {
-                userId: event.userId,
-                status: 'completed',
-                name: planData.name,
-                description: planData.description,
-                content: planData,
-                microcycles: {
-                    create: planData.microcycles.map((mc) => ({
-                        weekNumber: mc.weekNumber,
-                        name: mc.name,
-                        phase: mc.phase,
-                        sessions: {
-                            create: mc.sessions.map((session) => ({
-                                dayOfWeek: session.dayOfWeek,
-                                name: session.name,
-                                duration: session.duration,
-                                exercises: {
-                                    create: session.exercises.map((exercise) => ({
-                                        name: exercise.name,
-                                        category: exercise.category,
-                                        sets: exercise.sets,
-                                        reps: exercise.reps,
-                                        weight: exercise.weight,
-                                        notes: exercise.notes,
-                                    })),
-                                },
-                            })),
-                        },
-                    })),
-                },
-            },
-        });
-        // 更新PlanJob为完成状态
-        await prisma.planJob.update({
-            where: { id: planJob.id },
-            data: {
-                status: 'completed',
-                progress: 100,
-                resultData: { planId: plan.id, planName: plan.name },
-                completedAt: new Date(),
-            },
-        });
-        // 发布计划生成完成事件
-        const planGeneratedEvent = {
-            eventId: `plan-generated-${plan.id}-${Date.now()}`,
-            userId: event.userId,
-            planId: plan.id,
-            timestamp: Date.now(),
-            planName: plan.name || 'Generated Plan',
-            status: 'completed',
-            version: plan.version,
         };
-        await eventPublisher.publishPlanGenerated(planGeneratedEvent);
-        server.log.info({ planId: plan.id, userId: event.userId, jobId: event.jobId }, 'Plan generated successfully');
+        // 异步生成计划（非阻塞）
+        await asyncPlanGenerator.generatePlanAsync(event.jobId, request, 1 // 优先级
+        );
+        server.log.info({ jobId: event.jobId, userId: event.userId }, 'Plan generation queued successfully');
     }
     catch (error) {
-        server.log.error({ error, eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Failed to generate plan from event');
-        // 更新PlanJob为失败状态
-        try {
-            await prisma.planJob.updateMany({
-                where: { jobId: event.jobId },
-                data: {
-                    status: 'failed',
-                    errorData: { error: error.message, stack: error.stack },
-                    completedAt: new Date(),
-                },
-            });
-        }
-        catch (dbError) {
-            server.log.error({ dbError }, 'Failed to update PlanJob status to failed');
-        }
-        // 发布计划生成失败事件
-        const planGenerationFailedEvent = {
-            eventId: `plan-failed-${event.jobId}-${Date.now()}`,
-            userId: event.userId,
-            jobId: event.jobId,
-            timestamp: Date.now(),
-            error: error.message,
-            retryCount: task.retries,
-        };
-        await eventPublisher.publishPlanGenerationFailed(planGenerationFailedEvent);
+        server.log.error({ error, eventId: event.eventId, userId: event.userId, jobId: event.jobId }, 'Failed to queue plan generation');
+        // 更新任务状态为失败
+        await prisma.planJob.updateMany({
+            where: { jobId: event.jobId },
+            data: {
+                status: 'failed',
+                progress: 0,
+                completedAt: new Date(),
+                errorData: { error: error.message, stack: error.stack },
+            },
+        });
     }
 }
 // 健康检查端点已移至下方，提供更详细的状态信息
@@ -438,22 +387,7 @@ server.get('/metrics', async (request, reply) => {
     reply.type('text/plain');
     return register.metrics();
 });
-// 添加健康检查端点
-server.get('/health', async (request, reply) => {
-    const concurrencyStatus = concurrencyController.getStatus();
-    const eventProcessorHealthy = eventProcessor.isHealthy();
-    return {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        version: process.env.npm_package_version || '1.0.0',
-        concurrency: concurrencyStatus,
-        eventProcessor: {
-            connected: eventProcessorHealthy,
-            consumers: eventProcessor.isHealthy() ? 'active' : 'disconnected'
-        }
-    };
-});
+// 健康检查端点已移至 health.ts 中的 setupHealthRoutes
 // 添加并发状态端点
 server.get('/concurrency/status', async (request, reply) => {
     const status = concurrencyController.getStatus();
@@ -461,6 +395,38 @@ server.get('/concurrency/status', async (request, reply) => {
         ...status,
         timestamp: new Date().toISOString()
     };
+});
+// 获取队列状态端点
+server.get('/queue/status', async (request, reply) => {
+    try {
+        const queueStatus = asyncPlanGenerator.getQueueStatus();
+        const dbMetrics = await databaseOptimizer.getPerformanceMetrics();
+        return reply.send({
+            queue: queueStatus,
+            database: dbMetrics,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    catch (error) {
+        server.log.error({ error }, 'Failed to get queue status');
+        return reply.code(500).send({ error: 'queue_status_failed' });
+    }
+});
+// 清理缓存端点
+server.post('/cache/cleanup', async (request, reply) => {
+    try {
+        await asyncPlanGenerator.cleanupCache();
+        const cleanupResult = await databaseOptimizer.cleanupExpiredData();
+        return reply.send({
+            message: 'Cache cleanup completed',
+            cleanup: cleanupResult,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    catch (error) {
+        server.log.error({ error }, 'Failed to cleanup cache');
+        return reply.code(500).send({ error: 'cache_cleanup_failed' });
+    }
 });
 // 注册安全中间件
 server.addHook('onRequest', authMiddleware);

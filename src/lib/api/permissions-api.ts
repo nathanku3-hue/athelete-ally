@@ -64,6 +64,14 @@ class PermissionAPIError extends Error {
   }
 }
 
+// 请求配置类型
+interface RequestConfig {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  headers?: Record<string, string>;
+  body?: any;
+  params?: Record<string, any>;
+}
+
 // 基础请求函数
 async function request<T>(endpoint: string, config: RequestConfig): Promise<T> {
   const url = new URL(`${API_BASE_URL}${endpoint}`);
@@ -464,5 +472,4 @@ export const permissionsAPI = new PermissionsAPIClient();
 // 导出错误类
 export { PermissionAPIError };
 
-// 导出类型
-export type { PermissionCheck, ShareRequest, ShareUpdate, PermissionResponse, ShareResponse };
+// 类型已在上面定义并导出
