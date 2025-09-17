@@ -1,0 +1,204 @@
+# features.yaml
+
+version: 1.2
+status: Final
+author: Nkgss
+last_updated: 2025-08-29
+
+title: "Product Requirements Document: Minimalist Athlete S&C App"
+
+summary: |
+  The Minimalist Athlete S&C App provides automated, scientifically-sound strength & conditioning coaching for time-poor individuals striving for better athletic performance. By using a personalized, AI-driven periodization engine, the app delivers long-term, sport-specific training plans that dynamically adapt to the user's daily recovery, making elite-level guidance accessible to everyone.
+
+guiding_principles:
+  - title: "Minimalist by Design"
+    description: "Every screen and interaction will be clean, uncluttered, and purposeful. The app is a calm, expert tool."
+  - title: "Intelligent Gamification"
+    description: "We will use subtle elements like motivational names and progress tracking to make athletic training engaging and rewarding."
+  - title: "Coach, Not a Calculator"
+    description: "The app's primary role is to make complex sports science simple and actionable through intuitive guidance."
+
+user_persona:
+  name: "Alex"
+  age: 26
+  role: "Software Developer"
+  bio: |
+    Alex works a demanding 9-to-5 job but channels his competitive drive into a local basketball league. He's serious about improving but struggles to balance effective training with his career.
+  frustrations: |
+    Time scarcity, information overload, and lack of structured, sport-specific programming in other fitness apps.
+
+goals:
+  - id: G-01
+    description: "Drive Consistent Engagement"
+    metric: "Weekly Plan Adherence Rate"
+    target: "75%"
+  - id: G-02
+    description: "Build User Trust & Confidence"
+    metric: "Onboarding Completion Rate"
+    target: "90%"
+  - id: G-03
+    description: "Deliver Tangible Performance Gains"
+    metric: "User-Reported Performance Score (1-5)"
+    target: "4.0+"
+
+epics:
+  - id: EPIC-01
+    title: "New User Onboarding & Personalization"
+    description: "The initial setup flow, designed to gather the minimum necessary information to generate a highly personalized plan."
+    user_stories:
+      - id: US-001
+        title: "Identify Training Purpose"
+        story: "As a new athlete (Alex), I want to identify my primary training purpose, so that the app understands my level of commitment."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-002
+        title: "Select Training Proficiency Level"
+        story: "As a new athlete (Alex), I want to select my current proficiency level from a clear, descriptive spectrum, so that the app can generate a program with the appropriate technical complexity."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-003
+        title: "Define Competitive Season & Goal"
+        story: "As a competitive athlete (Alex), I want to define my current training phase and set my competition start date, so that the AI can reverse-engineer a long-term periodization plan."
+        priority: "Must-Have"
+        dependencies:
+          - US-001
+      - id: US-004
+        title: "Set Weekly Training Availability"
+        story: "As a time-poor athlete (Alex), I want to specify the number of days per week I can commit to strength training, so that the AI can generate a realistic schedule."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-005b
+        title: "Block Out Work & Life Commitments"
+        story: "As a time-poor professional (Alex), I want to block out my recurring work hours in the app, so that the workout scheduler only suggests training times when I am actually free."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-006
+        title: "Specify Equipment Access"
+        story: "As Alex, I want to easily specify what equipment I have access to, so that the workout generator only prescribes exercises I can perform."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-005
+        title: "Schedule Around Fixed Practices"
+        story: "As an athlete with a fixed team schedule (Alex), I want to optionally block out my mandatory practice days and their intensity, so that the AI can intelligently schedule my strength sessions."
+        priority: "Should-Have"
+        dependencies: null
+      - id: US-007
+        title: "Note Recovery Habits"
+        story: "As an athlete focused on performance (Alex), I want to note which recovery practices I already use, so that the app has a more holistic view of my training habits."
+        priority: "Could-Have"
+        dependencies: null
+
+  - id: EPIC-02
+    title: "AI-Powered Training Plan Generation"
+    description: "The core logic of the app: taking onboarding data and generating a complete training plan."
+    user_stories:
+      - id: US-009
+        title: "Generate a Personalized Periodization Plan"
+        story: "As a competitive athlete (Alex), I want the app to generate a complete, long-term, and scientifically-sound periodization plan based on my data, so that I can train with confidence."
+        note: "This will include gamified weekly names (e.g., 'Week 1: Priming Phase')."
+        priority: "Must-Have"
+        dependencies:
+          - US-001
+          - US-002
+          - US-003
+          - US-004
+          - US-005b
+          - US-006
+      - id: US-009b
+        title: "Set and Schedule Weekly Training Volume"
+        story: "As an athlete (Alex) starting a new training week, I want to confirm my recommended training volume, so that the app can generate and schedule the specific workouts for my upcoming week."
+        priority: "Must-Have"
+        dependencies:
+          - US-009
+          
+  - id: EPIC-03
+    title: "Intelligent Movement Library"
+    description: "The structure of the exercise database and features that help Alex make smart choices."
+    user_stories:
+      - id: US-010
+        title: "Access a Structured Exercise Library"
+        story: "As an athlete (Alex), I want to browse a well-organized exercise library, so that I can understand the purpose of different movements."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-011
+        title: "Guide Exercise Selection with Dynamic UI"
+        story: "As an athlete with limited sports science knowledge (Alex), I want the app's dynamic UI to visually guide me towards optimal exercises for my current training phase, so that I don't accidentally hinder my progress."
+        priority: "Must-Have"
+        dependencies:
+          - US-009
+          - US-010
+
+  - id: EPIC-04
+    title: "Dynamic Fatigue Management"
+    description: "The daily interaction where the app adapts a workout based on the user's real-time state."
+    user_stories:
+      - id: US-012
+        title: "Log Pre-Session Fatigue"
+        story: "As an athlete (Alex), I want to quickly log my fatigue level before each session or skip this step, so that the app can suggest intelligent adjustments."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-013
+        title: "Receive Dynamic UI Workout Warnings"
+        story: "When I've logged high fatigue, I want the app's dynamic UI to highlight potentially risky exercises in my workout, so that I can immediately identify what to be cautious about."
+        priority: "Must-Have"
+        dependencies:
+          - US-012
+          - US-010
+      - id: US-014
+        title: "Get Intelligent Exercise Substitutions"
+        story: "When an exercise is highlighted as risky, I want to get a list of safer, alternative exercises, so that I can modify my workout on the fly."
+        priority: "Must-Have"
+        dependencies:
+          - US-013
+
+  - id: EPIC-05
+    title: "Performance & Recovery Logging"
+    description: "How Alex logs his results to see progress and provides feedback to make the AI smarter."
+    user_stories:
+      - id: US-015
+        title: "Track Key Performance Metrics"
+        story: "As an athlete (Alex), I want to log my performance on key athletic tests and personal records, so that I can track my progress."
+        priority: "Must-Have"
+        dependencies: null
+      - id: US-017
+        title: "Utilize a Minimalist Workout Interface"
+        story: "As a time-poor athlete (Alex), I want a clean workout interface that focuses only on sets and reps by default, so that I can concentrate on my training."
+        priority: "Must-Have"
+        dependencies:
+          - US-009b
+      - id: US-016
+        title: "Provide Post-Session Feedback for AI Tuning"
+        story: "As Alex, I want to provide simple feedback on my previous day's workout and recovery, so that the AI can learn my personal tolerance."
+        priority: "Should-Have"
+        dependencies:
+          - US-017
+      - id: US-016b
+        title: "Log Per-Exercise Difficulty"
+        story: "As Alex, I want to optionally rate the difficulty of a specific exercise after completing it, so that the AI can make more granular adjustments to my future workouts."
+        priority: "Should-Have"
+        dependencies:
+          - US-017
+
+  - id: EPIC-06
+    title: "Advanced Features & Integrations"
+    description: "Valuable features for power users and for integrating the app into Alex's wider digital life."
+    user_stories:
+      - id: US-019
+        title: "Sync Schedule to External Calendar"
+        story: "As an organized athlete (Alex), I want to add my weekly training schedule to my phone's calendar, so that I can see my workouts alongside my other life commitments."
+        priority: "Should-Have"
+        dependencies:
+          - US-009b
+      - id: US-018
+        title: "Export Training Data"
+        story: "As a data-driven athlete (Alex), I want to export my full training plan and progress report, so that I can perform my own analysis or share it with a coach."
+        priority: "Could-Have"
+        dependencies:
+          - US-009
+          - US-015
+
+out_of_scope_mvp:
+  - "Nutrition Tracking & Guidance: The app will not provide meal plans, calorie tracking, or specific nutritional advice."
+  - "External Calendar Integration: Automatically syncing with Google/Apple Calendar."
+  - "Fine-Tuned AI Model: The MVP will use a sophisticated prompt-driven approach. The development of a fine-tuned model is a post-launch strategic goal."
+  - "Social & Community Features: There will be no user-to-user interaction or sharing functionalities."
