@@ -38,7 +38,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Lint check
         run: npx turbo run lint
@@ -107,7 +110,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Validate configuration
         run: |
@@ -140,7 +146,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Validate OpenAPI contracts
         run: |
@@ -196,7 +205,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Validate production configuration
         run: |
@@ -229,7 +241,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Run all tests (Mandatory)
         run: |
@@ -298,7 +313,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Run security audit
         run: npm audit --audit-level=high
@@ -350,7 +368,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          echo "🔧 安装依赖包..."
+          npm install --legacy-peer-deps --no-audit --no-fund
+          echo "✅ 依赖安装完成"
 
       - name: Run performance tests
         run: npx turbo run test:performance --filter=...[origin/main] || echo "No performance tests found"
