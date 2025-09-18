@@ -8,7 +8,6 @@ module.exports = {
   // 统一的测试文件发现模式
   roots: [
     '<rootDir>/src',
-    '<rootDir>/tests', 
     '<rootDir>/packages',
     '<rootDir>/services',
     '<rootDir>/apps'
