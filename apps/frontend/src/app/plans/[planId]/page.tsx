@@ -10,6 +10,8 @@ import PerformanceForm from '@/components/feedback/PerformanceForm';
 import { Exercise } from '@athlete-ally/shared-types';
 import { usePlan } from '@/hooks/usePlan';
 
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
 interface PlanData {
   id: string;
   name: string;
@@ -54,57 +56,43 @@ export default function PlanPage() {
   const [isAdjustmentSuggestionsOpen, setIsAdjustmentSuggestionsOpen] = useState(false);
   const [adjustments, setAdjustments] = useState<any[]>([]);
   const [fatigueData, setFatigueData] = useState<any>(null);
+  const [selectedWeek, setSelectedWeek] = useState(0);
 
-  
+  const handleBackToHome = () => {
+    router.push('/');
+  };
 
-  
+  const handleStartNewPlan = () => {
+    router.push('/onboarding');
+  };
 
-        } else {
-          // If not found, create a mock exercise for demonstration
-          const mockExercise: Exercise = {
-            id: `mock-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
-            name: exerciseName,
-            description: `A ${exerciseName.toLowerCase()} exercise for your training plan`,
-            category: 'General',
-            equipment: ['bodyweight'],
-            difficulty: 3,
-            primaryMuscles: ['Multiple'],
-            secondaryMuscles: [],
-            instructions: `Instructions for ${exerciseName}:\n1. Set up in the starting position\n2. Execute the movement with proper form\n3. Complete the desired number of repetitions\n4. Rest and repeat as needed`,
-            tags: ['mock', 'general'],
-            isActive: true,
-            popularity: 0,
-            tips: 'Focus on proper form and controlled movement',
-            averageRating: 4.0,
-            totalRatings: 0
-          };
-          setSelectedExercise(mockExercise);
-          setIsExerciseModalOpen(true);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch exercise details:', error);
-      // Show mock exercise as fallback
-      const mockExercise: Exercise = {
-        id: `mock-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
-        name: exerciseName,
-        description: `A ${exerciseName.toLowerCase()} exercise for your training plan`,
-        category: 'General',
-        equipment: ['bodyweight'],
-        difficulty: 3,
-        primaryMuscles: ['Multiple'],
-        secondaryMuscles: [],
-        instructions: `Instructions for ${exerciseName}:\n1. Set up in the starting position\n2. Execute the movement with proper form\n3. Complete the desired number of repetitions\n4. Rest and repeat as needed`,
-        tips: 'Focus on proper form and controlled movement',
-        tags: ['mock', 'general'],
-        isActive: true,
-        popularity: 0,
-        averageRating: 4.0,
-        totalRatings: 0
-      };
-      setSelectedExercise(mockExercise);
-      setIsExerciseModalOpen(true);
-    }
+  // Helper function to get exercise details
+  const getExerciseDetails = (exerciseName: string): Exercise => {
+    // If not found, create a mock exercise for demonstration
+    const mockExercise: Exercise = {
+      id: `mock-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
+      name: exerciseName,
+      description: `A ${exerciseName.toLowerCase()} exercise for your training plan`,
+      category: 'General',
+      equipment: ['bodyweight'],
+      difficulty: 3,
+      primaryMuscles: ['Multiple'],
+      secondaryMuscles: [],
+      instructions: `Instructions for ${exerciseName}:\n1. Set up in the starting position\n2. Execute the movement with proper form\n3. Complete the desired number of repetitions\n4. Rest and repeat as needed`,
+      tags: ['mock', 'general'],
+      isActive: true,
+      popularity: 0,
+      tips: 'Focus on proper form and controlled movement',
+      averageRating: 4.0,
+      totalRatings: 0
+    };
+    return mockExercise;
+  };
+
+  const handleExerciseClick = (exerciseName: string) => {
+    const exercise = getExerciseDetails(exerciseName);
+    setSelectedExercise(exercise);
+    setIsExerciseModalOpen(true);
   };
 
   const handleExerciseRate = async (exerciseId: string, rating: number, difficulty: number, comment?: string) => {
@@ -243,7 +231,7 @@ export default function PlanPage() {
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4 text-red-400">Error Loading Plan</h1>
-          <p className="text-gray-400 mb-8">{error || 'Plan not found'}</p>
+          <p className="text-gray-400 mb-8">{error instanceof Error ? error.message : error || 'Plan not found'}</p>
           <div className="space-x-4">
             <button
               onClick={handleBackToHome}
@@ -419,12 +407,10 @@ export default function PlanPage() {
           </div>
         </div>
 
-      {
         {/* Feedback (Select Session) */}
         {currentWeek && (
           <section className="mt-12 bg-gray-800 rounded-lg p-6">
             <h3 className="text-xl font-bold mb-4">Session Feedback</h3>
-            <div className="mb-4">
             <div className="mb-4">
               <label className="block text-sm mb-1">Select Exercise (from chosen session)</label>
               <select
@@ -443,7 +429,6 @@ export default function PlanPage() {
               </select>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  )
               {/* RPE is per exercise; default to first exercise if present */}
               <RPEForm
                 sessionId={`${planId}-w${currentWeek.weekNumber}-s${feedbackSessionIdx}`}
@@ -455,7 +440,7 @@ export default function PlanPage() {
             </div>
           </section>
         )}
-        }
+
       <ExerciseModal
         exercise={selectedExercise}
         isOpen={isExerciseModalOpen}

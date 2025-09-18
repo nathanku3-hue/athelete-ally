@@ -1,10 +1,12 @@
 "use client";
 import { useState } from 'react';
 import { useAdaptations, useApplyAdaptations } from '@/hooks/useAdaptations';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function AdaptationsPanel({ planId }: { planId: string }) {
   const { data, isLoading, error } = useAdaptations(planId, !!planId);
-  const apply = useApplyAdaptations(planId);\n  const { show } = useToast();
+  const apply = useApplyAdaptations(planId);
+  const { show } = useToast();
   const [selected, setSelected] = useState<any[]>([]);
 
   if (isLoading) return <div>Loading adaptations…</div>;
@@ -19,7 +21,7 @@ export default function AdaptationsPanel({ planId }: { planId: string }) {
   }
 
   async function onApply() {
-    \n    show('Adaptations applied', 'success');
+    show('Adaptations applied', 'success');
     setSelected([]);
   }
 

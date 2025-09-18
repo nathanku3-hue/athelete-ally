@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import OnboardingProviderWrapper from "@/components/providers/OnboardingProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import QueryProvider from "@/components/providers/QueryProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 

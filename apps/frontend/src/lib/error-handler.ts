@@ -25,6 +25,8 @@ export interface ApiSuccessResponse<T = any> {
 
 export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
 
+export type ErrorCode = string;
+
 /**
  * 前端API错误类
  */

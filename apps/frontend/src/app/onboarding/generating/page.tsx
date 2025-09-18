@@ -1,7 +1,8 @@
 "use client";
 
- Link from 'next/link';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { usePlanStatusPolling } from '@/hooks/usePlanStatusPolling';
 
@@ -209,9 +210,9 @@ function GeneratingContent() {
 
         <div className="mt-6 text-center">
           <Link
-            href={(data?.status === "completed" && (data?.planId ? ("/plans/" + data.planId) : "/plan")) || "#"}
-            className={(data?.status === "completed") ? "inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" : "inline-block px-4 py-2 bg-gray-700 text-gray-400 rounded cursor-not-allowed pointer-events-none"}
-            aria-disabled={data?.status !== "completed"}
+            href={(currentStatus?.status === "completed") ? "/plan" : "#"}
+            className={(currentStatus?.status === "completed") ? "inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" : "inline-block px-4 py-2 bg-gray-700 text-gray-400 rounded cursor-not-allowed pointer-events-none"}
+            aria-disabled={currentStatus?.status !== "completed"}
           >
             Continue to Plan →
           </Link>

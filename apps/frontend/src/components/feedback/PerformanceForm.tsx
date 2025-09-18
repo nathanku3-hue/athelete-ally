@@ -1,9 +1,11 @@
 "use client";
 import { useState } from 'react';
 import { useSubmitPerformance } from '@/hooks/useFeedback';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function PerformanceForm({ sessionId, onSubmitted }: { sessionId: string; onSubmitted?: () => void; }) {
-  const submit = useSubmitPerformance();\n  const { show } = useToast();
+  const submit = useSubmitPerformance();
+  const { show } = useToast();
   const [totalVolume, setTotalVolume] = useState(0);
   const [averageRPE, setAverageRPE] = useState(7);
   const [completionRate, setCompletionRate] = useState(100);
@@ -13,7 +15,7 @@ export default function PerformanceForm({ sessionId, onSubmitted }: { sessionId:
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    \n    show('Performance submitted', 'success');
+    show('Performance submitted', 'success');
     onSubmitted?.();
   }
 

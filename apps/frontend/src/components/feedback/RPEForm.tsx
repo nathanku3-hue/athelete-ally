@@ -1,16 +1,18 @@
 "use client";
 import { useState } from 'react';
 import { useSubmitRPE } from '@/hooks/useFeedback';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function RPEForm({ sessionId, exerciseId, onSubmitted }: { sessionId: string; exerciseId: string; onSubmitted?: () => void; }) {
-  const submit = useSubmitRPE();\n  const { show } = useToast();
+  const submit = useSubmitRPE();
+  const { show } = useToast();
   const [rpe, setRpe] = useState(7);
   const [completionRate, setCompletionRate] = useState(100);
   const [notes, setNotes] = useState('');
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    \n    show('RPE submitted', 'success');
+    show('RPE submitted', 'success');
     onSubmitted?.();
   }
 

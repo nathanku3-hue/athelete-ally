@@ -2,7 +2,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 
-type Plan = { id: string; name: string; description?: string; content?: any; createdAt?: string; updatedAt?: string };
+type Plan = { 
+  id: string; 
+  name: string; 
+  description?: string; 
+  status?: string; 
+  version?: number; 
+  content?: any; 
+  createdAt?: string; 
+  updatedAt?: string 
+};
 
 export function usePlan(planId: string, enabled = true) {
   return useQuery({
