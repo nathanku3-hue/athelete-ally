@@ -2,7 +2,14 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 
 // JWT 配置
-export const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const rawJwtSecret = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && !rawJwtSecret) {
+  throw new Error('JWT_SECRET is required in production environment');
+}
+if (process.env.NODE_ENV !== 'production' && !rawJwtSecret) {
+  console.warn('Warning: JWT_SECRET not set; using dev-only default.');
+}
+export const JWT_SECRET = rawJwtSecret || 'dev-only-jwt-secret';
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 // JWT Payload Schema
@@ -22,7 +29,7 @@ export class JWTManager {
    * 生成JWT token
    */
   static generateToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-    return jwt.sign(payload, JWT_SECRET, { 
+    return jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
       issuer: 'athlete-ally',
       audience: 'athlete-ally-users'

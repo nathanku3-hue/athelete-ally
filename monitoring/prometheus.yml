@@ -5,26 +5,13 @@ global:
 rule_files:
   - "alert_rules.yml"
 
-scrape_configs:
-  - job_name: 'planning-engine'
+
+  - job_name: 'gateway-bff'
     static_configs:
-      - targets: ['planning-engine:4102']
+      - targets: ['gateway-bff:9464']
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s
-
-  - job_name: 'postgres'
-    static_configs:
-      - targets: ['postgres:5432']
-
-  - job_name: 'redis'
-    static_configs:
-      - targets: ['redis:6379']
-
-  - job_name: 'nats'
-    static_configs:
-      - targets: ['nats:4222']
-
 alerting:
   alertmanagers:
     - static_configs:

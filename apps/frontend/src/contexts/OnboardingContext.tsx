@@ -250,10 +250,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         fixedSchedules: [] // 简化fixedSchedules，暂时为空数组
       };
 
+      // Attach auth token if available
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const response = await fetch('/api/v1/onboarding', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(submitPayload),
       });

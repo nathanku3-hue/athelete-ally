@@ -7,9 +7,9 @@ const EnvSchema = z.object({
   NODE_ENV: z.string().default('development'),
   PORT: z.string().transform((v) => Number(v)).default('4000'),
   
-  // 服务URL配置
-  PROFILE_ONBOARDING_URL: z.string().url().default('http://profile-onboarding:3002'),
-  PLANNING_ENGINE_URL: z.string().url().default('http://planning-engine:3003'),
+  // 服务URL配置 (local dev defaults)
+  PROFILE_ONBOARDING_URL: z.string().url().default('http://localhost:4101'),
+  PLANNING_ENGINE_URL: z.string().url().default('http://localhost:4102'),
   EXERCISES_URL: z.string().url().default('http://localhost:4103'),
   FATIGUE_URL: z.string().url().default('http://localhost:4104'),
   WORKOUTS_URL: z.string().url().default('http://localhost:4105'),

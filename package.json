@@ -4,7 +4,10 @@
   "private": true,
   "packageManager": "npm@10.9.3",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev apps/frontend -p 3000",
+    "dev:frontend": "next dev apps/frontend -p 3000",
+    "dev:bff": "npm run dev -w apps/gateway-bff",
+    "dev:all:local": "node scripts/start-local-dev.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

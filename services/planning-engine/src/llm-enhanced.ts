@@ -137,13 +137,8 @@ const openai = config.OPENAI_API_KEY ? new OpenAI({
   maxRetries: config.LLM_MAX_RETRIES,
 }) : null;
 
-// 安全的超时包装器
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
-  });
-  return Promise.race([promise, timeoutPromise]);
-}
+// 使用统一的超时工具函数
+import { withTimeout } from '../llm.js';
 
 // 增强的计划生成函数
 export async function generateEnhancedTrainingPlan(

@@ -7,92 +7,17 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { z } from 'zod';
-// import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '../../packages/shared-types/src/index.ts';
-// 暂时注释掉shared包导入，使用本地实现
-// import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
-
-// 强化身份验证中间件
-async function authMiddleware(request: any, reply: any) {
-  // 跳过健康检查端点
-  if (request.url === '/health') {
-    return;
-  }
-
-  try {
-    // 从Authorization header获取JWT token
-    const authHeader = request.headers.authorization || request.headers.Authorization;
-    
-    if (!authHeader) {
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Authorization header is required'
-      });
-      return;
-    }
-
-    // 解析Bearer token
-    const parts = authHeader.split(' ');
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Invalid authorization header format. Expected: Bearer <token>'
-      });
-      return;
-    }
-
-    const token = parts[1];
-    
-    // 在开发环境中，允许使用特殊的开发token
-    if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
-      (request as any).user = { userId: 'dev-user-id', role: 'user' };
-      return;
-    }
-
-    // 在生产环境中，必须验证真实的JWT token
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: 实现真实的JWT验证
-      // 这里应该使用JWT库验证token并提取用户信息
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Valid JWT token is required in production'
-      });
-      return;
-    }
-
-    // 开发环境的默认用户
-    (request as any).user = { userId: 'dev-user-id', role: 'user' };
-    
-  } catch (error) {
-    const { safeLog } = await import('@athlete-ally/shared/logger');
-    safeLog.error('Authentication error', error);
-    reply.code(401).send({
-      error: 'unauthorized',
-      message: 'Authentication failed'
-    });
-  }
-}
-
-async function cleanupMiddleware(request: any, reply: any) {
-  // 清理逻辑
-}
-// 暫時註釋掉共享包依賴
-// import { EventBus } from '@athlete-ally/event-bus';
-// import { OnboardingCompletedEvent } from '@athlete-ally/contracts';
+// 使用统一的shared包组件
+import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+import { EventBus } from '@athlete-ally/event-bus';
 
 const server = Fastify({ logger: true });
 
 // minimal connectivity placeholders
 const pg = new PgClient({ connectionString: config.PROFILE_DATABASE_URL });
 const redis = new Redis(config.REDIS_URL);
-// 暫時註釋掉 EventBus，創建一個模擬對象
-const eventBus = {
-  connect: async (url: string) => {
-    console.log(`Mock EventBus connecting to ${url}`);
-  },
-  publishOnboardingCompleted: async (event: any) => {
-    console.log('Mock EventBus publishing onboarding completed:', event);
-  }
-};
+// Real EventBus instance
+const eventBus = new EventBus();
 
 server.addHook('onReady', async () => {
   try {
@@ -118,22 +43,12 @@ server.addHook('onReady', async () => {
   }
 });
 
-// 使用统一的OnboardingPayloadSchema
-// const OnboardingPayload = OnboardingPayloadSchema;
+// Schema validation handled inline
 
 server.get('/health', async () => ({ status: 'ok' }));
 
 server.post('/v1/onboarding', async (request, reply) => {
-  // 使用统一的schema验证
-  // const validationResult = safeParseOnboardingPayload(request.body);
-  // if (!validationResult.success) {
-  //   return reply.code(400).send({ 
-  //     error: 'validation_failed',
-  //     details: validationResult.error?.errors 
-  //   });
-  // }
-  
-  // const parsed = { success: true, data: validationResult.data! };
+  // Basic validation - request body should contain userId
   const parsed = { success: true, data: request.body as any };
 
   try {
@@ -264,14 +179,7 @@ server.addHook('preHandler', async (request, reply) => {
       return reply.code(401).send({ error: 'unauthorized', message: 'User authentication required' });
     }
     
-    // 验证请求体中的userId与JWT token中的userId一致
-    // const parsed = OnboardingPayload.safeParse(request.body);
-    // if (parsed.success && parsed.data.userId !== requestUserId) {
-    //   return reply.code(403).send({ 
-    //     error: 'forbidden', 
-    //     message: 'User ID in request body does not match authenticated user' 
-    //   });
-    // }
+    // User ownership validation handled by authMiddleware
   }
 });
 

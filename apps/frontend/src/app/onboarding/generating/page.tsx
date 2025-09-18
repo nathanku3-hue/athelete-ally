@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from 'react';
+ Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { usePlanStatusPolling } from '@/hooks/usePlanStatusPolling';
@@ -15,22 +15,7 @@ function GeneratingContent() {
     (typeof window !== 'undefined' ? localStorage.getItem('planGenerationJobId') : null);
   
   // 调试模式：直接跳转到plans页面
-  React.useEffect(() => {
-    if (jobId) {
-      console.log('Debug mode: Direct navigation to plans page');
-      const timer = setTimeout(() => {
-        clearData();
-        // Clear the jobId from localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('planGenerationJobId');
-        }
-        // 跳转到plans页面
-        router.push(`/plans/${jobId}`);
-      }, 2000); // 2秒延迟模拟生成过程
-      
-      return () => clearTimeout(timer);
-    }
-  }, [jobId, clearData, router]);
+  
 
   // 使用轮询逻辑获取计划生成状态（调试模式下被跳过）
   const {
@@ -64,7 +49,7 @@ function GeneratingContent() {
     status: 'pending' as const,
     progress: 0,
     estimatedTime: 30,
-    message: jobId ? 'Debug mode: Generating your training plan...' : 'Initializing your personalized training plan...'
+    message: jobId ? 'Generating your training plan...' : 'Initializing your personalized training plan...'
   };
 
   const handleGoBack = () => {
@@ -222,6 +207,15 @@ function GeneratingContent() {
           )}
         </div>
 
+        <div className="mt-6 text-center">
+          <Link
+            href={(data?.status === "completed" && (data?.planId ? ("/plans/" + data.planId) : "/plan")) || "#"}
+            className={(data?.status === "completed") ? "inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" : "inline-block px-4 py-2 bg-gray-700 text-gray-400 rounded cursor-not-allowed pointer-events-none"}
+            aria-disabled={data?.status !== "completed"}
+          >
+            Continue to Plan →
+          </Link>
+        </div>
         {/* Loading animation for processing */}
         {currentStatus.status === 'processing' && (
           <div className="mt-8">

@@ -1,12 +1,8 @@
 // 数据库优化服务 - 改善Planning Engine数据库操作性能
 import { prisma } from '../db.js';
 import { config } from '../config.js';
-// 临时禁用logger
-const logger = {
-  info: (...args: any[]) => console.log(...args),
-  warn: (...args: any[]) => console.warn(...args),
-  error: (...args: any[]) => console.error(...args),
-};
+// 使用统一的日志记录
+import { logger } from '../logger.js';
 import { TrainingPlan } from '../llm.js';
 
 // 批量操作接口

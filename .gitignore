@@ -92,4 +92,11 @@ playwright/.cache/
 *GUIDE*.md
 *PLAN*.md
 *FIX*.md
-*DEBUG*.md
+*DEBUG*.md# Environment files (repo-wide)
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+# Generic *.env files (e.g., infra)
+**/*.env
+!**/*.env.example

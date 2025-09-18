@@ -50,7 +50,7 @@ const PlanSchema = z.object({
 export type TrainingPlan = z.infer<typeof PlanSchema>;
 
 // 安全的超时包装器
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new Error(`Operation timed out after ${timeoutMs}ms`)), timeoutMs);
   });
@@ -160,8 +160,7 @@ Return the plan as structured JSON with this exact format:
 
     return validationResult.data;
   } catch (error) {
-    console.error('LLM generation failed, falling back to mock:', error);
-    return generateMockPlan(request);
+    console.error('LLM generation failed:', error);\n    if (process.env.NODE_ENV === 'production') {\n      throw error instanceof Error ? error : new Error('LLM generation failed');\n    }\n    return generateMockPlan(request);
   }
 }
 
