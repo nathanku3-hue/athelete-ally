@@ -39,6 +39,16 @@ jobs:
           echo "::group::npm config list -l"
           npm config list -l || true
           echo "::endgroup::"
+      
+      - name: Check for nested lockfiles
+        run: |
+          if git ls-files '**/package-lock.json' | grep -v '^package-lock.json$'; then
+            echo "❌ Found nested package-lock.json files:"
+            git ls-files '**/package-lock.json' | grep -v '^package-lock.json$'
+            exit 1
+          else
+            echo "✅ No nested lockfiles found"
+          fi
 
       # 尝试1: 包含生命周期脚本 (postinstall等)
       - name: npm ci (foreground scripts)

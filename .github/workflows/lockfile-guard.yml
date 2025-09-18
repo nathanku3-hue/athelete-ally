@@ -25,9 +25,19 @@ jobs:
 
       - name: Pin npm version
         run: |
-          npm i -g "npm@${NPM_VERSION}"
+          npm i -g "npm@10.9.3"
           node -v
           npm -v
+      
+      - name: Check for nested lockfiles
+        run: |
+          if git ls-files '**/package-lock.json' | grep -v '^package-lock.json$'; then
+            echo "❌ Found nested package-lock.json files:"
+            git ls-files '**/package-lock.json' | grep -v '^package-lock.json$'
+            exit 1
+          else
+            echo "✅ No nested lockfiles found"
+          fi
 
       - name: Snapshot lockfile (before)
         run: |

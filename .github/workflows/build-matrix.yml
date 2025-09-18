@@ -1,0 +1,168 @@
+name: Build Matrix
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  npm-ci:
+    runs-on: ubuntu-latest
+    outputs:
+      ci_fg: ${{ steps.ci_fg.outcome }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.4'
+          cache: 'npm'
+      
+      - name: Pin npm version
+        run: |
+          npm i -g "npm@10.9.3"
+          npm -v
+      
+      - name: npm ci (foreground scripts)
+        id: ci_fg
+        continue-on-error: true
+        run: |
+          npm ci --foreground-scripts 2>&1 | tee npm-ci-foreground.log
+      
+      - name: npm ci (ignore scripts) - diagnostics only
+        if: steps.ci_fg.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          npm ci --ignore-scripts 2>&1 | tee npm-ci-ignore-scripts.log
+      
+      - name: Generate dependency analysis
+        run: |
+          npm ls --all --json > npm-ls.json || true
+          npm dedupe --dry-run 2>&1 | tee npm-dedupe-dry-run.log || true
+      
+      - name: Upload npm artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-ci-artifacts
+          path: |
+            npm-ls.json
+            npm-dedupe-dry-run.log
+            npm-ci-foreground.log
+            npm-ci-ignore-scripts.log
+          retention-days: 7
+      
+      - name: Fail job if npm ci failed
+        if: steps.ci_fg.outcome != 'success'
+        run: exit 1
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: npm-ci
+    if: needs.npm-ci.outputs.ci_fg == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.4'
+          cache: 'npm'
+      
+      - name: Pin npm version
+        run: |
+          npm i -g "npm@10.9.3"
+          npm -v
+      
+      - name: npm ci
+        run: |
+          npm ci --foreground-scripts
+      
+      - name: Build frontend
+        run: |
+          npm run build
+
+  build-bff:
+    runs-on: ubuntu-latest
+    needs: npm-ci
+    if: needs.npm-ci.outputs.ci_fg == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.4'
+          cache: 'npm'
+      
+      - name: Pin npm version
+        run: |
+          npm i -g "npm@10.9.3"
+          npm -v
+      
+      - name: npm ci
+        run: |
+          npm ci --foreground-scripts
+      
+      - name: Build BFF
+        run: |
+          npm run build -w apps/gateway-bff
+
+  type-check-planning-engine:
+    runs-on: ubuntu-latest
+    needs: npm-ci
+    if: needs.npm-ci.outputs.ci_fg == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.4'
+          cache: 'npm'
+      
+      - name: Pin npm version
+        run: |
+          npm i -g "npm@10.9.3"
+          npm -v
+      
+      - name: npm ci
+        run: |
+          npm ci --foreground-scripts
+      
+      - name: Type check planning-engine
+        run: |
+          npx tsc -p services/planning-engine/tsconfig.json --noEmit
+
+  type-check-profile-onboarding:
+    runs-on: ubuntu-latest
+    needs: npm-ci
+    if: needs.npm-ci.outputs.ci_fg == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.4'
+          cache: 'npm'
+      
+      - name: Pin npm version
+        run: |
+          npm i -g "npm@10.9.3"
+          npm -v
+      
+      - name: npm ci
+        run: |
+          npm ci --foreground-scripts
+      
+      - name: Type check profile-onboarding
+        run: |
+          npx tsc -p services/profile-onboarding/tsconfig.json --noEmit
