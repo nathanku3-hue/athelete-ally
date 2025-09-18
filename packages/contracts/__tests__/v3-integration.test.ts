@@ -149,7 +149,7 @@ describe('V3 Integration Tests', () => {
       };
 
       // 模擬服務間通信
-      const response = await simulateServiceCall(serviceCommunication);
+      const response = await simulateServiceCall();
       expect(response.status).toBe('success');
       expect(response.data).toBeDefined();
     });
@@ -191,7 +191,7 @@ describe('V3 Integration Tests', () => {
         duration: 5000
       };
 
-      const response = await simulateServiceFailure(failureScenario);
+      const response = await simulateServiceFailure();
       expect(response.status).toBe('error');
       expect(response.fallback).toBeDefined();
     });
@@ -203,7 +203,7 @@ describe('V3 Integration Tests', () => {
         retryDelay: 1000
       };
 
-      const response = await simulateRetryOperation(retryScenario);
+      const response = await simulateRetryOperation();
       expect(response.attempts).toBeLessThanOrEqual(3);
       expect(response.success).toBe(true);
     });
@@ -254,7 +254,7 @@ async function simulateApiCall(method: string, endpoint: string, data?: unknown)
   // 根據端點返回不同的模擬數據
   let responseData: Record<string, unknown> = {
     id: 'mock-id',
-    ...data
+    ...(data && typeof data === 'object' ? data : {})
   };
 
   if (endpoint.includes('/weekly-review/') && method === 'GET') {
