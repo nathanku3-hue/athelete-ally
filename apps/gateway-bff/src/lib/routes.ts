@@ -1,25 +1,51 @@
 import { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z, ZodSchema } from 'zod';
 import { proxyRequest } from './proxy';
 import { EnhancedPlanGenerationRequestSchema, RPEFeedbackSchema, PerformanceMetricsSchema, AdaptationsApplySchema, ApiEnvelopeSchema } from '@athlete-ally/shared-types';
 import { traceApiRequest } from '../telemetry';
 import { config } from '../config';
 
 
+/**
+ * Register Magic Slice v1 routes on a Fastify server.
+ * Route responsibilities:
+ * - Validate incoming payloads (Zod)
+ * - Proxy requests to Planning Engine
+ * - Validate envelope shape of downstream responses
+ */
 export function registerMagicSliceRoutes(server: FastifyInstance) {
+  /**
+   * Validate a body against a schema and return typed data or a 400.
+   */
+  function validateOr400<T>(reply: any, schema: ZodSchema<T>, body: unknown): body is T {
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      reply.code(400).send({ success: false, error: parsed.error.format(), message: 'Invalid request' });
+      return false;
+    }
+    // Reassign parsed data back onto request body for downstream proxy
+    // (Callers will cast appropriately.)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    (reply.request as any).validated = parsed.data;
+    return true;
+  }
+
+  /**
+   * Proxy to Planning Engine and ensure envelope shape.
+   */
+  async function proxyWithEnvelope(method: 'GET'|'POST'|'PUT'|'DELETE', url: string, data?: any) {
+    const res = await proxyRequest(method, url, data, { upstream: 'planning-engine', route: url.replace(/^.*\/api\//, '/api/') });
+    const body = await res.json();
+    const envSchema = ApiEnvelopeSchema(z.any());
+    const valid = envSchema.safeParse(body);
+    return { res, body, valid };
+  }
   // Enhanced plan generation (strict)
   server.post('/v1/plans/enhanced/generate', {}, async (request, reply) => {
-    const body = request.body as unknown;
-    const parsed = EnhancedPlanGenerationRequestSchema.safeParse(body);
-    if (!parsed.success) {
-      return reply.code(400).send({ success: false, error: parsed.error.format(), message: 'Invalid request' });
-    }
+    if (!validateOr400(reply, EnhancedPlanGenerationRequestSchema, request.body)) return;
     const span = traceApiRequest('POST', '/v1/plans/enhanced/generate', (request as any).user?.userId);
     try {
-      const res = await proxyRequest('POST', `${config.PLANNING_ENGINE_URL}/api/v1/plans/enhanced/generate`, parsed.data, { upstream: 'planning-engine', route: '/v1/plans/enhanced/generate' });
-      const body = await res.json();
-      const envSchema = ApiEnvelopeSchema(z.any());
-      const valid = envSchema.safeParse(body);
+      const { res, body, valid } = await proxyWithEnvelope('POST', `${config.PLANNING_ENGINE_URL}/api/v1/plans/enhanced/generate`, (reply.request as any).validated);
       if (!valid.success) {
         return reply.code(502).send({ success: false, error: 'Invalid downstream response', details: valid.error.format() });
       }
@@ -30,16 +56,10 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
 
   // RPE feedback (standard)
   server.post('/v1/plans/feedback/rpe', {}, async (request, reply) => {
-    const parsed = RPEFeedbackSchema.safeParse(request.body);
-    if (!parsed.success) {
-      return reply.code(400).send({ success: false, error: parsed.error.format(), message: 'Invalid RPE feedback' });
-    }
+    if (!validateOr400(reply, RPEFeedbackSchema, request.body)) return;
     const span = traceApiRequest('POST', '/v1/plans/feedback/rpe', (request as any).user?.userId);
     try {
-      const res = await proxyRequest('POST', `${config.PLANNING_ENGINE_URL}/api/v1/plans/feedback/rpe`, parsed.data, { upstream: 'planning-engine', route: '/v1/plans/feedback/rpe' });
-      const body = await res.json();
-      const envSchema = ApiEnvelopeSchema(z.any());
-      const valid = envSchema.safeParse(body);
+      const { res, body, valid } = await proxyWithEnvelope('POST', `${config.PLANNING_ENGINE_URL}/api/v1/plans/feedback/rpe`, (reply.request as any).validated);
       if (!valid.success) {
         return reply.code(502).send({ success: false, error: 'Invalid downstream response', details: valid.error.format() });
       }
@@ -50,16 +70,10 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
 
   // Performance metrics (standard)
   server.post('/v1/plans/feedback/performance', {}, async (request, reply) => {
-    const parsed = PerformanceMetricsSchema.safeParse(request.body);
-    if (!parsed.success) {
-      return reply.code(400).send({ success: false, error: parsed.error.format(), message: 'Invalid performance metrics' });
-    }
+    if (!validateOr400(reply, PerformanceMetricsSchema, request.body)) return;
     const span = traceApiRequest('POST', '/v1/plans/feedback/performance', (request as any).user?.userId);
     try {
-      const res = await proxyRequest('POST', `${config.PLANNING_ENGINE_URL}/api/v1/plans/feedback/performance`, parsed.data, { upstream: 'planning-engine', route: '/v1/plans/feedback/performance' });
-      const body = await res.json();
-      const envSchema = ApiEnvelopeSchema(z.any());
-      const valid = envSchema.safeParse(body);
+      const { res, body, valid } = await proxyWithEnvelope('POST', `${config.PLANNING_ENGINE_URL}/api/v1/plans/feedback/performance`, (reply.request as any).validated);
       if (!valid.success) {
         return reply.code(502).send({ success: false, error: 'Invalid downstream response', details: valid.error.format() });
       }

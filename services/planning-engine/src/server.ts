@@ -194,6 +194,22 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
   }
 }
 
+/**
+ * Build a normalized plan generation request object from the incoming event.
+ * This function is pure and makes it easy to unit test future changes.
+ */
+function buildPlanRequestFromEvent(event: PlanGenerationRequestedEvent) {
+  return {
+    userId: event.userId,
+    proficiency: event.proficiency || 'intermediate',
+    season: event.season || 'offseason',
+    availabilityDays: event.availabilityDays || 3,
+    weeklyGoalDays: event.weeklyGoalDays,
+    equipment: event.equipment || ['bodyweight'],
+    purpose: event.purpose,
+  } as const;
+}
+
 // Event handler for plan generation requested (优化版本)
 async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedEvent>) {
   const event = task.data;
@@ -213,15 +229,7 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
     });
 
     // 使用异步生成器处理计划生成
-    const request: any = {
-      userId: event.userId,
-      proficiency: event.proficiency || 'intermediate',
-      season: event.season || 'offseason',
-      availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays,
-      equipment: event.equipment || ['bodyweight'],
-      purpose: event.purpose,
-    };
+    const request = buildPlanRequestFromEvent(event);
 
     // 异步生成计划（非阻塞）
     await asyncPlanGenerator.generatePlanAsync(

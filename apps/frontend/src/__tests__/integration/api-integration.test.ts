@@ -2,8 +2,7 @@
 import { APITestUtils, APIResponse } from '@/lib/api-test-utils';
 
 // 只在有环境服务时运行集成测试
-// TODO: 当预览环境可用时，重新启用这些测试
-// 设置 RUN_ENV_TESTS=true 来运行需要live服务的集成测试
+// 提示: 设置 RUN_ENV_TESTS=true 来运行需要 live 服务的集成测试
 const shouldRunEnvTests = process.env.RUN_ENV_TESTS === 'true';
 
 (shouldRunEnvTests ? describe : describe.skip)('API Integration Tests', () => {
