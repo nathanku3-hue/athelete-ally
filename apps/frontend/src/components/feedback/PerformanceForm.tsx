@@ -15,8 +15,22 @@ export default function PerformanceForm({ sessionId, onSubmitted }: { sessionId:
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    show('Performance submitted', 'success');
-    onSubmitted?.();
+    try {
+      await submit.mutateAsync({
+        sessionId,
+        totalVolume,
+        averageRPE,
+        completionRate,
+        recoveryTime,
+        sleepQuality,
+        stressLevel,
+        timestamp: new Date().toISOString(),
+      } as any);
+      show('Performance submitted', 'success');
+      onSubmitted?.();
+    } catch (err) {
+      show('Performance submit failed', 'error');
+    }
   }
 
   return (

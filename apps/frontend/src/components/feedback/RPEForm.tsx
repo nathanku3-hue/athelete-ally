@@ -12,8 +12,20 @@ export default function RPEForm({ sessionId, exerciseId, onSubmitted }: { sessio
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    show('RPE submitted', 'success');
-    onSubmitted?.();
+    try {
+      await submit.mutateAsync({
+        sessionId,
+        exerciseId,
+        rpe,
+        completionRate,
+        notes: notes || undefined,
+        timestamp: new Date().toISOString(),
+      } as any);
+      show('RPE submitted', 'success');
+      onSubmitted?.();
+    } catch (err) {
+      show('RPE submit failed', 'error');
+    }
   }
 
   return (
