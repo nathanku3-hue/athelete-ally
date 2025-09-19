@@ -6,6 +6,7 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import fetch from 'node-fetch';
+import { registerMagicSliceRoutes } from './lib/routes.js';
 
 import { config } from './config.js';
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
@@ -52,6 +53,11 @@ await server.register(swagger, {
   },
 });
 await server.register(swaggerUi, { routePrefix: '/api/docs', uiConfig: { docExpansion: 'list', deepLinking: false } });
+
+// Mount Magic Slice v1 routes under /api to expose /api/v1/* endpoints
+await server.register(async (app) => {
+  registerMagicSliceRoutes(app);
+}, { prefix: '/api' });
 
 // Root welcome
 server.get('/', async () => ({ message: 'Welcome to the API!' }));
