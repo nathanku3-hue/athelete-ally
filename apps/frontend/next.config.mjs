@@ -132,13 +132,11 @@ const nextConfig = {
   // },
   
   // 实验性功能
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
+  
   
   // 服务器外部包
   serverExternalPackages: ['@prisma/client'],
 };
 
 export default nextConfig;
+
