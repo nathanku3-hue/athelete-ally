@@ -12,10 +12,21 @@
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./",
-    "types": ["jest", "node", "aws-lambda"]
+    "types": [
+      "jest",
+      "node",
+      "aws-lambda"
+    ],
+    "composite": true,
+    "incremental": true
   },
-  "include": ["events/**/*", "openapi.yaml"],
-  "exclude": ["node_modules", "dist", "__tests__"]
+  "include": [
+    "events/**/*",
+    "openapi.yaml"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__tests__"
+  ]
 }
-
-

@@ -9,9 +9,25 @@
     "sourceMap": true,
     "baseUrl": "../../",
     "paths": {
-      "@athlete-ally/contracts": ["packages/contracts/src"]
-    }
+      "@athlete-ally/contracts": [
+        "packages/contracts/src"
+      ]
+    },
+    "composite": true,
+    "incremental": true
   },
-  "include": ["src/**/*", "../../packages/contracts/src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+  "include": [
+    "src/**/*",
+    "../../packages/contracts/src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.test.ts"
+  ],
+  "references": [
+    {
+      "path": "../contracts"
+    }
+  ]
 }

@@ -1,0 +1,20 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/shared-types"
+    },
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/protocol-types"
+    },
+    {
+      "path": "./packages/contracts"
+    },
+    {
+      "path": "./packages/event-bus"
+    }
+  ]
+}

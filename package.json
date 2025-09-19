@@ -66,7 +66,9 @@
     "db:test": "node scripts/test-db-connection.js",
     "redis:test": "node scripts/test-redis-connection.js",
     "services:health-check": "node scripts/health-check-all.js",
-    "smoke:alpha": "node scripts/smoke-alpha.js"
+    "smoke:alpha": "node scripts/smoke-alpha.js",
+    "ts:build": "tsc -b tsconfig.build.json",
+    "ts:clean": "tsc -b --clean tsconfig.build.json"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
