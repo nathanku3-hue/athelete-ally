@@ -7,6 +7,12 @@ Internal
 
 # Phase 2: Magic Slice Alpha (v0.2.0-alpha)
 
+v0.2.0-alpha.1 — UX Polish & Validation Hardening
+- Frontend: Wire Magic Slice feedback hooks into Plan page (RPE and Performance)
+- Frontend: Inline validation, field-level errors, a11y attributes, and disabled/pending states
+- Frontend: Dev-only feedback page to exercise hooks end-to-end in local env
+- Gateway‑BFF: Expose Magic Slice routes under both `/v1/*` and `/api/v1/*` to unblock UI
+
 Date: $(date -u +"%Y-%m-%d")
 
 Highlights
