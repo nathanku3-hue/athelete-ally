@@ -41,7 +41,29 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
-];
+  ,
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      parserOptions: {
+        // Enable type-aware linting across the monorepo
+        project: [
+          "./tsconfig.json",
+          "./tsconfig.base.json",
+          "./apps/*/tsconfig.json",
+          "./packages/*/tsconfig.json",
+          "./services/*/tsconfig.json"
+        ],
+        tsconfigRootDir: __dirname
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-explicit-any": "warn"
+    }
+  }];
 
 export default eslintConfig;
+
 
