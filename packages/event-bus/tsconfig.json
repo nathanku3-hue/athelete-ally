@@ -10,11 +10,18 @@
     "baseUrl": "../../",
     "paths": {
       "@athlete-ally/contracts": [
-        "packages/contracts/src"
+        "packages/contracts/events/index.ts"
+      ],
+      "@athlete-ally/contracts/events": [
+        "packages/contracts/events"
+      ],
+      "@athlete-ally/contracts/events/*": [
+        "packages/contracts/events/*"
       ]
     },
     "composite": true,
-    "incremental": true
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": [
     "src/**/*",

@@ -18,7 +18,8 @@
       "aws-lambda"
     ],
     "composite": true,
-    "incremental": true
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": [
     "events/**/*",

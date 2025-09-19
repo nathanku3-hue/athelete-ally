@@ -6,7 +6,7 @@
 import { Protocol, ProtocolShare, Permission, Block } from '@athlete-ally/protocol-types';
 
 // API配置
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
 const DEFAULT_HEADERS = {
   'Content-Type': 'application/json',
 };

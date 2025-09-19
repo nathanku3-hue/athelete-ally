@@ -126,6 +126,10 @@ export interface OnboardingContextType {
 export * from './schemas/onboarding';
 
 // 导出RPE和User Preferences Schema
-export * from './schemas/rpe';export * from './schemas/enhanced-plan';
+export * from './schemas/rpe';
+export * from './schemas/enhanced-plan';
 export * from './schemas/feedback';
 export * from './schemas/api';
+// Progress & Notifications schemas
+export * from './schemas/progress';
+export * from './schemas/notifications';

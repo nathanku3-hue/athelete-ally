@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:contracts": "jest --runInBand --verbose --no-cache --testPathPattern=contracts",
+    "test:contracts": "jest --maxWorkers=50% --verbose --no-cache --testPathPattern=contracts",
     "test:database": "jest --testPathPattern=database-models",
     "test:api": "jest --testPathPattern=api-endpoints",
     "test:integration": "jest --testPathPattern=integration",

@@ -96,20 +96,25 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.55.0",
     "@tanstack/react-query": "^5.87.4",
-    "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/aria-query": "^5.0.4",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/aria-query": "^5.0.4",
     "autoprefixer": "^10.4.19",
     "eslint": "^8",
     "eslint-config-next": "^14",
+    "jest-environment-jsdom": "^30.1.2",
     "next": "^15.5.3",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
@@ -129,5 +134,11 @@
     "apps/*",
     "services/*",
     "packages/*"
-  ]
+  ],
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "jest --bail --findRelatedTests --passWithNoTests"
+    ]
+  }
 }

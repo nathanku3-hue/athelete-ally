@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { OnboardingPayloadSchema, safeParseOnboardingPayload, validateOnboardingStep, getStepProgress } from '@athlete-ally/shared-types';
 
 describe('Onboarding合同统一测试', () => {
@@ -114,7 +114,7 @@ describe('Onboarding合同统一测试', () => {
   describe('步骤验证功能', () => {
     it('应该正确验证步骤1（目的和目标）', () => {
       const step1Data = {
-        purpose: 'general_fitness',
+        purpose: 'general_fitness' as const,
         purposeDetails: 'I want to get in shape'
       };
 
@@ -124,7 +124,7 @@ describe('Onboarding合同统一测试', () => {
 
     it('应该正确验证步骤2（技能水平）', () => {
       const step2Data = {
-        proficiency: 'intermediate'
+        proficiency: 'intermediate' as const
       };
 
       expect(validateOnboardingStep(2, step2Data)).toBe(true);
@@ -133,7 +133,7 @@ describe('Onboarding合同统一测试', () => {
 
     it('应该正确验证步骤3（赛季和目标）', () => {
       const step3Data = {
-        season: 'offseason',
+        season: 'offseason' as const,
         competitionDate: '2024-06-01T00:00:00Z'
       };
 
@@ -179,19 +179,19 @@ describe('Onboarding合同统一测试', () => {
       expect(progress.percentage).toBe(0);
 
       const partialData = {
-        purpose: 'general_fitness',
+        purpose: 'general_fitness' as const,
         purposeDetails: 'I want to get in shape',
-        proficiency: 'intermediate'
+        proficiency: 'intermediate' as const
       };
       const partialProgress = getStepProgress(partialData);
       expect(partialProgress.current).toBe(2);
       expect(partialProgress.percentage).toBe(33);
 
       const completeData = {
-        purpose: 'general_fitness',
+        purpose: 'general_fitness' as const,
         purposeDetails: 'I want to get in shape',
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         competitionDate: '2024-06-01T00:00:00Z',
         availabilityDays: 3,
         weeklyGoalDays: 4,
@@ -269,7 +269,7 @@ describe('Onboarding合同统一测试', () => {
       
       const errorMessages = result.error?.errors.map(e => e.message);
       expect(errorMessages).toContain('Invalid user ID format');
-      expect(errorMessages).toContain('Invalid enum value');
+      expect(errorMessages.some(msg => msg.includes('Invalid enum value. Expected'))).toBe(true);
       expect(errorMessages).toContain('Number must be less than or equal to 7');
     });
 

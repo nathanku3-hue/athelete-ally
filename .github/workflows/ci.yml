@@ -34,6 +34,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      - name: Cache Jest transforms
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/jest
+            node_modules/.cache/ts-jest
+            packages/*/node_modules/.cache/jest
+            packages/*/node_modules/.cache/ts-jest
+          key: ${{ runner.os }}-jest-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/jest.config.*') }}
+
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist/*.tsbuildinfo
+            packages/*/tsconfig.tsbuildinfo
+            tsconfig.tsbuildinfo
+          key: ${{ runner.os }}-tsbuild-${{ hashFiles('**/tsconfig.json') }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
@@ -103,6 +122,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      - name: Cache Jest transforms
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/jest
+            node_modules/.cache/ts-jest
+            packages/*/node_modules/.cache/jest
+            packages/*/node_modules/.cache/ts-jest
+          key: ${{ runner.os }}-jest-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/jest.config.*') }}
+
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist/*.tsbuildinfo
+            packages/*/tsconfig.tsbuildinfo
+            tsconfig.tsbuildinfo
+          key: ${{ runner.os }}-tsbuild-${{ hashFiles('**/tsconfig.json') }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
@@ -139,6 +177,25 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+
+      - name: Cache Jest transforms
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/jest
+            node_modules/.cache/ts-jest
+            packages/*/node_modules/.cache/jest
+            packages/*/node_modules/.cache/ts-jest
+          key: ${{ runner.os }}-jest-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/jest.config.*') }}
+
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist/*.tsbuildinfo
+            packages/*/tsconfig.tsbuildinfo
+            tsconfig.tsbuildinfo
+          key: ${{ runner.os }}-tsbuild-${{ hashFiles('**/tsconfig.json') }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -192,6 +249,61 @@ jobs:
           else
             echo "protoc not available, skipping proto validation"
           fi
+
+  # 包测试
+  packages:
+    name: Package Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Jest transforms
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/jest
+            node_modules/.cache/ts-jest
+            packages/*/node_modules/.cache/jest
+            packages/*/node_modules/.cache/ts-jest
+          key: ${{ runner.os }}-jest-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/jest.config.*') }}
+
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist/*.tsbuildinfo
+            packages/*/tsconfig.tsbuildinfo
+            tsconfig.tsbuildinfo
+          key: ${{ runner.os }}-tsbuild-${{ hashFiles('**/tsconfig.json') }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Enable Corepack and Enforce Package Manager Version
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Run package smoke tests
+        run: npm run test:packages
+
+      - name: Upload package test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-test-results-${{ github.run_id }}
+          path: |
+            packages/*/coverage/
+            packages/*/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
 
 
 

@@ -1,7 +1,12 @@
 // API集成测试套件
 import { APITestUtils, APIResponse } from '@/lib/api-test-utils';
 
-describe('API Integration Tests', () => {
+// 只在有环境服务时运行集成测试
+// TODO: 当预览环境可用时，重新启用这些测试
+// 设置 RUN_ENV_TESTS=true 来运行需要live服务的集成测试
+const shouldRunEnvTests = process.env.RUN_ENV_TESTS === 'true';
+
+(shouldRunEnvTests ? describe : describe.skip)('API Integration Tests', () => {
   // 设置测试超时
   jest.setTimeout(30000);
 

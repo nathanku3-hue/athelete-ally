@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 import { SecureIdGenerator, SecureIdValidator } from '@athlete-ally/shared';
 
 describe('Secure ID Generation and Validation', () => {

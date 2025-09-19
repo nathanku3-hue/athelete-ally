@@ -1,0 +1,33 @@
+name: Jest Open Handles Scan
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # weekly (Mon 03:00 UTC)
+  workflow_dispatch: {}
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  open-handles:
+    name: Open Handles (Occasional)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: |
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'open-handles'))
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci --no-audit --no-fund
+
+      - name: Run Jest with detectOpenHandles
+        run: npm run test:open-handles

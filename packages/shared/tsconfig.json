@@ -5,7 +5,8 @@
     "rootDir": "src",
     "composite": true,
     "incremental": true,
-    "declaration": true
+    "declaration": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": [
     "src/**/*"

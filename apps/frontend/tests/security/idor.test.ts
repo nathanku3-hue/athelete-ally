@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { SecurityContextManager } from '@athlete-ally/shared';
 
 describe('IDOR (Insecure Direct Object Reference) Protection', () => {

@@ -12,7 +12,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@event-bus-test-utils/*": ["tests/test-utils/*"]
+      "@event-bus-test-utils/*": ["tests/test-utils/*"],
+      "@athlete-ally/contracts": ["../contracts/events/index.ts"],
+      "@athlete-ally/contracts/": ["../contracts/events/"]
     },
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true

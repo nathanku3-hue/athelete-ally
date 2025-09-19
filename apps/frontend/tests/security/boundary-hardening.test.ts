@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { generateTrainingPlan } from '../../services/planning-engine/src/llm.js';
 
 describe('边界控制与韧性测试', () => {
