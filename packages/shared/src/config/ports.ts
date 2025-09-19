@@ -3,7 +3,7 @@
 
 export const SERVICE_PORTS = {
   // 前端应用 - 使用8000号段避免冲突
-  GATEWAY_BFF: 8000,
+  GATEWAY_BFF: 4000,
   WEB: 3000, // Next.js 默认，若冲突可改为 8080
   
   // 微服务 - 使用8000号段
@@ -78,3 +78,4 @@ export function getMonitoringPorts(): number[] {
     SERVICE_PORTS.JAEGER,
   ];
 }
+
