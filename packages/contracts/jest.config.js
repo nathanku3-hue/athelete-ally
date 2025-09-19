@@ -4,11 +4,13 @@ const config = {
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
-      useESM: true
+      useESM: true,
+      tsconfig: '<rootDir>/tsconfig.test.json'
     }
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@contracts-test-utils/(.*)$': '<rootDir>/tests/test-utils/$1'
   },
   testMatch: [
     '**/__tests__/**/*.test.ts',
