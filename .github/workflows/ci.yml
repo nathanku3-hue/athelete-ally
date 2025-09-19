@@ -117,9 +117,14 @@ jobs:
             export NODE_ENV=test
           fi
           echo "✅ 配置验证完成"
-
-      - name: Run tests
-        run: npx turbo run test
+      - name: Upload root coverage (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-coverage-${{ github.run_id }}
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
   # 合同校验
   contracts:
     name: Contract Validation
@@ -143,10 +148,16 @@ jobs:
 
       - name: Typecheck (contracts)
         run: npm run -w packages/contracts typecheck
-
       - name: Contracts tests with coverage gate
         run: npm run -w packages/contracts test:contracts:cov
-
+      - name: Upload contracts coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contracts-coverage-${{ github.run_id }}
+          path: packages/contracts/coverage/
+          retention-days: 14
+          if-no-files-found: ignore
       - name: Validate OpenAPI contracts
         run: |
           # 检查 OpenAPI 语法
@@ -181,4 +192,6 @@ jobs:
           else
             echo "protoc not available, skipping proto validation"
           fi
+
+
 

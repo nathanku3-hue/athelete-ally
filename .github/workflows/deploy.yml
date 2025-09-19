@@ -41,6 +41,14 @@ jobs:
         with:
           file: ./coverage/lcov.info
 
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -143,4 +151,6 @@ jobs:
           else
             echo "❌ Deployment failed!"
           fi
+
+
 
