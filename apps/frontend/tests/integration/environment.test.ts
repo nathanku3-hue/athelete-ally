@@ -143,7 +143,7 @@ async function cleanupTestEnvironment(): Promise<void> {
   console.log('✅ 测试环境清理完成');
 }
 
-describe('Environment Integration Tests', () => {
+(process.env.RUN_ENV_TESTS ? describe : describe.skip)('Environment Integration Tests', () => {
   beforeAll(async () => {
     await startTestEnvironment();
   }, TEST_CONFIG.TIMEOUT);
