@@ -151,3 +151,12 @@ jest --verbose
 **配置完成时间**: 2025-01-19  
 **验证状态**: ✅ 全部通过  
 **下一步**: CI 集成和覆盖率门禁
+
+
+## Result Shape For Tests
+
+- Use a unified discriminated union for test helper responses:
+  - `type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: unknown }`
+- Helpers return this shape; in tests, branch on `ok` before accessing `data`.
+- Utilities exposed per package under `packages/<pkg>/tests/test-utils`:
+  - `ok(data)`, `err(error)`, `fromPromise(promise)`, `unwrap(result)`, `map(result, fn)`, `isOk(result)`.
