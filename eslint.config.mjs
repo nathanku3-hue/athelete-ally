@@ -25,6 +25,13 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "import/no-commonjs": "off",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn",
+      "@typescript-eslint/await-thenable": "warn",
+      "@typescript-eslint/no-implicit-any-catch": "warn",
     },
   },
   {
@@ -37,3 +44,4 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
+
