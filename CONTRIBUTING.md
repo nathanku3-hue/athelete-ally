@@ -430,3 +430,27 @@ npx turbo run db:migrate
 ---
 
 **记住**: The Ally Workflow 是我们团队的质量保证，每一个步骤都是为了确保我们交付的代码是高质量、可维护、可扩展的。遵循这个工作流，我们就能持续交付价值，同时保持代码库的健康状态。
+
+## 测试规范（统一约定）
+
+- 优先使用“泛型 helpers”与统一结果形状
+  - 统一结果：`type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: unknown }`
+  - 工具：`ok/err/fromPromise/isOk/unwrap/map`（见各包 `packages/<pkg>/tests/test-utils`，或别名 `@<pkg>-test-utils/*`）
+  - 在测试中先判断 `ok` 再访问 `data`，失败分支断言 `error`
+- 运行时校验：关键 I/O 边界使用 zod 解析断言
+  - 共享 Schema 位于 `packages/shared-types/src/schemas/*`
+  - 断言示例：`const parsed = Schema.safeParse(json); expect(parsed.success).toBe(true)`
+  - 仅在必要时做解析断言；内部纯计算可只用 TS 类型
+- 模拟工具：优先复用已有 helpers 而非重复造轮子
+  - `simulateApiCall/simulateServiceFailure/simulateRetryOperation` 等位于 `packages/contracts/tests/test-utils`
+  - 进阶：必要时新增通用 helper，放到对应包的 `tests/test-utils`
+- 断言不要“收窄/脆弱”（Do not over‑specify）
+  - 避免对完整对象做 `deepEqual` 或严格字段枚举；优先断言形状/必要字段/关键约束
+  - 示例：`expect(arr).toHaveLength(>=1)`、`expect(item).toHaveProperty('id')`、`expect(value).toBeGreaterThan(0)`
+- 类型与安全：
+  - 测试默认遵守 `@typescript-eslint/no-unsafe-*` 规则（必要处可局部 disable 并写明原因）
+  - 避免 `any`；使用 z.infer 同步类型：`type T = z.infer<typeof Schema>`
+- 受影响测试与本地校验：
+  - 仅跑受影响用例：`jest -o` 或 `jest --findRelatedTests`
+  - 本地严格检查：`npm run lint:tests:strict`、类型覆盖率：`npm run type:coverage:*`
+  - 预提交已启用 Husky + lint-staged：自动执行 eslint 修复、受影响测试、变更范围 type-check

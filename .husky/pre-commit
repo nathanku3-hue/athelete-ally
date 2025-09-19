@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+
+# Source husky shim if available
+if [ -f "$(dirname -- "$0")/_/husky.sh" ]; then
+  . "$(dirname -- "$0")/_/husky.sh"
+fi
+
+# Prevent build artifacts from being committed (reuse existing .githooks if present)
+if [ -x ".githooks/pre-commit" ]; then
+  ./.githooks/pre-commit || exit 1
+fi
+
+echo "🔍 Running lint-staged..."
+npx lint-staged || exit 1
+
+# Fast typecheck for changed scope (turbo cache aware)
+echo "🔎 Type-checking changed packages..."
+npx turbo run type-check --continue --filter=...[HEAD] || exit 1
+
+# Run affected tests only (Jest -o)
+echo "🧪 Running affected tests (jest -o)..."
+npx jest -o --passWithNoTests || exit 1
