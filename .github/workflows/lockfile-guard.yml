@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  NODE_VERSION: '18.20.4'
+  NODE_VERSION: '20'
   NPM_VERSION: '10.x'
 
 jobs:
@@ -74,4 +74,6 @@ jobs:
             exit 1
           fi
           echo "Lockfile is up-to-date."
+
+
 

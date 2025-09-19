@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Run Alpha smoke script
         id: smoke
@@ -42,4 +42,5 @@ jobs:
         with:
           name: alpha-smoke-logs-${{ github.run_id }}
           path: smoke.log
+
 

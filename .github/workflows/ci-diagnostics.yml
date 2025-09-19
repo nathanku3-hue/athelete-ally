@@ -9,7 +9,7 @@ on:
 
 env:
   # 匹配项目中的.nvmrc文件
-  NODE_VERSION: '18.20.4'
+  NODE_VERSION: '20'
   NPM_VERSION: '10.9.3'
 
 jobs:
@@ -113,3 +113,5 @@ jobs:
         if: steps.ci_fg.outcome == 'success'
         run: |
           npm run build
+
+

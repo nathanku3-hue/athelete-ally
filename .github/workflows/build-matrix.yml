@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
+          node-version: '20'
           cache: 'npm'
       
       - name: Pin npm version
@@ -70,7 +70,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
+          node-version: '20'
           cache: 'npm'
       
       - name: Pin npm version
@@ -97,7 +97,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
+          node-version: '20'
           cache: 'npm'
       
       - name: Pin npm version
@@ -124,7 +124,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
+          node-version: '20'
           cache: 'npm'
       
       - name: Pin npm version
@@ -151,7 +151,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.4'
+          node-version: '20'
           cache: 'npm'
       
       - name: Pin npm version
@@ -166,3 +166,4 @@ jobs:
       - name: Type check profile-onboarding
         run: |
           npx tsc -p services/profile-onboarding/tsconfig.json --noEmit
+
