@@ -15,6 +15,10 @@ out/
 coverage/
 *.lcov
 
+# Debug artifacts
+jest-config.json
+ts-trace.log
+
 # Environment variables
 .env
 .env.local
