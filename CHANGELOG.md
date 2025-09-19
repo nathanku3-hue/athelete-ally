@@ -1,3 +1,10 @@
+# Unreleased
+
+Internal
+- Fix TypeScript path mapping for `@athlete-ally/contracts` to prevent double `events` in resolution and add explicit `@athlete-ally/contracts/events` mappings (tsconfig.base.json, tsconfig.json)
+- Align `packages/event-bus/tsconfig.json` paths and includes to `contracts/events`
+- Update shared-types smoke tests to match current Zod schemas; all package tests green via `npm run test:packages`
+
 # Phase 2: Magic Slice Alpha (v0.2.0-alpha)
 
 Date: $(date -u +"%Y-%m-%d")
@@ -38,4 +45,3 @@ Breaking Changes
 Upgrade Notes
 - Ensure `NEXT_PUBLIC_API_BASE_URL` is set (default `http://localhost:4000`)
 - Ensure NATS/Redis/Prometheus/Grafana/Jaeger are running for full observability
-
