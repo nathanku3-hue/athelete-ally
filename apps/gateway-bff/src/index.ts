@@ -59,6 +59,9 @@ await server.register(async (app) => {
   registerMagicSliceRoutes(app);
 }, { prefix: '/api' });
 
+// Also mount Magic Slice routes at root for clients calling '/v1/*'
+registerMagicSliceRoutes(server);
+
 // Root welcome
 server.get('/', async () => ({ message: 'Welcome to the API!' }));
 
