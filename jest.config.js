@@ -261,5 +261,12 @@ module.exports = {
       lines: 80,
       statements: 80
     }
+    ,
+    // Per-path coverage thresholds for key directories
+    'packages/contracts/**/*.{ts,tsx}': { branches: 90, functions: 90, lines: 90, statements: 90 },
+    'packages/shared/src/**/*.{ts,tsx}': { branches: 80, functions: 80, lines: 80, statements: 80 },
+    'apps/gateway-bff/src/**/*.{ts,tsx}': { branches: 75, functions: 80, lines: 80, statements: 80 },
+    'apps/frontend/src/lib/**/*.{ts,tsx}': { branches: 65, functions: 70, lines: 70, statements: 70 },
+    'apps/frontend/src/components/**/*.{ts,tsx}': { branches: 60, functions: 65, lines: 65, statements: 65 }
   }
 };
