@@ -54,7 +54,7 @@ export interface PerformanceRequest {
 }
 
 export class APITestUtils {
-  private static baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4102';
+  private static baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   
   /**
    * 测试训练计划生成API
@@ -426,3 +426,4 @@ export class APITestUtils {
     return report;
   }
 }
+

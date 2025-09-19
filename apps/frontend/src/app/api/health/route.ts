@@ -25,7 +25,7 @@ async function checkDatabase(): Promise<HealthCheck> {
   try {
     // 这里应该检查数据库连接
     // 由于前端不应该直接连接数据库，我们通过API检查
-    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4102';
+    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4000';
     const response = await fetch(`${gatewayUrl}/health`, {
       method: 'GET',
       headers: {
@@ -70,7 +70,7 @@ async function checkRedis(): Promise<HealthCheck> {
   const startTime = Date.now();
   
   try {
-    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4102';
+    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4000';
     const response = await fetch(`${gatewayUrl}/health`, {
       method: 'GET',
       headers: {
@@ -115,7 +115,7 @@ async function checkNats(): Promise<HealthCheck> {
   const startTime = Date.now();
   
   try {
-    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4102';
+    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4000';
     const response = await fetch(`${gatewayUrl}/health`, {
       method: 'GET',
       headers: {
@@ -160,7 +160,7 @@ async function checkGatewayBff(): Promise<HealthCheck> {
   const startTime = Date.now();
   
   try {
-    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4102';
+    const gatewayUrl = process.env.GATEWAY_BFF_URL || 'http://localhost:4000';
     const response = await fetch(`${gatewayUrl}/health`, {
       method: 'GET',
       headers: {
@@ -314,3 +314,4 @@ export async function GET(request: NextRequest) {
     });
   }
 }
+
