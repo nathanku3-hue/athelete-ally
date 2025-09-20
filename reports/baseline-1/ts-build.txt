@@ -1,0 +1,4 @@
+Projects in scope:            6
+Config file parsing time: 0.22s
+Up-to-date check time:    0.16s
+Build time:               0.39s
