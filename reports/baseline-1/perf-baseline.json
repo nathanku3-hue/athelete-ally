@@ -1,0 +1,62 @@
+{
+  "runs": 10,
+  "success": 0,
+  "errors": 10,
+  "quantiles": {
+    "p50": null,
+    "p90": null,
+    "p99": null
+  },
+  "results": [
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 13
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 3
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 2
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 1
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 2
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 1
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 1
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 1
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 2
+    },
+    {
+      "ok": false,
+      "error": "FetchError: request to http://localhost:4000/api/v1/onboarding failed, reason: connect ECONNREFUSED 127.0.0.1:4000",
+      "ms": 2
+    }
+  ]
+}
