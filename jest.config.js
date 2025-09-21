@@ -26,7 +26,7 @@ module.exports = {
               ],
       setupFilesAfterEnv: ['<rootDir>/apps/frontend/src/__tests__/setup.ts'],
   moduleNameMapper: {
-        '^(\\\\.{1,2}/.*)\\\\.js$': '',
+        '^(\.{1,2}/.*)\.js$': '$1',
         '^@/(.*)$': '<rootDir>/apps/frontend/src/$1',
     '^@athlete-ally/(.*)$': '<rootDir>/packages/$1',
     '^@athlete-ally/event-bus/(.*)$': '<rootDir>/packages/event-bus/src/$1',
