@@ -107,16 +107,187 @@ module.exports = {
         '!packages/contracts/**/node_modules/**',
         '!packages/contracts/**/dist/**'
       ],
-      coverageThreshold: CI_LOOSE ? {
-  global: { branches: 0, functions: 0, lines: 0, statements: 0 }
-} : {
-  global: { branches: 50, functions: 60, lines: 60, statements: 60 },
-  'packages/contracts/tests/test-utils/**/*.{ts,tsx}': { branches: 80, functions: 80, lines: 80, statements: 80 },
-  'packages/shared/src/**/*.{ts,tsx}': { branches: 70, functions: 70, lines: 70, statements: 70 },
-  'apps/gateway-bff/src/**/*.{ts,tsx}': { branches: 60, functions: 70, lines: 70, statements: 70 },
-  'apps/frontend/src/lib/**/*.{ts,tsx}': { branches: 50, functions: 60, lines: 60, statements: 60 },
-  'apps/frontend/src/components/**/*.{ts,tsx}': { branches: 40, functions: 50, lines: 50, statements: 50 }
-}
+      coverageThreshold: {
+        global: {
+          branches: 90,
+          functions: 90,
+          lines: 90,
+          statements: 90
+        }
+      }
+    },
+    
+    // Event Bus package
+    {
+      displayName: 'event-bus',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/packages/event-bus'],
+      testMatch: [
+        '<rootDir>/packages/event-bus/**/__tests__/**/*.test.{ts,tsx}',
+        '<rootDir>/packages/event-bus/**/*.test.{ts,tsx}'
+      ],
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+        ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })
+      },
+      transform: {
+        '^.+\\.(ts|tsx)$': ['ts-jest', {
+          useESM: true,
+          tsconfig: '<rootDir>/packages/event-bus/tsconfig.json'
+        }]
+      },
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
+      collectCoverageFrom: [
+        'packages/event-bus/src/**/*.{ts,tsx}',
+        '!packages/event-bus/src/**/*.d.ts',
+        '!packages/event-bus/src/**/__tests__/**',
+        '!packages/event-bus/src/**/node_modules/**'
+      ]
+    },
+    
+    // Shared package
+    {
+      displayName: 'shared',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/packages/shared'],
+      testMatch: [
+        '<rootDir>/packages/shared/**/__tests__/**/*.test.{ts,tsx}',
+        '<rootDir>/packages/shared/**/*.test.{ts,tsx}'
+      ],
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+        ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })
+      },
+      transform: {
+        '^.+\\.(ts|tsx)$': ['ts-jest', {
+          useESM: true,
+          tsconfig: '<rootDir>/packages/shared/tsconfig.json'
+        }]
+      },
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
+      collectCoverageFrom: [
+        'packages/shared/src/**/*.{ts,tsx}',
+        '!packages/shared/src/**/*.d.ts',
+        '!packages/shared/src/**/__tests__/**',
+        '!packages/shared/src/**/node_modules/**'
+      ]
+    },
+    
+    // Shared Types package
+    {
+      displayName: 'shared-types',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/packages/shared-types'],
+      testMatch: [
+        '<rootDir>/packages/shared-types/**/__tests__/**/*.test.{ts,tsx}',
+        '<rootDir>/packages/shared-types/**/*.test.{ts,tsx}'
+      ],
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+        ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })
+      },
+      transform: {
+        '^.+\\.(ts|tsx)$': ['ts-jest', {
+          useESM: true,
+          tsconfig: '<rootDir>/packages/shared-types/tsconfig.json'
+        }]
+      },
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
+      collectCoverageFrom: [
+        'packages/shared-types/src/**/*.{ts,tsx}',
+        '!packages/shared-types/src/**/*.d.ts',
+        '!packages/shared-types/src/**/__tests__/**',
+        '!packages/shared-types/src/**/node_modules/**'
+      ]
+    },
+    
+    // Protocol Types package
+    {
+      displayName: 'protocol-types',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/packages/protocol-types'],
+      testMatch: [
+        '<rootDir>/packages/protocol-types/**/__tests__/**/*.test.{ts,tsx}',
+        '<rootDir>/packages/protocol-types/**/*.test.{ts,tsx}'
+      ],
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+        ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })
+      },
+      transform: {
+        '^.+\\.(ts|tsx)$': ['ts-jest', {
+          useESM: true,
+          tsconfig: '<rootDir>/packages/protocol-types/tsconfig.json'
+        }]
+      },
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
+      collectCoverageFrom: [
+        'packages/protocol-types/src/**/*.{ts,tsx}',
+        '!packages/protocol-types/src/**/*.d.ts',
+        '!packages/protocol-types/src/**/__tests__/**',
+        '!packages/protocol-types/src/**/node_modules/**'
+      ]
+    },
+    
+    // Analytics package
+    {
+      displayName: 'analytics',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/packages/analytics'],
+      testMatch: [
+        '<rootDir>/packages/analytics/**/__tests__/**/*.test.{ts,tsx}',
+        '<rootDir>/packages/analytics/**/*.test.{ts,tsx}'
+      ],
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+        ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })
+      },
+      transform: {
+        '^.+\\.(ts|tsx)$': ['ts-jest', {
+          useESM: true,
+          tsconfig: '<rootDir>/packages/analytics/tsconfig.json'
+        }]
+      },
+      extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  collectCoverageFrom: [
+        'packages/analytics/src/**/*.{ts,tsx}',
+        '!packages/analytics/src/**/*.d.ts',
+        '!packages/analytics/src/**/__tests__/**',
+        '!packages/analytics/src/**/node_modules/**'
+      ]
+    }
+  ],
+  
+  // 全局配置
+  collectCoverage: false,
+  coverageDirectory: '<rootDir>/coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'json'],
+  
+  // 测试超时
+  testTimeout: 15000,
+  
+  // 其他全局配置
+  passWithNoTests: true,
+  verbose: true,
+  
+  // 支持ES模块
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  
+  // 全局覆盖率阈值（作为后备）
+  coverageThreshold: {
+    global: {
+      branches: 50,
+      functions: 60,
+      lines: 60,
+      statements: 60
+    },
+    // Per-path coverage thresholds for key directories
+    'packages/contracts/tests/test-utils/**/*.{ts,tsx}': { branches: 80, functions: 80, lines: 80, statements: 80 },
+    'packages/shared/src/**/*.{ts,tsx}': { branches: 70, functions: 70, lines: 70, statements: 70 },
+    'apps/gateway-bff/src/**/*.{ts,tsx}': { branches: 60, functions: 70, lines: 70, statements: 70 },
+    'apps/frontend/src/lib/**/*.{ts,tsx}': { branches: 50, functions: 60, lines: 60, statements: 60 },
+    'apps/frontend/src/components/**/*.{ts,tsx}': { branches: 40, functions: 50, lines: 50, statements: 50 }
+  }
 };
 
 
