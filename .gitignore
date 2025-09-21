@@ -96,7 +96,12 @@ playwright/.cache/
 *GUIDE*.md
 *PLAN*.md
 *FIX*.md
-*DEBUG*.md# Environment files (repo-wide)
+*DEBUG*.md
+
+# Large bundle files (exceed GitHub's 100MB limit)
+releases/*.bundle
+
+# Environment files (repo-wide)
 **/.env
 **/.env.*
 !**/.env.example
