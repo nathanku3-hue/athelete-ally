@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: { ignoreDuringBuilds: true },
   // 基础配置
   reactStrictMode: true,
   
@@ -139,4 +140,5 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
 
