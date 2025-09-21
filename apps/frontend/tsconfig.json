@@ -19,7 +19,9 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@athlete-ally/protocol-types": ["../../packages/protocol-types/src"],
+      "@athlete-ally/shared-types": ["../../packages/shared-types/src"]
     },
     "plugins": [
       {
@@ -37,3 +39,4 @@
     "node_modules"
   ]
 }
+
