@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
 import { connect } from 'nats';
 import { configObject } from './config/environment.js';
-import { SimpleHealthChecker, setupSimpleHealthRoutes } from './simple-health.js';
+import { SimpleHealthChecker, setupSimpleHealthRoutes } from './health.js';
 import { ErrorHandler } from './middleware/error-handler.js';
 import { PerformanceMonitor } from './middleware/performance.js';
 
@@ -155,3 +155,4 @@ export class StartupManager {
     }
   }
 }
+
