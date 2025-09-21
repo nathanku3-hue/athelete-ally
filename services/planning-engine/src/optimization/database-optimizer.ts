@@ -2,7 +2,7 @@
 import { prisma } from '../db.js';
 import { config } from '../config.js';
 // 使用统一的日志记录
-import { safeLog as logger } from '@athlete-ally/shared/logger.js';
+import { safeLog as logger } from '@athlete-ally/shared/logger';
 import { TrainingPlan } from '../llm.js';
 
 // 批量操作接口
@@ -451,4 +451,5 @@ export class DatabaseOptimizer {
     }
   }
 }
+
 

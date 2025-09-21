@@ -27,7 +27,7 @@ const prisma = new PrismaClient();
 const redis = new Redis(configObject.REDIS_URL);
 
 // 初始化服务
-const healthChecker = new HealthChecker(prisma, redis);
+const healthChecker = new HealthChecker(prisma, redis, null as any);
 
 // 注册Swagger文档
 server.register(swagger, {
@@ -619,4 +619,5 @@ process.on('SIGTERM', gracefulShutdown);
 
 // 启动服务器
 start();
+
 

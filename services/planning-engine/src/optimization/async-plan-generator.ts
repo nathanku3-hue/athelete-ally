@@ -5,7 +5,7 @@ import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
 // 使用统一的日志记录
-import { safeLog as logger } from '@athlete-ally/shared/logger.js';
+import { safeLog as logger } from '@athlete-ally/shared/logger';
 
 // 缓存接口
 interface PlanCache {
@@ -352,4 +352,5 @@ export class AsyncPlanGenerator {
     }
   }
 }
+
 
