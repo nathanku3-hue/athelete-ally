@@ -14,7 +14,7 @@ ode scripts/performance-baseline.js completes successfully; p50/p90/p99 computed
 | 5 | **Actionable Baseline:** Run a11y Audit & Log Violations | [ ] To Do | 
 pm run test:frontend (or 
 pm run test:a11y) completes; violations summarized. | TECHNICAL_DEBT_LOG.md updated with a11y violations table. |
-| 6 | **Repo Hygiene:** Commit Pending Dashboards | [ ] To Do | git status is clean. | Grafana JSON files committed. |
+| 6 | **Repo Hygiene:** Commit Pending Dashboards | [x] Done | git status is clean. | Grafana JSON files committed. |
 | 7 | **Finalize:** Refresh All Artifacts | [ ] To Do | All tests pass; smoke passes or is documented; artifacts refreshed. | .patch and .bundle files are updated. |
 | 8 | Add 	est:a11y script for convenience | [ ] To Do | 
 pm run test:a11y runs only frontend a11y tests. | Root package.json scripts updated. |
@@ -24,3 +24,5 @@ pm run env:validate passes with expected warnings. | Results appended to
 eports/README.md. |
 
 Notes: ESLint fixed by removing stray undefined config entry in eslint.config.mjs (commit b0f4219). Verification: 'npm run lint' OK; 'npm run ts:build' OK; 'npm run test:apps' shows 1 pre-existing a11y failure in IntentForm test to be addressed under Task 5. No code changes reverted.
+
+Notes: Committed updated Grafana dashboards (commit 341727d). 'git status' is clean.
