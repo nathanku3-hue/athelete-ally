@@ -2,7 +2,7 @@
 
 | Priority | Task Description | Status | Verification Steps | Artifacts & Notes |
 |:---|:---|:---:|:---|:---|
-| 1 | **Fix Tooling:** Stabilize ESLint flat-config | [ ] To Do | 
+| 1 | **Fix Tooling:** Stabilize ESLint flat-config | [x] Done | 
 pm run lint passes without errors. | slint.config.mjs updated. |
 | 2 | **Fix Tooling:** Resolve Next.js SWC/Babel conflict | [ ] To Do | 
 pm run build -w apps/frontend passes without warnings. | 
@@ -20,4 +20,7 @@ pm run test:a11y) completes; violations summarized. | TECHNICAL_DEBT_LOG.md upda
 pm run test:a11y runs only frontend a11y tests. | Root package.json scripts updated. |
 | 9 | Document Next build/Babel decision | [ ] To Do | Decision recorded. | docs/reports/FINAL_BUILD_SYSTEM_DECISION.md. |
 | 10 | Verify ENV validator coverage | [ ] To Do | 
-pm run env:validate passes with expected warnings. | Results appended to eports/README.md. |
+pm run env:validate passes with expected warnings. | Results appended to 
+eports/README.md. |
+
+Notes: ESLint fixed by removing stray undefined config entry in eslint.config.mjs (commit b0f4219). Verification: 'npm run lint' OK; 'npm run ts:build' OK; 'npm run test:apps' shows 1 pre-existing a11y failure in IntentForm test to be addressed under Task 5. No code changes reverted.
