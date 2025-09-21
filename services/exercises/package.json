@@ -1,5 +1,5 @@
 {
-  "name": "exercises-service",
+  "name": "@athlete-ally/exercises",
   "version": "1.0.0",
   "description": "Exercise library and selection guidance service",
   "main": "dist/index.js",
@@ -35,6 +35,6 @@
     "prisma": "^5.7.1",
     "tsx": "^4.6.2",
     "typescript": "^5.3.3"
-  }
+  },
+  "private": true
 }
-

@@ -1,5 +1,5 @@
 {
-  "name": "profile-onboarding",
+  "name": "@athlete-ally/profile-onboarding",
   "version": "0.1.0",
   "private": true,
   "type": "module",

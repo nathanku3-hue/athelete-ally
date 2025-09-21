@@ -66,5 +66,6 @@
   "bugs": {
     "url": "https://github.com/athlete-ally/protocol-engine/issues"
   },
-  "homepage": "https://github.com/athlete-ally/protocol-engine#readme"
+  "homepage": "https://github.com/athlete-ally/protocol-engine#readme",
+  "private": true
 }

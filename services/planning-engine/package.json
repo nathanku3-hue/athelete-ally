@@ -1,5 +1,5 @@
 {
-  "name": "planning-engine",
+  "name": "@athlete-ally/planning-engine",
   "version": "0.1.0",
   "private": true,
   "type": "module",

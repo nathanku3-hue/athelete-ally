@@ -1,5 +1,5 @@
 {
-  "name": "gateway-bff",
+  "name": "@athlete-ally/gateway-bff",
   "version": "0.1.0",
   "private": true,
   "type": "module",
