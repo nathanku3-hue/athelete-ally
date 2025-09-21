@@ -11,7 +11,7 @@ ext.config.mjs updated; Babel config removed if unnecessary. |
 pm run ts:build passes. All 	sconfig.json files are consistent. | 	sconfig.base.json and project 	sconfig.json files updated. |
 | 4 | **Actionable Baseline:** Re-run Performance Test | [x] Done | 
 ode scripts/performance-baseline.js completes successfully; p50/p90/p99 computed. | HANDOFF_REPORT_2.md updated with latencies. |
-| 5 | **Actionable Baseline:** Run a11y Audit & Log Violations | [ ] To Do | 
+| 5 | **Actionable Baseline:** Run a11y Audit & Log Violations | [x] Done | 
 pm run test:frontend (or 
 pm run test:a11y) completes; violations summarized. | TECHNICAL_DEBT_LOG.md updated with a11y violations table. |
 | 6 | **Repo Hygiene:** Commit Pending Dashboards | [x] Done | git status is clean. | Grafana JSON files committed. |

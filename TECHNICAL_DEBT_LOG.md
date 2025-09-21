@@ -48,3 +48,8 @@ Findings
 
 ## Accessibility (automated checks)
 Axe-core tests added for IntentForm and PlanFeedbackPanel. Violations (if any) should be summarized here in future runs.
+
+### Accessibility (a11y) Audit Findings
+- IntentForm test fails due to lack of Next app router context. Recommend wrapping in router provider or mocking useRouter in test setup. (Effort: Small)
+- axe-core logs canvas getContext not implemented in jsdom during a11y suite; add jsdom canvas shim to test setup to avoid false-positives. (Effort: Small)
+
