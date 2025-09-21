@@ -1,3 +1,4 @@
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn(), replace: jest.fn(), prefetch: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() }) }));
 import React from 'react';
 import { render } from '@testing-library/react';
 // Render the form component directly instead of page to avoid Next router requirement
@@ -23,3 +24,4 @@ describe('IntentForm a11y', () => {
     }
   });
 });
+
