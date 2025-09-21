@@ -9,7 +9,20 @@ import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
 // 临时类型定义
-interface OnboardingCompletedEvent {\n  eventId: string;\n  userId: string;\n  timestamp: number | Date;\n  purpose?: string;\n  purposeDetails?: string;\n  proficiency?: string;\n  season?: string;\n  availabilityDays?: number;\n  weeklyGoalDays?: number;\n  equipment?: string[];\n  fixedSchedules?: Array<{ day: string; start: string; end: string }>;\n  recoveryHabits?: string[];\n}
+interface OnboardingCompletedEvent {
+  eventId: string;
+  userId: string;
+  timestamp: number | Date;
+  purpose?: string;
+  purposeDetails?: string;
+  proficiency?: string;
+  season?: string;
+  availabilityDays?: number;
+  weeklyGoalDays?: number;
+  equipment?: string[];
+  fixedSchedules?: Array<{ day: string; start: string; end: string }>;
+  recoveryHabits?: string[];
+}
 
 interface PlanGeneratedEvent {
   planId: string;
@@ -18,7 +31,18 @@ interface PlanGeneratedEvent {
   timestamp: Date;
 }
 
-interface PlanGenerationRequestedEvent {\n  eventId: string;\n  userId: string;\n  jobId: string;\n  timestamp: number | Date;\n  proficiency: string;\n  season: string;\n  availabilityDays: number;\n  weeklyGoalDays?: number;\n  equipment: string[];\n  purpose?: string;\n}
+interface PlanGenerationRequestedEvent {
+  eventId: string;
+  userId: string;
+  jobId: string;
+  timestamp: number | Date;
+  proficiency: string;
+  season: string;
+  availabilityDays: number;
+  weeklyGoalDays?: number;
+  equipment: string[];
+  purpose?: string;
+}
 
 interface PlanGenerationFailedEvent {
   userId: string;
@@ -464,4 +488,5 @@ server
     safeLog.error('Server startup error', err);
     process.exit(1);
   });
+
 
