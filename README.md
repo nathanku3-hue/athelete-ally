@@ -75,9 +75,10 @@ docker compose -f docker-compose.production.yml up -d
 
 ## 文档
 
-- [Phase 2 交付文档](docs/PHASE_2_DELIVERY.md)
+- [文档索引 (Docs Index)](docs/README.md)
 - [用户指南](docs/USER_GUIDE.md)
 - [技术文档](docs/TECHNICAL_DOCS.md)
+- [Phase 3 计划](docs/PHASE_3_PLAN.md)
 - [Planning Engine 文档](services/planning-engine/README.md)
 
 ## 开发指南
