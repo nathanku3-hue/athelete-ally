@@ -71,7 +71,8 @@
     "ts:clean": "tsc -b --clean tsconfig.build.json",
     "lint:tests:strict": "eslint \"**/__tests__/**/*.{ts,tsx}\" --max-warnings=0 --rule \"@typescript-eslint/no-unsafe-assignment:error\" --rule \"@typescript-eslint/no-unsafe-call:error\" --rule \"@typescript-eslint/no-unsafe-member-access:error\" --rule \"@typescript-eslint/no-unsafe-return:error\" --rule \"@typescript-eslint/no-unsafe-argument:error\"",
     "type:coverage:contracts": "npx type-coverage -p packages/contracts/tsconfig.json --strict --detail --at-least 90",
-    "type:coverage:root": "npx type-coverage -p tsconfig.build.json --strict --detail --ignore-files \"**/__tests__/**\" --at-least 80"
+    "type:coverage:root": "npx type-coverage -p tsconfig.build.json --strict --detail --ignore-files \"**/__tests__/**\" --at-least 80",
+    "test:a11y": "jest --selectProjects=frontend --testPathPattern=__tests__/a11y"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
