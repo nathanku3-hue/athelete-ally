@@ -44,9 +44,7 @@ jest.mock('next/link', () => ({
 }));
 
 // 模拟fetch API - 使用原生fetch
-if (typeof global.fetch === 'undefined') {
-  global.fetch = fetch;
-}
+if (typeof (global as any).fetch === 'undefined') { (global as any).fetch = require('node-fetch'); }
 
 // 模拟localStorage
 const localStorageMock = {
@@ -146,3 +144,61 @@ afterEach(() => {
   localStorageMock.clear();
   sessionStorageMock.clear();
 });
+// Mock Next App Router (next/navigation)
+jest.mock('next/navigation', () => ({
+  useRouter() {
+    return {
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+    };
+  },
+  useSearchParams() {
+    return new (class {
+      get(name: string) { return null; }
+      toString() { return ''; }
+      entries() { return ([] as any).entries(); }
+      keys() { return ([] as any).keys(); }
+      values() { return ([] as any).values(); }
+      [Symbol.iterator]() { return ([] as any)[Symbol.iterator](); }
+    })();
+  },
+}));
+
+// Also attempt to mock Next internal path if present
+try {
+  require.resolve('next/src/client/components/navigation');
+  jest.mock('next/src/client/components/navigation', () => ({
+    useRouter() {
+      return { push: jest.fn(), replace: jest.fn(), prefetch: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() };
+    },
+  }));
+} catch {}
+
+
+
+// Silence jsdom canvas getContext error
+(() => {
+  const originalError = console.error;
+  console.error = (...args: any[]) => {
+    const msg = String(args[0] ?? '');
+    if (msg.includes('HTMLCanvasElement.prototype.getContext')) return;
+    originalError.call(console, ...args);
+  };
+})();
+
+// jsdom canvas shim to avoid axe color-contrast getContext error path
+(() => {
+  const g: any = globalThis as any;
+  const Canvas = g.HTMLCanvasElement || (g.window && g.window.HTMLCanvasElement);
+  if (Canvas && Canvas.prototype) {
+    try {
+      Canvas.prototype.getContext = jest.fn(() => ({
+        measureText: () => ({ width: 0 }),
+      }));
+    } catch {}
+  }
+})();
