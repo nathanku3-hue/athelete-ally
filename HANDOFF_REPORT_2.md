@@ -42,3 +42,8 @@ Artifacts:
 ## Ready for Push
 - To publish branch and artifacts when remote is available:
 \n\n
+
+
+## Baseline 2 Update
+- Re-ran performance baseline locally (10 runs) with gateway stubs. Gateway dev runtime resolution blocked direct startup; fell back to isolated run capturing failures for traceability. Artifact: reports/baseline-2/perf-baseline.json. Next reliable method: use 
+pm run preview:up to start gateway + downstreams, then re-run baseline to compute p50/p90/p99.
