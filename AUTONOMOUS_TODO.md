@@ -1,0 +1,23 @@
+# Autonomous Workflow - AUTONOMOUS_TODO.md
+
+| Priority | Task Description | Status | Verification Steps | Artifacts & Notes |
+|:---|:---|:---:|:---|:---|
+| 1 | **Fix Tooling:** Stabilize ESLint flat-config | [ ] To Do | 
+pm run lint passes without errors. | slint.config.mjs updated. |
+| 2 | **Fix Tooling:** Resolve Next.js SWC/Babel conflict | [ ] To Do | 
+pm run build -w apps/frontend passes without warnings. | 
+ext.config.mjs updated; Babel config removed if unnecessary. |
+| 3 | **Fix Tooling:** Align TypeScript moduleResolution | [ ] To Do | 
+pm run ts:build passes. All 	sconfig.json files are consistent. | 	sconfig.base.json and project 	sconfig.json files updated. |
+| 4 | **Actionable Baseline:** Re-run Performance Test | [ ] To Do | 
+ode scripts/performance-baseline.js completes successfully; p50/p90/p99 computed. | HANDOFF_REPORT_2.md updated with latencies. |
+| 5 | **Actionable Baseline:** Run a11y Audit & Log Violations | [ ] To Do | 
+pm run test:frontend (or 
+pm run test:a11y) completes; violations summarized. | TECHNICAL_DEBT_LOG.md updated with a11y violations table. |
+| 6 | **Repo Hygiene:** Commit Pending Dashboards | [ ] To Do | git status is clean. | Grafana JSON files committed. |
+| 7 | **Finalize:** Refresh All Artifacts | [ ] To Do | All tests pass; smoke passes or is documented; artifacts refreshed. | .patch and .bundle files are updated. |
+| 8 | Add 	est:a11y script for convenience | [ ] To Do | 
+pm run test:a11y runs only frontend a11y tests. | Root package.json scripts updated. |
+| 9 | Document Next build/Babel decision | [ ] To Do | Decision recorded. | docs/reports/FINAL_BUILD_SYSTEM_DECISION.md. |
+| 10 | Verify ENV validator coverage | [ ] To Do | 
+pm run env:validate passes with expected warnings. | Results appended to eports/README.md. |
