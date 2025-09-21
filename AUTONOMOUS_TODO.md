@@ -18,7 +18,7 @@ pm run test:a11y) completes; violations summarized. | TECHNICAL_DEBT_LOG.md upda
 | 7 | **Finalize:** Refresh All Artifacts | [ ] To Do | All tests pass; smoke passes or is documented; artifacts refreshed. | .patch and .bundle files are updated. |
 | 8 | Add 	est:a11y script for convenience | [ ] To Do | 
 pm run test:a11y runs only frontend a11y tests. | Root package.json scripts updated. |
-| 9 | Document Next build/Babel decision | [ ] To Do | Decision recorded. | docs/reports/FINAL_BUILD_SYSTEM_DECISION.md. |
+| 9 | Document Next build/Babel decision | [x] Done | Decision recorded. | docs/reports/FINAL_BUILD_SYSTEM_DECISION.md. |
 | 10 | Verify ENV validator coverage | [ ] To Do | 
 pm run env:validate passes with expected warnings. | Results appended to 
 eports/README.md. |

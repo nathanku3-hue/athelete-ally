@@ -9,3 +9,5 @@ Baseline 1 (reports/baseline-1):
 - ts-build.txt: TypeScript composite build diagnostics
 - analyze-performance.json: (intended) micro-benchmark output; may be empty due to platform mismatch
 
+
+- env:validate run output captured during stabilization; see console logs in CI.
