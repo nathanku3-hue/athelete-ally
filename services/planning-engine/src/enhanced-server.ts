@@ -9,7 +9,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import { PrismaClient } from '../prisma/generated/client/index.js';
 import { Redis } from 'ioredis';
 import { configObject } from './config/environment.js';
-import { SimpleHealthChecker, setupSimpleHealthRoutes } from './simple-health.js';
+import { HealthChecker, setupHealthRoutes } from './health.js';
 import { ErrorHandler } from './middleware/error-handler.js';
 import { PerformanceMonitor } from './middleware/performance.js';
 
@@ -27,7 +27,7 @@ const prisma = new PrismaClient();
 const redis = new Redis(configObject.REDIS_URL);
 
 // 初始化服务
-const healthChecker = new SimpleHealthChecker(prisma, redis);
+const healthChecker = new HealthChecker(prisma, redis);
 
 // 注册Swagger文档
 server.register(swagger, {
@@ -66,7 +66,7 @@ server.register(swaggerUi, {
 });
 
 // 注册健康检查路由
-setupSimpleHealthRoutes(server, healthChecker);
+setupHealthRoutes(server, healthChecker);
 
 // 注册监控指标路由
 server.get('/metrics', {
@@ -619,3 +619,4 @@ process.on('SIGTERM', gracefulShutdown);
 
 // 启动服务器
 start();
+
