@@ -28,3 +28,5 @@ Notes: ESLint fixed by removing stray undefined config entry in eslint.config.mj
 Notes: Committed updated Grafana dashboards (commit 341727d). 'git status' is clean.
 
 Notes: Removed apps/frontend/babel.config.js (commit 883fdd8) to force SWC path. Added eslint.ignoreDuringBuilds in next.config.mjs (commit afa928d) to avoid Next passing invalid ESLint options. 'npm run build' passes. Tailwind 'content option' warning remains (unrelated); tracked under debt.
+
+Notes: Reviewed TS configs. Root (Next) uses moduleResolution 'bundler'; base (packages/services) uses 'node'. This is intentional per target (web vs node). 'npm run ts:build' already passes; no changes made to avoid churn. Documented decision; revisit if modulePath resolution issues arise in Node ESM packages.
