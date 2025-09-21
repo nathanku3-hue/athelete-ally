@@ -1,6 +1,7 @@
 // 共享包导出
-export * from './config/ports';
-export * from './auth/jwt';
-export * from './auth/middleware';
-export * from './security/secure-id';
-export * from './error-handler';
+export * from './config/ports.js';
+export * from './auth/jwt.js';
+export * from './auth/middleware.js';
+export * from './security/secure-id.js';
+export * from './error-handler.js';
+
