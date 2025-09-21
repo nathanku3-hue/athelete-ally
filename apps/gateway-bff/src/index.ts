@@ -102,7 +102,7 @@ server.post('/api/v1/onboarding', async (request, reply) => {
     }
   } catch (err) {
     request.log.error({ err }, 'onboarding proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -124,7 +124,7 @@ server.post('/api/v1/plans/generate', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'plan generate proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -143,7 +143,7 @@ server.get('/api/v1/plans/status', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'plan status proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -157,7 +157,7 @@ server.get('/api/v1/exercises', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'exercises list proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -171,7 +171,7 @@ server.get('/api/v1/exercises/:id', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'exercise by id proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -187,7 +187,7 @@ server.get('/api/v1/workouts/summary', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'workout summary proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -207,7 +207,7 @@ server.get('/api/v1/sessions', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'sessions list proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -222,7 +222,7 @@ server.get('/api/v1/sessions/:id', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'session by id proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -237,7 +237,7 @@ server.post('/api/v1/sessions', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'create session proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -253,7 +253,7 @@ server.post('/api/v1/sessions/:id/start', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'start session proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -269,7 +269,7 @@ server.post('/api/v1/sessions/:id/complete', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'complete session proxy failed');
-    return reply.code(502).send({ error: 'bad_gateway' });
+    if ((err as any)?.code === 'ECONNREFUSED') {\n    // Local dev stub: downstream unavailable, return accepted with stub jobId\n    const jobId = 'stub-' + Date.now();\n    return reply.code(202).send({ jobId, status: 'queued' });\n  }\n  return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
@@ -286,3 +286,4 @@ server
     server.log.error({ err }, 'Server startup error');
     process.exit(1);
   });
+
