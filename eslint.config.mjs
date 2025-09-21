@@ -41,7 +41,6 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
-  ,
   {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
@@ -65,5 +64,6 @@ const eslintConfig = [
   }];
 
 export default eslintConfig;
+
 
 
