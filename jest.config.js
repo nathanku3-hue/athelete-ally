@@ -24,7 +24,7 @@ module.exports = {
                 '<rootDir>/apps/frontend/src/__tests__/permissions/.*',
                 '<rootDir>/apps/frontend/src/__tests__/hooks/.*'
               ,
-                '<rootDir>/apps/frontend/tests/**'],
+                '<rootDir>/apps/frontend/tests/.*'],
       setupFilesAfterEnv: ['<rootDir>/apps/frontend/src/__tests__/setup.ts'],
   moduleNameMapper: {
         '^(\.{1,2}/.*)\.js$': '$1',
