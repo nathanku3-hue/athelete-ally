@@ -79,7 +79,6 @@ playwright-report/
 playwright/.cache/
 
 # Docker
-.dockerignore
 
 # Monitoring and logs
 /var/log/
@@ -87,12 +86,6 @@ playwright/.cache/
 # Temporary scripts and reports
 *_TEMP_*
 *_temp_*
-*REPORT*.md
-*SUMMARY*.md
-*GUIDE*.md
-*PLAN*.md
-*FIX*.md
-*DEBUG*.md# Environment files (repo-wide)
 **/.env
 **/.env.*
 !**/.env.example
@@ -100,3 +93,9 @@ playwright/.cache/
 # Generic *.env files (e.g., infra)
 **/*.env
 !**/*.env.example
+docs/tmp/
+tmp/
+
+# Prisma generated clients (do not commit)
+services/*/prisma/generated/
+services/*/prisma/generated/**
