@@ -2,8 +2,16 @@
 import { prisma } from '../db.js';
 import { config } from '../config.js';
 // 使用统一的日志记录
-import { safeLog as logger } from '@athlete-ally/shared/logger';
+import { safeLog } from '@athlete-ally/shared/logger';
 import { TrainingPlan } from '../llm.js';
+
+// Logger wrapper to match (context, message) signature
+const logger = {
+  warn: (ctx: any, msg: string) => safeLog.warn(msg, ctx),
+  info: (ctx: any, msg: string) => safeLog.info(msg, ctx),
+  error: (ctx: any, msg: string) => safeLog.error(msg, ctx),
+};
+
 
 // 批量操作接口
 interface BatchOperation<T> {
@@ -451,5 +459,6 @@ export class DatabaseOptimizer {
     }
   }
 }
+
 
 

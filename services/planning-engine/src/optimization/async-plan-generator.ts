@@ -5,7 +5,15 @@ import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
 // 使用统一的日志记录
-import { safeLog as logger } from '@athlete-ally/shared/logger';
+import { safeLog } from '@athlete-ally/shared/logger';
+
+// Logger wrapper to match (context, message) signature
+const logger = {
+  warn: (ctx: any, msg: string) => safeLog.warn(msg, ctx),
+  info: (ctx: any, msg: string) => safeLog.info(msg, ctx),
+  error: (ctx: any, msg: string) => safeLog.error(msg, ctx),
+};
+
 
 // 缓存接口
 interface PlanCache {
@@ -352,5 +360,6 @@ export class AsyncPlanGenerator {
     }
   }
 }
+
 
 
