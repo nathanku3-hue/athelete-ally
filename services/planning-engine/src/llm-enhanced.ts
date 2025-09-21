@@ -138,7 +138,7 @@ const openai = config.OPENAI_API_KEY ? new OpenAI({
 }) : null;
 
 // 使用统一的超时工具函数
-import { withTimeout } from '../llm.js';
+import { withTimeout } from './llm.js';
 
 // 增强的计划生成函数
 export async function generateEnhancedTrainingPlan(
@@ -386,3 +386,4 @@ function generateMockExercises(trainingIntent: TrainingIntent, day: number) {
   }
   return exercises;
 }
+

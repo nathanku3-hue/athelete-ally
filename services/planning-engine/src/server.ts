@@ -9,11 +9,7 @@ import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
 // 临时类型定义
-interface OnboardingCompletedEvent {
-  userId: string;
-  profileData: any;
-  timestamp: Date;
-}
+interface OnboardingCompletedEvent {\n  eventId: string;\n  userId: string;\n  timestamp: number | Date;\n  purpose?: string;\n  purposeDetails?: string;\n  proficiency?: string;\n  season?: string;\n  availabilityDays?: number;\n  weeklyGoalDays?: number;\n  equipment?: string[];\n  fixedSchedules?: Array<{ day: string; start: string; end: string }>;\n  recoveryHabits?: string[];\n}
 
 interface PlanGeneratedEvent {
   planId: string;
@@ -22,11 +18,7 @@ interface PlanGeneratedEvent {
   timestamp: Date;
 }
 
-interface PlanGenerationRequestedEvent {
-  userId: string;
-  requestData: any;
-  timestamp: Date;
-}
+interface PlanGenerationRequestedEvent {\n  eventId: string;\n  userId: string;\n  jobId: string;\n  timestamp: number | Date;\n  proficiency: string;\n  season: string;\n  availabilityDays: number;\n  weeklyGoalDays?: number;\n  equipment: string[];\n  purpose?: string;\n}
 
 interface PlanGenerationFailedEvent {
   userId: string;
@@ -472,3 +464,4 @@ server
     safeLog.error('Server startup error', err);
     process.exit(1);
   });
+
