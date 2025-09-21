@@ -31,8 +31,7 @@ const eslintConfig = [
       "@typescript-eslint/no-unsafe-return": "warn",
       "@typescript-eslint/no-unsafe-argument": "warn",
       "@typescript-eslint/await-thenable": "warn",
-      "@typescript-eslint/no-implicit-any-catch": "warn",
-    },
+          },
   },
   {
     files: ["**/*.ts", "**/*.tsx"],
