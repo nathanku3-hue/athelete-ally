@@ -26,7 +26,7 @@ export class StartupManager {
     this.prisma = new PrismaClient();
     this.redis = new Redis(configObject.REDIS_URL);
     this.nats = null;
-    this.healthChecker = new HealthChecker(this.prisma, this.redis);
+    this.healthChecker = new HealthChecker(this.prisma, this.redis, this.nats as any);
     this.errorHandler = new ErrorHandler(this.app);
     this.performanceMonitor = new PerformanceMonitor(this.app);
   }
@@ -155,6 +155,7 @@ export class StartupManager {
     }
   }
 }
+
 
 
 
