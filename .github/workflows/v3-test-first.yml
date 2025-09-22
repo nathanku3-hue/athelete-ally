@@ -176,6 +176,23 @@ jobs:
         run: |
           docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci.yml down -v --remove-orphans || true
 
+      - name: Verify CI configuration
+        run: |
+          echo "🔍 Rendering final Docker Compose configuration..."
+          docker compose -f ./preview.compose.yaml -f ./docker-compose.ci.yml config > final-config.yml
+          
+          echo "📋 Checking for ports configuration..."
+          if grep -q '^\s*ports:' final-config.yml; then
+            echo "❌ Ports still present in CI config:"
+            grep -n '^\s*ports:' final-config.yml
+            exit 1
+          else
+            echo "✅ No ports found in CI config - isolation working"
+          fi
+          
+          echo "📋 Final configuration summary:"
+          grep -A 5 -B 2 'redis:\|postgres:\|nats:' final-config.yml
+
       # 启动隔离的测试基础设施服务
       - name: Start isolated test services
         run: |
@@ -197,6 +214,13 @@ jobs:
         run: |
           # 验证基础设施服务是否正常启动
           docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci.yml ps
+
+      - name: Verify service connectivity
+        run: |
+          echo "🔍 Testing service connectivity..."
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci.yml exec redis redis-cli ping || echo "❌ Redis connection failed"
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci.yml exec postgres pg_isready -U athlete || echo "❌ PostgreSQL connection failed"
+          curl -sf http://nats:8222/varz || echo "❌ NATS connection failed"
 
       - name: Run integration tests
         run: npm run test:integration -w packages/contracts
