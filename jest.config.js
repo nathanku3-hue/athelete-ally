@@ -41,7 +41,8 @@ module.exports = {
     '^@athlete-ally/event-bus/(.*)$': '<rootDir>/packages/event-bus/src/$1',
     '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/events/$1',
     '^@athlete-ally/shared/(.*)$': '<rootDir>/packages/shared/src/$1',
-    '^@athlete-ally/shared-types/(.*)$': '<rootDir>/packages/shared-types/src/$1'
+    '^@athlete-ally/shared-types/(.*)$': '<rootDir>/packages/shared-types/src/$1',
+    '^@athlete-ally/protocol-types/(.*)$': '<rootDir>/packages/protocol-types/src/$1'
   },
   
   // 转换配置
@@ -64,7 +65,8 @@ module.exports = {
           '@athlete-ally/event-bus/*': ['packages/event-bus/src/*'],
           '@athlete-ally/contracts/*': ['packages/contracts/events/*'],
           '@athlete-ally/shared/*': ['packages/shared/src/*'],
-          '@athlete-ally/shared-types/*': ['packages/shared-types/src/*']
+          '@athlete-ally/shared-types/*': ['packages/shared-types/src/*'],
+          '@athlete-ally/protocol-types/*': ['packages/protocol-types/src/*']
         }
       }
     }],
