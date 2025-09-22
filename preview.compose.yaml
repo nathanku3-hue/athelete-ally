@@ -155,10 +155,8 @@ services:
       - "8222:8222"
   prometheus:
     image: prom/prometheus:latest
-    env_file:
-      - ./.env
     ports:
-      - "${PROMETHEUS_PORT}:9090"
+      - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
@@ -169,21 +167,17 @@ services:
       - '--web.enable-lifecycle'
   grafana:
     image: grafana/grafana:latest
-    env_file:
-      - ./.env
     ports:
-      - "${GRAFANA_PORT}:3000"
+      - "${GRAFANA_PORT:-3001}:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin123}
     volumes:
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
   jaeger:
     image: jaegertracing/all-in-one:latest
-    env_file:
-      - ./.env
     ports:
-      - "${JAEGER_PORT}:16686"
+      - "${JAEGER_PORT:-16686}:16686"
       - "14268:14268"
     environment:
       - COLLECTOR_OTLP_ENABLED=true
