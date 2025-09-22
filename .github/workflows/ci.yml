@@ -47,7 +47,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Verify tsx availability
+        run: npx tsx --version
 
       - name: Lint check
         run: npx turbo run lint
