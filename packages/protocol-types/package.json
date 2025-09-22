@@ -21,11 +21,12 @@
   "author": "Athlete Ally Team",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "typescript": "^5.9.2",
     "@types/node": "^20.0.0"
   },
   "dependencies": {},
   "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+    "typescript": "^5.9.2"
+  },
+  "private": true
 }

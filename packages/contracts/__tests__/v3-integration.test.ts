@@ -43,7 +43,7 @@ describe('V3 Integration Tests', () => {
       const createResponse = await simulateApiCall('POST', '/api/v3/weekly-review', createReviewRequest);
       expect(createResponse.status).toBe(201);
       expect(createResponse.data.id).toBeDefined();
-      weeklyReviewId = createResponse.data.id;
+      weeklyReviewId = createResponse.data.id as string;
 
       // 2. 獲取週回顧分析結果
       const getReviewResponse = await simulateApiCall('GET', `/api/v3/weekly-review/${weeklyReviewId}`);
@@ -53,7 +53,7 @@ describe('V3 Integration Tests', () => {
 
       // 3. 應用調整建議
       const applyRequest = {
-        adjustmentIds: getReviewResponse.data.adjustments.map((adj: { id: string }) => adj.id),
+        adjustmentIds: (getReviewResponse.data.adjustments as any[]).map((adj: { id: string }) => adj.id),
         appliedAt: new Date().toISOString()
       };
 
@@ -129,27 +129,14 @@ describe('V3 Integration Tests', () => {
       const notificationsResponse = await simulateApiCall('GET', `/api/v3/recovery-notification/${testUserId}`);
       expect(notificationsResponse.status).toBe(200);
       expect(notificationsResponse.data.notifications).toBeDefined();
-      expect(notificationsResponse.data.notifications.length).toBeGreaterThan(0);
+      expect((notificationsResponse.data.notifications as any[]).length).toBeGreaterThan(0);
     });
   });
 
   describe('Cross-Service Communication', () => {
     it('should handle service-to-service communication', async () => {
-      // 測試服務間通信
-      const serviceCommunication = {
-        from: 'workout-service',
-        to: 'adaptive-engine-service',
-        message: {
-          type: 'weekly_review_trigger',
-          data: {
-            userId: 'user-123',
-            weekNumber: 1
-          }
-        }
-      };
-
       // 模擬服務間通信
-      const response = await simulateServiceCall(serviceCommunication);
+      const response = await simulateServiceCall();
       expect(response.status).toBe('success');
       expect(response.data).toBeDefined();
     });
@@ -184,26 +171,13 @@ describe('V3 Integration Tests', () => {
 
   describe('Error Handling and Recovery', () => {
     it('should handle service failures gracefully', async () => {
-      // 模擬服務失敗
-      const failureScenario = {
-        service: 'adaptive-engine-service',
-        failureType: 'timeout',
-        duration: 5000
-      };
-
-      const response = await simulateServiceFailure(failureScenario);
+      const response = await simulateServiceFailure();
       expect(response.status).toBe('error');
       expect(response.fallback).toBeDefined();
     });
 
     it('should retry failed operations', async () => {
-      const retryScenario = {
-        operation: 'create_weekly_review',
-        maxRetries: 3,
-        retryDelay: 1000
-      };
-
-      const response = await simulateRetryOperation(retryScenario);
+      const response = await simulateRetryOperation();
       expect(response.attempts).toBeLessThanOrEqual(3);
       expect(response.success).toBe(true);
     });
@@ -254,7 +228,7 @@ async function simulateApiCall(method: string, endpoint: string, data?: unknown)
   // 根據端點返回不同的模擬數據
   let responseData: Record<string, unknown> = {
     id: 'mock-id',
-    ...data
+    ...(data as Record<string, unknown> || {})
   };
 
   if (endpoint.includes('/weekly-review/') && method === 'GET') {
@@ -266,7 +240,7 @@ async function simulateApiCall(method: string, endpoint: string, data?: unknown)
   } else if (endpoint.includes('/progress/')) {
     responseData = {
       ...responseData,
-      weeklyData: data?.weeklyData || [
+      weeklyData: (data as any)?.weeklyData || [
         { weekNumber: 1, weeklyTrainingLoad: 400 },
         { weekNumber: 2, weeklyTrainingLoad: 450 }
       ],

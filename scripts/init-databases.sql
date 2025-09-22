@@ -1,20 +1,3 @@
--- 创建 Athlete Ally 项目所需的数据库
--- 使用新的数据库命名约定
-
--- 创建 profile 数据库
-CREATE DATABASE athlete_ally_profile;
-
--- 创建 planning 数据库  
-CREATE DATABASE athlete_ally_planning;
-
--- 创建 workouts 数据库
-CREATE DATABASE athlete_ally_workouts;
-
--- 创建 fatigue 数据库
-CREATE DATABASE athlete_ally_fatigue;
-
--- 创建 exercises 数据库
-CREATE DATABASE athlete_ally_exercises;
-
--- 显示创建的数据库
-\l
+-- PostgreSQL数据库初始化脚本
+-- 这个脚本在PostgreSQL容器首次启动时执行
+-- 数据库和用户通过环境变量自动创建，无需手动创建

@@ -1,5 +1,9 @@
 name: V3 Test-First Development Pipeline
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main, develop, feat/v3-* ]
@@ -162,28 +166,59 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install package dependencies
         run: |
           cd packages/contracts
           npm install --no-audit --no-fund
 
-      - name: Start test services
+      - name: Verify tsx availability
+        run: npx tsx --version
+
+      # 预检查端口状态 (Linux兼容)
+      - name: Pre-flight port check (Linux compatible)
         run: |
-          # 啟動測試服務
-          docker-compose -f docker-compose.test.yml up -d
+          ss -tulpen | grep -E ':(5432|6379|4222)\b' || echo "Ports available"
+          if ss -tulpen | grep -E ':(5432|6379|4222)\b'; then
+            echo "⚠️ Ports occupied, will use isolated project name"
+          fi
+
+      # 清理旧的Docker容器和网络 (项目范围)
+      - name: Clean up existing containers (project-scoped)
+        run: |
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci-minimal.yml down -v --remove-orphans || true
+
+      # 启动隔离的测试基础设施服务
+      - name: Start isolated test services
+        run: |
+          docker compose -p ci_${{ github.run_id }} \
+            -f ./docker-compose.ci-minimal.yml \
+            up -d postgres redis nats
+        env:
+          # 在CI中禁用主机端口绑定
+          POSTGRES_PORT: ""
+          REDIS_PORT: ""
+          NATS_PORT: ""
 
       - name: Wait for services
         run: |
           # 等待服務啟動
           sleep 30
 
+      - name: Verify services status
+        run: |
+          # 验证基础设施服务是否正常启动
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci-minimal.yml ps
+
       - name: Run integration tests
         run: |
           cd packages/contracts
           npm run test:integration
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379
+          DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_db
+          REDIS_URL: redis://redis:6379
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4
@@ -192,10 +227,11 @@ jobs:
           name: integration-test-results
           path: packages/contracts/coverage/
 
-      - name: Stop test services
+      # 清理测试基础设施服务 (项目范围)
+      - name: Stop test services (project-scoped)
         if: always()
         run: |
-          docker-compose -f docker-compose.test.yml down
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci-minimal.yml down -v --remove-orphans
 
   # 性能測試
   performance-tests:
@@ -236,21 +272,32 @@ jobs:
     needs: [contract-tests, database-tests, api-tests, integration-tests]
     if: always()
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Download all test results
         uses: actions/download-artifact@v4
         with:
           path: test-results/
 
       - name: Generate test report
-        run: |
-          # 生成綜合測試報告
-          node scripts/generate-test-report.js
+        working-directory: ${{ github.workspace }}
+        run: node ./scripts/generate-test-report.js
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
         with:
           name: comprehensive-test-report
-          path: test-results/report.html
+          path: test-results/
 
   # 代碼質量檢查
   code-quality:
@@ -267,14 +314,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm install --no-audit --no-fund
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Run ESLint
-        run: |
-          cd packages/contracts
-          npm run lint
+        run: npx turbo run lint
 
       - name: Run TypeScript check
         run: |

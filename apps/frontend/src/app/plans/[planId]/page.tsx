@@ -4,9 +4,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ExerciseModal from '@/components/ui/ExerciseModal';
 import FatigueAssessment from '@/components/ui/FatigueAssessment';
-import AdjustmentSuggestions from '@/components/ui/AdjustmentSuggestions';
+import PlanFeedbackPanel from '@/components/feedback/PlanFeedbackPanel';
+import RPEForm from '@/components/feedback/RPEForm';
+import PerformanceForm from '@/components/feedback/PerformanceForm';
 import { Exercise } from '@athlete-ally/shared-types';
-import { DAY_NAMES } from '@/lib/constants/labels';
+import { usePlan } from '@/hooks/usePlan';
+
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 interface PlanData {
   id: string;
@@ -43,119 +47,52 @@ export default function PlanPage() {
   const router = useRouter();
   const planId = params.planId as string;
   
-  const [planData, setPlanData] = useState<PlanData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedWeek, setSelectedWeek] = useState(0);
+  const { data: planData, isLoading: loading, error } = usePlan(planId, !!planId);
+  const [feedbackSessionIdx, setFeedbackSessionIdx] = useState(0);
+  const [feedbackExerciseIdx, setFeedbackExerciseIdx] = useState(0);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
   const [isFatigueAssessmentOpen, setIsFatigueAssessmentOpen] = useState(false);
   const [isAdjustmentSuggestionsOpen, setIsAdjustmentSuggestionsOpen] = useState(false);
   const [adjustments, setAdjustments] = useState<any[]>([]);
   const [fatigueData, setFatigueData] = useState<any>(null);
-
-  useEffect(() => {
-    fetchPlanData();
-  }, [planId]);
-
-  const fetchPlanData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch real data from API
-      const response = await fetch(`/api/v1/plans/${planId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const planData: PlanData = await response.json();
-      setPlanData(planData);
-      
-      // Fallback mock data for development (commented out)
-      /*
-      const mockPlan: PlanData = {
-        // ... mock data implementation
-      };
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPlanData(mockPlan);
-      */
-      } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load plan');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const handleStartNewPlan = () => {
-    router.push('/onboarding/purpose');
-  };
+  const [selectedWeek, setSelectedWeek] = useState(0);
 
   const handleBackToHome = () => {
     router.push('/');
   };
 
-  const handleExerciseClick = async (exerciseName: string) => {
-    try {
-      // Search for exercise by name
-      const response = await fetch(`/api/v1/exercises?query=${encodeURIComponent(exerciseName)}&limit=1`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.exercises && data.exercises.length > 0) {
-          setSelectedExercise(data.exercises[0]);
-          setIsExerciseModalOpen(true);
-        } else {
-          // If not found, create a mock exercise for demonstration
-          const mockExercise: Exercise = {
-            id: `mock-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
-            name: exerciseName,
-            description: `A ${exerciseName.toLowerCase()} exercise for your training plan`,
-            category: 'General',
-            equipment: ['bodyweight'],
-            difficulty: 3,
-            primaryMuscles: ['Multiple'],
-            secondaryMuscles: [],
-            instructions: `Instructions for ${exerciseName}:\n1. Set up in the starting position\n2. Execute the movement with proper form\n3. Complete the desired number of repetitions\n4. Rest and repeat as needed`,
-            tags: ['mock', 'general'],
-            isActive: true,
-            popularity: 0,
-            tips: 'Focus on proper form and controlled movement',
-            averageRating: 4.0,
-            totalRatings: 0
-          };
-          setSelectedExercise(mockExercise);
-          setIsExerciseModalOpen(true);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch exercise details:', error);
-      // Show mock exercise as fallback
-      const mockExercise: Exercise = {
-        id: `mock-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
-        name: exerciseName,
-        description: `A ${exerciseName.toLowerCase()} exercise for your training plan`,
-        category: 'General',
-        equipment: ['bodyweight'],
-        difficulty: 3,
-        primaryMuscles: ['Multiple'],
-        secondaryMuscles: [],
-        instructions: `Instructions for ${exerciseName}:\n1. Set up in the starting position\n2. Execute the movement with proper form\n3. Complete the desired number of repetitions\n4. Rest and repeat as needed`,
-        tips: 'Focus on proper form and controlled movement',
-        tags: ['mock', 'general'],
-        isActive: true,
-        popularity: 0,
-        averageRating: 4.0,
-        totalRatings: 0
-      };
-      setSelectedExercise(mockExercise);
-      setIsExerciseModalOpen(true);
-    }
+  const handleStartNewPlan = () => {
+    router.push('/onboarding');
+  };
+
+  // Helper function to get exercise details
+  const getExerciseDetails = (exerciseName: string): Exercise => {
+    // If not found, create a mock exercise for demonstration
+    const mockExercise: Exercise = {
+      id: `mock-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
+      name: exerciseName,
+      description: `A ${exerciseName.toLowerCase()} exercise for your training plan`,
+      category: 'General',
+      equipment: ['bodyweight'],
+      difficulty: 3,
+      primaryMuscles: ['Multiple'],
+      secondaryMuscles: [],
+      instructions: `Instructions for ${exerciseName}:\n1. Set up in the starting position\n2. Execute the movement with proper form\n3. Complete the desired number of repetitions\n4. Rest and repeat as needed`,
+      tags: ['mock', 'general'],
+      isActive: true,
+      popularity: 0,
+      tips: 'Focus on proper form and controlled movement',
+      averageRating: 4.0,
+      totalRatings: 0
+    };
+    return mockExercise;
+  };
+
+  const handleExerciseClick = (exerciseName: string) => {
+    const exercise = getExerciseDetails(exerciseName);
+    setSelectedExercise(exercise);
+    setIsExerciseModalOpen(true);
   };
 
   const handleExerciseRate = async (exerciseId: string, rating: number, difficulty: number, comment?: string) => {
@@ -294,7 +231,7 @@ export default function PlanPage() {
       <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4 text-red-400">Error Loading Plan</h1>
-          <p className="text-gray-400 mb-8">{error || 'Plan not found'}</p>
+          <p className="text-gray-400 mb-8">{error instanceof Error ? error.message : error || 'Plan not found'}</p>
           <div className="space-x-4">
             <button
               onClick={handleBackToHome}
@@ -470,7 +407,40 @@ export default function PlanPage() {
           </div>
         </div>
 
-      {/* Exercise Modal */}
+        {/* Feedback (Select Session) */}
+        {currentWeek && (
+          <section className="mt-12 bg-gray-800 rounded-lg p-6">
+            <h3 className="text-xl font-bold mb-4">Session Feedback</h3>
+            <div className="mb-4">
+              <label className="block text-sm mb-1">Select Exercise (from chosen session)</label>
+              <select
+                className="bg-gray-700 px-3 py-2 rounded w-full"
+                value={feedbackExerciseIdx}
+                onChange={(e) => setFeedbackExerciseIdx(Number(e.target.value))}
+                disabled={!currentSessions[feedbackSessionIdx] || currentSessions[feedbackSessionIdx].exercises.length === 0}
+              >
+                {currentSessions[feedbackSessionIdx] && currentSessions[feedbackSessionIdx].exercises.length > 0 ?
+                  currentSessions[feedbackSessionIdx].exercises.map((ex, idx) => (
+                    <option key={idx} value={idx}>{ex.name}</option>
+                  )) : (
+                    <option value={0}>No exercises available</option>
+                  )
+                }
+              </select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* RPE is per exercise; default to first exercise if present */}
+              <RPEForm
+                sessionId={`${planId}-w${currentWeek.weekNumber}-s${feedbackSessionIdx}`}
+                exerciseId={`${planId}-w${currentWeek.weekNumber}-s${feedbackSessionIdx}-ex-${feedbackExerciseIdx}`}
+              />
+              <PerformanceForm
+                sessionId={`${planId}-w${currentWeek.weekNumber}-s${feedbackSessionIdx}`}
+              />
+            </div>
+          </section>
+        )}
+
       <ExerciseModal
         exercise={selectedExercise}
         isOpen={isExerciseModalOpen}
@@ -491,8 +461,8 @@ export default function PlanPage() {
         sessionId={planId}
       />
 
-      {/* Adjustment Suggestions Modal */}
-      <AdjustmentSuggestions
+      {/* Plan Feedback Panel (refactored) */}
+      <PlanFeedbackPanel
         adjustments={adjustments}
         onFeedback={handleAdjustmentFeedback}
         onClose={() => setIsAdjustmentSuggestionsOpen(false)}
@@ -501,3 +471,4 @@ export default function PlanPage() {
     </main>
   );
 }
+

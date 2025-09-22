@@ -14,7 +14,7 @@ cd "$(dirname "$0")/../monitoring"
 
 # 启动监控服务
 echo "📊 启动 Prometheus, Jaeger, Grafana..."
-docker-compose up -d
+docker compose up -d
 
 # 等待服务启动
 echo "⏳ 等待服务启动..."
@@ -22,7 +22,7 @@ sleep 10
 
 # 检查服务状态
 echo "🔍 检查服务状态..."
-docker-compose ps
+docker compose ps
 
 # 显示访问信息
 echo ""
@@ -46,5 +46,5 @@ echo "  2. 指标数据会自动发送到 Prometheus"
 echo "  3. 在 Grafana 中查看可视化仪表板"
 echo ""
 echo "🛑 停止服务："
-echo "  docker-compose down"
+echo "  docker compose down"
 

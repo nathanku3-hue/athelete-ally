@@ -1,199 +1,64 @@
 // Initialize OpenTelemetry first
 import './telemetry.js';
 import 'dotenv/config';
-
-// 添加全局异常处理器
-process.on('uncaughtException', (err, origin) => {
-  console.error(`🚨 Uncaught Exception: ${err.message}`, `Origin: ${origin}`);
-  console.error('Stack trace:', err.stack);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
-});
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { z } from 'zod';
 import fetch from 'node-fetch';
+
 import { config } from './config.js';
-import { businessMetrics, traceOnboardingStep, tracePlanGeneration, traceApiRequest } from './telemetry.js';
+import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
-import { OnboardingPayloadSchema, safeParseOnboardingPayload } from '@athlete-ally/shared-types';
-// 暂时注释掉shared包导入，使用本地实现
-// import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
-// import { SecureIdGenerator } from '@athlete-ally/shared';
 
-// 本地安全实现
-import { randomUUID } from 'crypto';
-
-class SecureIdGenerator {
-  static generateJobId(): string {
-    return `job_${randomUUID()}`;
-  }
-  static generatePlanId(): string {
-    return `plan_${randomUUID()}`;
-  }
-}
-
-// 强化身份验证中间件
-async function authMiddleware(request: any, reply: any) {
-  // 跳过健康检查和指标端点
-  if (request.url === '/health' || request.url === '/metrics') {
-    return;
-  }
-
-  try {
-    // 从Authorization header获取JWT token
-    const authHeader = request.headers.authorization || request.headers.Authorization;
-    
-    if (!authHeader) {
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Authorization header is required'
-      });
-      return;
-    }
-
-    // 解析Bearer token
-    const parts = authHeader.split(' ');
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Invalid authorization header format. Expected: Bearer <token>'
-      });
-      return;
-    }
-
-    const token = parts[1];
-    
-    // 在开发环境中，允许使用特殊的开发token
-    if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
-      (request as any).user = { userId: 'dev-user-id', role: 'user' };
-      return;
-    }
-
-    // 在生产环境中，必须验证真实的JWT token
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: 实现真实的JWT验证
-      // 这里应该使用JWT库验证token并提取用户信息
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Valid JWT token is required in production'
-      });
-      return;
-    }
-
-    // 开发环境的默认用户
-    (request as any).user = { userId: 'dev-user-id', role: 'user' };
-    
-  } catch (error) {
-    console.error('Authentication error:', error);
-    reply.code(401).send({
-      error: 'unauthorized',
-      message: 'Authentication failed'
-    });
-  }
-}
-
-async function cleanupMiddleware(request: any, reply: any) {
-  // 清理逻辑
-}
-// 生产级 CORS 配置
-const corsConfig = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow: boolean) => void) => {
-    // 允许的域名白名单
-    const allowedOrigins = [
-      'http://localhost:3000',    // 开发环境前端
-      'http://localhost:3001',    // 开发环境前端备用端口
-      'https://athlete-ally.com', // 生产环境域名
-      'https://www.athlete-ally.com', // 生产环境www域名
-      'https://staging.athlete-ally.com', // 预发布环境
-    ];
-    
-    // 开发环境允许所有本地来源
-    if (process.env.NODE_ENV === 'development') {
-      if (!origin || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-        return callback(null, true);
-      }
-    }
-    
-    // 生产环境严格检查
-    if (allowedOrigins.includes(origin || '')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'), false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'X-RateLimit-Limit',
-    'X-RateLimit-Remaining',
-    'X-RateLimit-Reset'
-  ],
-  exposedHeaders: [
-    'X-RateLimit-Limit',
-    'X-RateLimit-Remaining',
-    'X-RateLimit-Reset'
-  ],
-  maxAge: 86400 // 24小时预检缓存
-};
-
-// 简化的中间件（开发环境）
-const rateLimitMiddleware = async () => {};
-const metricsMiddleware = async () => {};
-
+// Create server
 const server = Fastify({ logger: true });
 
-// 简化的指标注册（开发环境）
-const metricsRegistry = { metrics: () => '# No metrics available in development mode' };
+// CORS configuration (dev-safe defaults; configurable via env)
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000')
+  .split(',')
+  .map((s) => s.trim());
+const allowCredentials = (process.env.CORS_ALLOW_CREDENTIALS || 'true').toLowerCase() === 'true';
 
-// 注册CORS插件（生产级安全配置）
-server.register(cors, corsConfig);
+await server.register(cors, {
+  origin: (origin, cb) => {
+    // Allow non-browser or same-origin requests
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Reject unauthorized origins
+    cb(new Error('CORS origin not allowed'), false);
+  },
+  credentials: allowCredentials,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
+});
 
-// 注册全局中间件
-server.addHook('onRequest', metricsMiddleware);
+// Global hooks: auth first (to enrich request.user), then rate limiting, then cleanup
+server.addHook('onRequest', authMiddleware);
 server.addHook('onRequest', userRateLimitMiddleware);
 server.addHook('onRequest', strictRateLimitMiddleware);
-server.addHook('onRequest', authMiddleware);
 server.addHook('onSend', cleanupMiddleware);
 
-// Swagger configuration
-server.register(swagger, {
+// Swagger/OpenAPI under /api/docs
+await server.register(swagger, {
   openapi: {
     openapi: '3.0.3',
     info: {
       title: 'Athlete Ally API',
       version: '0.1.0',
-      description: 'API for athlete strength & conditioning coaching app'
+      description: 'API for athlete strength & conditioning coaching app',
     },
-    servers: [
-      { url: 'http://localhost:4000', description: 'Development server' }
-    ]
-  }
+    servers: [{ url: 'http://localhost:4000/api', description: 'Development server' }],
+  },
 });
+await server.register(swaggerUi, { routePrefix: '/api/docs', uiConfig: { docExpansion: 'list', deepLinking: false } });
 
-server.register(swaggerUi, {
-  routePrefix: '/docs',
-  uiConfig: {
-    docExpansion: 'list',
-    deepLinking: false
-  }
-});
-
-// root welcome route
+// Root welcome
 server.get('/', async () => ({ message: 'Welcome to the API!' }));
 
-// 健康检查端点已移至下方，提供更详细的状态信息
-// serve contracts for reference
-server.get('/contracts/openapi.yaml', async (_req, reply) => {
+// Contracts and simple docs
+server.get('/api/contracts/openapi.yaml', async (_req, reply) => {
   const fs = await import('fs');
   const path = await import('path');
   const p = path.resolve(process.cwd(), 'packages/contracts/openapi.yaml');
@@ -201,1183 +66,215 @@ server.get('/contracts/openapi.yaml', async (_req, reply) => {
   reply.type('text/yaml').send(content);
 });
 
-// simple Redoc docs page
-server.get('/documentation', async (_req, reply) => {
-  const html = `<!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="utf-8" />
-      <title>API Docs</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <style>body{margin:0;padding:0;} .redoc-wrap{height:100vh;}</style>
-    </head>
-    <body>
-      <redoc spec-url="/contracts/openapi.yaml"></redoc>
-      <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
-    </body>
-  </html>`;
-  reply.type('text/html').send(html);
-});
+server.get('/api/health', async () => ({ status: 'ok' }));
+server.get('/health', async () => ({ status: 'ok' }));
 
-// 使用统一的OnboardingPayloadSchema
-const OnboardingPayload = OnboardingPayloadSchema;
+// Basic v1 health for compatibility with frontend
+server.get('/api/v1/health', async () => ({ status: 'ok' }));
 
-server.post('/v1/onboarding', {
-  schema: {
-    description: 'Submit onboarding profile data',
-    tags: ['onboarding'],
-    body: {
-      type: 'object',
-      required: ['userId'],
-      properties: {
-        userId: { type: 'string' },
-        purpose: { type: 'string' },
-        proficiency: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-        season: { type: 'string', enum: ['offseason', 'preseason', 'inseason'] },
-        availabilityDays: { type: 'number', minimum: 1, maximum: 7 },
-        equipment: { type: 'array', items: { type: 'string' } },
-        fixedSchedules: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              day: { type: 'string' },
-              start: { type: 'string' },
-              end: { type: 'string' }
-            }
-          }
-        }
-      }
-    },
-    response: {
-      202: {
-        type: 'object',
-        properties: {
-          jobId: { type: 'string' },
-          status: { type: 'string' }
-        }
-      },
-      400: {
-        type: 'object',
-        properties: {
-          error: { type: 'string' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  
-  // 从JWT token获取用户身份，而不是从请求体
-  const user = (request as any).user;
-  const userId = user.userId;
-  
-  const span = traceApiRequest('POST', '/v1/onboarding', userId);
-  
+// Proxy: Onboarding -> Profile Onboarding service
+server.post('/api/v1/onboarding', async (request, reply) => {
   try {
-    // 记录业务指标
-    businessMetrics.onboardingRequests.add(1, {
-      'user.id': userId,
-      'onboarding.purpose': (request.body as any)?.purpose || 'unknown',
-    });
-
-    // 使用统一的schema验证
-    const validationResult = safeParseOnboardingPayload(request.body);
-    if (!validationResult.success) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'validation_error' });
-      span.setStatus({ code: 2, message: 'Validation failed' });
-      span.end();
-      return reply.code(400).send({ 
-        error: 'validation_failed',
-        details: validationResult.error?.errors 
-      });
-    }
-    
-    const parsed = { success: true, data: validationResult.data! };
-
-    // 安全验证：确保请求体中的userId与JWT token中的userId一致
-    if (parsed.data.userId !== userId) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'security_violation' });
-      span.setStatus({ code: 2, message: 'User ID mismatch' });
-      span.end();
-      return reply.code(403).send({ 
-        error: 'forbidden', 
-        message: 'User ID in request body does not match authenticated user' 
-      });
-    }
-
-    // 追踪用户引导步骤
-    const onboardingSpan = traceOnboardingStep('onboarding_submission', parsed.data.userId, {
-      purpose: parsed.data.purpose,
-      proficiency: parsed.data.proficiency,
-      season: parsed.data.season,
-      equipmentCount: parsed.data.equipment?.length || 0,
-    });
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    
-    const res = await fetch(`${config.PROFILE_ONBOARDING_URL}/v1/onboarding`, {
+    const url = `${config.PROFILE_ONBOARDING_URL}/v1/onboarding`;
+    const resp = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(parsed.data),
-      signal: controller.signal
+      headers: {
+        'Content-Type': 'application/json',
+        // pass Authorization downstream so service can extract user
+        ...(request.headers.authorization ? { Authorization: String(request.headers.authorization) } : {}),
+      },
+      body: JSON.stringify(request.body || {}),
     });
-    
-    clearTimeout(timeout);
-    let body: unknown = null;
-    
+    const text = await resp.text();
     try {
-      body = await res.json();
+      const json = text ? JSON.parse(text) : {};
+      return reply.code(resp.status).send(json);
     } catch {
-      body = { error: { code: 'UPSTREAM_INVALID_JSON', message: 'invalid upstream json' } };
+      return reply.code(resp.status).send(text);
     }
-
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/onboarding',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 
-        'error.type': 'upstream_error',
-        'http.status_code': res.status.toString(),
-      });
-      
-      const mapped = res.status === 400
-        ? { code: 'UPSTREAM_BAD_REQUEST', http: 400 }
-        : res.status >= 500
-        ? { code: 'UPSTREAM_ERROR', http: 502 }
-        : { code: 'UPSTREAM_ERROR', http: 502 };
-      
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      onboardingSpan.setStatus({ code: 2, message: 'Upstream error' });
-      onboardingSpan.end();
-      span.end();
-      return reply.code(mapped.http).send({ error: { code: mapped.code, message: 'Upstream error' } });
-    }
-
-    // 成功完成引导
-    businessMetrics.onboardingCompletions.add(1, {
-      'user.id': parsed.data.userId,
-      'onboarding.purpose': parsed.data.purpose || 'unknown',
-    });
-
-    onboardingSpan.setStatus({ code: 1, message: 'Onboarding completed successfully' });
-    onboardingSpan.end();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    
-    return reply.code(res.status).send(body);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+  } catch (err) {
+    request.log.error({ err }, 'onboarding proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-// Exercises API endpoints
-server.get('/v1/exercises', {
-  schema: {
-    description: 'Search exercises',
-    tags: ['exercises'],
-    querystring: {
-      type: 'object',
-      properties: {
-        query: { type: 'string' },
-        category: { type: 'string' },
-        equipment: { type: 'array', items: { type: 'string' } },
-        difficulty: { type: 'number', minimum: 1, maximum: 5 },
-        muscles: { type: 'array', items: { type: 'string' } },
-        limit: { type: 'number', minimum: 1, maximum: 100, default: 20 },
-        offset: { type: 'number', minimum: 0, default: 0 }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          exercises: { type: 'array' },
-          pagination: { type: 'object' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('GET', '/v1/exercises');
-  
+// Proxy: Plan generation -> Planning Engine
+server.post('/api/v1/plans/generate', async (request, reply) => {
   try {
-    const queryString = new URLSearchParams(request.query as any).toString();
-    const res = await fetch(`${config.EXERCISES_URL}/exercises?${queryString}`, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json' }
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'GET',
-      'http.path': '/v1/exercises',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to fetch exercises' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
-  }
-});
-
-server.get('/v1/exercises/:id', {
-  schema: {
-    description: 'Get exercise by ID',
-    tags: ['exercises'],
-    params: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' }
+    const url = `${config.PLANNING_ENGINE_URL}/generate`;
+    const user = (request as any).user;
+    const body = { userId: user?.userId, ...(request.body as object || {}) };
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(request.headers.authorization ? { Authorization: String(request.headers.authorization) } : {}),
       },
-      required: ['id']
-    },
-    response: {
-      200: { type: 'object' },
-      404: { type: 'object', properties: { error: { type: 'string' } } }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const { id } = request.params as { id: string };
-  const span = traceApiRequest('GET', `/v1/exercises/${id}`);
-  
-  try {
-    const res = await fetch(`${config.EXERCISES_URL}/exercises/${id}`, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json' }
+      body: JSON.stringify(body),
     });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'GET',
-      'http.path': '/v1/exercises/:id',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Exercise not found' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'plan generate proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.post('/v1/exercises/:id/rate', {
-  schema: {
-    description: 'Rate an exercise',
-    tags: ['exercises'],
-    params: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' }
+// Proxy: Plan generation status -> Planning Engine
+server.get('/api/v1/plans/status', async (request, reply) => {
+  try {
+    const { jobId } = (request.query as any) || {};
+    if (!jobId) return reply.code(400).send({ error: 'jobId_required' });
+    const url = `${config.PLANNING_ENGINE_URL}/status/${encodeURIComponent(jobId)}`;
+    const resp = await fetch(url, {
+      headers: {
+        ...(request.headers.authorization ? { Authorization: String(request.headers.authorization) } : {}),
       },
-      required: ['id']
-    },
-    body: {
-      type: 'object',
-      required: ['userId', 'rating', 'difficulty'],
-      properties: {
-        userId: { type: 'string' },
-        rating: { type: 'number', minimum: 1, maximum: 5 },
-        difficulty: { type: 'number', minimum: 1, maximum: 5 },
-        comment: { type: 'string' }
-      }
-    },
-    response: {
-      200: { type: 'object' },
-      400: { type: 'object', properties: { error: { type: 'string' } } }
-    }
+    });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'plan status proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const { id } = request.params as { id: string };
-  const span = traceApiRequest('POST', `/v1/exercises/${id}/rate`);
-  
+});
+
+// Proxy: Exercises list/search -> Exercises Service
+server.get('/api/v1/exercises', async (request, reply) => {
   try {
-    const res = await fetch(`${config.EXERCISES_URL}/exercises/${id}/rate`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/exercises/:id/rate',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to rate exercise' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const qs = request.raw.url?.split('?')[1] || '';
+    const url = `${config.EXERCISES_URL}/exercises${qs ? `?${qs}` : ''}`;
+    const resp = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'exercises list proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.get('/v1/exercises/categories', {
-  schema: {
-    description: 'Get exercise categories',
-    tags: ['exercises'],
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          categories: { type: 'array' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('GET', '/v1/exercises/categories');
-  
+// Proxy: Exercise by id -> Exercises Service
+server.get('/api/v1/exercises/:id', async (request, reply) => {
   try {
-    const res = await fetch(`${config.EXERCISES_URL}/categories`, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json' }
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'GET',
-      'http.path': '/v1/exercises/categories',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to fetch categories' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const { id } = request.params as any;
+    const url = `${config.EXERCISES_URL}/exercises/${encodeURIComponent(id)}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'exercise by id proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-// Fatigue Management API endpoints
-server.post('/v1/fatigue/assess', {
-  schema: {
-    description: 'Submit fatigue assessment',
-    tags: ['fatigue'],
-    body: {
-      type: 'object',
-      required: ['userId', 'overallFatigue', 'physicalFatigue', 'mentalFatigue', 'sleepQuality', 'stressLevel'],
-      properties: {
-        userId: { type: 'string' },
-        sessionId: { type: 'string' },
-        overallFatigue: { type: 'number', minimum: 1, maximum: 5 },
-        physicalFatigue: { type: 'number', minimum: 1, maximum: 5 },
-        mentalFatigue: { type: 'number', minimum: 1, maximum: 5 },
-        sleepQuality: { type: 'number', minimum: 1, maximum: 5 },
-        stressLevel: { type: 'number', minimum: 1, maximum: 5 },
-        notes: { type: 'string' },
-        previousWorkout: { type: 'string' },
-        timeSinceLastWorkout: { type: 'number' },
-        assessmentType: { type: 'string', enum: ['pre_workout', 'post_workout', 'daily'] }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          assessmentId: { type: 'string' },
-          message: { type: 'string' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('POST', '/v1/fatigue/assess');
-  
+// Proxy: Workout summary -> Workouts Service (derive userId from JWT)
+server.get('/api/v1/workouts/summary', async (request, reply) => {
   try {
-    const res = await fetch(`${config.FATIGUE_URL}/fatigue/assess`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/fatigue/assess',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to submit fatigue assessment' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { timeRange = '30d' } = (request.query as any) || {};
+    const url = `${config.WORKOUTS_URL}/api/v1/summary/${encodeURIComponent(user.userId)}?timeRange=${encodeURIComponent(timeRange)}`;
+    const resp = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'workout summary proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.post('/v1/fatigue/adjustments', {
-  schema: {
-    description: 'Get training adjustments based on fatigue',
-    tags: ['fatigue'],
-    body: {
-      type: 'object',
-      required: ['userId', 'fatigueData', 'trainingSession'],
-      properties: {
-        userId: { type: 'string' },
-        fatigueData: {
-          type: 'object',
-          properties: {
-            overallFatigue: { type: 'number' },
-            physicalFatigue: { type: 'number' },
-            mentalFatigue: { type: 'number' },
-            sleepQuality: { type: 'number' },
-            stressLevel: { type: 'number' },
-            timeSinceLastWorkout: { type: 'number' },
-            previousWorkout: { type: 'string' }
-          }
-        },
-        trainingSession: {
-          type: 'object',
-          properties: {
-            exercises: { type: 'array' },
-            totalDuration: { type: 'number' },
-            restBetweenSets: { type: 'number' }
-          }
-        }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          adjustments: { type: 'array' },
-          summary: { type: 'object' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('POST', '/v1/fatigue/adjustments');
-  
+// Proxy: Sessions (minimal)
+server.get('/api/v1/sessions', async (request, reply) => {
   try {
-    const res = await fetch(`${config.FATIGUE_URL}/fatigue/adjustments`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/fatigue/adjustments',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to get adjustments' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { limit, offset } = (request.query as any) || {};
+    const qs = new URLSearchParams();
+    qs.set('userId', user.userId);
+    if (limit) qs.set('limit', String(limit));
+    if (offset) qs.set('offset', String(offset));
+    const url = `${config.WORKOUTS_URL}/sessions?${qs.toString()}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'sessions list proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.post('/v1/fatigue/feedback', {
-  schema: {
-    description: 'Submit adjustment feedback',
-    tags: ['fatigue'],
-    body: {
-      type: 'object',
-      required: ['adjustmentId', 'satisfactionScore'],
-      properties: {
-        adjustmentId: { type: 'string' },
-        satisfactionScore: { type: 'number', minimum: 1, maximum: 5 },
-        feedback: { type: 'string' }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          message: { type: 'string' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('POST', '/v1/fatigue/feedback');
-  
+server.get('/api/v1/sessions/:id', async (request, reply) => {
   try {
-    const res = await fetch(`${config.FATIGUE_URL}/fatigue/feedback`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/fatigue/feedback',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to submit feedback' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { id } = request.params as any;
+    const url = `${config.WORKOUTS_URL}/sessions/${encodeURIComponent(id)}?userId=${encodeURIComponent(user.userId)}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'session by id proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-// Workouts API endpoints
-server.post('/v1/workouts/sessions', {
-  schema: {
-    description: 'Create a new workout session',
-    tags: ['workouts'],
-    body: {
-      type: 'object',
-      required: ['userId'],
-      properties: {
-        userId: { type: 'string' },
-        planId: { type: 'string' },
-        sessionName: { type: 'string' },
-        location: { type: 'string' },
-        weather: { type: 'string' },
-        temperature: { type: 'number' }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          session: { type: 'object' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('POST', '/v1/workouts/sessions');
-  
+server.post('/api/v1/sessions', async (request, reply) => {
   try {
-    const res = await fetch(`${config.WORKOUTS_URL}/sessions`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/workouts/sessions',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to create session' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const url = `${config.WORKOUTS_URL}/sessions`;
+    const body = { userId: user.userId, ...(request.body as object || {}) };
+    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'create session proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.post('/v1/workouts/sessions/:id/start', {
-  schema: {
-    description: 'Start a workout session',
-    tags: ['workouts'],
-    params: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' }
-      },
-      required: ['id']
-    },
-    body: {
-      type: 'object',
-      required: ['userId'],
-      properties: {
-        userId: { type: 'string' }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          session: { type: 'object' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const { id } = request.params as { id: string };
-  const span = traceApiRequest('POST', `/v1/workouts/sessions/${id}/start`);
-  
+server.post('/api/v1/sessions/:id/start', async (request, reply) => {
   try {
-    const res = await fetch(`${config.WORKOUTS_URL}/sessions/${id}/start`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/workouts/sessions/:id/start',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to start session' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { id } = request.params as any;
+    const url = `${config.WORKOUTS_URL}/sessions/${encodeURIComponent(id)}/start`;
+    const body = { userId: user.userId, ...(request.body as object || {}) };
+    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'start session proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.post('/v1/workouts/sessions/:id/complete', {
-  schema: {
-    description: 'Complete a workout session',
-    tags: ['workouts'],
-    params: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' }
-      },
-      required: ['id']
-    },
-    body: {
-      type: 'object',
-      required: ['userId'],
-      properties: {
-        userId: { type: 'string' },
-        notes: { type: 'string' },
-        overallRating: { type: 'number', minimum: 1, maximum: 5 },
-        difficulty: { type: 'number', minimum: 1, maximum: 5 },
-        energy: { type: 'number', minimum: 1, maximum: 5 },
-        motivation: { type: 'number', minimum: 1, maximum: 5 }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          session: { type: 'object' },
-          newRecords: { type: 'array' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const { id } = request.params as { id: string };
-  const span = traceApiRequest('POST', `/v1/workouts/sessions/${id}/complete`);
-  
+server.post('/api/v1/sessions/:id/complete', async (request, reply) => {
   try {
-    const res = await fetch(`${config.WORKOUTS_URL}/sessions/${id}/complete`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body)
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/workouts/sessions/:id/complete',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to complete session' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { id } = request.params as any;
+    const url = `${config.WORKOUTS_URL}/sessions/${encodeURIComponent(id)}/complete`;
+    const body = { userId: user.userId, ...(request.body as object || {}) };
+    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'complete session proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
   }
 });
 
-server.get('/v1/workouts/sessions', {
-  schema: {
-    description: 'Get workout session history',
-    tags: ['workouts'],
-    querystring: {
-      type: 'object',
-      required: ['userId'],
-      properties: {
-        userId: { type: 'string' },
-        limit: { type: 'number', minimum: 1, maximum: 100, default: 20 },
-        offset: { type: 'number', minimum: 0, default: 0 }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          sessions: { type: 'array' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('GET', '/v1/workouts/sessions');
-  
-  try {
-    const queryString = new URLSearchParams(request.query as any).toString();
-    const res = await fetch(`${config.WORKOUTS_URL}/sessions?${queryString}`, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json' }
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'GET',
-      'http.path': '/v1/workouts/sessions',
-      'http.status_code': res.status.toString(),
-    });
+// Not yet implemented: PATCH session, complete exercise
+server.patch('/api/v1/sessions/:id', async (_req, reply) => reply.code(501).send({ error: 'not_implemented' }));
+server.post('/api/v1/sessions/:sessionId/exercises/:exerciseId/complete', async (_req, reply) => reply.code(501).send({ error: 'not_implemented' }));
 
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to get sessions' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
-  }
-});
-
-server.get('/v1/workouts/sessions/active/:userId', {
-  schema: {
-    description: 'Get active workout session',
-    tags: ['workouts'],
-    params: {
-      type: 'object',
-      properties: {
-        userId: { type: 'string' }
-      },
-      required: ['userId']
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          session: { type: 'object' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const { userId } = request.params as { userId: string };
-  const span = traceApiRequest('GET', `/v1/workouts/sessions/active/${userId}`);
-  
-  try {
-    const res = await fetch(`${config.WORKOUTS_URL}/sessions/active/${userId}`, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json' }
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'GET',
-      'http.path': '/v1/workouts/sessions/active/:userId',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to get active session' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
-  }
-});
-
-server.post('/v1/plans/generate', {
-  schema: {
-    description: 'Trigger plan generation',
-    tags: ['plans'],
-    body: {
-      type: 'object',
-      required: ['userId'],
-      properties: {
-        userId: { type: 'string' },
-        seedPlanId: { type: 'string' }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          planId: { type: 'string' },
-          version: { type: 'number' },
-          status: { type: 'string' }
-        }
-      },
-      400: {
-        type: 'object',
-        properties: {
-          error: { type: 'string' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const span = traceApiRequest('POST', '/v1/plans/generate', (request.body as any)?.userId);
-  
-  try {
-    // 记录业务指标
-    businessMetrics.planGenerationRequests.add(1, {
-      'user.id': (request.body as any)?.userId || 'unknown',
-    });
-
-    // 追踪计划生成
-    const planSpan = tracePlanGeneration((request.body as any)?.userId, request.body);
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    
-    const res = await fetch(`${config.PLANNING_ENGINE_URL}/generate`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(request.body),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeout);
-    let body: unknown = null;
-    
-    try {
-      body = await res.json();
-    } catch {
-      body = { error: { code: 'UPSTREAM_INVALID_JSON', message: 'invalid upstream json' } };
-    }
-
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'POST',
-      'http.path': '/v1/plans/generate',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.planGenerationFailures.add(1, {
-        'user.id': (request.body as any)?.userId || 'unknown',
-        'error.type': 'upstream_error',
-        'http.status_code': res.status.toString(),
-      });
-      
-      businessMetrics.apiErrors.add(1, { 
-        'error.type': 'upstream_error',
-        'http.status_code': res.status.toString(),
-      });
-      
-      const mapped = res.status === 400
-        ? { code: 'UPSTREAM_BAD_REQUEST', http: 400 }
-        : res.status >= 500
-        ? { code: 'UPSTREAM_ERROR', http: 502 }
-        : { code: 'UPSTREAM_ERROR', http: 502 };
-      
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      planSpan.setStatus({ code: 2, message: 'Plan generation failed' });
-      planSpan.end();
-      span.end();
-      return reply.code(mapped.http).send({ error: { code: mapped.code, message: 'Upstream error' } });
-    }
-
-    // 成功生成计划
-    businessMetrics.planGenerationSuccess.add(1, {
-      'user.id': (request.body as any)?.userId || 'unknown',
-    });
-    
-    businessMetrics.planGenerationDuration.record(responseTime, {
-      'user.id': (request.body as any)?.userId || 'unknown',
-      'plan.status': 'success',
-    });
-
-    planSpan.setStatus({ code: 1, message: 'Plan generated successfully' });
-    planSpan.end();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    
-    return reply.code(res.status).send(body);
-  } catch (error) {
-    businessMetrics.planGenerationFailures.add(1, {
-      'user.id': (request.body as any)?.userId || 'unknown',
-      'error.type': 'internal_error',
-    });
-    
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
-  }
-});
-
-// 查询计划生成状态
-server.get('/v1/plans/status', {
-  schema: {
-    description: 'Get plan generation status',
-    tags: ['plans'],
-    querystring: {
-      type: 'object',
-      required: ['jobId'],
-      properties: {
-        jobId: { type: 'string' }
-      }
-    },
-    response: {
-      200: {
-        type: 'object',
-        properties: {
-          jobId: { type: 'string' },
-          status: { type: 'string' },
-          planId: { type: 'string' },
-          message: { type: 'string' }
-        }
-      },
-      404: {
-        type: 'object',
-        properties: {
-          error: { type: 'string' }
-        }
-      }
-    }
-  }
-}, async (request, reply) => {
-  const startTime = Date.now();
-  const { jobId } = request.query as { jobId: string };
-  const span = traceApiRequest('GET', `/v1/plans/status?jobId=${jobId}`);
-  
-  try {
-    const res = await fetch(`${config.PLANNING_ENGINE_URL}/status/${jobId}`, {
-      method: 'GET',
-      headers: { 'content-type': 'application/json' }
-    });
-    
-    const responseTime = (Date.now() - startTime) / 1000;
-    businessMetrics.apiResponseTime.record(responseTime, {
-      'http.method': 'GET',
-      'http.path': '/v1/plans/status',
-      'http.status_code': res.status.toString(),
-    });
-
-    if (!res.ok) {
-      businessMetrics.apiErrors.add(1, { 'error.type': 'upstream_error' });
-      span.setStatus({ code: 2, message: 'Upstream error' });
-      span.end();
-      return reply.code(res.status).send({ error: 'Failed to get plan status' });
-    }
-
-    const data = await res.json();
-    span.setStatus({ code: 1, message: 'Success' });
-    span.end();
-    return reply.send(data);
-  } catch (error) {
-    businessMetrics.apiErrors.add(1, { 'error.type': 'internal_error' });
-    span.setStatus({ code: 2, message: 'Internal error' });
-    span.end();
-    throw error;
-  }
-});
-
-// 添加 Prometheus 指标端点
-server.get('/metrics', async (request, reply) => {
-  reply.type('text/plain');
-  return metricsRegistry.metrics();
-});
-
-// 添加健康检查端点
-server.get('/health', async (request, reply) => {
-  return {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    version: process.env.npm_package_version || '1.0.0'
-  };
-});
-
+// Start listening
 const port = Number(config.PORT || 4000);
 server
-  .listen(port, '0.0.0.0')
-  .then(() => {
-    console.log(`gateway-bff listening on :${port}`);
-    console.log(`Server successfully started on port ${port}`);
-    
-    // 检查Fastify内部状态
-    console.log('🔍 Fastify Internal State:');
-    console.log('  - Is server ready?', server.ready);
-    console.log('  - Is underlying server listening?', server.server.listening);
-    console.log('  - Server address:', server.server.address());
-    
-    const address = server.server.address();
-    if (address && typeof address === 'object') {
-      console.log(`Server is listening on: http://${address.address}:${address.port}`);
-    } else {
-      console.log(`Server is listening on: http://localhost:${config.PORT}`);
-    }
-    
-    // 验证端口是否真的在监听
-    import('net').then((net) => {
-      const testSocket = new net.Socket();
-      testSocket.connect(port, '127.0.0.1', () => {
-        console.log(`✅ Port ${port} is accessible`);
-        testSocket.destroy();
-      });
-      testSocket.on('error', (err) => {
-        console.log(`❌ Port ${port} is NOT accessible:`, err.message);
-      });
-    });
-  })
+  .listen({ port, host: '0.0.0.0' })
+  .then(() => server.log.info(`gateway-bff listening on :${port}`))
   .catch((err) => {
-    console.error('Server failed to start:', err);
-    console.error('Error details:', {
-      code: err.code,
-      errno: err.errno,
-      syscall: err.syscall,
-      address: err.address,
-      port: err.port
-    });
+    server.log.error({ err }, 'Server startup error');
     process.exit(1);
   });
-
-
-

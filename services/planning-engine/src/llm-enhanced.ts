@@ -137,13 +137,8 @@ const openai = config.OPENAI_API_KEY ? new OpenAI({
   maxRetries: config.LLM_MAX_RETRIES,
 }) : null;
 
-// 安全的超时包装器
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
-  });
-  return Promise.race([promise, timeoutPromise]);
-}
+// 使用统一的超时工具函数
+// withTimeout函数已移除，使用原生Promise.race实现超时
 
 // 增强的计划生成函数
 export async function generateEnhancedTrainingPlan(
@@ -160,7 +155,12 @@ export async function generateEnhancedTrainingPlan(
   const prompt = buildEnhancedPrompt(request);
 
   try {
-    const completion = await withTimeout(
+    // 使用Promise.race实现超时控制
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('LLM request timeout')), config.LLM_TIMEOUT_MS)
+    );
+    
+    const completion = await Promise.race([
       openai.chat.completions.create({
         model: "gpt-4",
         messages: [{ role: "user", content: prompt }],
@@ -168,8 +168,8 @@ export async function generateEnhancedTrainingPlan(
         max_tokens: config.LLM_MAX_TOKENS,
         response_format: { type: "json_object" },
       }),
-      config.LLM_TIMEOUT_MS
-    );
+      timeoutPromise
+    ]) as any;
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {

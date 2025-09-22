@@ -1,0 +1,27 @@
+# docker-compose.ci.yml - CI环境覆盖文件
+# 完全移除端口绑定，仅使用内部网络通信
+services:
+  # 基础设施服务 - 移除端口绑定
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    # 不包含ports配置，仅通过内部网络通信
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+    expose:
+      - "5432"
+    # 不包含ports配置，仅通过内部网络通信
+
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    expose:
+      - "4222"
+      - "8222"
+    # 不包含ports配置，仅通过内部网络通信

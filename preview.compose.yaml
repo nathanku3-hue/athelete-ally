@@ -131,7 +131,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
   postgres:
     image: postgres:16-alpine
     environment:
@@ -139,7 +139,7 @@ services:
       - POSTGRES_PASSWORD=athlete
       - POSTGRES_DB=athlete
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - ./scripts:/docker-entrypoint-initdb.d
     healthcheck:
@@ -151,14 +151,12 @@ services:
     image: nats:2.10-alpine
     command: ["-js", "-m", "8222"]
     ports:
-      - "4222:4222"
+      - "${NATS_PORT:-4222}:4222"
       - "8222:8222"
   prometheus:
     image: prom/prometheus:latest
-    env_file:
-      - ./.env
     ports:
-      - "${PROMETHEUS_PORT}:9090"
+      - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
@@ -169,21 +167,17 @@ services:
       - '--web.enable-lifecycle'
   grafana:
     image: grafana/grafana:latest
-    env_file:
-      - ./.env
     ports:
-      - "${GRAFANA_PORT}:3000"
+      - "${GRAFANA_PORT:-3001}:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin123}
     volumes:
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
   jaeger:
     image: jaegertracing/all-in-one:latest
-    env_file:
-      - ./.env
     ports:
-      - "${JAEGER_PORT}:16686"
+      - "${JAEGER_PORT:-16686}:16686"
       - "14268:14268"
     environment:
       - COLLECTOR_OTLP_ENABLED=true

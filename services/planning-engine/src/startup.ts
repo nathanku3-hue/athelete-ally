@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
 import { connect } from 'nats';
 import { configObject } from './config/environment.js';
-import { SimpleHealthChecker, setupSimpleHealthRoutes } from './simple-health.js';
+// 健康检查功能已集成到主服务器中
 import { ErrorHandler } from './middleware/error-handler.js';
 import { PerformanceMonitor } from './middleware/performance.js';
 
@@ -17,7 +17,7 @@ export class StartupManager {
   private prisma: PrismaClient;
   private redis: Redis;
   private nats: any;
-  private healthChecker: SimpleHealthChecker;
+  // 健康检查功能已集成到主服务器中
   private errorHandler: ErrorHandler;
   private performanceMonitor: PerformanceMonitor;
 
@@ -26,7 +26,7 @@ export class StartupManager {
     this.prisma = new PrismaClient();
     this.redis = new Redis(configObject.REDIS_URL);
     this.nats = null;
-    this.healthChecker = new SimpleHealthChecker(this.prisma, this.redis);
+    // 健康检查功能已集成到主服务器中
     this.errorHandler = new ErrorHandler(this.app);
     this.performanceMonitor = new PerformanceMonitor(this.app);
   }
@@ -105,8 +105,7 @@ export class StartupManager {
   }
 
   private async registerRoutes(): Promise<void> {
-    // 注册健康检查路由
-    setupSimpleHealthRoutes(this.app, this.healthChecker);
+    // 健康检查路由已集成到主服务器中
     
     // 注册增强计划API路由
     const { enhancedPlanRoutes } = await import('./routes/enhanced-plans.js');

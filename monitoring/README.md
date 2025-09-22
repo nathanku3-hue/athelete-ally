@@ -252,3 +252,88 @@ docker-compose restart
 - [Prometheus文档](https://prometheus.io/docs/)
 - [Grafana文档](https://grafana.com/docs/)
 
+---
+
+## 🧭 监控运行手册（Runbook）
+
+面向值班工程师的标准操作流程，用于在开发/预览环境快速定位并恢复监控与核心业务指标。
+
+### 1) 启动/停止
+- 启动（推荐脚本）
+  - Windows: `scripts/start-monitoring.ps1`
+  - Unix: `scripts/start-monitoring.sh`
+- 通过 preview.compose.yaml 启动（包含 Prometheus/Grafana/Jaeger）
+  - `docker compose -f preview.compose.yaml up -d prometheus grafana jaeger`
+- 停止/清理
+  - `docker compose -f preview.compose.yaml down -v`
+
+### 2) 健康检查与端点
+- 服务健康：`GET /health`（各服务）
+- 指标抓取：`GET /metrics`
+- BFF 健康：`curl http://localhost:4000/api/health`
+- 规划引擎健康：`curl http://localhost:4102/health`
+- 事件总线（NATS）管理 UI（如已打开 8222）：`http://localhost:8222`
+
+### 3) Prometheus Targets 验证
+1. 打开 Prometheus: `http://localhost:9090/targets`
+2. 确认以下端点为 UP：
+   - gateway-bff: `http://gateway-bff:9464/metrics` 或本地 `http://localhost:9464/metrics`
+   - planning-engine: `http://planning-engine:9466/metrics`
+   - profile-onboarding: `http://profile-onboarding:9465/metrics`
+3. 若为 DOWN：
+   - 确认服务在运行（容器/进程）
+   - 在服务日志中搜索 OpenTelemetry/metrics exporter 错误
+   - 检查 monitoring/prometheus.yml 中 job 地址是否与端口一致
+
+### 4) Jaeger/Tracing 验证
+1. 打开 Jaeger: `http://localhost:16686`
+2. 选择服务：gateway-bff / planning-engine / profile-onboarding
+3. 触发一次端到端流：
+   - 提交 `/api/v1/onboarding`（带 Authorization）
+   - 触发 `/api/v1/plans/generate` 并通过 `/api/v1/plans/status?jobId=...` 轮询
+4. 在 Jaeger 中检索最近 15 分钟的 Trace，确认包含 API → NATS → Planning Engine 的链路
+
+### 5) 常见告警与排障
+- 计划生成失败率高
+  - 看 planning-engine 日志（LLM/DB/NATS 错误）
+  - 查看 NATS 状态、重试与 DLQ（若配置）
+- API 错误率高
+  - 在 BFF 日志定位具体路由与上游依赖
+  - 检查 CORS、Auth header 传递与下游 5xx
+- 指标/追踪缺失
+  - 检查 SDK 初始化（端口/endpoint 变量）
+  - 检查容器网络、端口映射与 scrape 配置
+
+### 6) 仪表板与值班检查单
+- Grafana 登录：`http://localhost:3001`（或 `http://localhost:3000`，取决于 env）
+  - 用户：admin / 密码：见 `.env` 中 `GF_SECURITY_ADMIN_PASSWORD`
+- 仪表板建议：
+  - 平台总览（请求率、错误率、P95 延迟）
+  - 业务看板（onboarding 请求、plan generation duration 成功/失败、队列长度）
+  - 事件总线（发布/消费速率、NAK/ACK 比例）
+- 值班检查（每次发布后）
+  - Prometheus Targets 全部 UP
+  - BFF/Planning Engine 健康端点 200
+  - Jaeger 可见端到端 Trace
+  - 关键业务指标有数据（非 0）
+
+### 7) 常见故障快速恢复
+- CORS 拒绝 → 确认 BFF `CORS_ALLOWED_ORIGINS` 是否包含前端地址
+- 429 过多 → 调整 BFF 速率限制环境变量或检查突发流量源
+- NATS 连接失败 → 重启 NATS 容器，确认 `NATS_URL`
+- 指标不采集 → 重启受影响服务并观察 `/metrics`，确认端口与监控配置一致
+
+### 8) 参考命令
+```bash
+# 查看 Prometheus scrape 错误
+docker compose -f preview.compose.yaml logs prometheus | rg scrape
+
+# 检查 BFF 指标端点
+curl -s http://localhost:9464/metrics | head -n 20
+
+# 检查规划引擎队列/并发状态（自带端点）
+curl -s http://localhost:4102/queue/status | jq
+curl -s http://localhost:4102/concurrency/status | jq
+```
+
+

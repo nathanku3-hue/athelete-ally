@@ -1,15 +1,11 @@
 // 异步计划生成器 - 优化Planning Engine性能
-import { generateTrainingPlan, PlanGenerationRequest, TrainingPlan } from '../llm.js';
+import { generateTrainingPlan, TrainingPlan, TrainingPlanRequest } from '../llm.js';
 import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
-// 临时禁用logger
-const logger = {
-  info: (...args: any[]) => console.log(...args),
-  warn: (...args: any[]) => console.warn(...args),
-  error: (...args: any[]) => console.error(...args),
-};
+// 使用统一的日志记录
+// 使用console进行日志记录，避免循环依赖
 
 // 缓存接口
 interface PlanCache {
@@ -27,7 +23,7 @@ class RedisPlanCache implements PlanCache {
       const cached = await this.redis.get(`plan:${key}`);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
-      logger.warn({ error, key }, 'Failed to get from cache');
+      console.warn(`Failed to get from cache: ${error} for key: ${key}`);
       return null;
     }
   }
@@ -36,7 +32,7 @@ class RedisPlanCache implements PlanCache {
     try {
       await this.redis.setex(`plan:${key}`, ttl, JSON.stringify(plan));
     } catch (error) {
-      logger.warn({ error, key }, 'Failed to set cache');
+      console.warn(`Failed to set cache: ${error} for key: ${key}`);
     }
   }
 
@@ -44,7 +40,7 @@ class RedisPlanCache implements PlanCache {
     try {
       await this.redis.del(`plan:${key}`);
     } catch (error) {
-      logger.warn({ error, key }, 'Failed to delete from cache');
+      console.warn(`Failed to delete from cache: ${error} for key: ${key}`);
     }
   }
 }
@@ -77,7 +73,7 @@ class MemoryPlanCache implements PlanCache {
 // 计划生成任务
 interface PlanGenerationTask {
   id: string;
-  request: PlanGenerationRequest;
+  request: TrainingPlanRequest;
   priority: number;
   createdAt: Date;
   retryCount: number;
@@ -104,7 +100,7 @@ export class AsyncPlanGenerator {
   }
 
   // 生成缓存键
-  private generateCacheKey(request: PlanGenerationRequest): string {
+  private generateCacheKey(request: TrainingPlanRequest): string {
     const keyData = {
       proficiency: request.proficiency,
       season: request.season,
@@ -119,7 +115,7 @@ export class AsyncPlanGenerator {
   // 异步生成计划
   async generatePlanAsync(
     jobId: string,
-    request: PlanGenerationRequest,
+    request: TrainingPlanRequest,
     priority: number = 1
   ): Promise<void> {
     const task: PlanGenerationTask = {
@@ -136,7 +132,7 @@ export class AsyncPlanGenerator {
     const cachedPlan = await this.cache.get(cacheKey);
     
     if (cachedPlan) {
-      logger.info({ jobId, cacheKey }, 'Using cached plan');
+      console.info(`Using cached plan for jobId: ${jobId}, cacheKey: ${cacheKey}`);
       await this.savePlanToDatabase(jobId, request.userId, cachedPlan);
       await this.publishPlanGeneratedEvent(jobId, request.userId, cachedPlan);
       return;
@@ -172,7 +168,7 @@ export class AsyncPlanGenerator {
       
       // 异步处理任务
       this.processTask(task).catch(error => {
-        logger.error({ error, taskId: task.id }, 'Task processing failed');
+        console.error(`Task processing failed: ${error} for taskId: ${task.id}`);
         this.processingTasks.delete(task.id);
       });
     }
@@ -203,7 +199,7 @@ export class AsyncPlanGenerator {
       );
 
       this.processingTasks.delete(jobId);
-      logger.info({ jobId }, 'Plan generation completed successfully');
+      console.info(`Plan generation completed successfully for jobId: ${jobId}`);
 
     } catch (error) {
       this.processingTasks.delete(jobId);
@@ -215,10 +211,10 @@ export class AsyncPlanGenerator {
         this.taskQueue.push(task);
         this.taskQueue.sort((a, b) => b.priority - a.priority);
         
-        logger.warn({ jobId, retryCount: task.retryCount }, 'Retrying plan generation');
+        console.warn(`Retrying plan generation for jobId: ${jobId}, retryCount: ${task.retryCount}`);
         this.processQueue();
       } else {
-        logger.error({ error, jobId }, 'Plan generation failed after max retries');
+        console.error(`Plan generation failed after max retries: ${error} for jobId: ${jobId}`);
         await this.updateJobStatus(jobId, 'failed', 0);
       }
     }
@@ -227,7 +223,7 @@ export class AsyncPlanGenerator {
   // 生成并保存计划
   private async generateAndSavePlan(
     jobId: string,
-    request: PlanGenerationRequest
+    request: TrainingPlanRequest
   ): Promise<void> {
     // 更新进度
     await this.updateJobStatus(jobId, 'processing', 25);
@@ -292,7 +288,7 @@ export class AsyncPlanGenerator {
       },
     });
 
-    logger.info({ planId: plan.id, jobId }, 'Plan saved to database');
+    console.info(`Plan saved to database for planId: ${plan.id}, jobId: ${jobId}`);
   }
 
   // 发布计划生成事件
@@ -311,7 +307,7 @@ export class AsyncPlanGenerator {
     };
 
     await this.eventPublisher.publishPlanGenerated(event);
-    logger.info({ jobId, userId }, 'Plan generated event published');
+    console.info(`Plan generated event published for jobId: ${jobId}, userId: ${userId}`);
   }
 
   // 更新任务状态
@@ -326,7 +322,7 @@ export class AsyncPlanGenerator {
         data: { status, progress, updatedAt: new Date() },
       });
     } catch (error) {
-      logger.warn({ error, jobId }, 'Failed to update job status');
+      console.warn(`Failed to update job status: ${error} for jobId: ${jobId}`);
     }
   }
 

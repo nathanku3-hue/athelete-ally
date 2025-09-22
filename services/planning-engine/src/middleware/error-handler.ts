@@ -377,8 +377,12 @@ export function handleErrors(target: any, propertyName: string, descriptor: Prop
 /**
  * 异步错误处理包装器
  */
-export function asyncErrorHandler(fn: Function) {
-  return (req: any, res: any, next: any) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+export function asyncErrorHandler(fn: (req: unknown, res: unknown, next: unknown) => Promise<unknown>) {
+  return (req: unknown, res: unknown, next: unknown) => {
+    Promise.resolve(fn(req, res, next)).catch((error: unknown) => {
+      if (typeof next === 'function') {
+        next(error);
+      }
+    });
   };
 }

@@ -1,13 +1,4 @@
-// 临时EventBus类
-class EventBus {
-  constructor() {}
-  async publish(topic: string, data: any) {
-    console.log(`Publishing to ${topic}:`, data);
-  }
-  async subscribe(topic: string, handler: (data: any) => Promise<void>) {
-    console.log(`Subscribing to ${topic}`);
-  }
-}
+import { EventBus } from '@athlete-ally/event-bus';
 import { config } from '../config.js';
 import { register, Counter, Histogram } from 'prom-client';
 
@@ -137,9 +128,7 @@ export class EventPublisher {
   }
 
   async disconnect() {
-    if (this.eventBus) {
-      await this.eventBus.close();
-    }
+    await this.eventBus.close();
     this.isConnected = false;
   }
 }

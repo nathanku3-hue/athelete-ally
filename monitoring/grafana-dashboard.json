@@ -2,7 +2,10 @@
   "dashboard": {
     "id": null,
     "title": "Athlete Ally 系统监控",
-    "tags": ["athlete-ally", "monitoring"],
+    "tags": [
+      "athlete-ally",
+      "monitoring"
+    ],
     "style": "dark",
     "timezone": "browser",
     "panels": [
@@ -139,6 +142,56 @@
           "x": 12,
           "y": 16
         }
+      },
+      {
+        "id": 6.0,
+        "title": "Gateway→Planning P95 Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (le) (rate(api_response_time_seconds_bucket{upstream_service=\"planning-engine\"}[5m])))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum by (le) (rate(api_response_time_seconds_bucket{upstream_service=\"planning-engine\"}[5m])))",
+            "legendFormat": "P50"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "seconds",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "x": 0,
+          "w": 12,
+          "y": 24
+        }
+      },
+      {
+        "id": 7.0,
+        "title": "Gateway→Planning Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(api_errors_total{upstream_service=\"planning-engine\"}[5m])",
+            "legendFormat": "errors/s"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "errors/s",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "x": 12,
+          "w": 12,
+          "y": 24
+        }
       }
     ],
     "time": {
@@ -180,11 +233,3 @@
     }
   ]
 }
-
-
-
-
-
-
-
-

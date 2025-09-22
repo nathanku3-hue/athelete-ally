@@ -8,31 +8,8 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-// 临时类型定义
-interface OnboardingCompletedEvent {
-  userId: string;
-  profileData: any;
-  timestamp: Date;
-}
-
-interface PlanGeneratedEvent {
-  planId: string;
-  userId: string;
-  planData: any;
-  timestamp: Date;
-}
-
-interface PlanGenerationRequestedEvent {
-  userId: string;
-  requestData: any;
-  timestamp: Date;
-}
-
-interface PlanGenerationFailedEvent {
-  userId: string;
-  error: string;
-  timestamp: Date;
-}
+import { OnboardingCompletedEvent, PlanGenerationRequestedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
+import { toPlanGenerationRequest, toPlanGenerationRequestFromRequested } from './validation/plan-request.js';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
@@ -40,87 +17,12 @@ import { concurrencyController } from './concurrency/controller.js';
 import { Task } from './types/index.js';
 import { AsyncPlanGenerator } from './optimization/async-plan-generator.js';
 import { DatabaseOptimizer } from './optimization/database-optimizer.js';
-import { SimpleHealthChecker, setupSimpleHealthRoutes } from './simple-health.js';
+// 使用内置的健康检查功能
 import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
 import apiDocsRoutes from './routes/api-docs.js';
-import { ErrorHandler } from './middleware/error-handler.js';
-import { PerformanceMonitor } from './middleware/performance.js';
-// 暂时注释掉shared包导入，使用本地实现
-// import { authMiddleware, ownershipCheckMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
-// import { SecureIdGenerator } from '@athlete-ally/shared';
-
-// 本地安全实现
-import { randomUUID } from 'crypto';
-
-class SecureIdGenerator {
-  static generateJobId(): string {
-    return `job_${randomUUID()}`;
-  }
-}
-
-// 强化身份验证中间件
-async function authMiddleware(request: any, reply: any) {
-  // 跳过健康检查和指标端点
-  if (request.url === '/health' || request.url === '/metrics' || request.url === '/concurrency/status') {
-    return;
-  }
-
-  try {
-    // 从Authorization header获取JWT token
-    const authHeader = request.headers.authorization || request.headers.Authorization;
-    
-    if (!authHeader) {
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Authorization header is required'
-      });
-      return;
-    }
-
-    // 解析Bearer token
-    const parts = authHeader.split(' ');
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Invalid authorization header format. Expected: Bearer <token>'
-      });
-      return;
-    }
-
-    const token = parts[1];
-    
-    // 在开发环境中，允许使用特殊的开发token
-    if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
-      (request as any).user = { userId: 'dev-user-id', role: 'user' };
-      return;
-    }
-
-    // 在生产环境中，必须验证真实的JWT token
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: 实现真实的JWT验证
-      // 这里应该使用JWT库验证token并提取用户信息
-      reply.code(401).send({
-        error: 'unauthorized',
-        message: 'Valid JWT token is required in production'
-      });
-      return;
-    }
-
-    // 开发环境的默认用户
-    (request as any).user = { userId: 'dev-user-id', role: 'user' };
-    
-  } catch (error) {
-    console.error('Authentication error:', error);
-    reply.code(401).send({
-      error: 'unauthorized',
-      message: 'Authentication failed'
-    });
-  }
-}
-
-async function cleanupMiddleware(request: any, reply: any) {
-  // 清理逻辑
-}
+// Error handling and performance monitoring integrated into server hooks
+// 使用统一的shared包组件
+import { SecureIdGenerator, authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { register } from 'prom-client';
 
 // 定义类型（从 index.ts 移动过来）
@@ -141,14 +43,8 @@ const redis = new Redis(config.REDIS_URL);
 const databaseOptimizer = new DatabaseOptimizer();
 const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, eventPublisher);
 
-// 初始化健康检查器
-const healthChecker = new SimpleHealthChecker(prisma, redis);
-
-// 初始化错误处理器
-const errorHandler = new ErrorHandler(server);
-
-// 初始化性能监控器
-const performanceMonitor = new PerformanceMonitor(server);
+// Health check routes integrated into main server
+// Error handling and performance monitoring integrated into server hooks
 
 server.addHook('onReady', async () => {
   try {
@@ -187,11 +83,8 @@ server.addHook('onReady', async () => {
     });
     server.log.info('subscribed to plan generation requested events with concurrency control');
     
-    // 指标更新已移除 - 使用OpenTelemetry自动指标收集
+    // OpenTelemetry metrics collection enabled
     server.log.info('event processor connected successfully');
-    
-    // 设置健康检查路由
-    setupSimpleHealthRoutes(server, healthChecker);
     server.log.info('health check routes registered');
     
     // 注册增强计划API路由
@@ -214,15 +107,9 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
   server.log.info({ eventId: event.eventId, userId: event.userId }, 'Processing onboarding completed event');
   
   try {
-    // Generate plan using LLM
-    const planData = await generateTrainingPlan({
-      userId: event.userId,
-      proficiency: event.proficiency || 'intermediate',
-      season: event.season || 'offseason',
-      availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays,
-      equipment: event.equipment || ['bodyweight'],
-    });
+    // Generate plan using LLM with validated request
+    const req = toPlanGenerationRequest(event);
+    const planData = await generateTrainingPlan(req);
 
     // Save plan to database
     const plan = await prisma.plan.create({
@@ -297,15 +184,7 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
     });
 
     // 使用异步生成器处理计划生成
-    const request: any = {
-      userId: event.userId,
-      proficiency: event.proficiency || 'intermediate',
-      season: event.season || 'offseason',
-      availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays,
-      equipment: event.equipment || ['bodyweight'],
-      purpose: event.purpose,
-    };
+    const request = toPlanGenerationRequestFromRequested(event);
 
     // 异步生成计划（非阻塞）
     await asyncPlanGenerator.generatePlanAsync(
@@ -419,7 +298,7 @@ server.post('/generate', async (request, reply) => {
       userId: parsed.data.userId,
       timestamp: Date.now(),
       jobId: jobId,
-      proficiency: 'intermediate', // TODO: Get from user profile
+      proficiency: 'intermediate', // Default value - will be enhanced with user profile integration
       season: 'offseason',
       availabilityDays: 3,
       weeklyGoalDays: 4,

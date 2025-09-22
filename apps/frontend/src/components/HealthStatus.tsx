@@ -46,7 +46,7 @@ export default function HealthStatus({
         setHealthStatus(response.data);
         setLastChecked(new Date());
       } else {
-        throw FrontendError.fromApiResponse(response);
+        throw new FrontendError('Failed to fetch health status');
       }
     } catch (err) {
       const frontendError = err instanceof FrontendError 
