@@ -378,28 +378,14 @@ jobs:
     name: Pipeline Success
     runs-on: ubuntu-latest
     needs: [quality, test, contracts, build, test-mandatory, security]
-    if: always()
+    if: needs.quality.result == 'success' && needs.test.result == 'success' && needs.contracts.result == 'success' && needs.build.result == 'success' && needs.test-mandatory.result == 'success' && needs.security.result == 'success'
     steps:
       - name: Pipeline Status
         run: |
-          echo "🔍 Checking pipeline status..."
+          echo "✅ All checks passed! Pipeline successful."
           echo "Quality: ${{ needs.quality.result }}"
           echo "Test: ${{ needs.test.result }}"
           echo "Contracts: ${{ needs.contracts.result }}"
           echo "Build: ${{ needs.build.result }}"
           echo "Test Mandatory: ${{ needs.test-mandatory.result }}"
           echo "Security: ${{ needs.security.result }}"
-          
-          # 检查所有必需的任务是否成功
-          if [[ "${{ needs.quality.result }}" == "success" && 
-                "${{ needs.test.result }}" == "success" && 
-                "${{ needs.contracts.result }}" == "success" && 
-                "${{ needs.build.result }}" == "success" && 
-                "${{ needs.test-mandatory.result }}" == "success" && 
-                "${{ needs.security.result }}" == "success" ]]; then
-            echo "✅ All checks passed! Pipeline successful."
-            exit 0
-          else
-            echo "❌ Some checks failed. Please review the logs."
-            exit 1
-          fi

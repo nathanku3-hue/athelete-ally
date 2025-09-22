@@ -236,15 +236,19 @@ jobs:
     needs: [contract-tests, database-tests, api-tests, integration-tests]
     if: always()
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download all test results
         uses: actions/download-artifact@v4
         with:
           path: test-results/
 
       - name: Generate test report
+        working-directory: ${{ github.workspace }}
         run: |
           # 生成綜合測試報告
-          node scripts/generate-test-report.js
+          node ./scripts/generate-test-report.js
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
@@ -267,14 +271,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          cd packages/contracts
-          npm install --no-audit --no-fund
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Run ESLint
-        run: |
-          cd packages/contracts
-          npm run lint
+        run: npx turbo run lint
 
       - name: Run TypeScript check
         run: |

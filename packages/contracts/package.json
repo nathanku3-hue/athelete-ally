@@ -19,7 +19,7 @@
     "test:performance": "jest --testPathPattern=performance",
     "test:coverage": "jest --coverage",
     "coverage:check": "jest --coverage --coverageThreshold.global.branches=90 --coverageThreshold.global.functions=90 --coverageThreshold.global.lines=90 --coverageThreshold.global.statements=90",
-    "lint": "eslint .",
+    "lint": "eslint -c ../../eslint.config.mjs .",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
