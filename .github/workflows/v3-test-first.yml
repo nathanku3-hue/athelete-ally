@@ -170,7 +170,7 @@ jobs:
       - name: Start test services
         run: |
           # 啟動測試服務
-          docker-compose -f docker-compose.test.yml up -d
+          docker compose -f preview.compose.yaml up -d postgres redis nats
 
       - name: Wait for services
         run: |
@@ -195,7 +195,7 @@ jobs:
       - name: Stop test services
         if: always()
         run: |
-          docker-compose -f docker-compose.test.yml down
+          docker compose -f preview.compose.yaml down -v
 
   # 性能測試
   performance-tests:
