@@ -5,9 +5,9 @@
 services:
   redis:
     ports: []  # 不绑定到主机端口，仅使用内部网络 redis:6379
-  
+
   postgres:
     ports: []  # 不绑定到主机端口，仅使用内部网络 postgres:5432
-  
+
   nats:
     ports: []  # 不绑定到主机端口，仅使用内部网络 nats:4222

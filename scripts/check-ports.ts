@@ -54,11 +54,11 @@ class PortChecker {
   private getDetailedErrorMessage(err: NodeJS.ErrnoException): string {
     switch (err.code) {
       case 'EADDRINUSE':
-        return `Port already in use (${err.code})`;
+        return `Port already in use (${err.code}) - Container or service conflict`;
       case 'EACCES':
-        return `Permission denied (${err.code})`;
+        return `Permission denied (${err.code}) - Insufficient privileges`;
       case 'EADDRNOTAVAIL':
-        return `Address not available (${err.code})`;
+        return `Address not available (${err.code}) - Network configuration issue`;
       default:
         return `${err.message} (${err.code || 'unknown'})`;
     }
@@ -116,7 +116,7 @@ class PortChecker {
       console.log('     docker compose -f ./preview.compose.yaml down -v --remove-orphans');
       console.log('  2. Use alternative ports:');
       console.log('     POSTGRES_PORT=5433 REDIS_PORT=6380 npm run infra:up');
-      console.log('  3. Check system services:');
+      console.log('  3. Check system services (last resort):');
       console.log('     Get-Service | Where-Object {$_.Name -like "*postgres*" -or $_.Name -like "*redis*"}');
       console.log('  4. Manual process termination (last resort):');
       console.log('     taskkill /f /im <process_name>.exe');
@@ -158,6 +158,4 @@ async function main() {
 }
 
 // 运行检查
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error);
-}
+main().catch(console.error);

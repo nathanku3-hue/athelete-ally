@@ -197,6 +197,11 @@ jobs:
             -f ./preview.compose.yaml \
             -f ./docker-compose.ci.yml \
             up -d postgres redis nats
+        env:
+          # 在CI中禁用主机端口绑定
+          POSTGRES_PORT: ""
+          REDIS_PORT: ""
+          NATS_PORT: ""
 
       - name: Wait for services
         run: |
@@ -213,8 +218,8 @@ jobs:
           cd packages/contracts
           npm run test:integration
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379
+          DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_db
+          REDIS_URL: redis://redis:6379
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v4

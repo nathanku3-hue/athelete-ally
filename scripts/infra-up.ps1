@@ -25,13 +25,20 @@ try {
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "❌ Alternative ports also failed." -ForegroundColor Red
                 Write-Host "💡 Manual steps required:" -ForegroundColor Yellow
-                Write-Host "   1. docker compose -f ./preview.compose.yaml down -v --remove-orphans" -ForegroundColor Cyan
-                Write-Host "   2. Check system services: Get-Service | Where-Object {`$_.Name -like '*postgres*' -or `$_.Name -like '*redis*'}" -ForegroundColor Cyan
+                Write-Host "   1. Project-scoped cleanup:" -ForegroundColor Cyan
+                Write-Host "      docker compose -f ./preview.compose.yaml down -v --remove-orphans" -ForegroundColor Cyan
+                Write-Host "   2. Use alternative ports:" -ForegroundColor Cyan
+                Write-Host "      POSTGRES_PORT=5434 REDIS_PORT=6381 npm run infra:up" -ForegroundColor Cyan
+                Write-Host "   3. Check system services (last resort):" -ForegroundColor Cyan
+                Write-Host "      Get-Service | Where-Object {`$_.Name -like '*postgres*' -or `$_.Name -like '*redis*'}" -ForegroundColor Cyan
+                Write-Host "   4. Manual process termination (last resort):" -ForegroundColor Cyan
+                Write-Host "      taskkill /f /im <process_name>.exe" -ForegroundColor Cyan
                 exit 1
             } else {
                 Write-Host "✅ Using alternative ports: 5433, 6380, 4222" -ForegroundColor Green
                 $env:POSTGRES_PORT = "5433"
                 $env:REDIS_PORT = "6380"
+                $env:NATS_PORT = "4222"
             }
         } catch {
             Write-Host "❌ Alternative port check failed: $_" -ForegroundColor Red
