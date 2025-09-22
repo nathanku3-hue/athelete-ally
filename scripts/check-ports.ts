@@ -26,7 +26,7 @@ class PortChecker {
         });
       });
 
-      server.on('error', (err: any) => {
+      server.on('error', (err: NodeJS.ErrnoException) => {
         this.results.push({ 
           port, 
           service, 
@@ -101,7 +101,29 @@ class PortChecker {
 // 主函数
 async function main() {
   const checker = new PortChecker();
-  await checker.checkAllPorts();
+  
+  // 检查命令行参数
+  const args = process.argv.slice(2);
+  
+  if (args.length > 0) {
+    // 检查特定端口
+    console.log('🔍 Checking specific ports...\n');
+    for (const portStr of args) {
+      const port = parseInt(portStr, 10);
+      if (isNaN(port)) {
+        console.error(`❌ Invalid port: ${portStr}`);
+        process.exit(1);
+      }
+      
+      const service = Object.keys(SERVICE_PORTS).find(key => SERVICE_PORTS[key as keyof typeof SERVICE_PORTS] === port) || 'Custom';
+      await checker.checkPort(port, service);
+    }
+    
+    checker.printResults();
+  } else {
+    // 检查所有端口
+    await checker.checkAllPorts();
+  }
 }
 
 // 运行检查

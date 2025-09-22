@@ -30,13 +30,40 @@ athlete-ally/
 # 安装依赖
 npm install
 
+# 检查端口可用性
+npm run check-ports
+
+# 启动基础设施服务
+npm run infra:up
+
 # 启动开发环境
 npm run dev
 
-# 启动ELK Stack
-cd services/planning-engine/elk
-docker compose up -d
+# 停止基础设施服务
+npm run infra:down
 ```
+
+### 基础设施管理
+```bash
+# 启动基础设施服务 (PostgreSQL, Redis, NATS)
+npm run infra:up
+
+# 停止基础设施服务
+npm run infra:down
+
+# 检查端口可用性
+npm run check-ports 5432 6379 4222
+
+# 清理基础设施服务 (仅开发环境，会删除所有数据)
+npm run infra:clean
+```
+
+### 环境变量配置
+复制 `env.example` 为 `.env` 并配置关键变量：
+- `REDIS_PORT`: Redis端口 (默认: 6379)
+- `POSTGRES_PORT`: PostgreSQL端口 (默认: 5432)  
+- `NATS_PORT`: NATS端口 (默认: 4222)
+- `SNYK_TOKEN`: Snyk安全扫描令牌 (可选)
 
 ### 生产部署
 ```bash

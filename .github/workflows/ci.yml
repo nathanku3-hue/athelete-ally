@@ -71,7 +71,18 @@ jobs:
           else
             echo "✅ No build artifacts found in repository"
           fi
-          
+
+      - name: Check for @master usage in workflows
+        run: |
+          echo "🔍 Checking for @master usage in workflows..."
+          if grep -r "@master" .github/workflows/; then
+            echo "❌ Found @master references, please use pinned versions"
+            exit 1
+          fi
+          echo "✅ No @master references found"
+
+      - name: Check for sensitive files
+        run: |
           # 检查是否提交了.env文件
           if git ls-files | grep -E "\.env" | head -10; then
             echo "❌ ERROR: .env files detected in repository!"

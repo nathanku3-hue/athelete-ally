@@ -1,5 +1,9 @@
 name: V3 Test-First Development Pipeline
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main, develop, feat/v3-* ]
@@ -167,10 +171,20 @@ jobs:
           cd packages/contracts
           npm install --no-audit --no-fund
 
+      # 检查端口可用性
+      - name: Check ports availability
+        run: |
+          npm run check-ports 5432 6379 4222
+
+      # 清理旧的Docker容器和网络
+      - name: Clean up existing containers
+        run: |
+          docker compose -p ci_${{ github.run_id }} -f ./preview.compose.yaml down -v --remove-orphans || true
+
       # 启动测试基础设施服务
       - name: Start test services
         run: |
-          docker compose -f ./preview.compose.yaml up -d postgres redis nats
+          docker compose -p ci_${{ github.run_id }} -f ./preview.compose.yaml -f ./docker-compose.ci.yml up -d postgres redis nats
 
       - name: Wait for services
         run: |
@@ -196,7 +210,7 @@ jobs:
       - name: Stop test services
         if: always()
         run: |
-          docker compose -f ./preview.compose.yaml down -v
+          docker compose -p ci_${{ github.run_id }} -f ./preview.compose.yaml down -v --remove-orphans
 
   # 性能測試
   performance-tests:

@@ -1,0 +1,14 @@
+# CI专用的Docker Compose覆盖文件
+# 移除主机端口绑定，服务通过内部网络通信
+# 避免CI环境中的端口冲突问题
+version: '3.8'
+
+services:
+  redis:
+    ports: []  # 不绑定到主机端口，仅使用内部网络 redis:6379
+  
+  postgres:
+    ports: []  # 不绑定到主机端口，仅使用内部网络 postgres:5432
+  
+  nats:
+    ports: []  # 不绑定到主机端口，仅使用内部网络 nats:4222

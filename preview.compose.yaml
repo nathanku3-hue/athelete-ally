@@ -131,7 +131,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
   postgres:
     image: postgres:16-alpine
     environment:
@@ -151,7 +151,7 @@ services:
     image: nats:2.10-alpine
     command: ["-js", "-m", "8222"]
     ports:
-      - "4222:4222"
+      - "${NATS_PORT:-4222}:4222"
       - "8222:8222"
   prometheus:
     image: prom/prometheus:latest
