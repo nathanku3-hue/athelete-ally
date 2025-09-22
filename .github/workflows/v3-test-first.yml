@@ -15,8 +15,12 @@ on:
     branches: [ main, develop ]
     paths:
       - 'packages/contracts/**'
-      - 'services/**'
-      - 'apps/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual verification'
 
 jobs:
   # 合同測試
