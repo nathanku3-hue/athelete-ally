@@ -39,15 +39,29 @@ class PortChecker {
       });
 
       server.on('error', (err: NodeJS.ErrnoException) => {
+        const errorMessage = this.getDetailedErrorMessage(err);
         this.results.push({ 
           port, 
           service, 
           available: false, 
-          error: err.code === 'EADDRINUSE' ? 'Port already in use' : err.message 
+          error: errorMessage
         });
         resolve(false);
       });
     });
+  }
+
+  private getDetailedErrorMessage(err: NodeJS.ErrnoException): string {
+    switch (err.code) {
+      case 'EADDRINUSE':
+        return `Port already in use (${err.code})`;
+      case 'EACCES':
+        return `Permission denied (${err.code})`;
+      case 'EADDRNOTAVAIL':
+        return `Address not available (${err.code})`;
+      default:
+        return `${err.message} (${err.code || 'unknown'})`;
+    }
   }
 
   async checkAllPorts(): Promise<void> {
@@ -98,12 +112,14 @@ class PortChecker {
       });
       
       console.log('\n🚨 Action required:');
-      console.log('  1. Stop conflicting services:');
+      console.log('  1. Project-scoped cleanup:');
       console.log('     docker compose -f ./preview.compose.yaml down -v --remove-orphans');
       console.log('  2. Use alternative ports:');
       console.log('     POSTGRES_PORT=5433 REDIS_PORT=6380 npm run infra:up');
       console.log('  3. Check system services:');
       console.log('     Get-Service | Where-Object {$_.Name -like "*postgres*" -or $_.Name -like "*redis*"}');
+      console.log('  4. Manual process termination (last resort):');
+      console.log('     taskkill /f /im <process_name>.exe');
       
       process.exit(1);
     } else {

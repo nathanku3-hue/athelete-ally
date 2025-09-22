@@ -22,8 +22,11 @@ echo "🔍 Checking port availability..."
 if ! npm run check-ports 5432 6379 4222; then
   echo "❌ Port check failed. Trying alternative ports..."
   if ! npm run check-ports 5433 6380 4222; then
-    echo "❌ Alternative ports also failed. Please resolve port conflicts manually."
-    echo "💡 Try: POSTGRES_PORT=5433 REDIS_PORT=6380 npm run infra:up"
+    echo "❌ Alternative ports also failed."
+    echo "💡 Manual steps required:"
+    echo "   1. docker compose -f ./preview.compose.yaml down -v --remove-orphans"
+    echo "   2. Check system services: systemctl status postgresql redis"
+    echo "   3. Use different ports: POSTGRES_PORT=5434 REDIS_PORT=6381 npm run infra:up"
     exit 1
   else
     echo "✅ Using alternative ports: 5433, 6380, 4222"

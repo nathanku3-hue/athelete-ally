@@ -23,8 +23,10 @@ try {
         try {
             $altCheck = npm run check-ports "5433" "6380" "4222"
             if ($LASTEXITCODE -ne 0) {
-                Write-Host "❌ Alternative ports also failed. Please resolve port conflicts manually." -ForegroundColor Red
-                Write-Host "💡 Try: `$env:POSTGRES_PORT='5433'; `$env:REDIS_PORT='6380'; npm run infra:up" -ForegroundColor Yellow
+                Write-Host "❌ Alternative ports also failed." -ForegroundColor Red
+                Write-Host "💡 Manual steps required:" -ForegroundColor Yellow
+                Write-Host "   1. docker compose -f ./preview.compose.yaml down -v --remove-orphans" -ForegroundColor Cyan
+                Write-Host "   2. Check system services: Get-Service | Where-Object {`$_.Name -like '*postgres*' -or `$_.Name -like '*redis*'}" -ForegroundColor Cyan
                 exit 1
             } else {
                 Write-Host "✅ Using alternative ports: 5433, 6380, 4222" -ForegroundColor Green

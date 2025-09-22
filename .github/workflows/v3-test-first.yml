@@ -177,20 +177,26 @@ jobs:
       - name: Verify tsx availability
         run: npx tsx --version
 
-      # 检查端口可用性
-      - name: Check ports availability
+      # 预检查端口状态 (Linux兼容)
+      - name: Pre-flight port check (Linux compatible)
         run: |
-          npm run check-ports 5432 6379 4222
+          ss -tulpen | grep -E ':(5432|6379|4222)\b' || echo "Ports available"
+          if ss -tulpen | grep -E ':(5432|6379|4222)\b'; then
+            echo "⚠️ Ports occupied, will use isolated project name"
+          fi
 
-      # 清理旧的Docker容器和网络
-      - name: Clean up existing containers
+      # 清理旧的Docker容器和网络 (项目范围)
+      - name: Clean up existing containers (project-scoped)
         run: |
           docker compose -p ci_${{ github.run_id }} -f ./preview.compose.yaml down -v --remove-orphans || true
 
-      # 启动测试基础设施服务
-      - name: Start test services
+      # 启动隔离的测试基础设施服务
+      - name: Start isolated test services
         run: |
-          docker compose -p ci_${{ github.run_id }} -f ./preview.compose.yaml -f ./docker-compose.ci.yml up -d postgres redis nats
+          docker compose -p ci_${{ github.run_id }} \
+            -f ./preview.compose.yaml \
+            -f ./docker-compose.ci.yml \
+            up -d postgres redis nats
 
       - name: Wait for services
         run: |
@@ -217,8 +223,8 @@ jobs:
           name: integration-test-results
           path: packages/contracts/coverage/
 
-      # 清理测试基础设施服务
-      - name: Stop test services
+      # 清理测试基础设施服务 (项目范围)
+      - name: Stop test services (project-scoped)
         if: always()
         run: |
           docker compose -p ci_${{ github.run_id }} -f ./preview.compose.yaml down -v --remove-orphans
