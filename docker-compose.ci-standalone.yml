@@ -1,0 +1,53 @@
+# docker-compose.ci-standalone.yml
+# 独立CI环境配置文件 - 仅包含基础设施服务，无端口绑定
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    networks:
+      - ci-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+    expose:
+      - "5432"
+    networks:
+      - ci-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U athlete -d athlete"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    expose:
+      - "4222"
+      - "8222"
+    networks:
+      - ci-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8222/varz >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  ci-network:
+    driver: bridge
