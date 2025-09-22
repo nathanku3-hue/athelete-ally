@@ -262,7 +262,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: comprehensive-test-report
-          path: test-results/report.html
+          path: test-results/
 
   # 代碼質量檢查
   code-quality:

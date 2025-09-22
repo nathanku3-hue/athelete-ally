@@ -12,12 +12,11 @@ export interface TrainingPlanRequest {
   availabilityDays: number;
   weeklyGoalDays: number;
   equipment: string[];
-  purpose?: string;
+  purpose?: 'general_fitness' | 'sport_performance' | 'muscle_building' | 'weight_loss' | 'rehabilitation';
   competitionDate?: string;
 }
 
-// 别名，用于向后兼容
-export type PlanGenerationRequest = TrainingPlanRequest;
+// 注意：PlanGenerationRequest别名已移除，请直接使用TrainingPlanRequest
 
 export interface TrainingPlan {
   id: string;

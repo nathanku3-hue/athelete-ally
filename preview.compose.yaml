@@ -139,7 +139,7 @@ services:
       - POSTGRES_PASSWORD=athlete
       - POSTGRES_DB=athlete
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - ./scripts:/docker-entrypoint-initdb.d
     healthcheck:

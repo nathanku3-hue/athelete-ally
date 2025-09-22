@@ -1,5 +1,5 @@
 // 异步计划生成器 - 优化Planning Engine性能
-import { generateTrainingPlan, TrainingPlan, PlanGenerationRequest } from '../llm.js';
+import { generateTrainingPlan, TrainingPlan, TrainingPlanRequest } from '../llm.js';
 import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
@@ -73,7 +73,7 @@ class MemoryPlanCache implements PlanCache {
 // 计划生成任务
 interface PlanGenerationTask {
   id: string;
-  request: PlanGenerationRequest;
+  request: TrainingPlanRequest;
   priority: number;
   createdAt: Date;
   retryCount: number;
@@ -100,7 +100,7 @@ export class AsyncPlanGenerator {
   }
 
   // 生成缓存键
-  private generateCacheKey(request: PlanGenerationRequest): string {
+  private generateCacheKey(request: TrainingPlanRequest): string {
     const keyData = {
       proficiency: request.proficiency,
       season: request.season,
@@ -115,7 +115,7 @@ export class AsyncPlanGenerator {
   // 异步生成计划
   async generatePlanAsync(
     jobId: string,
-    request: PlanGenerationRequest,
+    request: TrainingPlanRequest,
     priority: number = 1
   ): Promise<void> {
     const task: PlanGenerationTask = {
@@ -223,7 +223,7 @@ export class AsyncPlanGenerator {
   // 生成并保存计划
   private async generateAndSavePlan(
     jobId: string,
-    request: PlanGenerationRequest
+    request: TrainingPlanRequest
   ): Promise<void> {
     // 更新进度
     await this.updateJobStatus(jobId, 'processing', 25);
