@@ -13,9 +13,18 @@ permissions:
   issues: write
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '20'
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  # CI环境变量
+  NODE_ENV: test
+  PROMETHEUS_PORT: 9090
+  GRAFANA_PORT: 3001
+  GF_SECURITY_ADMIN_PASSWORD: admin123
+  JAEGER_PORT: 16686
+  OPENAI_API_KEY: test_openai_key_for_ci
+  JWT_SECRET: test_jwt_secret_for_ci
+  ENCRYPTION_KEY: test_encryption_key_for_ci
 
 jobs:
   # 代码质量检查
@@ -306,6 +315,15 @@ jobs:
       - name: Run dependency check
         run: npx audit-ci --config audit-ci.json || true
 
+      - name: Run Snyk security scan (if token available)
+        if: ${{ secrets.SNYK_TOKEN != '' }}
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          args: --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
       - name: Check for high-risk dependencies
         run: |
           echo "🔍 Checking for high-risk dependencies..."
@@ -364,6 +382,15 @@ jobs:
     steps:
       - name: Pipeline Status
         run: |
+          echo "🔍 Checking pipeline status..."
+          echo "Quality: ${{ needs.quality.result }}"
+          echo "Test: ${{ needs.test.result }}"
+          echo "Contracts: ${{ needs.contracts.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Test Mandatory: ${{ needs.test-mandatory.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          
+          # 检查所有必需的任务是否成功
           if [[ "${{ needs.quality.result }}" == "success" && 
                 "${{ needs.test.result }}" == "success" && 
                 "${{ needs.contracts.result }}" == "success" && 
@@ -371,13 +398,8 @@ jobs:
                 "${{ needs.test-mandatory.result }}" == "success" && 
                 "${{ needs.security.result }}" == "success" ]]; then
             echo "✅ All checks passed! Pipeline successful."
+            exit 0
           else
             echo "❌ Some checks failed. Please review the logs."
-            echo "Quality: ${{ needs.quality.result }}"
-            echo "Test: ${{ needs.test.result }}"
-            echo "Contracts: ${{ needs.contracts.result }}"
-            echo "Build: ${{ needs.build.result }}"
-            echo "Test Mandatory: ${{ needs.test-mandatory.result }}"
-            echo "Security: ${{ needs.security.result }}"
             exit 1
           fi
