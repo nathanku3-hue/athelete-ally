@@ -25,6 +25,11 @@ athlete-ally/
 
 ## 快速启动
 
+### 环境要求
+- Node.js 20.18.0 LTS
+- npm 10.9.3
+- Docker & Docker Compose
+
 ### 开发环境
 ```bash
 # 安装依赖
