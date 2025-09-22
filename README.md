@@ -30,6 +30,10 @@ athlete-ally/
 - npm 10.9.3
 - Docker & Docker Compose
 
+### Docker Compose 配置
+- **本地开发**: 使用 `preview.compose.yaml` 进行端口绑定，支持环境变量端口重映射
+- **CI环境**: 使用 `docker-compose.ci-standalone.yml` 进行完全隔离，无端口绑定
+
 ### 开发环境
 ```bash
 # 安装依赖
