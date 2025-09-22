@@ -17,7 +17,7 @@ Set-Location "$PSScriptRoot\..\monitoring"
 
 # 启动监控服务
 Write-Host "📊 启动 Prometheus, Jaeger, Grafana..." -ForegroundColor Yellow
-docker-compose up -d
+docker compose up -d
 
 # 等待服务启动
 Write-Host "⏳ 等待服务启动..." -ForegroundColor Yellow
@@ -25,7 +25,7 @@ Start-Sleep -Seconds 10
 
 # 检查服务状态
 Write-Host "🔍 检查服务状态..." -ForegroundColor Yellow
-docker-compose ps
+docker compose ps
 
 # 显示访问信息
 Write-Host ""
@@ -49,5 +49,5 @@ Write-Host "  2. 指标数据会自动发送到 Prometheus" -ForegroundColor Whi
 Write-Host "  3. 在 Grafana 中查看可视化仪表板" -ForegroundColor White
 Write-Host ""
 Write-Host "🛑 停止服务：" -ForegroundColor Cyan
-Write-Host "  docker-compose down" -ForegroundColor White
+Write-Host "  docker compose down" -ForegroundColor White
 

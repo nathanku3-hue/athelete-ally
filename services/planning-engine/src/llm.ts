@@ -160,7 +160,11 @@ Return the plan as structured JSON with this exact format:
 
     return validationResult.data;
   } catch (error) {
-    console.error('LLM generation failed:', error);\n    if (process.env.NODE_ENV === 'production') {\n      throw error instanceof Error ? error : new Error('LLM generation failed');\n    }\n    return generateMockPlan(request);
+    console.error('LLM generation failed:', error);
+    if (process.env.NODE_ENV === 'production') {
+      throw error instanceof Error ? error : new Error('LLM generation failed');
+    }
+    return generateMockPlan(request);
   }
 }
 

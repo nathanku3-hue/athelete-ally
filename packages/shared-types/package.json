@@ -9,7 +9,9 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lint": "eslint -c ../../eslint.config.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
   },
   "dependencies": {
     "zod": "^3.25.76"

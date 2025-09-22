@@ -18,8 +18,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint": "eslint -c ../../eslint.config.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
   },
   "dependencies": {
     "@athlete-ally/contracts": "^0.1.0",
@@ -49,6 +49,6 @@
     "ts-jest": "^29.1.1",
     "tslib": "^2.6.2",
     "tsx": "^4.16.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.2"
   }
 }

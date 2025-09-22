@@ -81,8 +81,8 @@ export interface PerformanceAnalysis {
 }
 
 export class AdaptationEngine {
-  private adaptationRules: Map<string, Function> = new Map();
-  private historicalData: Map<string, any[]> = new Map();
+  private adaptationRules: Map<string, (data: unknown) => unknown> = new Map();
+  private historicalData: Map<string, unknown[]> = new Map();
 
   constructor() {
     this.initializeAdaptationRules();

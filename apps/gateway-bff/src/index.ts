@@ -22,10 +22,11 @@ const allowCredentials = (process.env.CORS_ALLOW_CREDENTIALS || 'true').toLowerC
 
 await server.register(cors, {
   origin: (origin, cb) => {
-    // allow non-browser or same-origin requests
+    // Allow non-browser or same-origin requests
     if (!origin) return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error('CORS origin not allowed'));
+    // Reject unauthorized origins
+    cb(new Error('CORS origin not allowed'), false);
   },
   credentials: allowCredentials,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
