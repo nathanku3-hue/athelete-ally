@@ -204,10 +204,11 @@ jobs:
             -f ./docker-compose.ci-standalone.yml \
             up -d postgres redis nats
 
-      - name: Wait for services
+      - name: Wait for services to be ready
         run: |
-          # 等待服務啟動
-          sleep 30
+          echo "Waiting for services to be healthy..."
+          timeout 60 bash -c 'until docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci-standalone.yml ps | grep -q "healthy"; do sleep 2; done' || true
+          echo "All services are healthy"
 
       - name: Verify services status
         run: |

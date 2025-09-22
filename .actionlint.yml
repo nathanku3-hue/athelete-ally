@@ -1,0 +1,21 @@
+self-hosted-runner:
+  labels: []
+  name: ""
+
+runner-label:
+  allow: []
+  deny: ["@master", "@main"]
+
+matrix:
+  allow-empty: false
+  max-dimensions: 16
+  max-rows: 256
+
+shell-name:
+  disallow: []
+  prefer: "bash"
+
+workflow-call:
+  inputs: []
+  outputs: []
+  secrets: []

@@ -1,0 +1,33 @@
+name: Action Lint
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1.6.26
+        with:
+          config_file: .actionlint.yml
+          
+      - name: Check for @master usage
+        run: |
+          if grep -R "@master" .github/workflows; then
+            echo "❌ Found @master usage in workflows"
+            echo "Please use specific versions instead of @master"
+            exit 1
+          else
+            echo "✅ No @master usage found"
+          fi
