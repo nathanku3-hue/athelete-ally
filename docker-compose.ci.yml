@@ -1,13 +1,27 @@
-# CI专用的Docker Compose覆盖文件
-# 移除主机端口绑定，服务通过内部网络通信
-# 避免CI环境中的端口冲突问题
-
+# docker-compose.ci.yml - CI环境覆盖文件
+# 完全移除端口绑定，仅使用内部网络通信
 services:
+  # 基础设施服务 - 移除端口绑定
   redis:
-    ports: []  # 不绑定到主机端口，仅使用内部网络 redis:6379
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    # 不包含ports配置，仅通过内部网络通信
 
   postgres:
-    ports: []  # 不绑定到主机端口，仅使用内部网络 postgres:5432
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+    expose:
+      - "5432"
+    # 不包含ports配置，仅通过内部网络通信
 
   nats:
-    ports: []  # 不绑定到主机端口，仅使用内部网络 nats:4222
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    expose:
+      - "4222"
+      - "8222"
+    # 不包含ports配置，仅通过内部网络通信
