@@ -9,6 +9,7 @@ import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
 import { OnboardingCompletedEvent, PlanGenerationRequestedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
+import { toPlanGenerationRequest, toPlanGenerationRequestFromRequested } from './validation/plan-request.js';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
@@ -106,15 +107,9 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
   server.log.info({ eventId: event.eventId, userId: event.userId }, 'Processing onboarding completed event');
   
   try {
-    // Generate plan using LLM
-    const planData = await generateTrainingPlan({
-      userId: event.userId,
-      proficiency: event.proficiency || 'intermediate',
-      season: event.season || 'offseason',
-      availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays || 3,
-      equipment: event.equipment || ['bodyweight'],
-    });
+    // Generate plan using LLM with validated request
+    const req = toPlanGenerationRequest(event);
+    const planData = await generateTrainingPlan(req);
 
     // Save plan to database
     const plan = await prisma.plan.create({
@@ -189,15 +184,7 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
     });
 
     // 使用异步生成器处理计划生成
-    const request: any = {
-      userId: event.userId,
-      proficiency: event.proficiency || 'intermediate',
-      season: event.season || 'offseason',
-      availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays || 3,
-      equipment: event.equipment || ['bodyweight'],
-      purpose: event.purpose,
-    };
+    const request = toPlanGenerationRequestFromRequested(event);
 
     // 异步生成计划（非阻塞）
     await asyncPlanGenerator.generatePlanAsync(
