@@ -379,6 +379,10 @@ export function handleErrors(target: any, propertyName: string, descriptor: Prop
  */
 export function asyncErrorHandler(fn: (req: unknown, res: unknown, next: unknown) => Promise<unknown>) {
   return (req: unknown, res: unknown, next: unknown) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+    Promise.resolve(fn(req, res, next)).catch((error: unknown) => {
+      if (typeof next === 'function') {
+        next(error);
+      }
+    });
   };
 }

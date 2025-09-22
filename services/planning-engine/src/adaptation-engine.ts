@@ -537,8 +537,8 @@ export class AdaptationEngine {
    * 初始化适应性调整规则
    */
   private initializeAdaptationRules(): void {
-    this.adaptationRules.set('high_fatigue', this.createRecoveryAdaptation);
-    this.adaptationRules.set('low_completion', this.createVolumeReduction);
-    this.adaptationRules.set('high_rpe', this.createIntensityReduction);
+    this.adaptationRules.set('high_fatigue', (data: unknown) => this.createRecoveryAdaptation((data as any).currentPlan, (data as any).fatigueLevel));
+    this.adaptationRules.set('low_completion', (data: unknown) => this.createVolumeReduction((data as any).currentPlan, (data as any).trend));
+    this.adaptationRules.set('high_rpe', (data: unknown) => this.createIntensityReduction((data as any).currentPlan, (data as any).trend));
   }
 }

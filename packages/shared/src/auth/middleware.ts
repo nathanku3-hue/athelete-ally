@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { JWTManager, SecurityContextManager } from './jwt';
+import { JWTManager, SecurityContextManager } from './jwt.js';
 
 // 身份验证中间件
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {

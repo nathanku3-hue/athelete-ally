@@ -8,31 +8,7 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-// 临时类型定义
-interface OnboardingCompletedEvent {
-  userId: string;
-  profileData: any;
-  timestamp: Date;
-}
-
-interface PlanGeneratedEvent {
-  planId: string;
-  userId: string;
-  planData: any;
-  timestamp: Date;
-}
-
-interface PlanGenerationRequestedEvent {
-  userId: string;
-  requestData: any;
-  timestamp: Date;
-}
-
-interface PlanGenerationFailedEvent {
-  userId: string;
-  error: string;
-  timestamp: Date;
-}
+import { OnboardingCompletedEvent, PlanGenerationRequestedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
@@ -136,7 +112,7 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
       proficiency: event.proficiency || 'intermediate',
       season: event.season || 'offseason',
       availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays,
+      weeklyGoalDays: event.weeklyGoalDays || 3,
       equipment: event.equipment || ['bodyweight'],
     });
 
@@ -218,7 +194,7 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
       proficiency: event.proficiency || 'intermediate',
       season: event.season || 'offseason',
       availabilityDays: event.availabilityDays || 3,
-      weeklyGoalDays: event.weeklyGoalDays,
+      weeklyGoalDays: event.weeklyGoalDays || 3,
       equipment: event.equipment || ['bodyweight'],
       purpose: event.purpose,
     };

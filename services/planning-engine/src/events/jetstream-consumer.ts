@@ -161,7 +161,7 @@ export class JetStreamConsumer {
     maxConcurrent: number
   ): Promise<void> {
     let isProcessing = false;
-    let currentConcurrency = 0;
+    const currentConcurrency = 0;
     const processingQueue: Array<() => Promise<void>> = [];
 
     const processBatch = async () => {

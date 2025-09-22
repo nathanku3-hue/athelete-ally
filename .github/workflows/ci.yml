@@ -315,8 +315,9 @@ jobs:
       - name: Run dependency check
         run: npx audit-ci --config audit-ci.json || true
 
+      # Snyk安全扫描 - 可选的安全检查
       - name: Run Snyk security scan (if token available)
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: secrets.SNYK_TOKEN != ''
         uses: snyk/actions/setup@v4
         continue-on-error: true
         with:

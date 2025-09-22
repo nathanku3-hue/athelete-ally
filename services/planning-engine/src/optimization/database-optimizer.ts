@@ -2,7 +2,7 @@
 import { prisma } from '../db.js';
 import { config } from '../config.js';
 // 使用统一的日志记录
-import { logger } from '../logger.js';
+// 使用console进行日志记录，避免循环依赖
 import { TrainingPlan } from '../llm.js';
 
 // 批量操作接口
@@ -49,9 +49,9 @@ export class DatabaseOptimizer {
         // 2. 批量创建微周期
         const microcycleData = planData.microcycles.map((mc: any) => ({
           planId: plan.id,
-          weekNumber: mc.weekNumber,
-          name: mc.name,
-          phase: mc.phase,
+          weekNumber: (mc as any).weekNumber,
+          name: (mc as any).name,
+          phase: (mc as any).phase,
         }));
 
         const microcycles = await tx.microcycle.createMany({
@@ -68,10 +68,10 @@ export class DatabaseOptimizer {
         const sessionData: any[] = [];
         for (const mc of planData.microcycles) {
           const microcycle = createdMicrocycles.find(
-            (cmc: any) => cmc.weekNumber === mc.weekNumber
+            (cmc: any) => cmc.weekNumber === (mc as any).weekNumber
           );
           if (microcycle) {
-            for (const session of mc.sessions) {
+            for (const session of (mc as any).sessions) {
               sessionData.push({
                 microcycleId: microcycle.id,
                 dayOfWeek: session.dayOfWeek,
@@ -96,10 +96,10 @@ export class DatabaseOptimizer {
         const exerciseData: any[] = [];
         for (const mc of planData.microcycles) {
           const microcycle = createdMicrocycles.find(
-            (cmc: any) => cmc.weekNumber === mc.weekNumber
+            (cmc: any) => cmc.weekNumber === (mc as any).weekNumber
           );
           if (microcycle) {
-            for (const session of mc.sessions) {
+            for (const session of (mc as any).sessions) {
               const createdSession = createdSessions.find(
                 (cs: any) =>
                   cs.microcycleId === microcycle.id &&
@@ -137,7 +137,7 @@ export class DatabaseOptimizer {
       });
 
       const duration = Date.now() - startTime;
-      logger.info({
+      console.info({
         planId: result.planId,
         jobId,
         duration,
@@ -150,7 +150,7 @@ export class DatabaseOptimizer {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
+      console.error({
         error,
         jobId,
         duration,
@@ -186,7 +186,7 @@ export class DatabaseOptimizer {
       }
 
       const duration = Date.now() - startTime;
-      logger.info({
+      console.info({
         count: updates.length,
         duration,
         batchSize: this.batchSize,
@@ -194,7 +194,7 @@ export class DatabaseOptimizer {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
+      console.error({
         error,
         count: updates.length,
         duration,
@@ -229,7 +229,7 @@ export class DatabaseOptimizer {
       }
 
       const duration = Date.now() - startTime;
-      logger.info({
+      console.info({
         count: updates.length,
         duration,
         batchSize: this.batchSize,
@@ -237,7 +237,7 @@ export class DatabaseOptimizer {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
+      console.error({
         error,
         count: updates.length,
         duration,
@@ -309,7 +309,7 @@ export class DatabaseOptimizer {
       ]);
 
       const duration = Date.now() - startTime;
-      logger.info({
+      console.info({
         userId,
         page,
         limit,
@@ -326,7 +326,7 @@ export class DatabaseOptimizer {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
+      console.error({
         error,
         userId,
         page,
@@ -359,7 +359,7 @@ export class DatabaseOptimizer {
       });
 
       const duration = Date.now() - startTime;
-      logger.info({
+      console.info({
         planId,
         duration,
         hasMicrocycles: plan?.microcycles?.length || 0,
@@ -369,7 +369,7 @@ export class DatabaseOptimizer {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
+      console.error({
         error,
         planId,
         duration,
@@ -405,7 +405,7 @@ export class DatabaseOptimizer {
       ]);
 
       const duration = Date.now() - startTime;
-      logger.info({
+      console.info({
         deletedJobs: deletedJobs.count,
         deletedPlans: deletedPlans.count,
         duration,
@@ -418,7 +418,7 @@ export class DatabaseOptimizer {
 
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error({
+      console.error({
         error,
         duration,
       }, 'Failed to cleanup expired data');
@@ -442,7 +442,7 @@ export class DatabaseOptimizer {
         averageQueryTime: 0, // 需要实现实际的查询
       };
     } catch (error) {
-      logger.error({ error }, 'Failed to get performance metrics');
+      console.error(`Failed to get performance metrics: ${error}`);
       return {
         activeConnections: 0,
         queryCount: 0,

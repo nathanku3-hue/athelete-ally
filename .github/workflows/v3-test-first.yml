@@ -167,10 +167,10 @@ jobs:
           cd packages/contracts
           npm install --no-audit --no-fund
 
+      # 启动测试基础设施服务
       - name: Start test services
         run: |
-          # 啟動測試服務
-          docker compose -f preview.compose.yaml up -d postgres redis nats
+          docker compose -f ./preview.compose.yaml up -d postgres redis nats
 
       - name: Wait for services
         run: |
@@ -192,10 +192,11 @@ jobs:
           name: integration-test-results
           path: packages/contracts/coverage/
 
+      # 清理测试基础设施服务
       - name: Stop test services
         if: always()
         run: |
-          docker compose -f preview.compose.yaml down -v
+          docker compose -f ./preview.compose.yaml down -v
 
   # 性能測試
   performance-tests:
@@ -239,6 +240,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Download all test results
         uses: actions/download-artifact@v4
         with:
@@ -246,9 +256,7 @@ jobs:
 
       - name: Generate test report
         working-directory: ${{ github.workspace }}
-        run: |
-          # 生成綜合測試報告
-          node ./scripts/generate-test-report.js
+        run: node ./scripts/generate-test-report.js
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
