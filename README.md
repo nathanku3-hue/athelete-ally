@@ -33,16 +33,23 @@ athlete-ally/
 ### Docker Compose 配置
 - **本地开发**: 使用 `preview.compose.yaml` 进行端口绑定，支持环境变量端口重映射
 - **CI环境**: 使用 `docker-compose.ci-standalone.yml` 进行完全隔离，无端口绑定
+- **未来计划**: 将迁移到Docker Compose profiles方案（local vs ci）
 
 ### 环境变量
 - `POSTGRES_PORT`: PostgreSQL端口（默认5432）
 - `REDIS_PORT`: Redis端口（默认6379）
 - `NATS_PORT`: NATS端口（默认4222）
 
+### 工作流程
+- **V3 Test**: 验证核心功能，使用独立CI Compose
+- **Deploy**: 生产环境部署，Node 20 + npm ci
+- **Action Lint**: 工作流程质量检查，阻止@master使用
+
 ### 重要说明
 - 不要提交 `.env*` 文件到版本控制
 - CI环境使用独立网络，无主机端口绑定
 - 本地开发可以通过环境变量重映射端口
+- 所有Docker Compose操作使用项目级隔离
 
 ### 开发环境
 ```bash
