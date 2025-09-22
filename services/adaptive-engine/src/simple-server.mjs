@@ -1,7 +1,7 @@
 /**
- * 簡化版 V0.3 決策矩陣 API 服務
- * Engineer C - 平台工程師實現
- * 使用 JavaScript 避免 TypeScript 編譯問題
+ * Adaptive Engine Service - V0.3 Decision Matrix API
+ * Simplified implementation for CI/CD pipeline compatibility
+ * Uses ES modules to avoid TypeScript compilation issues
  */
 
 import express from 'express';
@@ -268,21 +268,21 @@ app.post('/api/v1/adaptive/feedback', (req, res) => {
   }
 });
 
-// 啟動服務器
+// Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 V0.3 決策矩陣 API 服務已啟動`);
-  console.log(`📍 地址: http://localhost:${PORT}`);
-  console.log(`❤️ 健康檢查: http://localhost:${PORT}/health`);
-  console.log(`📊 指標: http://localhost:${PORT}/metrics`);
+  console.log(`🚀 Adaptive Engine API service started`);
+  console.log(`📍 Address: http://localhost:${PORT}`);
+  console.log(`❤️ Health check: http://localhost:${PORT}/health`);
+  console.log(`📊 Metrics: http://localhost:${PORT}/metrics`);
 });
 
-// 優雅關閉
+// Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('收到 SIGTERM 信號，正在關閉服務器...');
+  console.log('Received SIGTERM, shutting down server...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('收到 SIGINT 信號，正在關閉服務器...');
+  console.log('Received SIGINT, shutting down server...');
   process.exit(0);
 });

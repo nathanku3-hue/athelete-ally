@@ -1,37 +1,29 @@
+/**
+ * Jest configuration for Athlete Ally monorepo
+ * Supports TypeScript, ES modules, and monorepo package resolution
+ */
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'node', // 专注于API测试
+  testEnvironment: 'node',
   
-  // 支持ES模块
+  // ES module support
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   
-  // 统一的测试文件发现模式
-  roots: [
-    '<rootDir>/src',
-    '<rootDir>/packages',
-    '<rootDir>/services',
-    '<rootDir>/apps'
-  ],
-  
-  // 严格的测试文件匹配模式
+  // Test discovery
+  roots: ['<rootDir>/src', '<rootDir>/packages', '<rootDir>/services', '<rootDir>/apps'],
   testMatch: [
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.test.tsx',
     '**/__tests__/**/*.integration.test.ts',
     '**/__tests__/**/*.e2e.test.ts'
   ],
-  
-  // 忽略模式
   testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '/build/',
-    '/coverage/',
-    '.*/setup.ts$',
-    '.*/setup.js$'
+    '/node_modules/', '/dist/', '/build/', '/coverage/',
+    '.*/setup.ts$', '.*/setup.js$'
   ],
   
-  // 模块解析配置
+  // Module resolution for monorepo packages
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@packages/(.*)$': '<rootDir>/packages/$1',
@@ -45,7 +37,7 @@ module.exports = {
     '^@athlete-ally/protocol-types/(.*)$': '<rootDir>/packages/protocol-types/src/$1'
   },
   
-  // 转换配置
+  // TypeScript transformation
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       useESM: true,
@@ -72,52 +64,28 @@ module.exports = {
     }],
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
   
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'
-  ],
-  
-  // 覆盖率配置
+  // Coverage configuration
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     'packages/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
     'apps/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!packages/**/*.d.ts',
-    '!services/**/*.d.ts',
-    '!apps/**/*.d.ts',
+    '!**/*.d.ts',
     '!**/__tests__/**',
     '!**/node_modules/**',
     '!**/dist/**',
     '!**/build/**'
   ],
-  
-  // 覆盖率阈值
   coverageThreshold: {
-    global: {
-      branches: 75,
-      functions: 80,
-      lines: 80,
-      statements: 80
-    }
+    global: { branches: 75, functions: 80, lines: 80, statements: 80 }
   },
   
-  // 测试环境配置
+  // Test configuration
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
-  
-  // 超时配置
   testTimeout: 15000,
-  
-  // 其他配置
   passWithNoTests: true,
   verbose: true,
-  
-  // 支持ES模块
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  
-  // 测试环境变量
-  testEnvironmentOptions: {
-    url: 'http://localhost:3000'
-  }
+  testEnvironmentOptions: { url: 'http://localhost:3000' }
 };

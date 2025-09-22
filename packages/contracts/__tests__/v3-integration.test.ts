@@ -135,19 +135,6 @@ describe('V3 Integration Tests', () => {
 
   describe('Cross-Service Communication', () => {
     it('should handle service-to-service communication', async () => {
-      // 測試服務間通信
-      const serviceCommunication = {
-        from: 'workout-service',
-        to: 'adaptive-engine-service',
-        message: {
-          type: 'weekly_review_trigger',
-          data: {
-            userId: 'user-123',
-            weekNumber: 1
-          }
-        }
-      };
-
       // 模擬服務間通信
       const response = await simulateServiceCall();
       expect(response.status).toBe('success');
@@ -184,25 +171,12 @@ describe('V3 Integration Tests', () => {
 
   describe('Error Handling and Recovery', () => {
     it('should handle service failures gracefully', async () => {
-      // 模擬服務失敗
-      const failureScenario = {
-        service: 'adaptive-engine-service',
-        failureType: 'timeout',
-        duration: 5000
-      };
-
       const response = await simulateServiceFailure();
       expect(response.status).toBe('error');
       expect(response.fallback).toBeDefined();
     });
 
     it('should retry failed operations', async () => {
-      const retryScenario = {
-        operation: 'create_weekly_review',
-        maxRetries: 3,
-        retryDelay: 1000
-      };
-
       const response = await simulateRetryOperation();
       expect(response.attempts).toBeLessThanOrEqual(3);
       expect(response.success).toBe(true);
