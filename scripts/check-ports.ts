@@ -1,6 +1,18 @@
 #!/usr/bin/env tsx
-// 端口冲突检测脚本
-// 检查所有服务端口是否可用
+/**
+ * 端口冲突检测脚本
+ * 
+ * 功能:
+ * - 检查基础设施端口可用性 (PostgreSQL: 5432, Redis: 6379, NATS: 4222)
+ * - 支持检查特定端口 (通过命令行参数)
+ * - 提供详细的错误信息和解决建议
+ * - 跨平台兼容 (Windows/Linux/macOS)
+ * 
+ * 使用方法:
+ *   npm run check-ports                    # 检查所有端口
+ *   npm run check-ports 5432 6379 4222    # 检查特定端口
+ *   npx tsx scripts/check-ports.ts 5432   # 直接调用
+ */
 
 import { createServer } from 'net';
 import { SERVICE_PORTS, getMicroservicePorts, getFrontendPorts, getInfrastructurePorts } from '../packages/shared/src/config/ports.js';
@@ -86,9 +98,12 @@ class PortChecker {
       });
       
       console.log('\n🚨 Action required:');
-      console.log('  - Stop services using these ports');
-      console.log('  - Or update port configuration');
-      console.log('  - Run: taskkill /f /im node.exe (Windows)');
+      console.log('  1. Stop conflicting services:');
+      console.log('     docker compose -f ./preview.compose.yaml down -v --remove-orphans');
+      console.log('  2. Use alternative ports:');
+      console.log('     POSTGRES_PORT=5433 REDIS_PORT=6380 npm run infra:up');
+      console.log('  3. Check system services:');
+      console.log('     Get-Service | Where-Object {$_.Name -like "*postgres*" -or $_.Name -like "*redis*"}');
       
       process.exit(1);
     } else {

@@ -1,7 +1,6 @@
 # CI专用的Docker Compose覆盖文件
 # 移除主机端口绑定，服务通过内部网络通信
 # 避免CI环境中的端口冲突问题
-version: '3.8'
 
 services:
   redis:

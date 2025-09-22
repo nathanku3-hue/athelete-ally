@@ -1,6 +1,17 @@
 #!/bin/bash
-# Docker工具脚本 - 统一管理Docker Compose命令
+# Docker工具脚本 - 统一管理Docker Compose命令 (Bash版本)
 # 避免重复的命令定义
+#
+# 功能:
+# - 启动基础设施服务 (postgres, redis, nats)
+# - 停止基础设施服务并清理资源
+# - 显示服务状态
+# - 检查Docker和Compose文件可用性
+#
+# 使用方法:
+#   ./scripts/docker-utils.sh start   # 启动服务
+#   ./scripts/docker-utils.sh stop    # 停止服务
+#   ./scripts/docker-utils.sh status  # 显示状态
 
 set -e
 
@@ -26,7 +37,12 @@ check_docker() {
 start_infra() {
   check_docker
   check_compose_file
+  
   echo "🐳 Starting infrastructure services..."
+  echo "   PostgreSQL: ${POSTGRES_PORT:-5432}"
+  echo "   Redis: ${REDIS_PORT:-6379}"
+  echo "   NATS: ${NATS_PORT:-4222}"
+  
   docker compose -f "$COMPOSE_FILE" up -d postgres redis nats
 }
 
