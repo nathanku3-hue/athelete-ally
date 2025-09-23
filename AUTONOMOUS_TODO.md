@@ -9,5 +9,5 @@
 | 5 | 升級 artifacts/codecov 版本 | [x] Done | deploy.yml 改為 upload-artifact@v4；（可選）codecov@v4 | 7905cd1 | 版本與 pinning 一致性 |
 | 6 | 健康檢查與可觀測性加固 | [x] Done | /api/health 可用；Docker HEALTHCHECK 可通過 | eaef8e6 | 新增最小 /api/health 路由 |
 | 7 | 本地/靜態驗證 | [x] Done | actionlint 或 YAML 檢查通過（退化：靜態驗證） | e77be4e | reports/workflow-static-check.txt 產生且 PASS |
-| 8 | 文檔與補丁持續更新 | [ ] To Do | HANDOFF_REPORT.md 持續更新；生成/刷新 patch | - | autonomous_session.patch 可攜回滾 |
+| 8 | 文檔與補丁持續更新 | [x] Done | HANDOFF_REPORT.md 更新；生成/刷新 patch | 78415d8 | autonomous_session.patch 可攜回滾 |
 | 9 | 收尾與交接 | [ ] To Do | 乾淨提交/推送；最終 HANDOFF_REPORT.md | - | 完整交接與下一步建議 |
