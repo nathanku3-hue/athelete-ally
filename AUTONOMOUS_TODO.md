@@ -1,3 +1,15 @@
+# Autonomous Workflow - AUTONOMOUS_TODO.md (Session: CI Hardening & Docs)
+
+| Priority | Task Description | Status | Verification Steps | Artifacts & Notes |
+|:---|:---:|:---:|:---:|:---|
+| 1 | **Apply Patch to deploy.yml Security Job** | [x] Done | actionlint (static) passes; deploy.yml contains Setup Node.js (Security). | deploy.yml updated (6fd3dcd). |
+| 2 | **Guard Codecov v4 Uploader** | [ ] To Do | add 'if: secrets.CODECOV_TOKEN != ""' and continue-on-error. | deploy.yml pending small guard. |
+| 3 | **Perform README.md Selective Merge** | [x] Done | README updated; cross-links valid. | README.md updated. |
+| 4 | **Extend /api/health with Build Info** | [x] Done | health returns commit SHA/buildId in JSON. | apps/frontend/src/app/api/health/route.ts (913c7cd). |
+| 5 | **Add E2E Smoke Test for Health Endpoint** | [x] Done | new e2e-lite test imports route and passes. | apps/frontend/src/__tests__/e2e/health-e2e.test.ts (913c7cd). |
+| 6 | **Update Static Workflow Check Evidence** | [x] Done | reports/workflow-static-check.txt includes new checks and PASS. | evidence refreshed (071f7de). |
+
+---
 # Autonomous Workflow - AUTONOMOUS_TODO.md
 
 | 優先級 | 任務描述 | 狀態 | 驗證步驟 | 提交雜湊值 | 產出與筆記 |
