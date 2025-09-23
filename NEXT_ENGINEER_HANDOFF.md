@@ -40,8 +40,8 @@ container runtime, and produce retrievable artifacts so work continues even if G
   - Docs/patch refresh: 78415d8, 54197a8
 - Pending (high value)
   - Final README selective-merge (keep accurate sections; dedupe; add cross-links)
-  - CI security job: add Node setup + npm ci
-  - Codecov v4 token guard (private repo contexts)
+  - CI security job: add Node setup + npm ci (DONE: 7d74018)
+  - Codecov v4 uploader non-blocking; optional token guard (PARTIAL)
 
 ## Immediate Next Step (Smallest, Safe, Reversible)
 Patch the deploy security job to ensure environment consistency.
@@ -140,11 +140,12 @@ reports/workflow-static-check.txt
   - Ensure reports/workflow-static-check.txt indicates PASS (or re-run your local checker/actionlint)
 
 ## How To Continue (Suggested Order)
-1. Apply the Immediate Next Step patch to .github/workflows/deploy.yml and commit.
+1. Apply the Immediate Next Step patch to .github/workflows/deploy.yml and commit. (DONE: 7d74018)
 2. If applicable, guard Codecov v4 uploader as shown.
 3. Submit or update PR; verify CI runs green (actionlint + CI + deploy jobs).
 4. Proceed with README selective merge and commit minimal, clear doc changes.
 5. Extend /api/health with build info; add tiny e2e smoke.
+   - DONE: health returns commit/build info; e2e-lite test added (913c7cd)
 
 Operating Notes
 - Avoid leaking secrets/tokens in commit logs or handoff docs.
