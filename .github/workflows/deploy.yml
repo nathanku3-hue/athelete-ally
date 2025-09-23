@@ -74,12 +74,20 @@ jobs:
 
       - name: Build application
         run: npm run build
+      - name: Verify Next.js build output
+        run: |
+          if [ ! -d "apps/frontend/.next" ]; then
+            echo "❌ Build output not found at apps/frontend/.next"
+            exit 1
+          else
+            echo "✅ Build output found at apps/frontend/.next"
+          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-files
-          path: .next/
+          path: apps/frontend/.next/
 
   security:
     runs-on: ubuntu-latest
