@@ -48,7 +48,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage/lcov.info
 
@@ -84,7 +84,7 @@ jobs:
           fi
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: apps/frontend/.next/
@@ -117,7 +117,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx`n        uses: docker/setup-buildx-action@v3
         uses: docker/setup-buildx-action@v3
       - name: Show Docker versions
         run: |
@@ -198,5 +198,6 @@ jobs:
           else
             echo "❌ Deployment failed!"
           fi
+
 
 
