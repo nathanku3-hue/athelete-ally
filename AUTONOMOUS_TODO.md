@@ -1,19 +1,13 @@
-# Autonomous Workflow - AUTONOMOUS_TODO.md (Session: Deploy Reliability)
+# Autonomous Workflow - AUTONOMOUS_TODO.md
 
-| Priority | Task Description | Status | Verification Steps | Artifacts & Notes |
-|:---|:---:|:---:|:---:|:---|
-| 1 | **Analyze Failure Logs** | [ ] To Do | Root cause of deploy failure is identified. | Note failing job/step and exact error; map to `deploy.yml` lines. |
-| 2 | **Enforce Node 20 & npm ci** | [x] Done | `deploy.yml` uses Node 20 and `npm ci` in all jobs. | Update `actions/setup-node@v4` to 20; replace `npm install` with `npm ci`. |
-| 3 | **Guard Snyk Step** | [x] Done | Snyk steps run only when `SNYK_TOKEN` is set. | Add `if: secrets.SNYK_TOKEN != ''` and use `snyk/actions/setup@v4` + CLI with env. |
-| 4 | **Verify Docker Login & Envs** | [x] Done | Workflow validates Docker creds and required env before build. | Add `docker/login-action@v3`; add explicit checks for required env variables. |
-| 5 | **Add Better Failure Logging** | [ ] To Do | Failure logs include versions and step diagnostics. | Add `set -euxo pipefail`, echo versions, and log summaries in critical steps. |
-| 6 | **Local/Test Validation** | [ ] To Do | Dry-run deploy workflow or targeted jobs pass locally (or test env). | Use `act` if available; otherwise static validation and YAML linting. |
-| 7 | **Harden Artifact/Build Path** | [ ] To Do | Ensure build outputs exist and are used consistently. | Validate `.next/` artifact presence or adjust Dockerfile for monorepo. |
-| 8 | **Add Readiness/Health Checks** | [ ] To Do | Add simple readiness checks where applicable (post-deploy). | Optional placeholders if deploy targets K8s/compose. |
-| 9 | **Finalize & Document** | [ ] To Do | Commit, update this plan, and prep bundle/patch artifacts. | Generate `.patch` and `.bundle`; create HANDOFF_REPORT.md. |
-
-
-
-
-
-
+| 優先級 | 任務描述 | 狀態 | 驗證步驟 | 提交雜湊值 | 產出與筆記 |
+|:---|:---|:---:|:---|:---:|:---|
+| 1 | 初始化/升級計畫表（Upgrade plan schema） | [ ] In Progress | 新表頭含「提交雜湊值」欄位已寫入；檔案被 Git 追蹤 | - | 建立 8 小時循環的唯一真相來源 |
+| 2 | 存儲庫總覽與風險盤點（Repository audit） | [ ] To Do | 生成 REPO_AUDIT.md 概要（目錄、語言、工作流、風險） | - | 列出語言/服務/工作流，識別高風險項 |
+| 3 | 修正 deploy.yml 的 Docker Buildx 步驟 | [ ] To Do | actionlint 通過或人工檢查無結構錯誤 | - | 加上 docker/setup-buildx-action；移除錯位的 uses |
+| 4 | 對齊 Node 20 + npm ci（全工作流） | [ ] To Do | backend-deploy.yml / v3-test-first.yml 皆使用 Node 20 + npm ci | - | 升級 actions 到 v4（必要時） |
+| 5 | 升級 artifacts/codecov 版本 | [ ] To Do | deploy.yml 改為 upload-artifact@v4；（可選）codecov@v4 | - | 版本與 pinning 一致性 |
+| 6 | 健康檢查與可觀測性加固 | [ ] To Do | /api/health 可用；Docker HEALTHCHECK 可通過 | - | 必要時新增最小路由與記錄版本輸出 |
+| 7 | 本地/靜態驗證 | [ ] To Do | actionlint 或 YAML 檢查通過（退化：靜態驗證） | - | 無外網時執行靜態檢查 |
+| 8 | 文檔與補丁持續更新 | [ ] To Do | HANDOFF_REPORT.md 持續更新；生成/刷新 patch | - | autonomous_session.patch 可攜回滾 |
+| 9 | 收尾與交接 | [ ] To Do | 乾淨提交/推送；最終 HANDOFF_REPORT.md | - | 完整交接與下一步建議 |
