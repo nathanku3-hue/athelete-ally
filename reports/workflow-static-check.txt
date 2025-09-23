@@ -1,0 +1,9 @@
+[PASS] Buildx step has uses (.github/workflows/deploy.yml)
+[PASS] upload-artifact is v4 (.github/workflows/deploy.yml)
+[PASS] codecov is v4 (.github/workflows/deploy.yml)
+[PASS] backend-deploy uses Node 20 (.github/workflows/backend-deploy.yml)
+[PASS] backend-deploy uses npm ci (.github/workflows/backend-deploy.yml)
+[PASS] v3-test-first uses Node 20 (.github/workflows/v3-test-first.yml)
+[PASS] v3-test-first uses npm ci (.github/workflows/v3-test-first.yml)
+
+OVERALL: PASS

@@ -34,11 +34,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
 
       - name: Run contract tests
         run: npm run test:contracts -w packages/contracts
@@ -75,11 +75,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
 
       - name: Run database tests
         run: npm run test:database -w packages/contracts
@@ -104,11 +104,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
 
       - name: Run API tests
         run: npm run test:api -w packages/contracts
@@ -155,14 +155,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install root dependencies
         run: npm ci
 
       - name: Install package dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
 
       - name: Verify tsx availability
         run: npx tsx --version
@@ -204,10 +204,11 @@ jobs:
             -f ./docker-compose.ci-standalone.yml \
             up -d postgres redis nats
 
-      - name: Wait for services
+      - name: Wait for services to be ready
         run: |
-          # 等待服務啟動
-          sleep 30
+          echo "Waiting for services to be healthy..."
+          timeout 60 bash -c 'until docker compose -p ci_${{ github.run_id }} -f ./docker-compose.ci-standalone.yml ps | grep -q "healthy"; do sleep 2; done' || true
+          echo "All services are healthy"
 
       - name: Verify services status
         run: |
@@ -263,11 +264,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
 
       - name: Run performance tests
         run: npm run test:performance -w packages/contracts
@@ -292,7 +293,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -324,7 +325,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -340,3 +341,4 @@ jobs:
         run: |
           npm run test:coverage -w packages/contracts
           npm run coverage:check -w packages/contracts
+

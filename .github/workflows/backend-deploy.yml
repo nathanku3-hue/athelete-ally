@@ -17,13 +17,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: 'services/planning-engine/package-lock.json'
       
       - name: Install dependencies
         working-directory: ./services/planning-engine
-        run: npm install --no-audit --no-fund
+        run: npm ci
       
       - name: Run linting
         working-directory: ./services/planning-engine
@@ -54,3 +54,4 @@ jobs:
         run: |
           echo "Deploying to production..."
           # 这里添加实际的部署命令
+
