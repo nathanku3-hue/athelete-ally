@@ -2,7 +2,7 @@
 FROM node:20-alpine AS base
 
 # 安装依赖
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl
 WORKDIR /app
 
 # 安装依赖
@@ -16,6 +16,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
+# Monorepo-aware build: the root build script builds the frontend app
 RUN npm run build
 
 # 生产镜像
@@ -30,9 +31,11 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # 复制必要文件
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Copy Next.js standalone output from the monorepo app path
+# The root build produces apps/frontend/.next/standalone and .next/static
+COPY --from=builder /app/apps/frontend/public ./public
+COPY --from=builder /app/apps/frontend/.next/standalone ./
+COPY --from=builder /app/apps/frontend/.next/static ./.next/static
 
 # 设置权限
 RUN chown -R nextjs:nodejs /app
@@ -45,6 +48,6 @@ ENV HOSTNAME "0.0.0.0"
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+  CMD curl -fsS http://localhost:3000/api/health || exit 1
 
 CMD ["node", "server.js"]
