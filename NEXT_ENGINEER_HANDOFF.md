@@ -3,7 +3,7 @@
 Session: 8hour Autonomous Hardening
 Branch: feature/autonomous-hardening-20250923
 Remote: branch exists on origin (tracking set); remote head includes stray-file removal fix
-Latest remote evidence: refs/heads/feature/autonomous-hardening-20250923 @ 071f7de (static evidence update); includes 7d74018 (security job) and 913c7cd (health + e2e-lite). Local HEAD is fc4d3b7 (TODO session update); use autonomous_session.bundle if GitHub is inaccessible.
+Latest remote evidence: refs/heads/feature/autonomous-hardening-20250923 @ 42f98e8 (handoff+artifacts refresh). Key commits: 6fd3dcd (security job), 913c7cd (health + e2e-lite), 071f7de (static evidence), fc4d3b7 (TODO session update).
 
 ## Objective & Scope
 Harden CI/CD reliability, standardize Node 20 + npm ci, correct deploy workflow structure, add healthcheck for
