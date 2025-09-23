@@ -12,3 +12,4 @@
 | 8 | **Add Readiness/Health Checks** | [ ] To Do | Add simple readiness checks where applicable (post-deploy). | Optional placeholders if deploy targets K8s/compose. |
 | 9 | **Finalize & Document** | [ ] To Do | Commit, update this plan, and prep bundle/patch artifacts. | Generate `.patch` and `.bundle`; create HANDOFF_REPORT.md. |
 
+
