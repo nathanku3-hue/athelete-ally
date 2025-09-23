@@ -3,6 +3,7 @@
 [PASS] codecov is v4 (.github/workflows/deploy.yml)
 [PASS] backend-deploy uses Node 20 (.github/workflows/backend-deploy.yml)
 [PASS] backend-deploy uses npm ci (.github/workflows/backend-deploy.yml)
+[PASS] backend-deploy bumps actions to @v4 (.github/workflows/backend-deploy.yml)
 [PASS] v3-test-first uses Node 20 (.github/workflows/v3-test-first.yml)
 [PASS] v3-test-first uses npm ci (.github/workflows/v3-test-first.yml)
 
