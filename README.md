@@ -31,8 +31,8 @@ athlete-ally/
 - Docker & Docker Compose
 
 ### Docker Compose 配置
-- **本地开发**: 使用 `preview.compose.yaml` 进行端口绑定，支持环境变量端口重映射
-- **CI环境**: 使用 `docker-compose.ci-standalone.yml` 进行完全隔离，无端口绑定
+- **本地开发**: 使用 [`preview.compose.yaml`](preview.compose.yaml) 进行端口绑定，支持环境变量端口重映射
+- **CI环境**: 使用 [`docker-compose.ci-standalone.yml`](docker-compose.ci-standalone.yml) 进行完全隔离，无端口绑定
 - **未来计划**: 将迁移到Docker Compose profiles方案（local vs ci）
 
 ### 环境变量
@@ -40,7 +40,7 @@ athlete-ally/
 - `REDIS_PORT`: Redis端口（默认6379）
 - `NATS_PORT`: NATS端口（默认4222）
 
-### 工作流程
+### CI/CD 工作流程
 - **V3 Test**: 验证核心功能，使用独立CI Compose
 - **Deploy**: 生产环境部署，Node 20 + npm ci
 - **Action Lint**: 工作流程质量检查，阻止@master使用
@@ -86,10 +86,10 @@ npm run infra:clean
 
 ### 环境变量配置
 复制 `env.example` 为 `.env` 并配置关键变量：
-- `REDIS_PORT`: Redis端口 (默认: 6379)
-- `POSTGRES_PORT`: PostgreSQL端口 (默认: 5432)  
-- `NATS_PORT`: NATS端口 (默认: 4222)
-- `SNYK_TOKEN`: Snyk安全扫描令牌 (可选)
+- `POSTGRES_PORT`: PostgreSQL端口（默认5432）
+- `REDIS_PORT`: Redis端口（默认6379）
+- `NATS_PORT`: NATS端口（默认4222）
+- `SNYK_TOKEN`: Snyk安全扫描令牌（可选）
 
 ### 生产部署
 ```bash
@@ -141,9 +141,6 @@ docker compose -f docker-compose.production.yml up -d
 - 遵循 ESLint 配置
 - 编写单元测试
 - 提交前运行 `npm run lint`
-
-### 环境变量
-复制 `env.example` 到 `.env` 并配置必要的环境变量。
 
 ### 数据库迁移
 ```bash
