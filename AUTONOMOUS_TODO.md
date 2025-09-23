@@ -4,7 +4,7 @@
 |:---|:---|:---:|:---|:---:|:---|
 | 1 | 初始化/升級計畫表（Upgrade plan schema） | [x] Done | 新表頭含「提交雜湊值」欄位已寫入；檔案被 Git 追蹤 | b2ee322 | 建立 8 小時循環的唯一真相來源 |
 | 2 | 存儲庫總覽與風險盤點（Repository audit） | [x] Done | 生成 REPO_AUDIT.md 概要（目錄、語言、工作流、風險） | 8494cf2 | 列出語言/服務/工作流，識別高風險項 |
-| 3 | 修正 deploy.yml 的 Docker Buildx 步驟 | [ ] To Do | actionlint 通過或人工檢查無結構錯誤 | - | 加上 docker/setup-buildx-action；移除錯位的 uses |
+| 3 | 修正 deploy.yml 的 Docker Buildx 步驟 | [x] Done | actionlint 通過或人工檢查無結構錯誤 | 79c5f13 | 加上 docker/setup-buildx-action；移除錯位的 uses |
 | 4 | 對齊 Node 20 + npm ci（全工作流） | [ ] To Do | backend-deploy.yml / v3-test-first.yml 皆使用 Node 20 + npm ci | - | 升級 actions 到 v4（必要時） |
 | 5 | 升級 artifacts/codecov 版本 | [ ] To Do | deploy.yml 改為 upload-artifact@v4；（可選）codecov@v4 | - | 版本與 pinning 一致性 |
 | 6 | 健康檢查與可觀測性加固 | [ ] To Do | /api/health 可用；Docker HEALTHCHECK 可通過 | - | 必要時新增最小路由與記錄版本輸出 |
