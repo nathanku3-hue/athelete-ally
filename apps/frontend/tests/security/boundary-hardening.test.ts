@@ -1,22 +1,23 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { generateTrainingPlan } from '../../services/planning-engine/src/llm.js';
+import * as LLMAny from '../../services/planning-engine/src/llm.js';
+const generateTrainingPlan: any = (LLMAny as any).generateTrainingPlan || (LLMAny as any).default || (() => { throw new Error('LLM not available'); });
 
 describe('边界控制与韧性测试', () => {
   beforeEach(() => {
     // 清理环境变量
-    delete process.env.OPENAI_API_KEY;
-    delete process.env.NODE_ENV;
+    delete (process.env as any).OPENAI_API_KEY;
+    delete (process.env as any).NODE_ENV;
   });
 
   afterEach(() => {
     // 恢复环境变量
-    process.env.NODE_ENV = 'test';
+    (process.env as any).NODE_ENV = 'test';
   });
 
   describe('LLM服务快速失败原则', () => {
     it('生产环境缺少API密钥时必须抛出错误', async () => {
-      process.env.NODE_ENV = 'production';
-      delete process.env.OPENAI_API_KEY;
+      (process.env as any).NODE_ENV = 'production';
+      delete (process.env as any).OPENAI_API_KEY;
 
       const request = {
         userId: 'test-user',
@@ -32,8 +33,8 @@ describe('边界控制与韧性测试', () => {
     });
 
     it('开发环境缺少API密钥时允许使用mock数据', async () => {
-      process.env.NODE_ENV = 'development';
-      delete process.env.OPENAI_API_KEY;
+      (process.env as any).NODE_ENV = 'development';
+      delete (process.env as any).OPENAI_API_KEY;
 
       const request = {
         userId: 'test-user',
@@ -50,8 +51,8 @@ describe('边界控制与韧性测试', () => {
     });
 
     it('生产环境有API密钥时正常工作', async () => {
-      process.env.NODE_ENV = 'production';
-      process.env.OPENAI_API_KEY = 'test-api-key';
+      (process.env as any).NODE_ENV = 'production';
+      (process.env as any).OPENAI_API_KEY = 'test-api-key';
 
       const request = {
         userId: 'test-user',
@@ -67,7 +68,7 @@ describe('边界控制与韧性测试', () => {
   });
 
   describe('安全ID生成验证', () => {
-    it('生成的jobId应该是不可预测的', () => {
+    it('生成的jobId应该是不可预测的', async () => {
       const { randomUUID } = await import('crypto');
       
       const jobId1 = `job_${randomUUID()}`;
@@ -78,7 +79,7 @@ describe('边界控制与韧性测试', () => {
       expect(jobId2).toMatch(/^job_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     });
 
-    it('生成的planId应该是不可预测的', () => {
+    it('生成的planId应该是不可预测的', async () => {
       const { randomUUID } = await import('crypto');
       
       const planId1 = `plan_${randomUUID()}`;
@@ -89,7 +90,7 @@ describe('边界控制与韧性测试', () => {
       expect(planId2).toMatch(/^plan_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     });
 
-    it('不应该包含可预测的时间戳模式', () => {
+    it('不应该包含可预测的时间戳模式', async () => {
       const { randomUUID } = await import('crypto');
       
       const jobId = `job_${randomUUID()}`;
@@ -108,7 +109,7 @@ describe('边界控制与韧性测试', () => {
   describe('身份验证边界测试', () => {
     it('应该拒绝缺少Authorization header的请求', () => {
       const mockRequest = {
-        headers: {},
+        headers: {} as any,
         url: '/v1/generate'
       };
       
@@ -136,7 +137,7 @@ describe('边界控制与韧性测试', () => {
       };
 
       // 验证格式检查逻辑
-      const parts = mockRequest.headers.authorization.split(' ');
+      const parts = (mockRequest.headers as any).authorization.split(' ');
       expect(parts.length).not.toBe(2);
       expect(parts[0]).not.toBe('Bearer');
     });
@@ -150,7 +151,7 @@ describe('边界控制与韧性测试', () => {
       };
       
       // 验证格式检查逻辑
-      const parts = mockRequest.headers.authorization.split(' ');
+      const parts = (mockRequest.headers as any).authorization.split(' ');
       expect(parts.length).toBe(2);
       expect(parts[0]).toBe('Bearer');
       expect(parts[1]).toBe('valid-token');

@@ -446,7 +446,7 @@ describe('Protocol Permissions System', () => {
       const response = await apiClient.shareProtocol({
         protocolId: protocolA.id,
         sharedWith: userB.id,
-        permissions: ['invalid_permission'] as Permission[]
+        permissions: (['invalid_permission'] as unknown) as Permission[]
       }, tokenA);
       
       // Then: 返回验证错误
