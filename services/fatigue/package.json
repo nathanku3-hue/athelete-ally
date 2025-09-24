@@ -17,6 +17,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@athlete-ally/health-schema": "^1.0.0",
+    "@athlete-ally/otel-preset": "^1.0.0",
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/exporter-jaeger": "^1.18.1",
     "@opentelemetry/exporter-prometheus": "^0.45.1",

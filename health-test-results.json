@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-09-24T18:45:21.050Z",
+  "total": 3,
+  "passed": 0,
+  "failed": 3,
+  "services": [
+    {
+      "service": "fatigue-service",
+      "passed": false
+    },
+    {
+      "service": "workouts-service",
+      "passed": false
+    },
+    {
+      "service": "frontend",
+      "passed": false
+    }
+  ],
+  "summary": "0/3 services passed health checks"
+}

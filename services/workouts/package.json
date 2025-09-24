@@ -17,20 +17,15 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@opentelemetry/api": "^1.7.0",
+    "@athlete-ally/contracts": "^0.1.0",
+    "@athlete-ally/event-bus": "^0.1.0",
+    "@athlete-ally/health-schema": "^1.0.0",
+    "@athlete-ally/otel-preset": "^1.0.0",
     "@opentelemetry/exporter-jaeger": "^1.18.1",
     "@opentelemetry/exporter-prometheus": "^0.45.1",
-    "@opentelemetry/instrumentation": "^0.45.1",
-    "@opentelemetry/instrumentation-fs": "^0.12.0",
-    "@opentelemetry/instrumentation-http": "^0.45.1",
-    "@opentelemetry/resources": "^1.18.1",
-    "@opentelemetry/sdk-node": "^0.45.1",
-    "@opentelemetry/semantic-conventions": "^1.18.1",
     "@prisma/client": "^5.7.1",
     "fastify": "^4.24.3",
-    "zod": "^3.25.76",
-    "@athlete-ally/event-bus": "^0.1.0",
-    "@athlete-ally/contracts": "^0.1.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

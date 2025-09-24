@@ -8,6 +8,7 @@ import { prisma } from './db';
 import { businessMetrics } from './telemetry';
 import { WorkoutSessionManager } from './session-manager';
 import { AchievementEngine } from './achievement-engine';
+import { createFastifyHealthHandler } from '@athlete-ally/health-schema';
 
 const server = Fastify({ logger: true });
 const sessionManager = new WorkoutSessionManager();
@@ -78,8 +79,12 @@ const WorkoutGoalSchema = z.object({
   })).optional(),
 });
 
-// Health check
-server.get('/health', async () => ({ status: 'ok' }));
+// Health check with unified schema
+server.get('/health', createFastifyHealthHandler({
+  serviceName: 'workouts-service',
+  version: '1.0.0',
+  environment: process.env.NODE_ENV || 'development',
+}));
 
 // 获取用户摘要数据
 server.get('/api/v1/summary/:userId', async (request, reply) => {

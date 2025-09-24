@@ -7,6 +7,7 @@ import { config } from './config';
 import { prisma } from './db';
 import { businessMetrics, traceFatigueAssessment, traceUserFeedback } from './telemetry';
 import { AdjustmentEngine, FatigueData, TrainingSession } from './adjustment-engine';
+import { createFastifyHealthHandler } from '@athlete-ally/health-schema';
 
 const server = Fastify({ logger: true });
 const adjustmentEngine = new AdjustmentEngine();
@@ -46,8 +47,12 @@ const AdjustmentFeedbackSchema = z.object({
   feedback: z.string().optional(),
 });
 
-// Health check
-server.get('/health', async () => ({ status: 'ok' }));
+// Health check with unified schema
+server.get('/health', createFastifyHealthHandler({
+  serviceName: 'fatigue-service',
+  version: '1.0.0',
+  environment: process.env.NODE_ENV || 'development',
+}));
 
 // Submit fatigue assessment
 server.post('/fatigue/assess', async (request, reply) => {

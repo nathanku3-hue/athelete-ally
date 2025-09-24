@@ -28,6 +28,7 @@
     "test:api:watch": "jest --testPathPatterns=__tests__/integration/api-integration.test.ts --watch",
     "test:frontend:watch": "jest --config jest/jest.config.frontend.cjs --watch",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:health": "npx tsx scripts/test-health-endpoints.ts",
     "test:ci": "npm run test:coverage && npm run test:api && npm run test:frontend",
     "benchmark:planning": "node scripts/performance-benchmark.js",
     "turbo": "turbo",
