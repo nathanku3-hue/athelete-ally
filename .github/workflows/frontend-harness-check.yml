@@ -2,6 +2,11 @@ name: Frontend Harness Check (jsdom)
 
 on:
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual verification'
 
 permissions:
   contents: read
