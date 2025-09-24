@@ -512,3 +512,65 @@ jobs:
           echo "Test Mandatory: ${{ needs.test-mandatory.result }}"
           echo "Security: ${{ needs.security.result }}"
           echo "Test Report: ${{ needs.test-report.result }}"
+
+  frontend-smoke:
+    name: Frontend Smoke (jsdom)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify jsdom deps
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || echo "❌ Lock missing jest-environment-jsdom"
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+          echo "=== PACKAGE.JSON VERIFICATION ==="
+          grep -q '"jest-environment-jsdom"' package.json && echo "✅ package.json includes jest-environment-jsdom" || echo "❌ package.json missing jest-environment-jsdom"
+          grep -q '"jsdom"' package.json && echo "✅ package.json includes jsdom" || echo "❌ package.json missing jsdom"
+          grep -q '"@types/jsdom"' package.json && echo "✅ package.json includes @types/jsdom" || echo "❌ package.json missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Print Jest version
+        run: npx jest --version
+
+      - name: Run single frontend spec (jsdom)
+        run: |
+          npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+            --runInBand --verbose --detectOpenHandles --forceExit | tee frontend-smoke-log.txt
+
+      - name: Upload smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-smoke-log-${{ github.run_id }}
+          path: frontend-smoke-log.txt
