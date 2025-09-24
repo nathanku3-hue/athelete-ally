@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ${{ steps.locks.outputs.paths }}
+          cache-dependency-path: 'package-lock.json'
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -605,7 +605,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ steps.locks.outputs.paths }}
+          cache-dependency-path: 'package-lock.json'
 
       - name: Install dependencies (npm ci)
         run: npm ci
