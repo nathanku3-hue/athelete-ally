@@ -99,3 +99,11 @@ tmp/
 # Prisma generated clients (do not commit)
 services/*/prisma/generated/
 services/*/prisma/generated/**
+
+# Build artifacts and temporary files (do not commit)
+autonomous_session.*
+*.bundle
+*.patch
+tatus
+tmp_*
+*_temp_*

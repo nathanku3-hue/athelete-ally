@@ -336,7 +336,7 @@ jobs:
       # Snyk安全扫描 - 可选的安全检查
       - name: Run Snyk security scan (if token available)
         if: ${{ env.SNYK_TOKEN != '' }}
-        uses: snyk/actions/setup@v4
+        uses: snyk/actions/setup@v3
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

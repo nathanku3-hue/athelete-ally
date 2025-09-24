@@ -1,57 +1,0 @@
-[1mdiff --git a/README.md b/README.md[m
-[1mindex afb055a..e145c2b 100644[m
-[1m--- a/README.md[m
-[1m+++ b/README.md[m
-[36m@@ -30,6 +30,27 @@[m [mathlete-ally/[m
- - npm 10.9.3[m
- - Docker & Docker Compose[m
- [m
-[32m+[m[32m### Docker Compose 配置[m[41m[m
-[32m+[m[32m- **本地开发**: 使用 [`preview.compose.yaml`](preview.compose.yaml) 进行端口绑定，支持环境变量端口重映射[m[41m[m
-[32m+[m[32m- **CI环境**: 使用 [`docker-compose.ci-standalone.yml`](docker-compose.ci-standalone.yml) 进行完全隔离，无端口绑定[m[41m[m
-[32m+[m[32m- **未来计划**: 将迁移到Docker Compose profiles方案（local vs ci）[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m### 环境变量[m[41m[m
-[32m+[m[32m- `POSTGRES_PORT`: PostgreSQL端口（默认5432）[m[41m[m
-[32m+[m[32m- `REDIS_PORT`: Redis端口（默认6379）[m[41m[m
-[32m+[m[32m- `NATS_PORT`: NATS端口（默认4222）[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m### CI/CD 工作流程[m[41m[m
-[32m+[m[32m- **V3 Test**: 验证核心功能，使用独立CI Compose[m[41m[m
-[32m+[m[32m- **Deploy**: 生产环境部署，Node 20 + npm ci[m[41m[m
-[32m+[m[32m- **Action Lint**: 工作流程质量检查，阻止@master使用[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m### 重要说明[m[41m[m
-[32m+[m[32m- 不要提交 `.env*` 文件到版本控制[m[41m[m
-[32m+[m[32m- CI环境使用独立网络，无主机端口绑定[m[41m[m
-[32m+[m[32m- 本地开发可以通过环境变量重映射端口[m[41m[m
-[32m+[m[32m- 所有Docker Compose操作使用项目级隔离[m[41m[m
-[32m+[m[41m[m
- ### 开发环境[m
- ```bash[m
- # 安装依赖[m
-[36m@@ -65,10 +86,10 @@[m [mnpm run infra:clean[m
- [m
- ### 环境变量配置[m
- 复制 `env.example` 为 `.env` 并配置关键变量：[m
-[31m-- `REDIS_PORT`: Redis端口 (默认: 6379)[m
-[31m-- `POSTGRES_PORT`: PostgreSQL端口 (默认: 5432)  [m
-[31m-- `NATS_PORT`: NATS端口 (默认: 4222)[m
-[31m-- `SNYK_TOKEN`: Snyk安全扫描令牌 (可选)[m
-[32m+[m[32m- `POSTGRES_PORT`: PostgreSQL端口（默认5432）[m[41m[m
-[32m+[m[32m- `REDIS_PORT`: Redis端口（默认6379）[m[41m[m
-[32m+[m[32m- `NATS_PORT`: NATS端口（默认4222）[m[41m[m
-[32m+[m[32m- `SNYK_TOKEN`: Snyk安全扫描令牌（可选）[m[41m[m
- [m
- ### 生产部署[m
- ```bash[m
-[36m@@ -121,9 +142,6 @@[m [mdocker compose -f docker-compose.production.yml up -d[m
- - 编写单元测试[m
- - 提交前运行 `npm run lint`[m
- [m
-[31m-### 环境变量[m
-[31m-复制 `env.example` 到 `.env` 并配置必要的环境变量。[m
-[31m-[m
- ### 数据库迁移[m
- ```bash[m
- # 生成Prisma客户端[m
