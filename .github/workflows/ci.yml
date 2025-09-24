@@ -42,7 +42,7 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Sanity: verify lock contains jsdom env
+      - name: "Sanity: verify lock contains jsdom env"
         run: |
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_SHA=$GITHUB_SHA"
@@ -142,7 +142,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Sanity: verify lock contains jsdom env
+      - name: "Sanity: verify lock contains jsdom env"
         run: |
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_SHA=$GITHUB_SHA"
@@ -524,7 +524,7 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Sanity: print ref and verify jsdom deps
+      - name: "Sanity: print ref and verify jsdom deps"
         run: |
           echo "=== GIT BRANCH VERIFICATION ==="
           echo "GITHUB_REF=$GITHUB_REF"
