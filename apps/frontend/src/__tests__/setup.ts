@@ -44,8 +44,8 @@ jest.mock('next/link', () => ({
 }));
 
 // 模拟fetch API - 使用原生fetch
-if (typeof global.fetch === 'undefined') {
-  global.fetch = fetch;
+if (typeof (global as any).fetch === 'undefined' && typeof (globalThis as any).fetch !== 'undefined') {
+  (global as any).fetch = (globalThis as any).fetch as any;
 }
 
 // 模拟localStorage
