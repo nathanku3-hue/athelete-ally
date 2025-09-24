@@ -46,12 +46,30 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Generate Prisma clients
+        run: |
+          echo "🔧 Generating Prisma clients for all services..."
+          for service in services/*/; do
+            if [ -f "$service/prisma/schema.prisma" ]; then
+              echo "Generating Prisma client for $(basename "$service")..."
+              cd "$service"
+              npx prisma generate
+              cd - > /dev/null
+            fi
+          done
+          echo "✅ All Prisma clients generated"
 
       - name: Verify tsx availability
         run: npx tsx --version
@@ -132,6 +150,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -165,6 +188,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -221,6 +249,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -254,6 +287,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -325,6 +363,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -390,6 +433,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -417,6 +465,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/*/package-lock.json
+            packages/*/package-lock.json
+            services/*/package-lock.json
 
       - name: Install dependencies
         run: npm install
