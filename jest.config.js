@@ -4,7 +4,8 @@
  */
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'node',
+  // Use jsdom by default to support frontend/component tests; Node-only tests still run fine
+  testEnvironment: 'jsdom',
   
   // ES module support
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
@@ -46,6 +47,7 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       useESM: true,
+      // Align ts-jest path resolution to monorepo tsconfig paths
       tsconfig: {
         jsx: 'react-jsx',
         module: 'esnext',
@@ -54,7 +56,7 @@ module.exports = {
         esModuleInterop: true,
         baseUrl: '.',
         paths: {
-          '@/*': ['src/*'],
+          '@/*': ['apps/frontend/src/*'],
           '@packages/*': ['packages/*'],
           '@services/*': ['services/*'],
           '@apps/*': ['apps/*'],
@@ -88,7 +90,11 @@ module.exports = {
   },
   
   // Test configuration
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+  // Load frontend setup (jest-dom, browser mocks) and root setup (generic)
+  setupFilesAfterEnv: [
+    '<rootDir>/apps/frontend/src/__tests__/setup.ts',
+    '<rootDir>/src/__tests__/setup.ts'
+  ],
   testTimeout: 15000,
   passWithNoTests: true,
   verbose: true,
