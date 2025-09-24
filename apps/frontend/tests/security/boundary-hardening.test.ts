@@ -209,11 +209,11 @@ describe('边界控制与韧性测试', () => {
     });
 
     it('应该验证请求体中的userId与JWT token中的userId一致', () => {
-      const jwtUserId = 'jwt-user-id';
-      const requestBodyUserId = 'request-body-user-id';
+      const jwtUserId = 'jwt-user-id' as string;
+      const requestBodyUserId = 'request-body-user-id' as string;
       
       // 如果不一致，应该拒绝请求
-      if (jwtUserId !== requestBodyUserId) {
+      if ((jwtUserId as string) !== (requestBodyUserId as string)) {
         expect(jwtUserId).not.toBe(requestBodyUserId);
       }
     });
@@ -227,7 +227,7 @@ describe('边界控制与韧性测试', () => {
         'REDIS_URL'
       ];
       
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       
       requiredEnvVars.forEach(envVar => {
         if (!process.env[envVar]) {
@@ -238,7 +238,7 @@ describe('边界控制与韧性测试', () => {
     });
 
     it('开发环境应该允许使用默认值', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
       
       // 开发环境应该允许使用默认值或mock数据
       expect(process.env.NODE_ENV).toBe('development');
