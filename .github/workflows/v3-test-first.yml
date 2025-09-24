@@ -28,14 +28,40 @@ jobs:
     name: Contract Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout (pinned ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || (echo "❌ Lock missing jsdom env"; exit 1)
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Install dependencies
         run: npm ci
@@ -69,14 +95,40 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Checkout code
+      - name: Checkout (pinned ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || (echo "❌ Lock missing jsdom env"; exit 1)
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Install dependencies
         run: npm ci
@@ -98,14 +150,40 @@ jobs:
     name: API Endpoint Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout (pinned ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || (echo "❌ Lock missing jsdom env"; exit 1)
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Install dependencies
         run: npm ci
@@ -158,10 +236,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Install package dependencies
+      - name: Install dependencies (root level only)
         run: npm ci
 
       - name: Verify tsx availability
@@ -258,14 +333,40 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout code
+      - name: Checkout (pinned ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || (echo "❌ Lock missing jsdom env"; exit 1)
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Install dependencies
         run: npm ci
@@ -287,17 +388,43 @@ jobs:
     needs: [contract-tests, database-tests, api-tests, integration-tests]
     if: always()
     steps:
-      - name: Checkout code
+      - name: Checkout (pinned ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || (echo "❌ Lock missing jsdom env"; exit 1)
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Download all test results
         uses: actions/download-artifact@v4
@@ -319,17 +446,43 @@ jobs:
     name: Code Quality
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout (pinned ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || (echo "❌ Lock missing jsdom env"; exit 1)
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --no-audit --no-fund
+        run: npm ci
 
       - name: Run ESLint
         run: npx turbo run lint
