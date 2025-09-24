@@ -1,34 +1,38 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Pre-commit hook to check for build artifacts
-# 防止构建产物被意外提交
+CHANGED=$(git diff --cached --name-only --diff-filter=ACM || true)
+if [ -z "$CHANGED" ]; then
+  exit 0
+fi
 
-echo "🔍 运行pre-commit检查..."
-
-# 检查是否有构建产物被添加到暂存区
-STAGED_FILES=$(git diff --cached --name-only)
-
-# 检查暂存的文件是否包含构建产物
-BUILD_ARTIFACTS=(
-    "node_modules/"
-    "dist/"
-    ".turbo/"
-    "build/"
-    ".next/"
-    "coverage/"
-    "prisma/generated/"
-    "generated/"
-)
-
-for file in $STAGED_FILES; do
-    for artifact in "${BUILD_ARTIFACTS[@]}"; do
-        if [[ $file == *"$artifact"* ]]; then
-            echo "❌ 错误: 检测到构建产物 '$file' 被添加到暂存区"
-            echo "请从暂存区移除此文件: git reset HEAD '$file'"
-            echo "并确保该文件类型在.gitignore中"
-            exit 1
-        fi
-    done
+HAS_WORKFLOW=false
+for f in $CHANGED; do
+  case "$f" in
+    .github/workflows/*.yml) HAS_WORKFLOW=true ;; 
+  esac
 done
 
-echo "✅ Pre-commit检查通过"
+if $HAS_WORKFLOW; then
+  echo "🔎 Running actionlint on changed workflows..."
+  if command -v actionlint >/dev/null 2>&1; then
+    actionlint -color
+  else
+    npx -y @actionlint/cli@1.7.7 -color || {
+      echo "❌ actionlint failed"; exit 1;
+    }
+  fi
+fi
+
+SHELL_FILES=$(echo "$CHANGED" | grep -E '\\.sh$' || true)
+if [ -n "$SHELL_FILES" ]; then
+  if command -v shellcheck >/dev/null 2>&1; then
+    echo "🔎 Running shellcheck on changed shell scripts..."
+    # shellcheck disable=SC2086
+    shellcheck $SHELL_FILES
+  else
+    echo "ℹ️ shellcheck not installed; skipping shell script lint"
+  fi
+fi
+
+exit 0

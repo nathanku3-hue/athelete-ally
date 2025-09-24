@@ -25,6 +25,17 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "import/no-commonjs": "off",
+      "no-restricted-imports": [
+        "error",
+        {
+          "paths": [
+            {
+              "name": "vitest",
+              "message": "Use Jest APIs instead of Vitest. Import from '@jest/globals' if needed."
+            }
+          ]
+        }
+      ],
     },
   },
   {

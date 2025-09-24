@@ -46,8 +46,37 @@ athlete-ally/
 - **Action Lint**: 工作流程质量检查，阻止@master使用
 - 工作流目录一览: `.github/workflows/`（查看 `deploy.yml`, `v3-test-first.yml`, `backend-deploy.yml`）
 
+### 测试框架
+
+#### Jest配置
+- 使用Jest 29.7.0作为唯一测试框架
+- jsdom环境用于前端组件测试
+- Node环境用于后端服务测试
+- 导入Jest API：`import { describe, it, expect, jest } from '@jest/globals'`
+
+#### 运行测试
+```bash
+# 所有测试
+npm run test
+
+# 特定服务
+npm run test -- services/planning-engine/
+
+# 前端测试
+npm run test -- apps/frontend/tests/
+```
+
+#### ESLint规则
+- 禁止在测试文件中导入vitest
+- 使用@jest/globals替代全局类型
+
+#### 统一别名策略
+- tsconfig.base.json作为路径解析的唯一来源
+- Jest moduleNameMapper从tsconfig.base.json派生
+
 ### Git Hooks（开发者体验）
 - 仓库已提供自定义Git Hooks目录：`.githooks/`（本仓库`core.hooksPath = .githooks`）
+- 启用命令：`npm run hooks:enable`
 - 本地启用（如未启用）：
   - `npm run hooks:enable`
   - 或手动：`git config core.hooksPath .githooks`

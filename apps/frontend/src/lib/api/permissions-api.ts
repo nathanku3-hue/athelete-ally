@@ -74,7 +74,9 @@ interface RequestConfig {
 
 // 基础请求函数
 async function request<T>(endpoint: string, config: RequestConfig): Promise<T> {
-  const url = new URL(`${API_BASE_URL}${endpoint}`);
+  // 处理相对路径和绝对路径
+  const baseUrl = API_BASE_URL.startsWith('http') ? API_BASE_URL : 'http://localhost:3000';
+  const url = new URL(`${API_BASE_URL}${endpoint}`, baseUrl);
   
   // 添加查询参数
   if (config.params) {

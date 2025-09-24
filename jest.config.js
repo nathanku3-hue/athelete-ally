@@ -25,15 +25,15 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '/node_modules/', '/dist/', '/build/', '/coverage/',
-    '.*/setup.ts$', '.*/setup.js$'
+    '.*/setup.ts$', '.*/setup.js$',
+    '.*/e2e/.*' // 排除 E2E 测试，使用 Playwright
   ],
 
   // Module resolution for monorepo packages — derive from TS paths
   moduleNameMapper: {
     // TS base paths (prefix rootDir)
     ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' }),
-    // Shims/legacy mappings left intentionally while migrating legacy tests
-    '^vitest$': '<rootDir>/tests/_shims/vitest.ts',
+    // Legacy mappings for test stubs
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
     '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts'
   },
