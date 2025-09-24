@@ -23,14 +23,22 @@ jobs:
 
       - name: Sanity: print ref and verify lock contains jsdom env
         run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
           echo "GITHUB_REF=$GITHUB_REF"
           echo "GITHUB_SHA=$GITHUB_SHA"
-          git rev-parse --abbrev-ref HEAD
-          git log -1 --oneline
-          echo "=== Checking package-lock.json for jsdom dependencies ==="
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
           grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || echo "❌ Lock missing jest-environment-jsdom"
           grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
           grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+          echo "=== PACKAGE.JSON VERIFICATION ==="
+          grep -q '"jest-environment-jsdom"' package.json && echo "✅ package.json includes jest-environment-jsdom" || echo "❌ package.json missing jest-environment-jsdom"
+          grep -q '"jsdom"' package.json && echo "✅ package.json includes jsdom" || echo "❌ package.json missing jsdom"
+          grep -q '"@types/jsdom"' package.json && echo "✅ package.json includes @types/jsdom" || echo "❌ package.json missing @types/jsdom"
 
       - name: Discover lockfiles
         id: locks
@@ -39,17 +47,21 @@ jobs:
           git ls-files **/package-lock.json
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Setup Node 20 with npm cache
+      - name: Setup Node 20 (no cache)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
-      - name: Clear npm cache and install dependencies
+      - name: Force fresh install (no cache)
         run: |
+          echo "=== Removing all npm cache and node_modules ==="
+          rm -rf node_modules
+          rm -rf ~/.npm
           npm cache clean --force
-          npm ci --legacy-peer-deps
+          echo "=== Installing with npm install (not ci) ==="
+          npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Print Jest version
         run: npx jest --version
