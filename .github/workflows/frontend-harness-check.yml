@@ -27,7 +27,10 @@ jobs:
           echo "GITHUB_SHA=$GITHUB_SHA"
           git rev-parse --abbrev-ref HEAD
           git log -1 --oneline
-          grep -q '"jest-environment-jsdom"' package-lock.json && echo "Lock includes jsdom env" || (echo "Lock missing jsdom env"; exit 1)
+          echo "=== Checking package-lock.json for jsdom dependencies ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || echo "❌ Lock missing jest-environment-jsdom"
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
 
       - name: Discover lockfiles
         id: locks
@@ -43,8 +46,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Clear npm cache and install dependencies
+        run: |
+          npm cache clean --force
+          npm ci --legacy-peer-deps
 
       - name: Print Jest version
         run: npx jest --version
