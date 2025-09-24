@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { proxyRequest } from './proxy.js';
+import { proxyRequest } from './proxy';
 import { EnhancedPlanGenerationRequestSchema, RPEFeedbackSchema, PerformanceMetricsSchema, AdaptationsApplySchema, ApiEnvelopeSchema } from '@athlete-ally/shared-types';
 import { traceApiRequest } from '../telemetry.js';
 import { config } from '../config.js';

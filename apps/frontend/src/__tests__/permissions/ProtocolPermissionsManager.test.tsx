@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtocolPermissionsManager from '@/components/permissions/ProtocolPermissionsManager';
 import { Protocol, Permission } from '@athlete-ally/protocol-types';

@@ -30,6 +30,7 @@
       "@athlete-ally/contracts/*": ["./packages/contracts/events/*"],
       "@athlete-ally/shared": ["./packages/shared/src"],
       "@athlete-ally/shared/*": ["./packages/shared/src/*"],
+      "@athlete-ally/shared/auth/jwt": ["./packages/shared/src/auth/jwt"],
       "@athlete-ally/shared-types": ["./packages/shared-types/src"],
       "@athlete-ally/shared-types/*": ["./packages/shared-types/src/*"],
       "@athlete-ally/protocol-types": ["./packages/protocol-types/src"],

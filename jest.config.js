@@ -25,7 +25,8 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '/node_modules/', '/dist/', '/build/', '/coverage/',
-    '.*/setup.ts$', '.*/setup.js$'
+    '.*/setup.ts$', '.*/setup.js$',
+    '.*/e2e/.*' // 排除 E2E 测试，使用 Playwright
   ],
 
   // Module resolution for monorepo packages — derive from TS paths
