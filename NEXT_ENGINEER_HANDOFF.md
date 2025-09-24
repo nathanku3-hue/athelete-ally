@@ -40,8 +40,10 @@ container runtime, and produce retrievable artifacts so work continues even if G
   - Docs/patch refresh: 78415d8, 54197a8
 - Pending (high value)
   - Final README selective-merge (keep accurate sections; dedupe; add cross-links)
-  - CI security job: add Node setup + npm ci (DONE: 7d74018)
-  - Codecov v4 uploader non-blocking; optional token guard (PARTIAL)
+  - CI security job: add Node setup + npm ci (DONE: 6fd3dcd)
+  - Codecov v4 uploader guarded with token + continue-on-error (DONE: 33d6659)
+  - Dockerfile consolidated to Node 20 monorepo-aware (DONE: 07a9389)
+  - Hooks DX: document hooks enable; add npm script (DONE: a9234ff)
 
 ## Immediate Next Step (Smallest, Safe, Reversible)
 Patch the deploy security job to ensure environment consistency.
@@ -138,6 +140,8 @@ renovate.json
 reports/workflow-static-check.txt
 - Local workflow check (static)
   - Ensure reports/workflow-static-check.txt indicates PASS (or re-run your local checker/actionlint)
+  - Confirm Codecov guard present and non-blocking in deploy.yml
+    - `grep -n "Upload coverage to Codecov" -n .github/workflows/deploy.yml -n && sed -n '45,60p' .github/workflows/deploy.yml`
 
 ## How To Continue (Suggested Order)
 1. Apply the Immediate Next Step patch to .github/workflows/deploy.yml and commit. (DONE: 7d74018)
