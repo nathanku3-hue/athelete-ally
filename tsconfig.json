@@ -19,7 +19,6 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
       "@packages/*": ["./packages/*/src"],
       "@services/*": ["./services/*/src"],
       "@apps/*": ["./apps/*/src"],
@@ -47,3 +46,4 @@
     "**/build/**"
   ]
 }
+
