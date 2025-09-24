@@ -46,23 +46,17 @@ jobs:
           echo "Lock file size: $(wc -c < package-lock.json) bytes"
           echo "Lock file last modified: $(stat -c %y package-lock.json)"
           echo "=== CHECKING JSDOM DEPENDENCIES ==="
-          if grep -q 
-          "\"jest-environment-jsdom\""
-           package-lock.json; then
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
             echo "✅ Lock includes jest-environment-jsdom"
           else
             echo "❌ Lock missing jsdom env"; exit 1
           fi
-          if grep -q 
-          "\"jsdom\""
-           package-lock.json; then
+          if grep -q "\"jsdom\"" package-lock.json; then
             echo "✅ Lock includes jsdom"
           else
             echo "❌ Lock missing jsdom"
           fi
-          if grep -q 
-          "\"@types/jsdom\""
-           package-lock.json; then
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
             echo "✅ Lock includes @types/jsdom"
           else
             echo "❌ Lock missing @types/jsdom"
@@ -132,23 +126,17 @@ jobs:
           echo "Lock file size: $(wc -c < package-lock.json) bytes"
           echo "Lock file last modified: $(stat -c %y package-lock.json)"
           echo "=== CHECKING JSDOM DEPENDENCIES ==="
-          if grep -q 
-          "\"jest-environment-jsdom\""
-           package-lock.json; then
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
             echo "✅ Lock includes jest-environment-jsdom"
           else
             echo "❌ Lock missing jsdom env"; exit 1
           fi
-          if grep -q 
-          "\"jsdom\""
-           package-lock.json; then
+          if grep -q "\"jsdom\"" package-lock.json; then
             echo "✅ Lock includes jsdom"
           else
             echo "❌ Lock missing jsdom"
           fi
-          if grep -q 
-          "\"@types/jsdom\""
-           package-lock.json; then
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
             echo "✅ Lock includes @types/jsdom"
           else
             echo "❌ Lock missing @types/jsdom"
@@ -206,23 +194,17 @@ jobs:
           echo "Lock file size: $(wc -c < package-lock.json) bytes"
           echo "Lock file last modified: $(stat -c %y package-lock.json)"
           echo "=== CHECKING JSDOM DEPENDENCIES ==="
-          if grep -q 
-          "\"jest-environment-jsdom\""
-           package-lock.json; then
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
             echo "✅ Lock includes jest-environment-jsdom"
           else
             echo "❌ Lock missing jsdom env"; exit 1
           fi
-          if grep -q 
-          "\"jsdom\""
-           package-lock.json; then
+          if grep -q "\"jsdom\"" package-lock.json; then
             echo "✅ Lock includes jsdom"
           else
             echo "❌ Lock missing jsdom"
           fi
-          if grep -q 
-          "\"@types/jsdom\""
-           package-lock.json; then
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
             echo "✅ Lock includes @types/jsdom"
           else
             echo "❌ Lock missing @types/jsdom"
@@ -408,23 +390,17 @@ jobs:
           echo "Lock file size: $(wc -c < package-lock.json) bytes"
           echo "Lock file last modified: $(stat -c %y package-lock.json)"
           echo "=== CHECKING JSDOM DEPENDENCIES ==="
-          if grep -q 
-          "\"jest-environment-jsdom\""
-           package-lock.json; then
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
             echo "✅ Lock includes jest-environment-jsdom"
           else
             echo "❌ Lock missing jsdom env"; exit 1
           fi
-          if grep -q 
-          "\"jsdom\""
-           package-lock.json; then
+          if grep -q "\"jsdom\"" package-lock.json; then
             echo "✅ Lock includes jsdom"
           else
             echo "❌ Lock missing jsdom"
           fi
-          if grep -q 
-          "\"@types/jsdom\""
-           package-lock.json; then
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
             echo "✅ Lock includes @types/jsdom"
           else
             echo "❌ Lock missing @types/jsdom"
@@ -482,23 +458,17 @@ jobs:
           echo "Lock file size: $(wc -c < package-lock.json) bytes"
           echo "Lock file last modified: $(stat -c %y package-lock.json)"
           echo "=== CHECKING JSDOM DEPENDENCIES ==="
-          if grep -q 
-          "\"jest-environment-jsdom\""
-           package-lock.json; then
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
             echo "✅ Lock includes jest-environment-jsdom"
           else
             echo "❌ Lock missing jsdom env"; exit 1
           fi
-          if grep -q 
-          "\"jsdom\""
-           package-lock.json; then
+          if grep -q "\"jsdom\"" package-lock.json; then
             echo "✅ Lock includes jsdom"
           else
             echo "❌ Lock missing jsdom"
           fi
-          if grep -q 
-          "\"@types/jsdom\""
-           package-lock.json; then
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
             echo "✅ Lock includes @types/jsdom"
           else
             echo "❌ Lock missing @types/jsdom"
@@ -559,23 +529,17 @@ jobs:
           echo "Lock file size: $(wc -c < package-lock.json) bytes"
           echo "Lock file last modified: $(stat -c %y package-lock.json)"
           echo "=== CHECKING JSDOM DEPENDENCIES ==="
-          if grep -q 
-          "\"jest-environment-jsdom\""
-           package-lock.json; then
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
             echo "✅ Lock includes jest-environment-jsdom"
           else
             echo "❌ Lock missing jsdom env"; exit 1
           fi
-          if grep -q 
-          "\"jsdom\""
-           package-lock.json; then
+          if grep -q "\"jsdom\"" package-lock.json; then
             echo "✅ Lock includes jsdom"
           else
             echo "❌ Lock missing jsdom"
           fi
-          if grep -q 
-          "\"@types/jsdom\""
-           package-lock.json; then
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
             echo "✅ Lock includes @types/jsdom"
           else
             echo "❌ Lock missing @types/jsdom"
