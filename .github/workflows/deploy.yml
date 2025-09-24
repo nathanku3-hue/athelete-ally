@@ -48,7 +48,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
-        if: secrets.CODECOV_TOKEN != ''
+        if: ${{ secrets.CODECOV_TOKEN }}
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -117,12 +117,12 @@ jobs:
         run: npm audit --audit-level moderate
 
       - name: Run Snyk security scan
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ secrets.SNYK_TOKEN }}
         uses: snyk/actions/setup@v4
         continue-on-error: true
       
       - name: Run Snyk test
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ secrets.SNYK_TOKEN }}
         run: snyk test --severity-threshold=high --exclude=**/dist,**/.turbo,**/coverage,**/.next,**/prisma/generated
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

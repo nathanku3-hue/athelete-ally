@@ -19,3 +19,7 @@ workflow-call:
   inputs: []
   outputs: []
   secrets: []
+
+# 禁用 config_file 输入参数检查
+ignore:
+  - "config_file"
