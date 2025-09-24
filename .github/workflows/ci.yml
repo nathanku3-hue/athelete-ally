@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -216,8 +216,11 @@ jobs:
           fi
           echo "✅ 配置验证完成"
 
-      - name: Run tests
-        run: npx turbo run test
+      - name: Run tests (layered configs)
+        run: |
+          echo "🧪 Running tests with layered Jest configs..."
+          npm run test:frontend
+          npm run test:services
 
   # 合同校验
   contracts:
@@ -537,6 +540,66 @@ jobs:
           path: test-results/report.html
 
   # 最终状态
+  e2e-pw:
+    name: E2E (Playwright, chromium)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Sanity: verify lock contains jsdom env
+        run: |
+          set -euo pipefail
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          git log -1 --oneline
+          if grep -q '"jest-environment-jsdom"' package-lock.json; then
+            echo "✅ Lock includes jest-environment-jsdom"
+          else
+            echo "❌ Lock missing jsdom env"; exit 1
+          fi
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          set -euo pipefail
+          {
+            echo "paths<<EOF"
+            git ls-files -- '**/package-lock.json' || find . -type f -name 'package-lock.json' -not -path './node_modules/*'
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright (chromium)
+        run: npx playwright test --project=chromium --reporter=dot
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report
   success:
     name: Pipeline Success
     runs-on: ubuntu-latest
@@ -605,7 +668,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
 
       - name: Install dependencies (npm ci)
         run: npm ci

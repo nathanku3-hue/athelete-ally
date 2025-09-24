@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { JWTManager, SecurityContextManager } from '@athlete-ally/shared';
 
 describe('JWT Authentication Security', () => {

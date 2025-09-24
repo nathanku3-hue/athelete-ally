@@ -8,14 +8,14 @@ class TrainingAPI {
     const url = `${API_BASE_URL}${endpoint}`;
     // Attach Authorization header from localStorage token (client-side only)
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+    const authHeader: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await fetch(url, {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
         ...authHeader,
         ...options.headers,
-      },
-      ...options,
+      } as HeadersInit,
     });
     
     if (!response.ok) {
