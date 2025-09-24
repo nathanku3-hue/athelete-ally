@@ -23,3 +23,14 @@
 | 7 | 本地/靜態驗證 | [x] Done | actionlint 或 YAML 檢查通過（退化：靜態驗證） | e77be4e | reports/workflow-static-check.txt 產生且 PASS |
 | 8 | 文檔與補丁持續更新 | [x] Done | HANDOFF_REPORT.md 更新；生成/刷新 patch | 78415d8 | autonomous_session.patch 可攜回滾 |
 | 9 | 收尾與交接 | [ ] To Do | 乾淨提交/推送；最終 HANDOFF_REPORT.md | - | 完整交接與下一步建議 |
+# Autonomous Workflow - AUTONOMOUS_TODO.md (Session: Tech Debt & DX)
+
+| Priority | Task Description | Status | Verification Steps | Artifacts & Notes |
+|:---|:---:|:---:|:---:|:---|
+| 1 | **Guard Codecov v4 Uploader** | [x] Done | `deploy.yml` contains the `if: secrets.CODECOV_TOKEN != ''` guard and `continue-on-error: true`. | `.github/workflows/deploy.yml` updated. (33d6659) |
+| 2 | **Consolidate Dockerfile** | [x] Done | The `Dockerfile` has a single, monorepo-aware, Node 20 build stage. | `Dockerfile` (and `Dockerfile.production`) updated. (07a9389) |
+| 3 | **Fix Pre-commit Hook Path** | [x] Done | Pre-commit hooks are correctly configured and run. | `.githooks/pre-commit` present; `git config core.hooksPath .githooks`. (config active) |
+| 4 | **Perform `README.md` Polish** | [x] Done | `README.md` updated; all links valid. | `README.md` and `docs/README.md` updated. (a9234ff) |
+| 5 | **Final CI Hygiene Pass** | [ ] To Do | All workflows use Node 20 and `npm ci`; actions bumped to `@v4` where applicable. | `.github/workflows/*` updated. |
+
+---
