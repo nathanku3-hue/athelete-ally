@@ -40,7 +40,11 @@ module.exports = {
     '^@athlete-ally/shared/(.*)$': '<rootDir>/packages/shared/src/$1',
     '^@athlete-ally/shared-types/(.*)$': '<rootDir>/packages/shared-types/src/$1',
     '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
-    '^@athlete-ally/protocol-types/(.*)$': '<rootDir>/packages/protocol-types/src/$1'
+    '^@athlete-ally/protocol-types/(.*)$': '<rootDir>/packages/protocol-types/src/$1',
+    // Shims for tests authored for Vitest or hard-coded relative specifiers
+    '^vitest$': '<rootDir>/tests/_shims/vitest.ts',
+    '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
+    '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts'
   },
   
   // TypeScript transformation
