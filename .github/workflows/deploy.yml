@@ -120,17 +120,17 @@ jobs:
       - name: Run security audit
         run: npm audit --audit-level moderate
 
-      - name: Setup Snyk
-        if: ${{ env.SNYK_TOKEN != '' }}
-        uses: snyk/actions/setup@v3
-        continue-on-error: true
-      
-      - name: Snyk test
-        if: ${{ env.SNYK_TOKEN != '' }}
-        run: snyk test --severity-threshold=high --exclude=**/dist,**/.turbo,**/coverage,**/.next,**/prisma/generated
-        env:
-          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
-        continue-on-error: true
+        - name: Install Snyk CLI
+          if: ${{ env.SNYK_TOKEN != '' }}
+          run: npm i -g snyk@latest
+          continue-on-error: true
+
+        - name: Snyk test
+          if: ${{ env.SNYK_TOKEN != '' }}
+          run: snyk test --severity-threshold=high --exclude=dist,.turbo,coverage,.next,prisma/generated
+          env:
+            SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+          continue-on-error: true
 
   docker:
     needs: [test, build]

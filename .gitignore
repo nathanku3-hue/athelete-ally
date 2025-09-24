@@ -96,9 +96,10 @@ playwright/.cache/
 docs/tmp/
 tmp/
 
-# Prisma generated clients (do not commit)
+# Prisma generated files (comprehensive)
 services/*/prisma/generated/
-services/*/prisma/generated/**
+**/prisma/generated/
+.prisma/
 
 # Offline artifacts (exact names only)
 autonomous_session.bundle
