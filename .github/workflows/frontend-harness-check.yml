@@ -33,13 +33,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
-      - name: Install dependencies (ci)
-        id: install_ci
-        continue-on-error: true
-        run: npm ci
-
-      - name: Install dependencies (fallback install)
-        if: steps.install_ci.outcome == 'failure'
+      - name: Install dependencies (npm install)
         run: npm install --no-audit --no-fund
 
       - name: Print Jest version
