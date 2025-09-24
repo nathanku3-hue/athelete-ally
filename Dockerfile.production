@@ -1,16 +1,14 @@
-# 多阶段构建 - 生产环境Dockerfile
-FROM node:18-alpine AS base
-
-# 安装依赖
-RUN apk add --no-cache libc6-compat
+# Production Dockerfile (monorepo-aware, Node 20)
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat curl
 WORKDIR /app
 
-# 安装依赖
+# Dependencies layer (prod deps only)
 FROM base AS deps
 COPY package.json package-lock.json* ./
 RUN npm ci --only=production && npm cache clean --force
 
-# 构建应用
+# Builder for Next.js standalone
 FROM base AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
@@ -18,35 +16,26 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# 生产镜像
+# Runtime (non-root)
 FROM base AS runner
 WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+RUN addgroup --system --gid 1001 nodejs  && adduser --system --uid 1001 nextjs
 
-# 创建非root用户
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy built assets from monorepo app path
+COPY --from=builder /app/apps/frontend/public ./public
+COPY --from=builder /app/apps/frontend/.next/standalone ./
+COPY --from=builder /app/apps/frontend/.next/static ./.next/static
 
-# 复制必要文件
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# 设置权限
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
 EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3   CMD curl -fsS http://localhost:3000/api/health || exit 1
 
 CMD ["node", "server.js"]
-
-
