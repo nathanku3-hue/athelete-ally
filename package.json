@@ -65,7 +65,8 @@
     "db:test": "node scripts/test-db-connection.js",
     "redis:test": "node scripts/test-redis-connection.js",
     "services:health-check": "node scripts/health-check-all.js",
-    "smoke:alpha": "node scripts/smoke-alpha.js"
+    "smoke:alpha": "node scripts/smoke-alpha.js",
+    "hooks:enable": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

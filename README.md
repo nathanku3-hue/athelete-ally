@@ -44,6 +44,14 @@ athlete-ally/
 - **V3 Test**: 验证核心功能，使用独立CI Compose
 - **Deploy**: 生产环境部署，Node 20 + npm ci
 - **Action Lint**: 工作流程质量检查，阻止@master使用
+- 工作流目录一览: `.github/workflows/`（查看 `deploy.yml`, `v3-test-first.yml`, `backend-deploy.yml`）
+
+### Git Hooks（开发者体验）
+- 仓库已提供自定义Git Hooks目录：`.githooks/`（本仓库`core.hooksPath = .githooks`）
+- 本地启用（如未启用）：
+  - `npm run hooks:enable`
+  - 或手动：`git config core.hooksPath .githooks`
+- 预提交（pre-commit）会阻止将构建产物（如 `.next/`、`dist/`、`coverage/` 等）提交到仓库。
 
 ### 重要说明
 - 不要提交 `.env*` 文件到版本控制
