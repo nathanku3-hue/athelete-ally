@@ -1,0 +1,46 @@
+name: Frontend Harness Check (jsdom)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harness:
+    name: Frontend Single-Spec (PlanCard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Setup Node 20 with npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Print Jest version
+        run: npx jest --version
+
+      - name: Run single frontend spec (jsdom)
+        run: |
+          npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+            --runInBand --verbose --detectOpenHandles --forceExit
+
