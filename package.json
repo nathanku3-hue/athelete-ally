@@ -23,7 +23,7 @@
     "test:performance": "jest --testPathPatterns=__tests__/performance",
     "test:api": "jest --testPathPatterns=__tests__/integration/api-integration.test.ts",
     "test:api:watch": "jest --testPathPatterns=__tests__/integration/api-integration.test.ts --watch",
-    "test:frontend": "jest --testPathPatterns=__tests__/e2e/frontend-e2e.test.ts",
+    "test:frontend": "jest --config jest/jest.config.frontend.cjs",
     "test:frontend:watch": "jest --testPathPatterns=__tests__/e2e/frontend-e2e.test.ts --watch",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:ci": "npm run test:coverage && npm run test:api && npm run test:frontend",
@@ -66,7 +66,9 @@
     "redis:test": "node scripts/test-redis-connection.js",
     "services:health-check": "node scripts/health-check-all.js",
     "smoke:alpha": "node scripts/smoke-alpha.js",
-    "hooks:enable": "git config core.hooksPath .githooks"
+    "hooks:enable": "git config core.hooksPath .githooks",
+    "test:services": "jest --config jest/jest.config.services.cjs",
+    "test:projects": "jest --projects jest/jest.config.frontend.cjs jest/jest.config.services.cjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
