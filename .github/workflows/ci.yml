@@ -52,9 +52,9 @@ jobs:
       - name: Discover lockfiles
         id: locks
         run: |
-          echo "paths<<EOF" >> $GITHUB_OUTPUT
-          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "paths<<EOF" >> "$GITHUB_OUTPUT"
+          git ls-files -- '**/package-lock.json' || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -546,9 +546,9 @@ jobs:
       - name: Discover lockfiles
         id: locks
         run: |
-          echo "paths<<EOF" >> $GITHUB_OUTPUT
-          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "paths<<EOF" >> "$GITHUB_OUTPUT"
+          git ls-files -- '**/package-lock.json' || find . -name "package-lock.json" -not -path "./node_modules/*"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node 20
         uses: actions/setup-node@v4

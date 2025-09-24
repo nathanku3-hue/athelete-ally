@@ -48,9 +48,9 @@ jobs:
       - name: Discover lockfiles
         id: locks
         run: |
-          echo "paths<<EOF" >> $GITHUB_OUTPUT
-          git ls-files **/package-lock.json
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "paths<<EOF" >> "$GITHUB_OUTPUT"
+          git ls-files -- '**/package-lock.json'
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node 20 (no cache)
         uses: actions/setup-node@v4
