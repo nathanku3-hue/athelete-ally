@@ -1,5 +1,4 @@
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: [
@@ -11,7 +10,22 @@ module.exports = {
     '/src/__tests__/setup.ts'
   ],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['@swc/jest', {
+      jsc: {
+        target: 'es2020',
+        parser: {
+          syntax: 'typescript',
+          decorators: true,
+        },
+        transform: {
+          legacyDecorator: true,
+          decoratorMetadata: true,
+        },
+      },
+      module: {
+        type: 'commonjs',
+      },
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
