@@ -44,6 +44,8 @@ container runtime, and produce retrievable artifacts so work continues even if G
   - Codecov v4 uploader guarded with token + continue-on-error (DONE: 33d6659)
   - Dockerfile consolidated to Node 20 monorepo-aware (DONE: 07a9389)
   - Hooks DX: document hooks enable; add npm script (DONE: a9234ff)
+  - Phase 3 Strategic Planning docs: plan scaffold, user stories, API/arch, PoC (DONE: e700280, fae204f)
+  - Roadmap: Phase 3 timeline (DONE: fae204f)
 
 ## Immediate Next Step (Smallest, Safe, Reversible)
 Patch the deploy security job to ensure environment consistency.
@@ -113,6 +115,8 @@ Patch the deploy security job to ensure environment consistency.
 - Handoff: HANDOFF_REPORT.md
 - Patch: autonomous_session.patch (diff vs main)
 - Bundle: autonomous_session.bundle (contains this branch for offline import)
+ - Phase 3 plan: docs/PHASE_3_PLAN.md
+ - Roadmap: docs/ROADMAP.md
 
 ## Quick Verification Commands
 - Branch present on remote
