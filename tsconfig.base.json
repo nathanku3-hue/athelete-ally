@@ -18,6 +18,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./apps/frontend/src/*"],
       "@athlete-ally/*": ["./packages/*/src"],
       "@athlete-ally/event-bus": ["./packages/event-bus/src"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
@@ -27,6 +28,8 @@
       "@athlete-ally/shared/*": ["./packages/shared/src/*"],
       "@athlete-ally/shared-types": ["./packages/shared-types/src"],
       "@athlete-ally/shared-types/*": ["./packages/shared-types/src/*"],
+      "@athlete-ally/protocol-types": ["./packages/protocol-types/src"],
+      "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"],
       "@athlete-ally/services/*": ["./services/*/src"],
       "@athlete-ally/apps/*": ["./apps/*/src"]
     }

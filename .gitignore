@@ -100,10 +100,10 @@ tmp/
 services/*/prisma/generated/
 services/*/prisma/generated/**
 
-# Build artifacts and temporary files (do not commit)
-autonomous_session.*
-*.bundle
-*.patch
-tatus
-tmp_*
-*_temp_*
+# Offline artifacts (do not commit)
+autonomous_session.bundle
+autonomous_session.patch
+
+# Command output artifacts (do not commit)
+tatus --porcelain
+cripts -Name *start-*.ps1* | Sort-Object
