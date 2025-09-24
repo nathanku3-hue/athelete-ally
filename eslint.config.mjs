@@ -46,6 +46,11 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "warn",
       
       // Boundaries (warn first)
+      // Prevent deep internal module imports; prefer package entry points
+      "import/no-internal-modules": ["warn", { 
+        allow: ["@athlete-ally/**", "@/**"] 
+      }],
+
       // monorepo layer direction: apps -> services -> packages
       "no-restricted-imports": ["warn", {
         patterns: [

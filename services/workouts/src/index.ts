@@ -1,6 +1,7 @@
 // Initialize OpenTelemetry first
 import './telemetry';
-import 'dotenv/config';
+import { config } from 'dotenv';
+config();
 import Fastify from 'fastify';
 import { z } from 'zod';
 import { config } from './config';
