@@ -48,9 +48,12 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
+        if: secrets.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage/lcov.info
+        continue-on-error: true
 
   build:
     needs: test
@@ -216,7 +219,6 @@ jobs:
           else
             echo "❌ Deployment failed!"
           fi
-
 
 
 
