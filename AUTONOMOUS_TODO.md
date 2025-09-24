@@ -47,3 +47,5 @@
 ---
 
 > Session note (ci-debug init): 2025-09-25 02:55:45 +08:00
+
+- Progress: Initial static validation completed; actionlint report saved at reports/actionlint/report.txt. Next: monitor CI run for fix/ci-debug and iterate.
