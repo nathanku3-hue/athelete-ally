@@ -32,6 +32,11 @@ jobs:
         with:
           node-version: '20'  # 确保Node 20
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Show tool versions
         run: |
@@ -69,6 +74,11 @@ jobs:
         with:
           node-version: '20'  # 确保Node 20
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Show tool versions
         run: |
@@ -107,6 +117,11 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Install dependencies (Security)
         run: npm ci

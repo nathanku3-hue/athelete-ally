@@ -48,9 +48,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -152,9 +152,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -190,9 +190,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -251,9 +251,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -289,9 +289,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -365,9 +365,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -435,9 +435,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -467,9 +467,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
-            apps/*/package-lock.json
-            packages/*/package-lock.json
-            services/*/package-lock.json
+            apps/**/package-lock.json
+            packages/**/package-lock.json
+            services/**/package-lock.json
 
       - name: Install dependencies
         run: npm install
