@@ -7,7 +7,8 @@ module.exports = {
   roots: ['<rootDir>/apps/frontend'],
   testMatch: [
     '**/__tests__/**/*.test.tsx',
-    '**/__tests__/**/*.test.ts'
+    '**/__tests__/**/*.test.ts',
+    '**/tests/**/*.test.ts'
   ],
   setupFilesAfterEnv: [
     '<rootDir>/apps/frontend/src/__tests__/setup.ts',
