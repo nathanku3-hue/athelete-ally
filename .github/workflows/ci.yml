@@ -41,16 +41,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          # Find all package-lock.json files (tracked and untracked)
+          find . -name "package-lock.json" -not -path "./node_modules/*" | head -20
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            apps/**/package-lock.json
-            packages/**/package-lock.json
-            services/**/package-lock.json
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -111,17 +115,19 @@ jobs:
 
       - name: Check for sensitive files
         run: |
-          # 检查是否提交了.env文件
-          if git ls-files | grep -E "\.env" | head -10; then
-            echo "❌ ERROR: .env files detected in repository!"
-            echo "The following .env files were found:"
-            git ls-files | grep -E "\.env" | head -20
+          # 检查是否提交了.env文件（排除.example和.sample文件）
+          bad_env_files=$(git ls-files | grep -E "\.env$|\.env\.[^.]*$" | grep -v -E "\.example$|\.sample$" | head -10)
+          if [ -n "$bad_env_files" ]; then
+            echo "❌ ERROR: Sensitive .env files detected in repository!"
+            echo "The following sensitive .env files were found:"
+            echo "$bad_env_files"
             echo ""
             echo "Please remove these files and ensure all configuration is externalized."
             echo "Use environment variables instead of .env files for production."
+            echo "Note: .env.example and .env.sample files are allowed."
             exit 1
           else
-            echo "✅ No .env files found in repository"
+            echo "✅ No sensitive .env files found in repository"
           fi
           
           # 检查是否提交了敏感配置文件

@@ -27,16 +27,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          # Find all package-lock.json files (tracked and untracked)
+          find . -name "package-lock.json" -not -path "./node_modules/*" | head -20
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'  # 确保Node 20
           cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            apps/**/package-lock.json
-            packages/**/package-lock.json
-            services/**/package-lock.json
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Show tool versions
         run: |
@@ -69,16 +73,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          # Find all package-lock.json files (tracked and untracked)
+          find . -name "package-lock.json" -not -path "./node_modules/*" | head -20
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'  # 确保Node 20
           cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            apps/**/package-lock.json
-            packages/**/package-lock.json
-            services/**/package-lock.json
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
 
       - name: Show tool versions
         run: |
