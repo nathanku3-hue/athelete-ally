@@ -110,6 +110,20 @@ jobs:
       - name: Lint check
         run: npx turbo run lint
 
+      - name: Generate ESLint Boundaries Report
+        continue-on-error: true
+        run: |
+          mkdir -p reports/deps
+          npx eslint . -f json > reports/deps/eslint-boundaries.json || echo "ESLint boundaries report generated with warnings"
+
+      - name: Upload Boundaries Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-boundaries-report-${{ github.run_id }}
+          path: reports/deps/eslint-boundaries.json
+          retention-days: 7
+
       - name: Type check
         run: npx turbo run type-check
 

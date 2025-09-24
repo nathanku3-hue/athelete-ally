@@ -39,46 +39,35 @@ const eslintConfig = [
     },
   },
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*"],
     rules: {
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
-      // Monorepo boundary enforcement (warning level for now)
-      "no-restricted-imports": [
-        "warn",
-        {
-          "patterns": [
-            {
-              "group": ["services/**"],
-              "importNames": ["*"],
-              "message": "Apps should not directly import from services. Use shared packages or API calls instead."
-            },
-            {
-              "group": ["apps/**"],
-              "importNames": ["*"],
-              "message": "Services should not import from apps. This violates architectural boundaries."
-            }
-          ]
-        }
-      ],
-      "no-restricted-paths": [
-        "warn",
-        {
-          "zones": [
-            {
-              "target": "./apps/*/src/**",
-              "from": "./services/**",
-              "message": "Apps should not import from services directly"
-            },
-            {
-              "target": "./services/*/src/**",
-              "from": "./apps/**",
-              "message": "Services should not import from apps"
-            }
-          ]
-        }
-      ]
-    },
+      
+      // Boundaries (warn first)
+      // monorepo layer direction: apps -> services -> packages
+      "no-restricted-imports": ["warn", {
+        patterns: [
+          { 
+            group: ["packages/*/src/**"], 
+            message: "Import from package entrypoint (no deep src/*)." 
+          },
+          { 
+            group: ["apps/*/src/**"], 
+            message: "Do not import app internals across workspaces." 
+          },
+          {
+            group: ["services/**"],
+            message: "Apps should not directly import from services. Use shared packages or API calls instead."
+          },
+          {
+            group: ["apps/**"],
+            message: "Services should not import from apps. This violates architectural boundaries."
+          }
+        ]
+      }]
+    }
   },
 ];
 
