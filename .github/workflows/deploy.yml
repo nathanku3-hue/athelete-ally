@@ -24,8 +24,18 @@ jobs:
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
-      - name: Checkout code
+      - name: Checkout code (selected ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          git rev-parse --abbrev-ref HEAD
+          git log -1 --oneline
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "Lock includes jsdom env" || (echo "Lock missing jsdom env"; exit 1)
 
       - name: Discover lockfiles
         id: locks
@@ -70,8 +80,18 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code (selected ref)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          git rev-parse --abbrev-ref HEAD
+          git log -1 --oneline
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "Lock includes jsdom env" || (echo "Lock missing jsdom env"; exit 1)
 
       - name: Discover lockfiles
         id: locks
