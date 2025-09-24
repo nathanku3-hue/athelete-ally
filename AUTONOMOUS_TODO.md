@@ -38,10 +38,10 @@
 
 | Priority | Task Description | Status | Verification Steps | Artifacts & Notes |
 |:---|:---:|:---:|:---:|:---|
-| 1 | **Flesh out User Stories for "Holistic Performance Hub"** | [ ] To Do | The `docs/PHASE_3_PLAN.md` has a detailed user stories section. | `docs/PHASE_3_PLAN.md` updated. |
-| 2 | **Design API Changes for New Data Sources (HRV, Sleep)** | [ ] To Do | The `docs/PHASE_3_PLAN.md` has a detailed API design section with new endpoints and schemas. | `docs/PHASE_3_PLAN.md` updated. |
-| 3 | **Propose Architecture for New Microservices** | [ ] To Do | The `docs/PHASE_3_PLAN.md` has a detailed architecture section for any new services. | `docs/PHASE_3_PLAN.md` updated. |
-| 4 | **Create a Technical PoC Plan for HRV Integration** | [ ] To Do | The `docs/PHASE_3_PLAN.md` has a detailed PoC plan. | `docs/PHASE_3_PLAN.md` updated. |
-| 5 | **Update the Project Roadmap with a Phase 3 Timeline** | [ ] To Do | The `docs/ROADMAP.md` is updated with a high-level timeline for Phase 3. | `docs/ROADMAP.md` created or updated. |
+| 1 | **Flesh out User Stories for "Holistic Performance Hub"** | [x] Done | The `docs/PHASE_3_PLAN.md` has a detailed user stories section. | `docs/PHASE_3_PLAN.md` updated. (e700280) |
+| 2 | **Design API Changes for New Data Sources (HRV, Sleep)** | [x] Done | The `docs/PHASE_3_PLAN.md` has a detailed API design section with new endpoints and schemas. | `docs/PHASE_3_PLAN.md` updated. (fae204f) |
+| 3 | **Propose Architecture for New Microservices** | [x] Done | The `docs/PHASE_3_PLAN.md` has a detailed architecture section for any new services. | `docs/PHASE_3_PLAN.md` updated. (fae204f) |
+| 4 | **Create a Technical PoC Plan for HRV Integration** | [x] Done | The `docs/PHASE_3_PLAN.md` has a detailed PoC plan. | `docs/PHASE_3_PLAN.md` updated. (e700280) |
+| 5 | **Update the Project Roadmap with a Phase 3 Timeline** | [x] Done | The `docs/ROADMAP.md` is updated with a high-level timeline for Phase 3. | `docs/ROADMAP.md` created (fae204f). |
 
 ---
