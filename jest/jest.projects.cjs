@@ -16,5 +16,10 @@ module.exports = {
     '<rootDir>/jest/jest.config.frontend.cjs',
     '<rootDir>/jest/jest.config.services.cjs',
     '<rootDir>/jest/jest.config.integration.cjs'
-  ]
+  ],
+  
+  // Minimal global settings only
+  maxWorkers: '50%',
+  cache: true,
+  verbose: process.env.CI === 'true'
 };

@@ -1,0 +1,82 @@
+name: Boundaries Check (New/Modified Files)
+
+on:
+  pull_request:
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundaries-check:
+    name: Check Boundaries (New/Modified Files)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 2  # Need previous commit for diff
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check boundaries for new/modified files
+        run: |
+          set -euo pipefail
+          echo "🔍 Checking boundaries for new/modified files..."
+          
+          # Get list of changed TypeScript/TSX files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' || true)
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "✅ No TypeScript files changed, skipping boundary check"
+            exit 0
+          fi
+          
+          echo "📁 Changed TypeScript files:"
+          echo "$CHANGED_FILES"
+          
+          # Run ESLint with error-level boundary rules on changed files only
+          echo "🚨 Running strict boundary checks on changed files..."
+          npx eslint $CHANGED_FILES \
+            --rule "import/no-internal-modules: error" \
+            --rule "no-restricted-imports: error" \
+            --format=compact
+          
+          echo "✅ Boundary checks passed for new/modified files"
+
+      - name: Generate boundaries report
+        continue-on-error: true
+        run: |
+          mkdir -p reports/deps
+          npx eslint . -f json > reports/deps/eslint-boundaries-strict.json || echo "ESLint boundaries report generated with warnings"
+
+      - name: Upload Boundaries Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boundaries-report-${{ github.run_id }}
+          path: reports/deps/eslint-boundaries-strict.json
+          retention-days: 7
