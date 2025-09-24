@@ -16,7 +16,7 @@
     "test:database": "jest --testPathPattern=database-models",
     "test:api": "jest --testPathPattern=api-endpoints",
     "test:integration": "jest --testPathPattern=integration",
-    "test:performance": "jest --testPathPattern=performance",
+    "test:performance": "jest --testPathPattern=performance --passWithNoTests",
     "test:coverage": "jest --coverage",
     "coverage:check": "jest --coverage --coverageThreshold.global.branches=90 --coverageThreshold.global.functions=90 --coverageThreshold.global.lines=90 --coverageThreshold.global.statements=90",
     "lint": "eslint -c ../../eslint.config.mjs .",

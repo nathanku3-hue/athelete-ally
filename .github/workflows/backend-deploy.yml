@@ -46,6 +46,7 @@ jobs:
             echo "❌ Lock missing @types/jsdom"
           fi
       - name: "Discover lockfiles"
+        id: locks
         run: |
           set -euo pipefail
           {
