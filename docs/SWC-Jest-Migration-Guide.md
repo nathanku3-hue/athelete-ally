@@ -10,6 +10,10 @@ This guide documents the migration from `ts-jest` to `@swc/jest` for Node.js ser
 |---------|----------------|-------------------|-------------|
 | exercises | ~4.5s | ~4.5s | Baseline |
 | fatigue | ~3.7s | ~3.7s | Baseline |
+| analytics | 1.93s | 3.26s | -69% (slower) |
+| job-scheduler | 4.71s | 3.13s | +33% (faster) |
+
+*Note: Performance varies by service complexity and test suite size. @swc/jest shows mixed results with small test suites.*
 
 *Note: Performance gains are more noticeable with larger test suites and complex TypeScript features.*
 
@@ -39,21 +43,8 @@ module.exports = {
     '/src/__tests__/setup.ts'
   ],
   transform: {
-    '^.+\\.ts$': ['@swc/jest', {
-      jsc: {
-        target: 'es2020',
-        parser: {
-          syntax: 'typescript',
-          decorators: true,
-        },
-        transform: {
-          legacyDecorator: true,
-          decoratorMetadata: true,
-        },
-      },
-      module: {
-        type: 'commonjs',
-      },
+    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', { 
+      configFile: '../../scripts/swc.jest.config.json' 
     }],
   },
   collectCoverageFrom: [
@@ -65,6 +56,8 @@ module.exports = {
   passWithNoTests: true
 };
 ```
+
+**Important**: Use the shared SWC configuration file at `scripts/swc.jest.config.json` to ensure consistency across services.
 
 ### 3. Validation Steps
 
@@ -84,11 +77,11 @@ module.exports = {
 
 - ✅ `exercises` - 4.5s runtime
 - ✅ `fatigue` - 3.7s runtime
+- ✅ `analytics` - 3.26s runtime (was 1.93s with ts-jest)
+- ✅ `job-scheduler` - 3.13s runtime (was 4.71s with ts-jest)
 
 ## Services Pending
 
-- `analytics`
-- `job-scheduler`
 - `workouts`
 - `planning-engine`
 - `profile-onboarding`

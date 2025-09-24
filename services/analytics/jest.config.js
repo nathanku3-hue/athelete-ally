@@ -1,5 +1,4 @@
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: [
@@ -11,7 +10,9 @@ module.exports = {
     '/src/__tests__/setup.ts'
   ],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', { 
+      configFile: '../../scripts/swc.jest.config.json' 
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
