@@ -31,20 +31,45 @@ jobs:
 
       - name: "Sanity: print ref and verify lock contains jsdom env"
         run: |
-          echo "GITHUB_REF=$GITHUB_REF"
-          echo "GITHUB_SHA=$GITHUB_SHA"
-          git rev-parse --abbrev-ref HEAD
-          git log -1 --oneline
-          grep -q '"jest-environment-jsdom"' package-lock.json && echo "Lock includes jsdom env" || (echo "Lock missing jsdom env"; exit 1)
-
-      - name: Discover lockfiles
-        id: locks
+          set -euo pipefail
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          if grep -q 
+          "\"jest-environment-jsdom\""
+           package-lock.json; then
+            echo "✅ Lock includes jest-environment-jsdom"
+          else
+            echo "❌ Lock missing jsdom env"; exit 1
+          fi
+          if grep -q 
+          "\"jsdom\""
+           package-lock.json; then
+            echo "✅ Lock includes jsdom"
+          else
+            echo "❌ Lock missing jsdom"
+          fi
+          if grep -q 
+          "\"@types/jsdom\""
+           package-lock.json; then
+            echo "✅ Lock includes @types/jsdom"
+          else
+            echo "❌ Lock missing @types/jsdom"
+          fi
+      - name: "Discover lockfiles"
         run: |
-          echo "paths<<EOF" >> $GITHUB_OUTPUT
-          # Find all package-lock.json files (tracked and untracked)
-          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
-          echo "EOF" >> $GITHUB_OUTPUT
-
+          set -euo pipefail
+          {
+            echo "paths<<EOF"
+            git ls-files -- '**/package-lock.json' || find . -type f -name 'package-lock.json' -not -path './node_modules/*'
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -87,20 +112,45 @@ jobs:
 
       - name: "Sanity: print ref and verify lock contains jsdom env"
         run: |
-          echo "GITHUB_REF=$GITHUB_REF"
-          echo "GITHUB_SHA=$GITHUB_SHA"
-          git rev-parse --abbrev-ref HEAD
-          git log -1 --oneline
-          grep -q '"jest-environment-jsdom"' package-lock.json && echo "Lock includes jsdom env" || (echo "Lock missing jsdom env"; exit 1)
-
-      - name: Discover lockfiles
-        id: locks
+          set -euo pipefail
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          if grep -q 
+          "\"jest-environment-jsdom\""
+           package-lock.json; then
+            echo "✅ Lock includes jest-environment-jsdom"
+          else
+            echo "❌ Lock missing jsdom env"; exit 1
+          fi
+          if grep -q 
+          "\"jsdom\""
+           package-lock.json; then
+            echo "✅ Lock includes jsdom"
+          else
+            echo "❌ Lock missing jsdom"
+          fi
+          if grep -q 
+          "\"@types/jsdom\""
+           package-lock.json; then
+            echo "✅ Lock includes @types/jsdom"
+          else
+            echo "❌ Lock missing @types/jsdom"
+          fi
+      - name: "Discover lockfiles"
         run: |
-          echo "paths<<EOF" >> $GITHUB_OUTPUT
-          # Find all package-lock.json files (tracked and untracked)
-          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
-          echo "EOF" >> $GITHUB_OUTPUT
-
+          set -euo pipefail
+          {
+            echo "paths<<EOF"
+            git ls-files -- '**/package-lock.json' || find . -type f -name 'package-lock.json' -not -path './node_modules/*'
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
