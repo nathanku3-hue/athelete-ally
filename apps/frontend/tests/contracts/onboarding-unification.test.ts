@@ -116,7 +116,7 @@ describe('Onboarding合同统一测试', () => {
       const step1Data = {
         purpose: 'general_fitness',
         purposeDetails: 'I want to get in shape'
-      };
+      } as const;
 
       expect(validateOnboardingStep(1, step1Data)).toBe(true);
       expect(validateOnboardingStep(1, { purpose: 'general_fitness' })).toBe(false); // 缺少purposeDetails
@@ -125,7 +125,7 @@ describe('Onboarding合同统一测试', () => {
     it('应该正确验证步骤2（技能水平）', () => {
       const step2Data = {
         proficiency: 'intermediate'
-      };
+      } as const;
 
       expect(validateOnboardingStep(2, step2Data)).toBe(true);
       expect(validateOnboardingStep(2, {})).toBe(false);
@@ -135,7 +135,7 @@ describe('Onboarding合同统一测试', () => {
       const step3Data = {
         season: 'offseason',
         competitionDate: '2024-06-01T00:00:00Z'
-      };
+      } as const;
 
       expect(validateOnboardingStep(3, step3Data)).toBe(true);
       expect(validateOnboardingStep(3, { season: 'offseason' })).toBe(false); // 缺少competitionDate
@@ -145,7 +145,7 @@ describe('Onboarding合同统一测试', () => {
       const step4Data = {
         availabilityDays: 3,
         weeklyGoalDays: 4
-      };
+      } as const;
 
       expect(validateOnboardingStep(4, step4Data)).toBe(true);
       expect(validateOnboardingStep(4, { availabilityDays: 3 })).toBe(false); // 缺少weeklyGoalDays
@@ -154,7 +154,7 @@ describe('Onboarding合同统一测试', () => {
     it('应该正确验证步骤5（设备）', () => {
       const step5Data = {
         equipment: ['bodyweight', 'dumbbells']
-      };
+      } as const;
 
       expect(validateOnboardingStep(5, step5Data)).toBe(true);
       expect(validateOnboardingStep(5, { equipment: [] })).toBe(false); // 空数组
@@ -163,7 +163,7 @@ describe('Onboarding合同统一测试', () => {
     it('应该正确验证步骤6（恢复习惯）', () => {
       const step6Data = {
         recoveryHabits: ['stretching', 'massage']
-      };
+      } as const;
 
       expect(validateOnboardingStep(6, step6Data)).toBe(true);
       expect(validateOnboardingStep(6, { recoveryHabits: [] })).toBe(false); // 空数组
@@ -182,7 +182,7 @@ describe('Onboarding合同统一测试', () => {
         purpose: 'general_fitness',
         purposeDetails: 'I want to get in shape',
         proficiency: 'intermediate'
-      };
+      } as const;
       const partialProgress = getStepProgress(partialData);
       expect(partialProgress.current).toBe(2);
       expect(partialProgress.percentage).toBe(33);
@@ -197,7 +197,7 @@ describe('Onboarding合同统一测试', () => {
         weeklyGoalDays: 4,
         equipment: ['bodyweight'],
         recoveryHabits: ['stretching']
-      };
+      } as const;
       const completeProgress = getStepProgress(completeData);
       expect(completeProgress.current).toBe(6);
       expect(completeProgress.percentage).toBe(100);
@@ -225,7 +225,7 @@ describe('Onboarding合同统一测试', () => {
         availabilityDays: 3,
         weeklyGoalDays: 4,
         equipment: ['bodyweight']
-      };
+      } as const;
 
       const result = safeParseOnboardingPayload(gatewayData);
       expect(result.success).toBe(true);
@@ -248,7 +248,7 @@ describe('Onboarding合同统一测试', () => {
         recoveryHabits: ['stretching', 'massage'],
         onboardingStep: 6,
         isOnboardingComplete: true
-      };
+      } as const;
 
       const result = safeParseOnboardingPayload(serviceData);
       expect(result.success).toBe(true);
