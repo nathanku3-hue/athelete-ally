@@ -310,6 +310,8 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: quality
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -334,15 +336,15 @@ jobs:
 
       # Snyk安全扫描 - 可选的安全检查
       - name: Setup Snyk
-        if: secrets.SNYK_TOKEN != ''
+        if: ${{ env.SNYK_TOKEN != '' }}
         uses: snyk/actions/setup@v4
         continue-on-error: true
       
       - name: Snyk test
-        if: secrets.SNYK_TOKEN != ''
+        if: ${{ env.SNYK_TOKEN != '' }}
         run: snyk test --severity-threshold=high --exclude=**/dist,**/.turbo,**/coverage,**/.next,**/prisma/generated
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
         continue-on-error: true
 
       - name: Check for high-risk dependencies
