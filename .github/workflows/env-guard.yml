@@ -1,0 +1,41 @@
+name: Environment Files Guard
+
+on:
+  pull_request:
+    paths:
+      - '**'
+  push:
+    branches: [main]
+
+jobs:
+  env-files-check:
+    name: Check for .env files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for .env files
+        run: |
+          set -euo pipefail
+          
+          echo "🔍 Checking for .env files..."
+          
+          # Find any .env files (excluding examples)
+          ENV_FILES=$(find . -name ".env" -type f | grep -v ".env.example" | grep -v ".env.sample" | grep -v ".env.template" || true)
+          
+          if [ -n "$ENV_FILES" ]; then
+            echo "❌ Found .env files that should not be committed:"
+            echo "$ENV_FILES"
+            echo ""
+            echo "Environment files should not be committed to the repository."
+            echo "Use .env.example or .env.sample as templates instead."
+            echo ""
+            echo "To fix:"
+            echo "  1. Add .env to .gitignore"
+            echo "  2. Create .env.example with placeholder values"
+            echo "  3. Remove .env from git tracking: git rm --cached .env"
+            exit 1
+          else
+            echo "✅ No .env files found (excluding examples)"
+          fi

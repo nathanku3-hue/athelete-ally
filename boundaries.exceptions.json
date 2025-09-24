@@ -1,0 +1,48 @@
+{
+  "description": "Exceptions to monorepo boundary rules",
+  "version": "1.0.0",
+  "exceptions": [
+    {
+      "rule": "no-restricted-imports",
+      "description": "Temporary exceptions for boundary violations",
+      "patterns": [
+        {
+          "from": "apps/frontend/src/**",
+          "to": "services/**",
+          "reason": "Frontend may need direct service access during transition",
+          "temporary": true,
+          "expires": "2024-12-31"
+        },
+        {
+          "from": "services/**",
+          "to": "apps/**",
+          "reason": "Services should not import from apps - architectural violation",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "rule": "no-restricted-paths",
+      "description": "Path-based boundary exceptions",
+      "patterns": [
+        {
+          "from": "apps/*/src/**",
+          "to": "packages/shared/src/**",
+          "reason": "Apps can import from shared packages",
+          "temporary": false
+        },
+        {
+          "from": "services/*/src/**",
+          "to": "packages/shared/src/**",
+          "reason": "Services can import from shared packages",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "This file should be reviewed regularly and exceptions should be removed as architectural boundaries are enforced.",
+    "Temporary exceptions should have clear expiration dates and migration plans.",
+    "All exceptions should be documented with clear reasoning."
+  ]
+}

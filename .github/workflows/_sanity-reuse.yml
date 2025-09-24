@@ -1,0 +1,70 @@
+name: Sanity and Lock Discovery (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20'
+      cache_key:
+        description: 'Cache key for npm dependencies'
+        required: false
+        type: string
+        default: 'npm'
+    outputs:
+      cache-dependency-path:
+        description: 'Cache dependency path for npm'
+        value: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
+
+jobs:
+  sanity-and-locks:
+    name: Sanity Check and Lock Discovery
+    runs-on: ubuntu-latest
+    outputs:
+      cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: "Sanity: verify lock contains jsdom env"
+        run: |
+          set -euo pipefail
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          if grep -q "\"jest-environment-jsdom\"" package-lock.json; then
+            echo "✅ Lock includes jest-environment-jsdom"
+          else
+            echo "❌ Lock missing jsdom env"; exit 1
+          fi
+          if grep -q "\"jsdom\"" package-lock.json; then
+            echo "✅ Lock includes jsdom"
+          else
+            echo "❌ Lock missing jsdom"
+          fi
+          if grep -q "\"@types/jsdom\"" package-lock.json; then
+            echo "✅ Lock includes @types/jsdom"
+          else
+            echo "❌ Lock missing @types/jsdom"
+          fi
+
+      - name: "Discover lockfiles"
+        id: locks
+        run: |
+          set -euo pipefail
+          {
+            echo "paths<<EOF"
+            git ls-files -- '**/package-lock.json' || find . -type f -name 'package-lock.json' -not -path './node_modules/*'
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"

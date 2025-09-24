@@ -10,6 +10,8 @@ module.exports = {
 
   // Unify module resolution from TS paths
   moduleNameMapper: {
+    // Support .js suffix in TypeScript imports during ESM transition
+    '^(\.{1,2}/.*)\.js$': '$1',
     // ESM imports resolved by ts-jest automatically
     ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })),
     // Legacy shims removed after Vitest→Jest migration

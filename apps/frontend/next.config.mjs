@@ -14,12 +14,6 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   
-  // 实验性功能
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
-  
   // 环境变量
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
@@ -131,7 +125,7 @@ const nextConfig = {
   //   localeDetection: true,
   // },
   
-  // 实验性功能
+  // 实验性功能 (consolidated)
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],

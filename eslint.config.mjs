@@ -43,6 +43,41 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
+      // Monorepo boundary enforcement (warning level for now)
+      "no-restricted-imports": [
+        "warn",
+        {
+          "patterns": [
+            {
+              "group": ["services/**"],
+              "importNames": ["*"],
+              "message": "Apps should not directly import from services. Use shared packages or API calls instead."
+            },
+            {
+              "group": ["apps/**"],
+              "importNames": ["*"],
+              "message": "Services should not import from apps. This violates architectural boundaries."
+            }
+          ]
+        }
+      ],
+      "no-restricted-paths": [
+        "warn",
+        {
+          "zones": [
+            {
+              "target": "./apps/*/src/**",
+              "from": "./services/**",
+              "message": "Apps should not import from services directly"
+            },
+            {
+              "target": "./services/*/src/**",
+              "from": "./apps/**",
+              "message": "Services should not import from apps"
+            }
+          ]
+        }
+      ]
     },
   },
 ];

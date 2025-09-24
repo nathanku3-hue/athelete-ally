@@ -40,6 +40,7 @@ We use a layered testing approach with multiple frameworks optimized for differe
 - Runs all projects in parallel
 - Single entry point: `npm run test:projects`
 - Coverage collection across all layers
+- **Migration Path**: Root `jest.config.js` is deprecated; use layered configs or orchestrator
 
 ## Playwright E2E Testing
 
@@ -116,6 +117,7 @@ module.exports = {
 - Jest automatically resolves TypeScript paths from `tsconfig.base.json`
 - Use relative imports for local modules
 - Avoid `.js` extensions in TypeScript imports
+- **ESM Transition Support**: Jest base config includes mapper `'^(\.{1,2}/.*)\.js$': '$1'` to handle `.js` suffixes during TypeScript/ESM migration
 
 ## CI/CD Integration
 
