@@ -1,5 +1,16 @@
 /**
- * Jest configuration for Athlete Ally monorepo
+ * DEPRECATED: Root Jest Configuration for Athlete Ally monorepo
+ * 
+ * ⚠️  This file is deprecated and will be removed in a future release.
+ * 
+ * Please use the new layered Jest configurations instead:
+ * - Frontend tests: npm run test:frontend
+ * - Services tests: npm run test:services  
+ * - All projects: npm run test:projects
+ * 
+ * See docs/Testing-Architecture.md for migration guide.
+ * 
+ * Legacy configuration maintained for backward compatibility:
  * - Unifies path resolution by deriving moduleNameMapper from tsconfig.base.json
  * - Keeps jsdom env and minimal shims for legacy tests
  */

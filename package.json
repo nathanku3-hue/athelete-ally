@@ -24,6 +24,8 @@
     "test:api": "jest --testPathPatterns=__tests__/integration/api-integration.test.ts",
     "test:api:watch": "jest --testPathPatterns=__tests__/integration/api-integration.test.ts --watch",
     "test:frontend": "jest --config jest/jest.config.frontend.cjs",
+    "test:services": "jest --config jest/jest.config.services.cjs",
+    "test:projects": "jest --config jest/jest.projects.cjs",
     "test:frontend:watch": "jest --testPathPatterns=__tests__/e2e/frontend-e2e.test.ts --watch",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:ci": "npm run test:coverage && npm run test:api && npm run test:frontend",
