@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import * as LLMAny from '../../services/planning-engine/src/llm.js';
 const generateTrainingPlan: any = (LLMAny as any).generateTrainingPlan || (LLMAny as any).default || (() => { throw new Error('LLM not available'); });
 

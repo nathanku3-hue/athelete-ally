@@ -10,9 +10,9 @@ module.exports = {
 
   // Unify module resolution from TS paths
   moduleNameMapper: {
+    // ESM imports resolved by ts-jest automatically
     ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })),
-    // Legacy shims kept during migration
-    '^vitest$': '<rootDir>/tests/_shims/vitest.ts',
+    // Legacy shims removed after Vitest→Jest migration
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
     '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts'
   },
