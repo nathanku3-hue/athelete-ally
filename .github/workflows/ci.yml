@@ -45,8 +45,7 @@ jobs:
         id: locks
         run: |
           echo "paths<<EOF" >> $GITHUB_OUTPUT
-          # Find all package-lock.json files (tracked and untracked)
-          find . -name "package-lock.json" -not -path "./node_modules/*" | head -20
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
@@ -115,32 +114,14 @@ jobs:
 
       - name: Check for sensitive files
         run: |
-          # 检查是否提交了.env文件（排除.example和.sample文件）
-          bad_env_files=$(git ls-files | grep -E "\.env$|\.env\.[^.]*$" | grep -v -E "\.example$|\.sample$" | head -10)
-          if [ -n "$bad_env_files" ]; then
-            echo "❌ ERROR: Sensitive .env files detected in repository!"
-            echo "The following sensitive .env files were found:"
-            echo "$bad_env_files"
-            echo ""
-            echo "Please remove these files and ensure all configuration is externalized."
-            echo "Use environment variables instead of .env files for production."
-            echo "Note: .env.example and .env.sample files are allowed."
-            exit 1
-          else
-            echo "✅ No sensitive .env files found in repository"
-          fi
-          
-          # 检查是否提交了敏感配置文件
-          if git ls-files | grep -E "(secrets|credentials|keys)\.(json|yaml|yml|toml)$" | head -10; then
-            echo "❌ ERROR: Sensitive configuration files detected in repository!"
-            echo "The following sensitive files were found:"
-            git ls-files | grep -E "(secrets|credentials|keys)\.(json|yaml|yml|toml)$" | head -20
-            echo ""
-            echo "Please remove these files and use environment variables or secure secret management."
-            exit 1
-          else
-            echo "✅ No sensitive configuration files found in repository"
-          fi
+          bad=$(git ls-files -z \
+            | xargs -0 -I{} bash -lc 'case "{}" in \
+              *.example*|*.sample*|docs/*|**/fixtures/*) ;; \
+              .env|.env.*|*.pem|*.p12|*.key|id_rsa|id_dsa|.aws/credentials) echo "{}" ;; \
+              *) if [ -f "{}" ] && grep -I -qE "^(SECRET|TOKEN|PASSWORD|API_KEY|ACCESS_KEY|PRIVATE_KEY)=" "{}"; then echo "{}"; fi ;; \
+            esac')
+          if [ -n "$bad" ]; then echo "Sensitive files detected:" && echo "$bad" && exit 1; fi
+          echo "No sensitive env files"
 
   # 单元测试
   test:

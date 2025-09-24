@@ -153,7 +153,7 @@ describe('Onboarding合同统一测试', () => {
 
     it('应该正确验证步骤5（设备）', () => {
       const step5Data = {
-        equipment: ['bodyweight', 'dumbbells']
+        equipment: ['bodyweight', 'dumbbells'] as string[]
       } as const;
 
       expect(validateOnboardingStep(5, step5Data)).toBe(true);
@@ -162,7 +162,7 @@ describe('Onboarding合同统一测试', () => {
 
     it('应该正确验证步骤6（恢复习惯）', () => {
       const step6Data = {
-        recoveryHabits: ['stretching', 'massage']
+        recoveryHabits: ['stretching', 'massage'] as string[]
       } as const;
 
       expect(validateOnboardingStep(6, step6Data)).toBe(true);
@@ -195,8 +195,8 @@ describe('Onboarding合同统一测试', () => {
         competitionDate: '2024-06-01T00:00:00Z',
         availabilityDays: 3,
         weeklyGoalDays: 4,
-        equipment: ['bodyweight'],
-        recoveryHabits: ['stretching']
+        equipment: ['bodyweight'] as string[],
+        recoveryHabits: ['stretching'] as string[]
       } as const;
       const completeProgress = getStepProgress(completeData);
       expect(completeProgress.current).toBe(6);

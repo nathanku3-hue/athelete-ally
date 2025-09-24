@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "paths<<EOF" >> $GITHUB_OUTPUT
           # Find all package-lock.json files (tracked and untracked)
-          find . -name "package-lock.json" -not -path "./node_modules/*" | head -20
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
@@ -78,7 +78,7 @@ jobs:
         run: |
           echo "paths<<EOF" >> $GITHUB_OUTPUT
           # Find all package-lock.json files (tracked and untracked)
-          find . -name "package-lock.json" -not -path "./node_modules/*" | head -20
+          git ls-files **/package-lock.json || find . -name "package-lock.json" -not -path "./node_modules/*"
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
@@ -220,8 +220,7 @@ jobs:
     needs: [test, build, docker]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    environment: 
-      name: production
+    environment: production
     steps:
       - name: Deployment context summary
         run: |
