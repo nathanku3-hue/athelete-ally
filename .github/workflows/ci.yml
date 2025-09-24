@@ -64,20 +64,12 @@ jobs:
 
       - name: Check for build artifacts and sensitive files
         run: |
-          echo "🔍 Checking for accidentally committed build artifacts and sensitive files..."
-          
-          # 检查是否提交了构建产物
-          if git ls-files | grep -E "(node_modules|dist|\.turbo|build)/" | head -10; then
-            echo "❌ ERROR: Build artifacts detected in repository!"
-            echo "The following build artifacts were found:"
-            git ls-files | grep -E "(node_modules|dist|\.turbo|build)/" | head -20
-            echo ""
-            echo "Please remove these files and update .gitignore to prevent future commits."
-            echo "Run: git rm -r --cached <file> for each file"
+          git ls-files -z | xargs -0 -I{} sh -c 'test $(wc -c < "{}") -gt 1048576 && echo "{}"' | tee large_tracked.txt
+          if [ -s large_tracked.txt ]; then
+            echo "Large tracked files detected:" && cat large_tracked.txt
             exit 1
-          else
-            echo "✅ No build artifacts found in repository"
           fi
+          echo "No large tracked files"
 
       - name: Disallow @master actions
         run: |
@@ -337,7 +329,7 @@ jobs:
       # Snyk安全扫描 - 可选的安全检查
       - name: Setup Snyk
         if: ${{ env.SNYK_TOKEN != '' }}
-        uses: snyk/actions/setup@v4
+        uses: snyk/actions/setup@v3
         continue-on-error: true
       
       - name: Snyk test

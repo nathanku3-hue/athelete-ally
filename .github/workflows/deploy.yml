@@ -122,7 +122,7 @@ jobs:
 
       - name: Setup Snyk
         if: ${{ env.SNYK_TOKEN != '' }}
-        uses: snyk/actions/setup@v4
+        uses: snyk/actions/setup@v3
         continue-on-error: true
       
       - name: Snyk test

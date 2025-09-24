@@ -25,7 +25,11 @@ module.exports = {
   
   // Module resolution for monorepo packages
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/apps/frontend/src/$1',
+    '^@components/(.*)$': '<rootDir>/apps/frontend/src/components/$1',
+    '^@contexts/(.*)$': '<rootDir>/apps/frontend/src/contexts/$1',
+    '^@lib/(.*)$': '<rootDir>/apps/frontend/src/lib/$1',
+    '^@hooks/(.*)$': '<rootDir>/apps/frontend/src/hooks/$1',
     '^@packages/(.*)$': '<rootDir>/packages/$1',
     '^@services/(.*)$': '<rootDir>/services/$1',
     '^@apps/(.*)$': '<rootDir>/apps/$1',
@@ -34,6 +38,7 @@ module.exports = {
     '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/events/$1',
     '^@athlete-ally/shared/(.*)$': '<rootDir>/packages/shared/src/$1',
     '^@athlete-ally/shared-types/(.*)$': '<rootDir>/packages/shared-types/src/$1',
+    '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
     '^@athlete-ally/protocol-types/(.*)$': '<rootDir>/packages/protocol-types/src/$1'
   },
   

@@ -100,10 +100,10 @@ tmp/
 services/*/prisma/generated/
 services/*/prisma/generated/**
 
-# Offline artifacts (do not commit)
+# Offline artifacts (exact names only)
 autonomous_session.bundle
 autonomous_session.patch
 
-# Command output artifacts (do not commit)
+# Command output artifacts (exact patterns)
 tatus --porcelain
-cripts -Name *start-*.ps1* | Sort-Object
+cripts -Name start-*.ps1* | Sort-Object
