@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
@@ -216,8 +216,11 @@ jobs:
           fi
           echo "✅ 配置验证完成"
 
-      - name: Run tests
-        run: npx turbo run test
+      - name: Run tests (layered configs)
+        run: |
+          echo "🧪 Running tests with layered Jest configs..."
+          npm run test:frontend
+          npm run test:services
 
   # 合同校验
   contracts:
@@ -605,7 +608,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
 
       - name: Install dependencies (npm ci)
         run: npm ci
