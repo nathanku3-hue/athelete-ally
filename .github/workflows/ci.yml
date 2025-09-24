@@ -338,18 +338,18 @@ jobs:
       - name: Run dependency check
         run: npx audit-ci --config audit-ci.json || true
 
-        # Snyk安全扫描 - 可选的安全检查
-        - name: Install Snyk CLI
-          if: ${{ env.SNYK_TOKEN != '' }}
-          run: npm i -g snyk@latest
-          continue-on-error: true
+      # Snyk安全扫描 - 可选的安全检查
+      - name: Install Snyk CLI
+        if: ${{ env.SNYK_TOKEN != '' }}
+        run: npm i -g snyk@latest
+        continue-on-error: true
 
-        - name: Snyk test
-          if: ${{ env.SNYK_TOKEN != '' }}
-          run: snyk test --severity-threshold=high --exclude=dist,.turbo,coverage,.next,prisma/generated
-          env:
-            SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
-          continue-on-error: true
+      - name: Snyk test
+        if: ${{ env.SNYK_TOKEN != '' }}
+        run: snyk test --severity-threshold=high --exclude=dist,.turbo,coverage,.next,prisma/generated
+        env:
+          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+        continue-on-error: true
 
       - name: Check for high-risk dependencies
         run: |
