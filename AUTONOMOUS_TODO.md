@@ -31,6 +31,6 @@
 | 2 | **Consolidate Dockerfile** | [x] Done | The `Dockerfile` has a single, monorepo-aware, Node 20 build stage. | `Dockerfile` (and `Dockerfile.production`) updated. (07a9389) |
 | 3 | **Fix Pre-commit Hook Path** | [x] Done | Pre-commit hooks are correctly configured and run. | `.githooks/pre-commit` present; `git config core.hooksPath .githooks`. (config active) |
 | 4 | **Perform `README.md` Polish** | [x] Done | `README.md` updated; all links valid. | `README.md` and `docs/README.md` updated. (a9234ff) |
-| 5 | **Final CI Hygiene Pass** | [ ] To Do | All workflows use Node 20 and `npm ci`; actions bumped to `@v4` where applicable. | `.github/workflows/*` updated. |
+| 5 | **Final CI Hygiene Pass** | [x] Done | All workflows use Node 20 and `npm ci`; actions bumped to `@v4` where applicable. | `.github/workflows/*` updated (fcf7d57). |
 
 ---
