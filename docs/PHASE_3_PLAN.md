@@ -49,10 +49,14 @@ Data Model (normalized)
 Base: /api/v1
 
 Public (authenticated)
-- GET /readiness/today -> { readiness, drivers: ["hrv_low","sleep_debt"], updatedAt }
-- GET /sleep/summary?from=YYYY-MM-DD&to=YYYY-MM-DD -> array of sleep_daily
+- GET /readiness/today
+  - 200: { readiness: number(0..100), drivers: string[], updatedAt: ISO8601 }
+- GET /sleep/summary?from=YYYY-MM-DD&to=YYYY-MM-DD
+  - 200: sleep_daily[]
 - POST /connections/:vendor/link (start OAuth)
+  - 201: { authUrl: string }
 - DELETE /connections/:vendor (revoke)
+  - 204: {}
 
 Internal (service-to-service)
 - POST /ingest/hrv -> { userId, date, rMSSD, lnRMSSD, vendor }
@@ -60,6 +64,11 @@ Internal (service-to-service)
 
 Security
 - OAuth2/OIDC for vendor linking; signed ingest messages over NATS; RBAC for coach views.
+
+Schemas (canonical)
+- Readiness: { readiness: number, drivers: string[], updatedAt: string }
+- HRV Daily: { userId: string, date: string(YYYY-MM-DD), rMSSD?: number, lnRMSSD?: number, readinessScore?: number, vendor: string, capturedAt: string }
+- Sleep Daily: { userId: string, date: string, durationMin: number, efficiencyPct?: number, latencyMin?: number, wakeCount?: number, vendor: string, capturedAt: string }
 
 ## 5. Proposed Architecture
 New services (suggested)
@@ -70,6 +79,12 @@ New services (suggested)
 Data
 - PostgreSQL for canonical tables; optional Timeseries (e.g., Timescale) for trend queries.
 - NATS for events: vendor.data.received, data.normalized, insights.updated
+
+Sequence (HRV)
+1) Vendor webhook -> ingest-service (verify, enqueue vendor.data.received)
+2) normalize-service consumes -> writes hrv_daily (idempotent key: userId+date+vendor) -> emits data.normalized
+3) insights-engine consumes -> computes readiness -> emits insights.updated -> persists readiness snapshot
+4) API gateway surfaces /readiness/today using latest snapshot
 
 Observability
 - Tracing (OpenTelemetry), dashboards for ingest lag, normalization failures, and insights coverage.
@@ -103,4 +118,3 @@ Weeks 7–8: Hardening (observability, backfill, privacy controls) + pilot
 
 ## 9. Rollout & Success Metrics
 - Pilot cohort N=20; ≥85% daily readiness coverage; ≥10% plan adherence improvement vs. baseline.
-
