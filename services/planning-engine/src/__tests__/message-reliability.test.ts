@@ -1,3 +1,4 @@
+/* @jest-environment node */
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EventProcessor } from '../events/processor.js';
@@ -11,8 +12,8 @@ describe('Message Reliability Tests', () => {
     eventProcessor = new EventProcessor();
     
     // 模拟连接
-    vi.spyOn(eventBus, 'connect').mockResolvedValue(undefined);
-    vi.spyOn(eventProcessor, 'connect').mockResolvedValue(undefined);
+    jest.spyOn(eventBus, 'connect').mockResolvedValue(undefined);
+    jest.spyOn(eventProcessor, 'connect').mockResolvedValue(undefined);
   });
 
   afterEach(async () => {
@@ -27,16 +28,16 @@ describe('Message Reliability Tests', () => {
           eventId: `event-${i}`, 
           userId: `user-${i}` 
         })),
-        ack: vi.fn(),
-        nak: vi.fn()
+        ack: jest.fn(),
+        nak: jest.fn()
       }));
 
-      const mockFetch = vi.fn()
+      const mockFetch = jest.fn()
         .mockResolvedValueOnce(mockMessages.slice(0, 5))
         .mockResolvedValueOnce(mockMessages.slice(5, 10))
         .mockResolvedValue([]);
 
-      const mockPullSubscribe = vi.fn().mockResolvedValue({
+      const mockPullSubscribe = jest.fn().mockResolvedValue({
         fetch: mockFetch
       });
 
@@ -49,7 +50,7 @@ describe('Message Reliability Tests', () => {
       (eventBus as any).js = mockJs;
 
       const processedEvents: any[] = [];
-      const handler = vi.fn().mockImplementation((event) => {
+      const handler = jest.fn().mockImplementation((event) => {
         processedEvents.push(event);
         return Promise.resolve();
       });
@@ -71,23 +72,23 @@ describe('Message Reliability Tests', () => {
             eventId: 'valid-event', 
             userId: 'user-1' 
           })),
-          ack: vi.fn(),
-          nak: vi.fn()
+          ack: jest.fn(),
+          nak: jest.fn()
         },
         {
           data: new TextEncoder().encode(JSON.stringify({ 
             eventId: 'invalid-event' // 缺少userId
           })),
-          ack: vi.fn(),
-          nak: vi.fn()
+          ack: jest.fn(),
+          nak: jest.fn()
         }
       ];
 
-      const mockFetch = vi.fn()
+      const mockFetch = jest.fn()
         .mockResolvedValueOnce(mockMessages)
         .mockResolvedValue([]);
 
-      const mockPullSubscribe = vi.fn().mockResolvedValue({
+      const mockPullSubscribe = jest.fn().mockResolvedValue({
         fetch: mockFetch
       });
 
@@ -98,7 +99,7 @@ describe('Message Reliability Tests', () => {
       const eventBus = new EventBus();
       (eventBus as any).js = mockJs;
 
-      const handler = vi.fn().mockResolvedValue(undefined);
+      const handler = jest.fn().mockResolvedValue(undefined);
 
       await eventBus.subscribeToOnboardingCompleted(handler);
 
@@ -116,7 +117,7 @@ describe('Message Reliability Tests', () => {
       const eventProcessor = new EventProcessor();
       
       // 模拟长时间运行的处理函数
-      const handler = vi.fn().mockImplementation(() => 
+      const handler = jest.fn().mockImplementation(() => 
         new Promise(resolve => setTimeout(resolve, 100))
       );
 
@@ -147,7 +148,7 @@ describe('Message Reliability Tests', () => {
       const maxConcurrent = 1;
       const eventProcessor = new EventProcessor();
       
-      const handler = vi.fn().mockImplementation(() => 
+      const handler = jest.fn().mockImplementation(() => 
         new Promise(resolve => setTimeout(resolve, 50))
       );
 
@@ -182,8 +183,8 @@ describe('Message Reliability Tests', () => {
           eventId: 'retry-event', 
           userId: 'user-1' 
         })),
-        ack: vi.fn(),
-        nak: vi.fn()
+        ack: jest.fn(),
+        nak: jest.fn()
       };
 
       const eventBus = new EventBus();

@@ -379,3 +379,76 @@
  TAB ...................................... Complete filename & cycle.
  SHIFT-TAB ...................... ESC-TAB   Complete filename & reverse cycle.
  ctrl-L ................................... Complete filename, list all.
+name: Frontend Harness Check (jsdom)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harness:
+    name: Frontend Single-Spec (PlanCard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Sanity: print ref and verify lock contains jsdom env
+        run: |
+          echo "=== GIT BRANCH VERIFICATION ==="
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Latest commit: $(git log -1 --oneline)"
+          echo "=== PACKAGE-LOCK.JSON VERIFICATION ==="
+          echo "Lock file size: $(wc -c < package-lock.json) bytes"
+          echo "Lock file last modified: $(stat -c %y package-lock.json)"
+          echo "=== CHECKING JSDOM DEPENDENCIES ==="
+          grep -q '"jest-environment-jsdom"' package-lock.json && echo "✅ Lock includes jest-environment-jsdom" || echo "❌ Lock missing jest-environment-jsdom"
+          grep -q '"jsdom"' package-lock.json && echo "✅ Lock includes jsdom" || echo "❌ Lock missing jsdom"
+          grep -q '"@types/jsdom"' package-lock.json && echo "✅ Lock includes @types/jsdom" || echo "❌ Lock missing @types/jsdom"
+          echo "=== PACKAGE.JSON VERIFICATION ==="
+          grep -q '"jest-environment-jsdom"' package.json && echo "✅ package.json includes jest-environment-jsdom" || echo "❌ package.json missing jest-environment-jsdom"
+          grep -q '"jsdom"' package.json && echo "✅ package.json includes jsdom" || echo "❌ package.json missing jsdom"
+          grep -q '"@types/jsdom"' package.json && echo "✅ package.json includes @types/jsdom" || echo "❌ package.json missing @types/jsdom"
+
+      - name: Discover lockfiles
+        id: locks
+        run: |
+          echo "paths<<EOF" >> $GITHUB_OUTPUT
+          git ls-files **/package-lock.json
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Setup Node 20 (no cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ${{ steps.locks.outputs.paths }}
+
+      - name: Force fresh install (no cache)
+        run: |
+          echo "=== Removing all npm cache and node_modules ==="
+          rm -rf node_modules
+          rm -rf ~/.npm
+          npm cache clean --force
+          echo "=== Installing with npm install (not ci) ==="
+          npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Print Jest version
+        run: npx jest --version
+
+      - name: Run single frontend spec (jsdom)
+        run: |
+          npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+            --runInBand --verbose --detectOpenHandles --forceExit
+

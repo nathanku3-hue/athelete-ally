@@ -32,8 +32,7 @@ module.exports = {
   moduleNameMapper: {
     // TS base paths (prefix rootDir)
     ...pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' }),
-    // Shims/legacy mappings left intentionally while migrating legacy tests
-    '^vitest$': '<rootDir>/tests/_shims/vitest.ts',
+    // Legacy mappings for test stubs
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
     '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts'
   },

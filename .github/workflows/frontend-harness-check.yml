@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   harness:
-    name: Frontend Single-Spec (PlanCard)
+    name: Frontend Multi-Spec (PlanCard + useTrainingQueries)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -72,7 +72,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ steps.locks.outputs.paths }}
+          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
 
       - name: Force fresh install (no cache)
         run: |
@@ -86,8 +86,9 @@ jobs:
       - name: Print Jest version
         run: npx jest --version
 
-      - name: Run single frontend spec (jsdom)
+      - name: Run frontend specs (jsdom)
         run: |
           npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+            apps/frontend/src/__tests__/hooks/useTrainingQueries.test.tsx \
             --runInBand --verbose --detectOpenHandles --forceExit
 

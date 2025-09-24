@@ -1,3 +1,4 @@
+/* @jest-environment node */
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { EventProcessor } from '../events/processor.js';
 import { JetStreamConsumer } from '../events/jetstream-consumer.js';
@@ -21,13 +22,13 @@ describe('Planning Engine Reliability Tests', () => {
     it('should handle batch processing correctly', async () => {
       // 模拟JetStream消费者
       const mockConsumer = {
-        fetch: vi.fn().mockResolvedValue([
-          { data: new TextEncoder().encode(JSON.stringify({ eventId: '1', userId: 'user1' })), ack: vi.fn(), nak: vi.fn() },
-          { data: new TextEncoder().encode(JSON.stringify({ eventId: '2', userId: 'user2' })), ack: vi.fn(), nak: vi.fn() }
+        fetch: jest.fn().mockResolvedValue([
+          { data: new TextEncoder().encode(JSON.stringify({ eventId: '1', userId: 'user1' })), ack: jest.fn(), nak: jest.fn() },
+          { data: new TextEncoder().encode(JSON.stringify({ eventId: '2', userId: 'user2' })), ack: jest.fn(), nak: jest.fn() }
         ])
       };
 
-      const handler = vi.fn().mockResolvedValue(undefined);
+      const handler = jest.fn().mockResolvedValue(undefined);
       
       // 测试批处理
       const consumer = new JetStreamConsumer(null as any, null as any, null as any);
@@ -47,8 +48,8 @@ describe('Planning Engine Reliability Tests', () => {
     it('should retry failed messages appropriately', async () => {
       const mockMessage = {
         data: new TextEncoder().encode(JSON.stringify({ eventId: '1', userId: 'user1' })),
-        ack: vi.fn(),
-        nak: vi.fn()
+        ack: jest.fn(),
+        nak: jest.fn()
       };
 
       const consumer = new JetStreamConsumer(null as any, null as any, null as any);
@@ -67,7 +68,7 @@ describe('Planning Engine Reliability Tests', () => {
       const maxConcurrent = 2;
       concurrencyController.setMaxConcurrency('test', maxConcurrent);
       
-      const handler = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      const handler = jest.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
       
       // 启动多个并发任务
       const promises = [];
@@ -87,7 +88,7 @@ describe('Planning Engine Reliability Tests', () => {
       const maxConcurrent = 1;
       concurrencyController.setMaxConcurrency('test', maxConcurrent);
       
-      const handler = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)));
+      const handler = jest.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)));
       
       // 启动多个任务
       const promises = [];
@@ -105,7 +106,7 @@ describe('Planning Engine Reliability Tests', () => {
 
   describe('Event Processing', () => {
     it('should handle events with proper error recovery', async () => {
-      const handler = vi.fn()
+      const handler = jest.fn()
         .mockRejectedValueOnce(new Error('Temporary error'))
         .mockResolvedValue(undefined);
       
@@ -125,7 +126,7 @@ describe('Planning Engine Reliability Tests', () => {
       const maxConcurrent = 2;
       concurrencyController.setMaxConcurrency('test', maxConcurrent);
       
-      const handler = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      const handler = jest.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
       
       // 启动任务
       const task = { data: { id: 1 }, retries: 0, maxRetries: 3, createdAt: new Date() };
