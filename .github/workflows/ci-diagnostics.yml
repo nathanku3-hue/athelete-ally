@@ -8,8 +8,8 @@ on:
     branches: [ main ]
 
 env:
-  # 匹配项目中的.nvmrc文件
-  NODE_VERSION: '18.20.4'
+  # Align to .nvmrc
+  NODE_VERSION: '20.18.0'
   NPM_VERSION: '10.9.3'
 
 jobs:
