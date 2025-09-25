@@ -28,6 +28,8 @@ RUN apk add --no-cache openssl
 COPY --from=builder /app/apps/gateway-bff/dist ./dist
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
+# 拷貝 OpenAPI 規格文件
+COPY --from=builder /app/packages/contracts/openapi.yaml ./openapi.yaml
 # 僅安裝生產依賴
 RUN npm ci --production
 
