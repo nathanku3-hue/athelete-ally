@@ -30,6 +30,32 @@ const eslintConfig = [
   },
   {
     files: ["**/__tests__/**/*.ts", "**/__tests__/**/*.js", "**/*.test.ts", "**/*.test.js"],
+    languageOptions: {
+      globals: {
+        jest: true,
+        describe: true,
+        it: true,
+        expect: true,
+        beforeAll: true,
+        afterAll: true,
+        beforeEach: true,
+        afterEach: true,
+        process: true,
+        console: true,
+        Buffer: true,
+        setTimeout: true,
+        setInterval: true,
+        clearTimeout: true,
+        clearInterval: true,
+        fetch: true,
+        global: true,
+        __dirname: true,
+        __filename: true,
+        module: true,
+        require: true,
+        exports: true
+      }
+    },
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "import/no-commonjs": "off",

@@ -1,11 +1,8 @@
 // Planning Engine 性能测试
 // Jest globals are available without import
 // 模拟导入 - 在测试环境中使用模拟实现
-// import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.js';
-// import { DatabaseOptimizer } from '../../optimization/database-optimizer.js';
-// import { ConcurrencyController } from '../../concurrency/controller.js';
-// import { EventPublisher } from '../../events/publisher.js';
-// import { config } from '../../config.js';
+import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.ts';
+import { ConcurrencyController } from '../../concurrency/controller.ts';
 
 // 模拟Redis客户端
 class MockRedis {
@@ -40,6 +37,13 @@ class MockRedis {
 class MockEventPublisher {
   async publishPlanGenerated(event: any): Promise<void> {
     console.log('Mock: Publishing plan generated event', event.eventId);
+  }
+}
+
+// 模拟数据库优化器
+class DatabaseOptimizer {
+  async batchUpdateStatus(updates: any[]): Promise<void> {
+    // 模拟批量更新
   }
 }
 

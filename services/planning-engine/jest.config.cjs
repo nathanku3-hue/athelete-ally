@@ -20,7 +20,7 @@ module.exports = {
     // Handle .js imports in TypeScript files
     '^(\\.{1,2}/.*)\\.js$': '$1',
     // Fix @athlete-ally package mapping
-    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
+    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
   
   // Ensure proper ESM handling
