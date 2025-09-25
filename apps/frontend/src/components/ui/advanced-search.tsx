@@ -106,6 +106,8 @@ export function AdvancedSearch({
 
             const displayValue = Array.isArray(value) 
               ? value.join(', ') 
+              : typeof value === 'object' && value !== null
+              ? `${value.min || ''}-${value.max || ''}`
               : value;
 
             return (
