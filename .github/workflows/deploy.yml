@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # 确保Node 20
+          node-version: '20.18.0'  # 确保Node 20.18.0
           cache: 'npm'
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
@@ -106,7 +106,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # 确保Node 20
+          node-version: '20.18.0'  # 确保Node 20.18.0
           cache: 'npm'
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
@@ -145,7 +145,7 @@ jobs:
       - name: Setup Node.js (Security)
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.18.0'
           cache: 'npm'
           cache-dependency-path: |
             package-lock.json
@@ -242,7 +242,7 @@ jobs:
     needs: [test, build, docker]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    environment: production
+    # environment: production  # Commented out - environment needs to be created in GitHub repo settings
     steps:
       - name: Deployment context summary
         run: |

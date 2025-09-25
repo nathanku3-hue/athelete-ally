@@ -1,0 +1,42 @@
+name: Generate Prisma Clients
+
+on:
+  workflow_call:
+
+jobs:
+  generate-prisma:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma clients
+        run: |
+          echo "🔧 Generating Prisma clients for all services..."
+          # Generate for planning-engine specifically
+          if [ -f "services/planning-engine/prisma/schema.prisma" ]; then
+            echo "Generating Prisma client for planning-engine..."
+            npm run db:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
+          fi
+          # Generate for other services
+          for service in services/*/; do
+            if [ -f "$service/prisma/schema.prisma" ] && [ "$service" != "services/planning-engine/" ]; then
+              echo "Generating Prisma client for $(basename "$service")..."
+              cd "$service"
+              npx prisma generate
+              cd - > /dev/null
+            fi
+          done
+          echo "✅ All Prisma clients generated"
