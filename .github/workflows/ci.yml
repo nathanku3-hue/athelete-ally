@@ -65,7 +65,16 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma clients
-        run: ./scripts/generate-prisma-clients.sh
+        run: |
+          set -euo pipefail
+          echo "🔍 Script diagnostics:"
+          ls -l scripts || true
+          ls -l scripts/generate-prisma-clients.sh || true
+          file scripts/generate-prisma-clients.sh || true
+          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
+          chmod +x scripts/generate-prisma-clients.sh
+          head -n1 scripts/generate-prisma-clients.sh || true
+          bash ./scripts/generate-prisma-clients.sh
 
       - name: Verify tsx availability
         run: npx tsx --version
@@ -155,25 +164,36 @@ jobs:
         run: npm install
 
       - name: Generate Prisma clients
-        run: ./scripts/generate-prisma-clients.sh
+        run: |
+          set -euo pipefail
+          echo "🔍 Script diagnostics:"
+          ls -l scripts || true
+          ls -l scripts/generate-prisma-clients.sh || true
+          file scripts/generate-prisma-clients.sh || true
+          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
+          chmod +x scripts/generate-prisma-clients.sh
+          head -n1 scripts/generate-prisma-clients.sh || true
+          bash ./scripts/generate-prisma-clients.sh
 
       - name: Validate configuration
         run: |
+          set -euo pipefail
           echo "🔍 验证环境配置..."
           # 检查必要的环境变量是否存在
-          if [ -z "$NODE_ENV" ]; then
+          if [ -z "${NODE_ENV:-}" ]; then
             export NODE_ENV=test
           fi
           echo "✅ 配置验证完成"
 
       - name: Start Frontend Service
         run: |
+          set -euo pipefail
           echo "🚀 Starting frontend service for tests..."
           cd apps/frontend
           npm run build
           npm start &
           FRONTEND_PID=$!
-          echo "FRONTEND_PID=$FRONTEND_PID" >> "$GITHUB_ENV"
+          echo "FRONTEND_PID=${FRONTEND_PID}" >> "${GITHUB_OUTPUT}"
           
           # Wait for frontend to be ready
           echo "⏳ Waiting for frontend service to be ready..."
@@ -182,12 +202,13 @@ jobs:
               echo "✅ Frontend service is ready!"
               break
             fi
-            echo "Waiting for frontend... (attempt $i/30)"
+            echo "Waiting for frontend... (attempt ${i}/30)"
             sleep 2
           done
 
       - name: CI Environment Diagnostics
         run: |
+          set -euo pipefail
           echo "🔍 CI Environment Diagnostics:"
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
@@ -198,6 +219,7 @@ jobs:
 
       - name: Planning Engine Jest Diagnostics
         run: |
+          set -euo pipefail
           echo "🔍 Planning Engine Jest Configuration:"
           npx jest --config services/planning-engine/jest.config.cjs --showConfig | head -n 50
           echo "📋 Planning Engine Test List:"
@@ -205,20 +227,23 @@ jobs:
 
       - name: Run Services Tests (Known Good Path)
         run: |
+          set -euo pipefail
           echo "🧪 Running services tests with known good configuration..."
           npm run test:services
 
       - name: Run Frontend Tests (Known Good Path)
         run: |
+          set -euo pipefail
           echo "🧪 Running frontend tests with known good configuration..."
           npm run test:frontend
 
       - name: Stop Frontend Service
         if: always()
         run: |
+          set -euo pipefail
           echo "🛑 Stopping frontend service..."
-          if [ -n "$FRONTEND_PID" ]; then
-            kill "$FRONTEND_PID" 2>/dev/null || true
+          if [ -n "${FRONTEND_PID:-}" ]; then
+            kill "${FRONTEND_PID}" 2>/dev/null || true
           fi
           # Kill any remaining node processes on port 3000
           lsof -ti:3000 | xargs kill -9 2>/dev/null || true
@@ -350,10 +375,20 @@ jobs:
         run: npm install
 
       - name: Generate Prisma clients
-        run: ./scripts/generate-prisma-clients.sh
+        run: |
+          set -euo pipefail
+          echo "🔍 Script diagnostics:"
+          ls -l scripts || true
+          ls -l scripts/generate-prisma-clients.sh || true
+          file scripts/generate-prisma-clients.sh || true
+          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
+          chmod +x scripts/generate-prisma-clients.sh
+          head -n1 scripts/generate-prisma-clients.sh || true
+          bash ./scripts/generate-prisma-clients.sh
 
       - name: Run tests via orchestrator (Non-Blocking)
         run: |
+          set -euo pipefail
           echo "🧪 Running tests via Jest orchestrator (non-blocking)..."
           echo "Node version: $(node -v)"
           echo "Jest version: $(npx jest --version)"
