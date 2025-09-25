@@ -14,12 +14,13 @@ module.exports = {
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
     '^@athlete-ally/contracts/events/(.*)$': '<rootDir>/packages/contracts/events/$1',
     '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/$1',
-    // Handle .js imports in TypeScript files (ESM compatibility)
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    // Legacy shims removed after Vitest→Jest migration
-    '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
+    // Specific llm.js mappings (must come before generic .js mapping)
     '^(\\.\\./)*services/planning-engine/src/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts',
     '^(\\.\\./)*services/planning-engine/src/llm$': '<rootDir>/services/planning-engine/src/llm.ts',
+    // Legacy shims removed after Vitest→Jest migration
+    '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
+    // Handle .js imports in TypeScript files (ESM compatibility) - must come after specific mappings
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     // Generic @athlete-ally package mapping (must come last)
     '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
     // ESM imports resolved by ts-jest automatically (after specific mappings)

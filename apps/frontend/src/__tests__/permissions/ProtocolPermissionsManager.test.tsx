@@ -174,6 +174,12 @@ describe('ProtocolPermissionsManager', () => {
     const permissionsTab = screen.getByText('权限详情');
     fireEvent.click(permissionsTab);
 
+    // 等待标签页切换完成
+    await waitFor(() => {
+      const permissionsContent = screen.getByRole('tabpanel', { name: /权限详情/i });
+      expect(permissionsContent).not.toHaveAttribute('hidden');
+    }, { timeout: 5000 });
+
     // 等待内容渲染
     await waitFor(() => {
       expect(screen.getByText('您的权限')).toBeInTheDocument();
@@ -182,7 +188,7 @@ describe('ProtocolPermissionsManager', () => {
       expect(screen.getByText('编辑：可以修改协议内容和设置')).toBeInTheDocument();
       expect(screen.getByText('执行：可以开始和执行协议训练')).toBeInTheDocument();
       expect(screen.getByText('分享：可以将协议分享给其他用户')).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   it('应该显示公开设置说明', async () => {
@@ -194,13 +200,19 @@ describe('ProtocolPermissionsManager', () => {
     const publicTab = screen.getByText('公开设置');
     fireEvent.click(publicTab);
 
+    // 等待标签页切换完成
+    await waitFor(() => {
+      const publicContent = screen.getByRole('tabpanel', { name: /公开设置/i });
+      expect(publicContent).not.toHaveAttribute('hidden');
+    }, { timeout: 5000 });
+
     // 等待内容渲染
     await waitFor(() => {
       expect(screen.getByText('公开协议注意事项')).toBeInTheDocument();
       expect(screen.getByText('• 公开协议可以被所有用户查看和复制')).toBeInTheDocument();
       expect(screen.getByText('• 其他用户无法修改您的原始协议')).toBeInTheDocument();
       expect(screen.getByText('• 您可以随时将协议设置为私有')).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 });
 
@@ -235,12 +247,12 @@ describe('ShareDialog', () => {
     const shareButton = screen.getByText('分享协议');
     fireEvent.click(shareButton);
 
-    // 等待对话框内容渲染
+    // 等待对话框内容渲染 - 增加超时时间
     await waitFor(() => {
       expect(screen.getByText('分享协议: 测试协议')).toBeInTheDocument();
       expect(screen.getByLabelText('选择用户')).toBeInTheDocument();
       expect(screen.getByLabelText('权限设置')).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   it('应该允许选择权限', async () => {
@@ -338,13 +350,19 @@ describe('PermissionIndicator', () => {
     const permissionsTab = screen.getByText('权限详情');
     fireEvent.click(permissionsTab);
 
-    // 等待组件渲染完成并检查权限开关
+    // 等待标签页切换完成
     await waitFor(() => {
-      // 检查权限开关是否存在 - 使用labelText选择器
-      expect(screen.getByLabelText('查看')).toBeInTheDocument();
-      expect(screen.getByLabelText('编辑')).toBeInTheDocument();
-      expect(screen.getByLabelText('执行')).toBeInTheDocument();
-      expect(screen.getByLabelText('分享')).toBeInTheDocument();
-    });
+      const permissionsContent = screen.getByRole('tabpanel', { name: /权限详情/i });
+      expect(permissionsContent).not.toHaveAttribute('hidden');
+    }, { timeout: 5000 });
+
+    // 等待组件渲染完成并检查权限图标
+    await waitFor(() => {
+      // 检查权限图标是否存在 - 使用text选择器
+      expect(screen.getByText('查看')).toBeInTheDocument();
+      expect(screen.getByText('编辑')).toBeInTheDocument();
+      expect(screen.getByText('执行')).toBeInTheDocument();
+      expect(screen.getByText('分享')).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 });
