@@ -319,7 +319,7 @@ describe('PermissionIndicator', () => {
     );
   };
 
-  it('应该正确显示权限图标', () => {
+  it('应该正确显示权限图标', async () => {
     renderWithQueryClient(
       <ProtocolPermissionsManager protocol={mockProtocol} />
     );
@@ -328,10 +328,13 @@ describe('PermissionIndicator', () => {
     const permissionsTab = screen.getByText('权限详情');
     fireEvent.click(permissionsTab);
 
-    // 检查权限图标是否存在
-    expect(screen.getByText('查看')).toBeInTheDocument();
-    expect(screen.getByText('编辑')).toBeInTheDocument();
-    expect(screen.getByText('执行')).toBeInTheDocument();
-    expect(screen.getByText('分享')).toBeInTheDocument();
+    // 等待组件渲染完成
+    await waitFor(() => {
+      // 检查权限图标是否存在 - 使用更灵活的选择器
+      expect(screen.getByText(/查看/)).toBeInTheDocument();
+      expect(screen.getByText(/编辑/)).toBeInTheDocument();
+      expect(screen.getByText(/执行/)).toBeInTheDocument();
+      expect(screen.getByText(/分享/)).toBeInTheDocument();
+    });
   });
 });

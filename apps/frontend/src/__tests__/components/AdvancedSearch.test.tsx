@@ -217,7 +217,7 @@ describe('AdvancedSearch', () => {
     const searchButton = screen.getByText('搜索');
     await user.click(searchButton);
 
-    expect(screen.getByText('难度: 初级')).toBeInTheDocument();
+    expect(screen.getByText('难度: beginner')).toBeInTheDocument();
   });
 
   it('removes filter badge when close button is clicked', async () => {

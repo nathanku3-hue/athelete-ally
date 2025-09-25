@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies (root level)
         run: npm ci
       
+      - name: Build event-bus package
+        run: npm run build -w packages/event-bus
+      
       - name: Run linting (workspace)
         run: npm run lint -w services/planning-engine
       

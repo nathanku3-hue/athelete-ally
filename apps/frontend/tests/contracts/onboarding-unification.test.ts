@@ -269,7 +269,7 @@ describe('Onboarding合同统一测试', () => {
       
       const errorMessages = result.error?.errors.map(e => e.message);
       expect(errorMessages).toContain('Invalid user ID format');
-      expect(errorMessages).toContain('Invalid enum value');
+      expect(errorMessages).toContain('Invalid enum value. Expected');
       expect(errorMessages).toContain('Number must be less than or equal to 7');
     });
 

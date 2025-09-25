@@ -18,7 +18,7 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     // Legacy shims removed after Vitest→Jest migration
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
-    '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts',
+    '^(\\.\\./)*services/planning-engine/src/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts',
     // Generic @athlete-ally package mapping (must come last)
     '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
     // ESM imports resolved by ts-jest automatically (after specific mappings)
