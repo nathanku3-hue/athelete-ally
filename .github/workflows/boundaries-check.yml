@@ -60,7 +60,7 @@ jobs:
           
           # Run ESLint with error-level boundary rules on changed files only
           echo "🚨 Running strict boundary checks on changed files..."
-          npx eslint $CHANGED_FILES \
+          npx eslint "$CHANGED_FILES" \
             --rule "import/no-internal-modules: error" \
             --rule "no-restricted-imports: error" \
             --format=compact

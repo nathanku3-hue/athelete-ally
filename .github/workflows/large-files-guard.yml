@@ -47,7 +47,7 @@ jobs:
           echo "🔍 Checking for files larger than 1MB..."
           
           # Find all tracked files larger than 1MB
-          LARGE_FILES=$(git ls-files | xargs -I {} sh -c 'if [ -f "{}" ] && [ $(stat -c%s "{}" 2>/dev/null || echo 0) -gt 1048576 ]; then echo "{}"; fi' | grep -v '^$' || true)
+          LARGE_FILES=$(git ls-files | xargs -I {} sh -c "if [ -f \"{}\" ] && [ \$(stat -c%s \"{}\" 2>/dev/null || echo 0) -gt 1048576 ]; then echo \"{}\"; fi" | grep -v '^$' || true)
           
           if [ -n "$LARGE_FILES" ]; then
             echo "❌ Found large tracked files:"
