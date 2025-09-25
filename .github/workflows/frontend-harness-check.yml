@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Force fresh install (no cache)
         run: |

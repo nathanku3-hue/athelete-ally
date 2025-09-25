@@ -9,7 +9,7 @@ on:
 
 env:
   # Align to .nvmrc
-  NODE_VERSION: '20.18.0'
+  NODE_VERSION: '20'
   NPM_VERSION: '10.9.3'
 
 jobs:

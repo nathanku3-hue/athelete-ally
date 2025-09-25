@@ -1,0 +1,22 @@
+From 053caa5256cdaa501188ac8f29482d88a068b9b1 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Thu, 25 Sep 2025 02:58:19 +0800
+Subject: docs(ci-debug): progress note added to AUTONOMOUS_TODO.md
+
+---
+ AUTONOMOUS_TODO.md | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/AUTONOMOUS_TODO.md b/AUTONOMOUS_TODO.md
+index 6cdf0a9..f8f8be1 100644
+--- a/AUTONOMOUS_TODO.md
++++ b/AUTONOMOUS_TODO.md
+@@ -47,3 +47,5 @@
+ ---
+ 
+ > Session note (ci-debug init): 2025-09-25 02:55:45 +08:00
++
++- Progress: Initial static validation completed; actionlint report saved at reports/actionlint/report.txt. Next: monitor CI run for fix/ci-debug and iterate.
+-- 
+2.50.0.windows.1
+
