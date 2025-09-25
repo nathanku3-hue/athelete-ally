@@ -10,16 +10,19 @@ module.exports = {
 
   // Unify module resolution from TS paths
   moduleNameMapper: {
-    // ESM imports resolved by ts-jest automatically
-    ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })),
     // Specific @athlete-ally package mappings (must come before generic mapping)
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
-    '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/events/$1',
+    '^@athlete-ally/contracts/events/(.*)$': '<rootDir>/packages/contracts/events/$1',
+    '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/$1',
     // Handle .js imports in TypeScript files (ESM compatibility)
     '^(\\.{1,2}/.*)\\.js$': '$1',
     // Legacy shims removed after Vitest→Jest migration
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
-    '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts'
+    '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts',
+    // Generic @athlete-ally package mapping (must come last)
+    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
+    // ESM imports resolved by ts-jest automatically (after specific mappings)
+    ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' }))
   },
 
   // TypeScript transform aligned to monorepo tsconfig paths
@@ -39,12 +42,7 @@ module.exports = {
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
   
-  // Enable ESM support for Jest
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
-  },
+  // Enable ESM support for Jest (moved to transform config)
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
 
   testTimeout: 15000,
