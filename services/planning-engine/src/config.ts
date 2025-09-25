@@ -3,8 +3,8 @@ import { z } from 'zod';
 const EnvSchema = z.object({
   NODE_ENV: z.string().default('development'),
   PORT: z.string().transform((v) => Number(v)).default('4102'),
-  PLANNING_DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().url(),
+  PLANNING_DATABASE_URL: z.string().url().optional().default('postgresql://test:test@localhost:5432/test_planning'),
+  REDIS_URL: z.string().url().optional().default('redis://localhost:6379'),
   OPENAI_API_KEY: z.string().optional(),
   
   // 监控配置

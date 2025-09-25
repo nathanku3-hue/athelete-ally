@@ -1,5 +1,42 @@
 // Planning Engine 性能测试
 // Jest globals are available without import
+
+// Mock Prisma client to avoid initialization in unit tests
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn(() => ({
+    $connect: jest.fn(),
+    $disconnect: jest.fn(),
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    trainingPlan: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+    },
+  })),
+}));
+
+// Mock database module
+jest.mock('../../db.ts', () => ({
+  prisma: {
+    $connect: jest.fn(),
+    $disconnect: jest.fn(),
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    trainingPlan: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+    },
+  },
+}));
+
 // 模拟导入 - 在测试环境中使用模拟实现
 import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.ts';
 import { ConcurrencyController } from '../../concurrency/controller.ts';
