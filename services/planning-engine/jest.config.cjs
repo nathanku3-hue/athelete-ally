@@ -13,6 +13,11 @@ module.exports = {
     '<rootDir>/services/planning-engine/src/__tests__/setup.ts'
   ],
   
+  // Global mocks for planning-engine tests
+  setupFiles: [
+    '<rootDir>/services/planning-engine/src/__tests__/global-mocks.ts'
+  ],
+  
   // ESM-specific configuration for planning-engine
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {

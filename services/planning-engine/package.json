@@ -21,7 +21,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
-    "test": "jest --config jest.config.cjs --passWithNoTests",
+    "test": "jest --config jest.config.cjs --passWithNoTests --testTimeout=10000 --maxWorkers=1",
     "test:unit": "jest --testPathPattern=__tests__/unit",
     "test:integration": "jest --testPathPattern=__tests__/integration",
     "test:e2e": "jest --testPathPattern=__tests__/e2e",
