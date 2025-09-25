@@ -8,6 +8,7 @@ export * from './config/ports.js';
 
 // 认证相关
 export * from './auth/jwt.js';
+export * from './auth/test-utils.js';
 export { 
   authMiddleware, 
   cleanupMiddleware, 

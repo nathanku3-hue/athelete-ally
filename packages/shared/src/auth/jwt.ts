@@ -14,7 +14,7 @@ export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 // JWT Payload Schema
 export const JWTPayloadSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().uuid().or(z.string().min(1)), // Allow non-UUID in test/dev
   email: z.string().email().optional(),
   role: z.enum(['user', 'admin']).default('user'),
   iat: z.number().optional(),

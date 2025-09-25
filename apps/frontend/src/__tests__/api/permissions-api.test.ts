@@ -5,13 +5,14 @@
 
 import { PermissionsAPIClient, PermissionAPIError } from '@/lib/api/permissions-api';
 import { Permission } from '@athlete-ally/protocol-types';
+import { JWTTestUtils } from '@athlete-ally/shared';
 
 // 模拟fetch
 global.fetch = jest.fn();
 
 describe('PermissionsAPIClient', () => {
   let apiClient: PermissionsAPIClient;
-  const mockToken = 'mock-jwt-token';
+  const mockToken = JWTTestUtils.generateTestToken('test-user-123');
 
   beforeEach(() => {
     apiClient = new PermissionsAPIClient();
