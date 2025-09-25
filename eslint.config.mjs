@@ -20,6 +20,14 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  // Frontend-specific configuration
+  {
+    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      // Frontend-specific rules can be added here
+      // Next.js rules are handled by the extends above
+    },
+  },
   {
     files: ["**/__tests__/**/*.ts", "**/__tests__/**/*.js", "**/*.test.ts", "**/*.test.js"],
     rules: {
@@ -42,8 +50,14 @@ const eslintConfig = [
     files: ["**/*.{ts,tsx}"],
     ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*"],
     rules: {
+      // Unified baseline: warn for legacy code, error for new/modified
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
+      
+      // General code quality rules
+      "no-console": "warn",
+      "prefer-const": "warn",
+      "no-var": "error",
       
       // Boundaries (warn first)
       // Prevent deep internal module imports; prefer package entry points
