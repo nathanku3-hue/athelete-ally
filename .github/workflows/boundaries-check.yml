@@ -50,23 +50,21 @@ jobs:
           # Get list of changed TypeScript/TSX files
           CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' || true)"
           
-          if [ -z "$CHANGED_FILES" ]; then
+          if [ -z "${CHANGED_FILES:-}" ]; then
             echo "✅ No TypeScript files changed, skipping boundary check"
             exit 0
           fi
           
           echo "📁 Changed TypeScript files:"
-          echo "$CHANGED_FILES"
+          echo "${CHANGED_FILES}"
           
           # Run ESLint with error-level boundary rules on changed files only
           echo "🚨 Running strict boundary checks on changed files..."
-          # Normalize paths to POSIX format and quote each file
-          CHANGED_FILES_NORMALIZED=$(echo "$CHANGED_FILES" | sed 's|\\|/|g' | tr '\n' ' ')
-          npx eslint $CHANGED_FILES_NORMALIZED \
+          npx eslint --no-error-on-unmatched-pattern --max-warnings=0 \
+            $(printf "%s" "${CHANGED_FILES}") \
             --rule "import/no-internal-modules: error" \
             --rule "no-restricted-imports: error" \
-            --format=compact \
-            --no-error-on-unmatched-pattern
+            --format=compact
           
           echo "✅ Boundary checks passed for new/modified files"
 

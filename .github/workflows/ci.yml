@@ -67,8 +67,14 @@ jobs:
       - name: Generate Prisma clients
         run: |
           echo "🔧 Generating Prisma clients for all services..."
+          # Generate for planning-engine specifically
+          if [ -f "services/planning-engine/prisma/schema.prisma" ]; then
+            echo "Generating Prisma client for planning-engine..."
+            npm run prisma:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
+          fi
+          # Generate for other services
           for service in services/*/; do
-            if [ -f "$service/prisma/schema.prisma" ]; then
+            if [ -f "$service/prisma/schema.prisma" ] && [ "$service" != "services/planning-engine/" ]; then
               echo "Generating Prisma client for $(basename "$service")..."
               cd "$service"
               npx prisma generate

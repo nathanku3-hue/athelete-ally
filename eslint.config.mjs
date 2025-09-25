@@ -28,11 +28,13 @@ const eslintConfig = [
       // Next.js rules are handled by the extends above
     },
   },
+  // Test files configuration - relaxed rules for testing environment
   {
-    files: ["**/__tests__/**/*.ts", "**/__tests__/**/*.js", "**/*.test.ts", "**/*.test.js"],
+    files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}"],
     languageOptions: {
       globals: {
         jest: true,
+        node: true,
         describe: true,
         it: true,
         expect: true,
@@ -57,11 +59,15 @@ const eslintConfig = [
       }
     },
     rules: {
-      "@typescript-eslint/no-require-imports": "off",
-      "import/no-commonjs": "off",
+      // Relax TypeScript rules for tests
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
+      // Allow CommonJS imports/requires in tests if needed
+      "@typescript-eslint/no-require-imports": "off",
+      "import/no-commonjs": "off",
+      // Allow internal module imports in tests
       "import/no-internal-modules": "off",
+      // Prevent use of Vitest APIs in a Jest project
       "no-restricted-imports": [
         "error",
         {
@@ -88,10 +94,10 @@ const eslintConfig = [
       "prefer-const": "warn",
       "no-var": "error",
       
-      // Boundaries (warn first)
-      // Prevent deep internal module imports; prefer package entry points
+      // Import boundaries - prevent deep internal module imports; prefer package entry points
+      // Allow: @athlete-ally packages, Next.js aliases, dotenv, relative imports
       "import/no-internal-modules": ["warn", { 
-        allow: ["@athlete-ally/**", "@/**", "dotenv/config", "./**", "../**"] 
+        allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config"] 
       }],
 
       // monorepo layer direction: apps -> services -> packages

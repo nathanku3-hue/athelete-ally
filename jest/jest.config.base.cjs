@@ -12,6 +12,9 @@ module.exports = {
   moduleNameMapper: {
     // ESM imports resolved by ts-jest automatically
     ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })),
+    // Specific @athlete-ally package mappings (must come before generic mapping)
+    '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
+    '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/events/$1',
     // Handle .js imports in TypeScript files (ESM compatibility)
     '^(\\.{1,2}/.*)\\.js$': '$1',
     // Legacy shims removed after Vitest→Jest migration

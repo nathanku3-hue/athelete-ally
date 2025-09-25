@@ -17,31 +17,18 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     ...base.moduleNameMapper,
-    // Handle .js imports in TypeScript files
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    // Fix @athlete-ally package mapping
-    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src/index.ts',
+    // Service-specific @athlete-ally package mappings (override base mappings)
+    '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
+    '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
+    '^@athlete-ally/shared$': '<rootDir>/packages/shared/src',
+    '^@athlete-ally/shared-types$': '<rootDir>/packages/shared-types/src',
+    '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
+    // Generic @athlete-ally package mapping (must come last)
+    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
   },
-  
-  // Ensure proper ESM handling
-  transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true,
-      tsconfig: {
-        module: 'esnext',
-        moduleResolution: 'node',
-        allowSyntheticDefaultImports: true,
-        esModuleInterop: true,
-        baseUrl: '.',
-        paths: {
-          "@/*": ["./src/*"],
-          "@packages/*": ["../../packages/*/src"],
-          "@services/*": ["../../services/*/src"],
-          "@apps/*": ["../../apps/*/src"]
-        }
-      }
-    }]
-  },
+
+  // Inherit transform configuration from base (no duplication)
+  // Base config already handles ESM properly with ts-jest
   
   // Transform ignore patterns for ESM packages
   transformIgnorePatterns: [
