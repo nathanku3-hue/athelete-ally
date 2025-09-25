@@ -63,4 +63,14 @@ else
 fi
 
 echo ""
+echo "🔍 Resolved Cache Paths:"
+if [ -n "${NEEDS_SANITY_OUTPUTS_CACHE_DEPENDENCY_PATH:-}" ]; then
+    echo "   Paths: $NEEDS_SANITY_OUTPUTS_CACHE_DEPENDENCY_PATH"
+    echo "   Count: $(echo "$NEEDS_SANITY_OUTPUTS_CACHE_DEPENDENCY_PATH" | wc -l)"
+else
+    echo "   Paths: (not set - using fallback)"
+    echo "   Count: 1 (package-lock.json)"
+fi
+
+echo ""
 echo "✅ Diagnostic complete"
