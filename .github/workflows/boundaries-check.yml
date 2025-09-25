@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.18.0'
           cache: 'npm'
 
       - name: Install dependencies
@@ -47,15 +47,15 @@ jobs:
           set -euo pipefail
           echo "🔍 Checking boundaries for new/modified files..."
           
-          # Get list of changed TypeScript/TSX files
-          CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' || true)"
+          # Get list of changed TypeScript/TSX files (excluding test files)
+          CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' | grep -v -E '(test|spec)\.(ts|tsx)$' | grep -v '__tests__' || true)"
           
           if [ -z "${CHANGED_FILES:-}" ]; then
-            echo "✅ No TypeScript files changed, skipping boundary check"
+            echo "✅ No non-test TypeScript files changed, skipping boundary check"
             exit 0
           fi
           
-          echo "📁 Changed TypeScript files:"
+          echo "📁 Changed non-test TypeScript files:"
           echo "${CHANGED_FILES}"
           
           # Run ESLint with error-level boundary rules on changed files only

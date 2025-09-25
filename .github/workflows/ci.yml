@@ -216,6 +216,14 @@ jobs:
           echo "PLANNING_DATABASE_URL: ${PLANNING_DATABASE_URL:-unset}"
           echo "REDIS_URL: ${REDIS_URL:-unset}"
           echo "NODE_ENV: ${NODE_ENV:-unset}"
+          
+          echo "📦 Cache Diagnostics:"
+          echo "Cache dependency path: ${CACHE_DEPENDENCY_PATH:-unset}"
+          if [ -n "${CACHE_DEPENDENCY_PATH:-}" ]; then
+            echo "Cache files count: $(echo "${CACHE_DEPENDENCY_PATH}" | wc -l)"
+            echo "Cache files:"
+            echo "${CACHE_DEPENDENCY_PATH}"
+          fi
 
       - name: Planning Engine Jest Diagnostics
         run: |

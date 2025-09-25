@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "npm@10.9.3",
+  "engines": {
+    "node": "20.18.x",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
+    "preinstall": "node scripts/check-node-version.js",
     "dev": "next dev apps/frontend -p 3000",
     "dev:frontend": "next dev apps/frontend -p 3000",
     "dev:bff": "npm run dev -w apps/gateway-bff",

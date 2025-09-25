@@ -24,8 +24,16 @@ const eslintConfig = [
   {
     files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
     rules: {
-      // Frontend-specific rules can be added here
-      // Next.js rules are handled by the extends above
+      // Next.js App Router specific rules
+      "@next/next/no-page-custom-font": "off", // App Router doesn't use pages directory
+      "@next/next/no-html-link-for-pages": "off", // App Router uses different routing
+      "@next/next/no-img-element": "warn", // Prefer next/image
+      "@next/next/no-sync-scripts": "error", // Security rule
+      "@next/next/no-title-in-document-head": "off", // App Router handles this differently
+      
+      // Disable pages directory warnings for App Router
+      "@next/next/no-head-element": "off",
+      "@next/next/no-script-component-in-head": "off",
     },
   },
   // Test files configuration - relaxed rules for testing environment

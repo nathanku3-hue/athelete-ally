@@ -17,7 +17,7 @@ shell-name:
 
 workflow-call:
   inputs: []
-  outputs: 
+  outputs:
     - "cache-dependency-path"
   secrets: []
 

@@ -1,0 +1,22 @@
+  chore/lockfile-refresh-npm-overrides [m a669c41 docs(changelog): Phase 2 v0.2.0-alpha.1 entry for UX polish & validation hardening
+  chore/repo-hygiene                   [m 558754a resolve: fix README.md merge conflicts
+  feature/autonomous-hardening-20250919[m 24ca8e1 test(frontend): temporarily ignore src/__tests__/api/* due to cjs mapping; track as tech-debt
+  feature/autonomous-hardening-20250923[m 164f56e ci(infrastructure): 全面加固CI/CD基础设施
+  feature/ci-polish                    [m 4e4461e feat: enhance CI reliability and add actionlint
+  feature/compose-profiles             [m 4e4461e feat: enhance CI reliability and add actionlint
+  feature/dependency-hygiene           [m 4e4461e feat: enhance CI reliability and add actionlint
+  feature/deploy-reliability           [m 4e4461e feat: enhance CI reliability and add actionlint
+  feature/docs-branch-protection       [m 9d56bac feat: implement comprehensive CI optimization and parallel improvements
+  feature/e2e-playwright-chromium      [m def69d6 feat(testing): add orchestrator config and documentation
+  feature/harness-expansion            [m 8c74a35 feat(testing): expand Frontend Harness with useTrainingQueries
+  feature/jest-layered-config          [m d55b833 test(jest): introduce layered configs (base/frontend/services/integration) using .cjs; add scripts for targeted runs; keep root config unchanged for compatibility
+  feature/minimal-ci-update            [m 45eeff5 feat(ci): minimal CI adjustments for layered Jest configs
+  feature/playwright-e2e               [m 8c74a35 feat(testing): expand Frontend Harness with useTrainingQueries
+  feature/vitest-to-jest-migration     [m 6e80839 feat(testing): complete Vitest→Jest migration
++ [36mfix/a11y-test                        [m 1acc00a perf(baseline): correct gateway paths to /api/v1 endpoints
+  fix/actionlint-quote-names           [m 84769a9 ci(actionlint): quote , use 'git ls-files -- '**/package-lock.json'' to satisfy SC2086/SC2035 and improve determinism
+* [32mfix/ci-debug                         [m 1e376ab [ahead 1] ci: fix generate-prisma-clients.sh permission denied error
+  fix/deploy-reliability               [m 042702b docs(autonomous): update HANDOFF_REPORT with Dockerfile hardening and validation status
+  fix/shellcheck-sanity-blocks         [m b574307 fix: resolve additional CI/CD workflow and test issues
+  main                                 [m b9b7644 fix: resolve CI/CD bugs and optimize configurations
+  trigger/v3-test-workflow             [m 4e4461e feat: enhance CI reliability and add actionlint

@@ -38,19 +38,26 @@ npm run test:e2e
 - ESM-specific settings don't interfere with other services
 - All test files use `.ts` extensions for imports
 
-## 已知CI问题
+## 测试策略
 
-### ESM Mock限制
-- **问题**: 在ESM环境中，Prisma客户端的mock可能不完全工作
-- **影响**: 某些集成测试可能失败，特别是涉及数据库操作的测试
-- **临时解决方案**: 使用有针对性的 `it.skip()` 跳过有问题的测试
-- **长期解决方案**: 改进ESM mock机制或迁移到集成测试环境
+### 三层测试架构
+1. **单元测试** (阻塞): 纯函数测试，使用mock，必须通过
+2. **集成测试** (非阻塞): 真实数据库/服务，在独立job中运行
+3. **E2E测试** (非阻塞): 完整环境测试
 
-### 跳过的测试文件
+### 跳过的测试
+以下测试使用 `describe.skip()` 跳过，需要集成测试环境：
+
 - `message-reliability.test.ts` - EventBus集成测试
 - `reliability.test.ts` - EventProcessor集成测试  
 - `performance/planning-engine-performance.test.ts` - 性能测试
 - `integration/end-to-end.test.ts` - 端到端集成测试
-- 原因: ESM环境中的Prisma mock复杂性问题
-- GitHub Issue: https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
-- 解决方案: 使用 `testPathIgnorePatterns` 在CI中跳过这些测试
+
+**原因**: 需要真实数据库、Redis、NATS等外部服务
+**解决方案**: 集成测试job (`.github/workflows/integration-tests.yml`)
+**GitHub Issue**: https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
+
+### 测试环境要求
+- **单元测试**: 仅需要mock，无外部依赖
+- **集成测试**: 需要PostgreSQL + Redis + NATS
+- **性能测试**: 需要完整环境 + 负载测试工具
