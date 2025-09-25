@@ -27,31 +27,33 @@ jest.mock('@prisma/client', () => ({
   })),
 }));
 
-// Mock database module with ESM virtual mock
-jest.mock('../db.js', () => ({
-  prisma: {
-    $connect: jest.fn(),
-    $disconnect: jest.fn(),
-    user: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      updateMany: jest.fn(),
-    },
-    trainingPlan: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
-      updateMany: jest.fn(),
-    },
-    jobStatus: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      updateMany: jest.fn(),
-    },
+// Mock database module with ESM virtual mock for all import paths
+const mockPrisma = {
+  $connect: jest.fn(),
+  $disconnect: jest.fn(),
+  user: {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
   },
-}), { virtual: true });
+  trainingPlan: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+  },
+  jobStatus: {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+  },
+};
+
+// Mock all possible db.js import paths
+jest.mock('../db.js', () => ({ prisma: mockPrisma }), { virtual: true });
+jest.mock('./db.js', () => ({ prisma: mockPrisma }), { virtual: true });
 
 // Mock Redis client
 jest.mock('ioredis', () => {
