@@ -8,12 +8,12 @@ jest.mock('../../lib/proxy', () => ({
 
 import { proxyRequest } from '../../lib/proxy';
 
-function okResponse(body: any, status = 200) {
+function okResponse(body: unknown, status = 200) {
   return {
     ok: status >= 200 && status < 300,
     status,
     json: async () => body,
-  } as any;
+  } as Response;
 }
 
 describe('Gateway→Planning contract validation', () => {

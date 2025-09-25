@@ -28,8 +28,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
-    "lint": "eslint -c ../../eslint.config.mjs src",
-    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
+    "lint": "eslint -c eslint.config.mjs src",
+    "lint:fix": "eslint -c eslint.config.mjs src --fix"
   },
   "dependencies": {
     "@athlete-ally/contracts": "file:../../packages/contracts",
