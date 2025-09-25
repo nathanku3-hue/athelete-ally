@@ -1,14 +1,6 @@
 /**
  * @fileoverview 共享包统一导出
- * 
  * 提供认证、安全、配置等共享功能
- * 
- * @example
- * ```typescript
- * import { authMiddleware, SecureIdGenerator } from '@athlete-ally/shared';
- * ```
- * 
- * @note 所有相对导入使用 .js 扩展名以支持 ESM 模块解析
  */
 
 // 配置相关

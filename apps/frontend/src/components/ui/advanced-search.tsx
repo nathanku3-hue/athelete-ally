@@ -116,6 +116,8 @@ export function AdvancedSearch({
               >
                 {filter.label}: {displayValue}
                 <button
+                  // Provide an accessible name so tests and screen readers can find the control
+                  aria-label="移除"
                   onClick={() => removeFilter(key)}
                   className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >

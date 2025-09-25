@@ -4,9 +4,8 @@ import { EventBus } from '@athlete-ally/event-bus';
 import { EventProcessor } from '../events/processor.ts';
 
 describe.skip('Message Reliability Tests', () => {
-  // TODO: 修复ESM Prisma mock问题
+  // TODO: 修复ESM Prisma mock问题 - 需要集成测试环境
   // Issue: https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
-  // 需要集成测试环境，包含真实数据库和EventBus
   let eventBus: EventBus;
   let eventProcessor: EventProcessor;
 

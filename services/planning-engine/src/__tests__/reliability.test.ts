@@ -5,9 +5,8 @@ import { JetStreamConsumer } from '../events/jetstream-consumer.ts';
 import { ConcurrencyController } from '../concurrency/controller.ts';
 
 describe.skip('Planning Engine Reliability Tests', () => {
-  // TODO: 修复ESM Prisma mock问题
+  // TODO: 修复ESM Prisma mock问题 - 需要集成测试环境
   // Issue: https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
-  // 需要集成测试环境，包含真实数据库和NATS
   let eventProcessor: EventProcessor;
   let concurrencyController: ConcurrencyController;
 

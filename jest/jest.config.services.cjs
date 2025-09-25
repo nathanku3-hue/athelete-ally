@@ -9,10 +9,8 @@ module.exports = {
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.integration.test.ts'
   ],
-  testPathIgnorePatterns: [
-    // No global test skipping - use describe.skip/it.skip in individual test files
-    // See services/planning-engine/JEST_CONFIG.md for details
-  ],
+  // No global test skipping - use describe.skip/it.skip in individual test files
+  // See services/planning-engine/JEST_CONFIG.md for details
   setupFilesAfterEnv: [
     '<rootDir>/src/__tests__/setup.ts'
   ],
