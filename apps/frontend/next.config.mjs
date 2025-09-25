@@ -3,6 +3,11 @@ const nextConfig = {
   // 基础配置
   reactStrictMode: true,
   
+  // 禁用 ESLint 检查（使用根目录的 ESLint 配置）
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   // 性能优化
   compress: true,
   poweredByHeader: false,
