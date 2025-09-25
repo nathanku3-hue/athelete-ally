@@ -37,13 +37,13 @@ jobs:
           echo "Current contracts version: $CURRENT_VERSION"
           
           # Check if contracts files were modified
-          CONTRACTS_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -E '^packages/contracts/' | wc -l)
+          CONTRACTS_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -c -E '^packages/contracts/' || echo 0)
           
           if [ "$CONTRACTS_CHANGED" -gt 0 ]; then
             echo "📦 Contracts package was modified"
             
             # Check if version was bumped
-            VERSION_CHANGED=$(git diff HEAD~1 HEAD -- packages/contracts/package.json | grep -E '^\+.*"version"' | wc -l)
+            VERSION_CHANGED=$(git diff HEAD~1 HEAD -- packages/contracts/package.json | grep -c -E '^\+.*"version"' || echo 0)
             
             if [ "$VERSION_CHANGED" -eq 0 ]; then
               echo "⚠️  Warning: Contracts were modified but version was not bumped"

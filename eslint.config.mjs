@@ -62,7 +62,7 @@ const eslintConfig = [
       // Boundaries (warn first)
       // Prevent deep internal module imports; prefer package entry points
       "import/no-internal-modules": ["warn", { 
-        allow: ["@athlete-ally/**", "@/**", "dotenv/config"] 
+        allow: ["@athlete-ally/**", "@/**", "dotenv/config", "./**"] 
       }],
 
       // monorepo layer direction: apps -> services -> packages

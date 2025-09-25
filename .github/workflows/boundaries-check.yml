@@ -62,7 +62,7 @@ jobs:
           echo "🚨 Running strict boundary checks on changed files..."
           # Convert newline-separated list to space-separated for ESLint
           CHANGED_FILES_SPACE=$(echo "$CHANGED_FILES" | tr '\n' ' ')
-          npx eslint $CHANGED_FILES_SPACE \
+          npx eslint "$CHANGED_FILES_SPACE" \
             --rule "import/no-internal-modules: error" \
             --rule "no-restricted-imports: error" \
             --format=compact

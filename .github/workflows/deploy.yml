@@ -60,7 +60,7 @@ jobs:
           npm run build
           npm start &
           FRONTEND_PID=$!
-          echo "FRONTEND_PID=$FRONTEND_PID" >> $GITHUB_ENV
+          echo "FRONTEND_PID=$FRONTEND_PID" >> "$GITHUB_ENV"
           
           # Wait for frontend to be ready
           echo "⏳ Waiting for frontend service to be ready..."
@@ -81,7 +81,7 @@ jobs:
         run: |
           echo "🛑 Stopping frontend service..."
           if [ -n "$FRONTEND_PID" ]; then
-            kill $FRONTEND_PID 2>/dev/null || true
+            kill "$FRONTEND_PID" 2>/dev/null || true
           fi
           # Kill any remaining node processes on port 3000
           lsof -ti:3000 | xargs kill -9 2>/dev/null || true

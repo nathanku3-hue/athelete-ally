@@ -53,7 +53,7 @@ jobs:
           echo "🔍 Checking for Prisma schema changes..."
           
           # Check if any Prisma schema files were modified
-          PRISMA_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(prisma)$' | wc -l)
+          PRISMA_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -c -E '\.(prisma)$' || echo 0)
           
           if [ "$PRISMA_CHANGED" -gt 0 ]; then
             echo "📦 Prisma schema files were modified"
