@@ -29,7 +29,8 @@ services:
       - profile-onboarding
   gateway-bff:
     build:
-      context: ./apps/gateway-bff
+      context: .
+      dockerfile: apps/gateway-bff/Dockerfile
     # The command for development with hot-reloading
     command: npm run dev
     volumes:
@@ -61,7 +62,8 @@ services:
       - NATS_PORT=4222
   planning-engine:
     build:
-      context: ./services/planning-engine
+      context: .
+      dockerfile: services/planning-engine/Dockerfile
     # The command for development with hot-reloading
     command: npm run dev
     volumes:
@@ -96,7 +98,8 @@ services:
         condition: service_started
   profile-onboarding:
     build:
-      context: ./services/profile-onboarding
+      context: .
+      dockerfile: services/profile-onboarding/Dockerfile
     # The command for development with hot-reloading
     command: npm run dev
     volumes:
@@ -190,7 +193,8 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
   exercises:
     build:
-      context: ./services/exercises
+      context: .
+      dockerfile: services/exercises/Dockerfile
     command: npm run dev
     volumes:
       - ./services/exercises:/usr/src/app
@@ -221,7 +225,8 @@ services:
         condition: service_started
   fatigue:
     build:
-      context: ./services/fatigue
+      context: .
+      dockerfile: services/fatigue/Dockerfile
     command: npm run dev
     volumes:
       - ./services/fatigue:/usr/src/app
@@ -252,7 +257,8 @@ services:
         condition: service_started
   workouts:
     build:
-      context: ./services/workouts
+      context: .
+      dockerfile: services/workouts/Dockerfile
     command: npm run dev
     volumes:
       - ./services/workouts:/usr/src/app
@@ -283,7 +289,8 @@ services:
         condition: service_started
   analytics:
     build:
-      context: ./services/analytics
+      context: .
+      dockerfile: services/analytics/Dockerfile
     command: npm run dev
     volumes:
       - ./services/analytics:/usr/src/app

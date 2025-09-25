@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import { config } from './config.js';
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
+import { registerMagicSliceRoutes } from './lib/routes.js';
 
 // Create server
 const server = Fastify({ logger: true });
@@ -54,6 +55,9 @@ await server.register(swagger, {
 });
 await server.register(swaggerUi, { routePrefix: '/api/docs', uiConfig: { docExpansion: 'list', deepLinking: false } });
 
+// Register Magic Slice routes for frontend hooks
+registerMagicSliceRoutes(server);
+
 // Root welcome
 server.get('/', async () => ({ message: 'Welcome to the API!' }));
 
@@ -61,8 +65,22 @@ server.get('/', async () => ({ message: 'Welcome to the API!' }));
 server.get('/api/contracts/openapi.yaml', async (_req, reply) => {
   const fs = await import('fs');
   const path = await import('path');
-  const p = path.resolve(process.cwd(), 'packages/contracts/openapi.yaml');
-  const content = fs.readFileSync(p, 'utf8');
+  // Try container-safe path first, fallback to packages path
+  const containerPath = path.resolve(process.cwd(), 'openapi.yaml');
+  const packagesPath = path.resolve(process.cwd(), 'packages/contracts/openapi.yaml');
+  
+  let content: string;
+  try {
+    if (fs.existsSync(containerPath)) {
+      content = fs.readFileSync(containerPath, 'utf8');
+    } else {
+      content = fs.readFileSync(packagesPath, 'utf8');
+    }
+  } catch (error) {
+    reply.status(404).send({ error: 'OpenAPI spec not found' });
+    return;
+  }
+  
   reply.type('text/yaml').send(content);
 });
 

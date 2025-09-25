@@ -4,8 +4,12 @@ import { JWTManager, SecurityContextManager } from './jwt.js';
 // 身份验证中间件
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
   try {
-    // 跳过健康检查端点
-    if (request.url === '/health' || request.url === '/metrics') {
+    // 跳过预检请求和健康检查端点
+    if (request.method === 'OPTIONS') return;
+    if (request.url === '/health' || 
+        request.url === '/api/health' || 
+        request.url === '/api/v1/health' ||
+        request.url === '/metrics') {
       return;
     }
 

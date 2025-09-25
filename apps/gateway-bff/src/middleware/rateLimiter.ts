@@ -117,7 +117,12 @@ export async function userRateLimitMiddleware(request: FastifyRequest, reply: Fa
 
 // Strict rate limiting for sensitive endpoints
 export async function strictRateLimitMiddleware(request: FastifyRequest, reply: FastifyReply) {
-  const strictEndpoints = ['/api/v1/generate', '/api/v1/onboarding', '/api/v1/plans/enhanced/generate'];
+  const strictEndpoints = [
+    '/v1/plans/enhanced/generate',
+    '/api/v1/plans/enhanced/generate',
+    '/api/v1/plans/generate',
+    '/api/v1/onboarding',
+  ];
   const endpoint = request.url.split('?')[0];
   if (!strictEndpoints.some((ep) => endpoint.startsWith(ep))) {
     return;
