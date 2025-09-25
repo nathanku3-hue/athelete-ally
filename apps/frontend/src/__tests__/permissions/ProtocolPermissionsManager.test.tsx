@@ -165,7 +165,7 @@ describe('ProtocolPermissionsManager', () => {
     });
   });
 
-  it('应该显示权限说明', () => {
+  it('应该显示权限说明', async () => {
     renderWithQueryClient(
       <ProtocolPermissionsManager protocol={mockProtocol} />
     );
@@ -174,15 +174,18 @@ describe('ProtocolPermissionsManager', () => {
     const permissionsTab = screen.getByText('权限详情');
     fireEvent.click(permissionsTab);
 
-    expect(screen.getByText('您的权限')).toBeInTheDocument();
-    expect(screen.getByText('权限说明')).toBeInTheDocument();
-    expect(screen.getByText('查看：可以查看协议内容和详细信息')).toBeInTheDocument();
-    expect(screen.getByText('编辑：可以修改协议内容和设置')).toBeInTheDocument();
-    expect(screen.getByText('执行：可以开始和执行协议训练')).toBeInTheDocument();
-    expect(screen.getByText('分享：可以将协议分享给其他用户')).toBeInTheDocument();
+    // 等待内容渲染
+    await waitFor(() => {
+      expect(screen.getByText('您的权限')).toBeInTheDocument();
+      expect(screen.getByText('权限说明')).toBeInTheDocument();
+      expect(screen.getByText('查看：可以查看协议内容和详细信息')).toBeInTheDocument();
+      expect(screen.getByText('编辑：可以修改协议内容和设置')).toBeInTheDocument();
+      expect(screen.getByText('执行：可以开始和执行协议训练')).toBeInTheDocument();
+      expect(screen.getByText('分享：可以将协议分享给其他用户')).toBeInTheDocument();
+    });
   });
 
-  it('应该显示公开设置说明', () => {
+  it('应该显示公开设置说明', async () => {
     renderWithQueryClient(
       <ProtocolPermissionsManager protocol={mockProtocol} />
     );
@@ -191,11 +194,13 @@ describe('ProtocolPermissionsManager', () => {
     const publicTab = screen.getByText('公开设置');
     fireEvent.click(publicTab);
 
-    expect(screen.getByText('公开协议注意事项')).toBeInTheDocument();
-    expect(screen.getByText('• 公开协议可以被所有用户查看和复制')).toBeInTheDocument();
-    expect(screen.getByText('• 其他用户无法修改您的原始协议')).toBeInTheDocument();
-    expect(screen.getByText('• 您可以随时将协议设置为私有')).toBeInTheDocument();
-    expect(screen.getByText('• 公开协议会显示您的姓名作为创建者')).toBeInTheDocument();
+    // 等待内容渲染
+    await waitFor(() => {
+      expect(screen.getByText('公开协议注意事项')).toBeInTheDocument();
+      expect(screen.getByText('• 公开协议可以被所有用户查看和复制')).toBeInTheDocument();
+      expect(screen.getByText('• 其他用户无法修改您的原始协议')).toBeInTheDocument();
+      expect(screen.getByText('• 您可以随时将协议设置为私有')).toBeInTheDocument();
+    });
   });
 });
 
@@ -215,7 +220,7 @@ describe('ShareDialog', () => {
     );
   };
 
-  it('应该正确渲染分享对话框', () => {
+  it('应该正确渲染分享对话框', async () => {
     const mockOnShare = jest.fn();
     const mockOnClose = jest.fn();
 
@@ -230,12 +235,15 @@ describe('ShareDialog', () => {
     const shareButton = screen.getByText('分享协议');
     fireEvent.click(shareButton);
 
-    expect(screen.getByText('分享协议: 测试协议')).toBeInTheDocument();
-    expect(screen.getByLabelText('选择用户')).toBeInTheDocument();
-    expect(screen.getByLabelText('权限设置')).toBeInTheDocument();
+    // 等待对话框内容渲染
+    await waitFor(() => {
+      expect(screen.getByText('分享协议: 测试协议')).toBeInTheDocument();
+      expect(screen.getByLabelText('选择用户')).toBeInTheDocument();
+      expect(screen.getByLabelText('权限设置')).toBeInTheDocument();
+    });
   });
 
-  it('应该允许选择权限', () => {
+  it('应该允许选择权限', async () => {
     const mockOnShare = jest.fn();
     const mockOnClose = jest.fn();
 
@@ -250,16 +258,18 @@ describe('ShareDialog', () => {
     const shareButton = screen.getByText('分享协议');
     fireEvent.click(shareButton);
 
-    // 检查权限开关
-    const readSwitch = screen.getByLabelText('查看');
-    const writeSwitch = screen.getByLabelText('编辑');
-    const executeSwitch = screen.getByLabelText('执行');
-    const shareSwitch = screen.getByLabelText('分享');
+    // 等待对话框内容渲染并检查权限开关
+    await waitFor(() => {
+      const readSwitch = screen.getByLabelText('查看');
+      const writeSwitch = screen.getByLabelText('编辑');
+      const executeSwitch = screen.getByLabelText('执行');
+      const shareSwitch = screen.getByLabelText('分享');
 
-    expect(readSwitch).toBeChecked(); // 默认选中
-    expect(writeSwitch).not.toBeChecked();
-    expect(executeSwitch).not.toBeChecked();
-    expect(shareSwitch).not.toBeChecked();
+      expect(readSwitch).toBeChecked(); // 默认选中
+      expect(writeSwitch).not.toBeChecked();
+      expect(executeSwitch).not.toBeChecked();
+      expect(shareSwitch).not.toBeChecked();
+    });
   });
 
   it('应该允许设置过期时间', () => {

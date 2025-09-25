@@ -204,7 +204,10 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ protocol, onShare, isOpen, on
                     onCheckedChange={(checked) => handlePermissionChange(permission, checked)}
                   />
                   <Label htmlFor={permission} className="text-sm">
-                    {permission}
+                    {permission === 'read' ? '查看' : 
+                     permission === 'write' ? '编辑' : 
+                     permission === 'execute' ? '执行' : 
+                     permission === 'share' ? '分享' : permission}
                   </Label>
                 </div>
               ))}
