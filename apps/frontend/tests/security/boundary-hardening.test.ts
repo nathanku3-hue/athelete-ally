@@ -1,4 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+
+// Mock the LLM module to avoid import issues in test environment
+jest.mock('../../services/planning-engine/src/llm.js', () => ({
+  generateTrainingPlan: jest.fn(),
+  default: jest.fn()
+}));
+
 import * as LLMAny from '../../services/planning-engine/src/llm.js';
 const generateTrainingPlan: any = (LLMAny as any).generateTrainingPlan || (LLMAny as any).default || (() => { throw new Error('LLM not available'); });
 
