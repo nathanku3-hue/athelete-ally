@@ -22,7 +22,7 @@ module.exports = {
   
   // CI并发控制 - 避免CI容器在高并发下不稳定
   maxWorkers: process.env.CI === 'true' ? 1 : '50%',
-  runInBand: process.env.CI === 'true',
+  // runInBand is handled by CLI, not config
   cache: true,
   verbose: process.env.CI === 'true'
 };
