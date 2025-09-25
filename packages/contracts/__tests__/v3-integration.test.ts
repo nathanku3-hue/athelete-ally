@@ -53,7 +53,7 @@ describe('V3 Integration Tests', () => {
 
       // 3. 應用調整建議
       const applyRequest = {
-        adjustmentIds: (getReviewResponse.data.adjustments as any[]).map((adj: { id: string }) => adj.id),
+        adjustmentIds: (getReviewResponse.data.adjustments as Array<{ id: string }>).map((adj) => adj.id),
         appliedAt: new Date().toISOString()
       };
 
@@ -129,7 +129,7 @@ describe('V3 Integration Tests', () => {
       const notificationsResponse = await simulateApiCall('GET', `/api/v3/recovery-notification/${testUserId}`);
       expect(notificationsResponse.status).toBe(200);
       expect(notificationsResponse.data.notifications).toBeDefined();
-      expect((notificationsResponse.data.notifications as any[]).length).toBeGreaterThan(0);
+      expect((notificationsResponse.data.notifications as Array<unknown>).length).toBeGreaterThan(0);
     });
   });
 
@@ -240,7 +240,7 @@ async function simulateApiCall(method: string, endpoint: string, data?: unknown)
   } else if (endpoint.includes('/progress/')) {
     responseData = {
       ...responseData,
-      weeklyData: (data as any)?.weeklyData || [
+      weeklyData: (data as { weeklyData?: unknown })?.weeklyData || [
         { weekNumber: 1, weeklyTrainingLoad: 400 },
         { weekNumber: 2, weeklyTrainingLoad: 450 }
       ],
