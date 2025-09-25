@@ -49,5 +49,8 @@ module.exports = {
 
   testTimeout: 15000,
   passWithNoTests: true,
-  verbose: true
+  verbose: true,
+  // Remove deprecated options that cause warnings
+  // runInBand is handled by CI, not config
+  // testTimeout is already set above
 };

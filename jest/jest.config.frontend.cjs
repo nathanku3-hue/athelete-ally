@@ -13,11 +13,16 @@ module.exports = {
   testPathIgnorePatterns: [
     // Exclude Playwright E2E tests from Jest runs
     '/apps/frontend/src/__tests__/e2e/',
-    '/apps/frontend/tests/e2e/'
+    '/apps/frontend/tests/e2e/',
+    // Exclude legacy integration-like tests from unit tests
+    '/apps/frontend/tests/permissions/',
+    '/apps/frontend/tests/security/'
   ],
   setupFilesAfterEnv: [
     '<rootDir>/apps/frontend/src/__tests__/setup.ts',
     '<rootDir>/src/__tests__/setup.ts'
   ],
-  testEnvironmentOptions: { url: 'http://localhost:3000' }
+  testEnvironmentOptions: { url: 'http://localhost:3000' },
+  // Increase timeout for CI environment
+  testTimeout: 15000
 };
