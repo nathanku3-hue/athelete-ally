@@ -4,19 +4,19 @@
  */
 
 // 配置相关
-export * from './config/ports.js';
+export * from './config/ports';
 
 // 认证相关
-export * from './auth/jwt.js';
+export * from './auth/jwt';
 export { 
   authMiddleware, 
   cleanupMiddleware, 
   ownershipCheckMiddleware, 
   roleCheckMiddleware 
-} from './auth/middleware.js';
+} from './auth/middleware';
 
 // 安全相关
-export * from './security/secure-id.js';
+export * from './security/secure-id';
 
 // 错误处理
-export * from './error-handler.js';
+export * from './error-handler';
