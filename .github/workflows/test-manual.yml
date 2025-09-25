@@ -16,4 +16,4 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Test step
-        run: echo 'Test workflow triggered with input: ${{ inputs.test_input }}'
+        run: echo "Test workflow triggered with input: ${{ inputs.test_input }}"
