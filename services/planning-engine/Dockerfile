@@ -23,14 +23,14 @@ WORKDIR /usr/src/app
 # 安裝 OpenSSL 和必要的系統庫
 RUN apk add --no-cache openssl ca-certificates
 
-# 從 builder 階段，拷貝編譯好的產物和生產依賴
+# 從 builder 階段，拷貝編譯好的產物和完整的依賴
 # 注意路徑是相對於 builder 內部的 /app 目錄
 COPY --from=builder /app/services/planning-engine/dist ./dist
 COPY --from=builder /app/services/planning-engine/prisma ./prisma
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
-# 僅安裝生產依賴
-RUN npm ci --production
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
 
 # 生成 Prisma 客戶端
 RUN npx prisma generate

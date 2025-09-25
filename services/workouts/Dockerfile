@@ -8,13 +8,13 @@ COPY tsconfig.base.json ./
 COPY turbo.json ./
 # 拷貝所有需要被 link 的 workspace
 COPY packages ./packages
-COPY services/analytics ./services/analytics
+COPY services/workouts ./services/workouts
 
 # 運行完整的 monorepo 安裝
 RUN npm ci
 
 # 在完整的 monorepo 上下文中，只構建我們需要的那個服務
-RUN npx turbo run build --filter=analytics
+RUN npx turbo run build --filter=workouts
 
 # --- STAGE 2: Runner ---
 FROM node:lts-alpine
@@ -25,7 +25,7 @@ RUN apk add --no-cache openssl ca-certificates
 
 # 從 builder 階段，拷貝編譯好的產物和完整的依賴
 # 注意路徑是相對於 builder 內部的 /app 目錄
-COPY --from=builder /app/services/analytics/dist ./dist
+COPY --from=builder /app/services/workouts/dist ./dist
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/package-lock.json ./
 COPY --from=builder /app/node_modules ./node_modules
@@ -37,7 +37,7 @@ RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
 # 暴露端口
-EXPOSE 4106
+EXPOSE 4105
 
 # 啟動服務器的命令
 CMD ["node", "dist/index.js"]
