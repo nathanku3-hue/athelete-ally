@@ -43,6 +43,7 @@ jobs:
           rm -rf ~/.npm
           npm cache clean --force
           echo "=== Installing with npm install (not ci) ==="
+          # NOTE: Intentionally using npm install (not ci) for harness testing
           npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Print Jest version

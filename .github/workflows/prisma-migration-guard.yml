@@ -17,7 +17,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
+          POSTGRES_DB: test_db_${{ github.run_id }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -77,8 +77,8 @@ jobs:
             
             cd "$schema_dir"
             
-            # Set up test database URL
-            export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/test_db"
+            # Set up test database URL with unique DB name
+            export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/test_db_${{ github.run_id }}"
             
             # Generate Prisma client
             npx prisma generate

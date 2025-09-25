@@ -36,7 +36,10 @@ jobs:
             
             # Basic cache path analysis
             echo "📁 Package lock files found:"
-            find . -name "package-lock.json" -not -path "./node_modules/*" | head -10
+            LOCKFILES=$(find . -name "package-lock.json" -not -path "./node_modules/*")
+            echo "$LOCKFILES"
+            LOCKFILE_COUNT=$(echo "$LOCKFILES" | wc -l)
+            echo "📊 Total lockfiles: $LOCKFILE_COUNT"
             
             echo ""
             echo "📦 Node modules size:"
