@@ -53,8 +53,38 @@ jobs:
       - name: Run type checking
         run: npm run type-check
 
+      - name: Start Frontend Service
+        run: |
+          echo "🚀 Starting frontend service for tests..."
+          cd apps/frontend
+          npm run build
+          npm start &
+          FRONTEND_PID=$!
+          echo "FRONTEND_PID=$FRONTEND_PID" >> $GITHUB_ENV
+          
+          # Wait for frontend to be ready
+          echo "⏳ Waiting for frontend service to be ready..."
+          for i in {1..30}; do
+            if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "✅ Frontend service is ready!"
+              break
+            fi
+            echo "Waiting for frontend... (attempt $i/30)"
+            sleep 2
+          done
+
       - name: Run tests
         run: npm run test:coverage
+
+      - name: Stop Frontend Service
+        if: always()
+        run: |
+          echo "🛑 Stopping frontend service..."
+          if [ -n "$FRONTEND_PID" ]; then
+            kill $FRONTEND_PID 2>/dev/null || true
+          fi
+          # Kill any remaining node processes on port 3000
+          lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
       - name: Upload coverage to Codecov
         if: ${{ env.CODECOV_TOKEN != '' }}
