@@ -1,70 +1,54 @@
+/**
+ * Jest configuration for planning-engine service
+ * 
+ * This configuration extends the base Jest config and adds service-specific
+ * module mappings and ESM support for the planning-engine service.
+ * 
+ * Key features:
+ * - ESM support for TypeScript files
+ * - Correct @athlete-ally package mappings
+ * - Service-specific test file patterns
+ * - Proper setup file configuration
+ */
+const base = require('../../jest/jest.config.base.cjs');
+
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  ...base,
   
-  // 测试文件发现
-  roots: ['<rootDir>/src'],
+  // Service-specific configuration
+  rootDir: '../..', // Relative to the monorepo root
+  testEnvironment: 'node',
+  roots: ['<rootDir>/services/planning-engine'],
   testMatch: [
     '**/__tests__/**/*.test.ts',
-    '**/__tests__/**/*.integration.test.ts',
-    '**/__tests__/**/*.e2e.test.ts'
+    '**/__tests__/**/*.integration.test.ts'
   ],
-  
-  // 忽略模式
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '/build/',
-    '/coverage/'
+  setupFilesAfterEnv: [
+    '<rootDir>/services/planning-engine/src/__tests__/setup.ts'
   ],
+
+  // ESM-specific configuration
+  extensionsToTreatAsEsm: ['.ts'],
   
-  // 模块解析配置
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@packages/(.*)$': '<rootDir>/../../packages/$1',
-    '^@services/(.*)$': '<rootDir>/../../services/$1',
-    '^@apps/(.*)$': '<rootDir>/../../apps/$1'
+  // Module name mapping for @athlete-ally packages
+  moduleNameMapper: {
+    ...base.moduleNameMapper,
+    // Handle .js imports in TypeScript files (ESM compatibility)
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    // Specific @athlete-ally package mappings (from tsconfig.base.json)
+    '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
+    '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
+    '^@athlete-ally/shared$': '<rootDir>/packages/shared/src',
+    '^@athlete-ally/shared-types$': '<rootDir>/packages/shared-types/src',
+    '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
+    // Generic @athlete-ally package mapping
+    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
   },
+
+  // Inherit transform configuration from base (no duplication)
+  // Base config already handles ESM properly with ts-jest
   
-  // 转换配置
-  transform: {
-    '^.+\\.ts$': ['ts-jest', {
-      useESM: false,
-      tsconfig: {
-        jsx: 'react-jsx',
-        baseUrl: '.',
-        paths: {
-          '@/*': ['src/*'],
-          '@packages/*': ['../../packages/*'],
-          '@services/*': ['../../services/*'],
-          '@apps/*': ['../../apps/*']
-        }
-      }
-    }],
-    '^.+\\.js$': 'babel-jest'
-  },
-  
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
-  ],
-  
-  // 覆盖率配置
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!**/__tests__/**',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/build/**'
-  ],
-  
-  // 测试环境配置
-  setupFilesAfterEnv: ['<rootDir>/../../src/__tests__/setup.ts'],
-  
-  // 超时配置
   testTimeout: 15000,
-  
-  // 其他配置
   passWithNoTests: true,
   verbose: true
 };

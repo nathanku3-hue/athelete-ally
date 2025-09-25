@@ -73,6 +73,21 @@ NATS_URL=nats://...
 OPENAI_API_KEY=...
 ```
 
+## 测试
+
+### Jest 配置
+详细的 Jest 配置说明请参考 [JEST_CONFIG.md](./JEST_CONFIG.md)
+
+### 运行测试
+```bash
+# 从 monorepo 根目录
+npm run test:services
+
+# 或直接从服务目录
+cd services/planning-engine
+npm test
+```
+
 ## 监控
 
 - **Kibana**: http://localhost:5601

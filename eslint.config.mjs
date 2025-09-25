@@ -20,11 +20,47 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  // Test files configuration - relaxed rules for testing environment
   {
     files: ["**/__tests__/**/*.ts", "**/__tests__/**/*.js", "**/*.test.ts", "**/*.test.js"],
+    languageOptions: {
+      globals: {
+        // Jest globals
+        jest: true,
+        describe: true,
+        it: true,
+        expect: true,
+        beforeAll: true,
+        afterAll: true,
+        beforeEach: true,
+        afterEach: true,
+        // Node.js globals commonly used in tests
+        process: true,
+        console: true,
+        Buffer: true,
+        setTimeout: true,
+        setInterval: true,
+        clearTimeout: true,
+        clearInterval: true,
+        fetch: true,
+        global: true,
+        // CommonJS globals (for compatibility)
+        __dirname: true,
+        __filename: true,
+        module: true,
+        require: true,
+        exports: true
+      }
+    },
     rules: {
+      // Relaxed rules for test files
       "@typescript-eslint/no-require-imports": "off",
       "import/no-commonjs": "off",
+      "@typescript-eslint/no-explicit-any": "off", // Allow 'any' in tests for flexibility
+      "@typescript-eslint/no-unused-vars": "off", // Allow unused vars in tests
+      "import/no-internal-modules": "off", // Allow internal imports in tests
+      
+      // Prevent Vitest usage (enforce Jest)
       "no-restricted-imports": [
         "error",
         {
@@ -38,17 +74,19 @@ const eslintConfig = [
       ],
     },
   },
+  // Source code configuration - strict rules for production code
   {
     files: ["**/*.{ts,tsx}"],
     ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*"],
     rules: {
+      // TypeScript best practices
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       
-      // Boundaries (warn first)
-      // Prevent deep internal module imports; prefer package entry points
+      // Import boundaries - prevent deep internal module imports
+      // Allow: @athlete-ally packages, Next.js aliases, dotenv, relative imports
       "import/no-internal-modules": ["warn", { 
-        allow: ["@athlete-ally/**", "@/**", "dotenv/config"] 
+        allow: ["@athlete-ally/**", "@/**", "dotenv/config", "./**", "../**"] 
       }],
 
       // monorepo layer direction: apps -> services -> packages

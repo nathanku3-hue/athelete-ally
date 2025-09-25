@@ -169,6 +169,13 @@ jobs:
           fi
           echo "✅ 配置验证完成"
 
+      - name: Generate Prisma client
+        run: |
+          echo "🔧 Generating Prisma client..."
+          # Generate Prisma client for database operations in tests
+          npx prisma generate
+          echo "✅ Prisma client generated"
+
       - name: Run tests (layered configs)
         run: |
           echo "🧪 Running tests with layered Jest configs..."

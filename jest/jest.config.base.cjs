@@ -12,6 +12,8 @@ module.exports = {
   moduleNameMapper: {
     // ESM imports resolved by ts-jest automatically
     ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' })),
+    // Handle .js imports in TypeScript files (ESM compatibility)
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     // Legacy shims removed after Vitest→Jest migration
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
     '^\\.\\.\\/\\.\\.\\/services\\/planning-engine\\/src\\/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts'
