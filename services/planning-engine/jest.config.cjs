@@ -11,16 +11,13 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     // Skip problematic tests that require complex ESM mocking
-    '/__tests__/message-reliability.test.ts',
-    '/__tests__/reliability.test.ts',
-    '/__tests__/performance/planning-engine-performance.test.ts',
-    '/__tests__/integration/end-to-end.test.ts'
+    // See JEST_CONFIG.md for details
+    '/(message-reliability|reliability|performance/planning-engine-performance|integration/end-to-end)\\.test\\.ts$'
   ],
   // Global mocks for planning-engine tests (load before modules)
   setupFiles: [
     '<rootDir>/services/planning-engine/src/__tests__/global-mocks.ts'
   ],
-  
   setupFilesAfterEnv: [
     '<rootDir>/services/planning-engine/src/__tests__/setup.ts'
   ],
@@ -38,9 +35,6 @@ module.exports = {
     // Generic @athlete-ally package mapping (must come last)
     '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
   },
-
-  // Inherit transform configuration from base (no duplication)
-  // Base config already handles ESM properly with ts-jest
   
   // Transform ignore patterns for ESM packages
   transformIgnorePatterns: [

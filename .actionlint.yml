@@ -17,9 +17,12 @@ shell-name:
 
 workflow-call:
   inputs: []
-  outputs: []
+  outputs: 
+    - "cache-dependency-path"
   secrets: []
 
-# 禁用 config_file 输入参数检查
+# Disable specific checks that cause false positives
 ignore:
-  - "config_file"
+  - "config_file"     # Allow config_file input parameter
+  - "workflow-call"   # Allow local reusable workflow calls
+  - "expression"      # Allow needs.outputs expressions

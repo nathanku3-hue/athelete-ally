@@ -10,6 +10,11 @@ module.exports = {
     '**/__tests__/**/*.test.ts',
     '**/tests/**/*.test.ts'
   ],
+  testPathIgnorePatterns: [
+    // Exclude Playwright E2E tests from Jest runs
+    '/apps/frontend/src/__tests__/e2e/',
+    '/apps/frontend/tests/e2e/'
+  ],
   setupFilesAfterEnv: [
     '<rootDir>/apps/frontend/src/__tests__/setup.ts',
     '<rootDir>/src/__tests__/setup.ts'
