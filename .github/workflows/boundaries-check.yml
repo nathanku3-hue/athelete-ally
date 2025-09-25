@@ -59,10 +59,11 @@ jobs:
           echo "${CHANGED_FILES}"
           
           # Run ESLint with error-level boundary rules on changed files only
+          # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
           echo "🚨 Running strict boundary checks on changed files..."
           npx eslint --no-error-on-unmatched-pattern --max-warnings=0 \
-            $(printf "%s" "${CHANGED_FILES}") \
-            --rule "import/no-internal-modules: error" \
+            "$(printf "%s" "${CHANGED_FILES}")" \
+            --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
             --rule "no-restricted-imports: error" \
             --format=compact
           

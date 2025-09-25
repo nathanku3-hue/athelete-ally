@@ -238,7 +238,8 @@ describe('AdvancedSearch', () => {
     const searchButton = screen.getByText('搜索');
     await user.click(searchButton);
 
-    const removeButton = screen.getByRole('button', { name: '' });
+    // Find the remove button for the selected filter (supports multiple languages)
+    const removeButton = screen.getByRole('button', { name: /remove|删除|移除/i });
     await user.click(removeButton);
 
     expect(screen.queryByText('难度: 初级')).not.toBeInTheDocument();

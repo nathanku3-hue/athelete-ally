@@ -38,7 +38,9 @@ jobs:
         run: |
           set -euo pipefail
           echo "🔧 Generating Prisma client for planning-engine..."
-          npm run db:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
+          # Use unified script for consistency
+          chmod +x scripts/generate-prisma-clients.sh
+          bash ./scripts/generate-prisma-clients.sh
       
       - name: Run tests (workspace)
         run: npm run test -w services/planning-engine
