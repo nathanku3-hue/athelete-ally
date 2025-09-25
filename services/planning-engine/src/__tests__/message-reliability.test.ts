@@ -1,5 +1,5 @@
 /* @jest-environment node */
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+// Jest globals are available without import
 import { EventBus } from '@athlete-ally/event-bus';
 import { EventProcessor } from '../events/processor.js';
 

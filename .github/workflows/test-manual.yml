@@ -15,5 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Test step
-        run: echo "Test workflow triggered with input: ${{ inputs.test_input }}"
+      - name: "Test step"
+        run: |
+          echo "Test workflow triggered with input: ${{ inputs.test_input }}"

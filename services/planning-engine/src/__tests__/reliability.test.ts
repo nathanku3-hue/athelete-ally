@@ -1,5 +1,5 @@
 /* @jest-environment node */
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+// Jest globals are available without import
 import { EventProcessor } from '../events/processor.js';
 import { JetStreamConsumer } from '../events/jetstream-consumer.js';
 import { ConcurrencyController } from '../concurrency/controller.js';

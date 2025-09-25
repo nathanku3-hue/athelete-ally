@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+// Jest globals are available without import
 import { generateTrainingPlan } from '../../llm.js';
 
 describe('End-to-End Integration Tests', () => {

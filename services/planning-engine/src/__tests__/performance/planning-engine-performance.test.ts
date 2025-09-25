@@ -1,5 +1,5 @@
 // Planning Engine 性能测试
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+// Jest globals are available without import
 // 模拟导入 - 在测试环境中使用模拟实现
 // import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.js';
 // import { DatabaseOptimizer } from '../../optimization/database-optimizer.js';
