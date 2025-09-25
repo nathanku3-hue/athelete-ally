@@ -6,7 +6,8 @@ jest.mock('../../services/planning-engine/src/llm.js', () => ({
   default: jest.fn()
 }));
 
-import * as LLMAny from '../../services/planning-engine/src/llm.js';
+// Use dynamic import to avoid module resolution issues
+const LLMAny = require('../../services/planning-engine/src/llm.js');
 const generateTrainingPlan: any = (LLMAny as any).generateTrainingPlan || (LLMAny as any).default || (() => { throw new Error('LLM not available'); });
 
 describe('边界控制与韧性测试', () => {
