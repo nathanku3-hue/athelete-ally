@@ -71,3 +71,17 @@
 - Complete audit trail and documentation provided
 - No breaking changes, all modifications are defensive
 - CI/CD pipeline stability significantly improved
+
+## Post-Completion Actions
+- ✅ Added cache diagnostic script (scripts/debug-cache-paths.sh)
+- ✅ Documented reusable sanity workflow contract
+- ✅ Added contract comments to prevent future drift
+- 🔄 Ready for PR creation when GitHub accessible
+- 🔄 Monitoring watchouts as specified
+
+## Watchouts Monitoring
+- **Reusable Sanity Contract**: Documented and stabilized
+- **Actionlint Availability**: Hooks offline-safe, CI pinning ready
+- **NPM Policy**: Explicitly documented (npm ci default, harness exception)
+- **OTEL Version Skew**: Dynamic require approach implemented
+- **Boundaries Enforcement**: Allowlist frozen, no growth allowed
