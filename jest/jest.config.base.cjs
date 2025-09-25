@@ -33,6 +33,13 @@ module.exports = {
     }],
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
+  
+  // Enable ESM support for Jest
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  },
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
 
   testTimeout: 15000,

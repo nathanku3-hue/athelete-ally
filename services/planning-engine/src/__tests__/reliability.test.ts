@@ -1,8 +1,8 @@
 /* @jest-environment node */
 // Jest globals are available without import
-import { EventProcessor } from '../events/processor.js';
-import { JetStreamConsumer } from '../events/jetstream-consumer.js';
-import { ConcurrencyController } from '../concurrency/controller.js';
+import { EventProcessor } from '../events/processor.ts';
+import { JetStreamConsumer } from '../events/jetstream-consumer.ts';
+import { ConcurrencyController } from '../concurrency/controller.ts';
 
 describe('Planning Engine Reliability Tests', () => {
   let eventProcessor: EventProcessor;

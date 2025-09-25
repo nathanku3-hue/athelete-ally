@@ -1,7 +1,7 @@
 /* @jest-environment node */
 // Jest globals are available without import
 import { EventBus } from '@athlete-ally/event-bus';
-import { EventProcessor } from '../events/processor.js';
+import { EventProcessor } from '../events/processor.ts';
 
 describe('Message Reliability Tests', () => {
   let eventBus: EventBus;

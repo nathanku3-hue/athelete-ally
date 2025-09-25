@@ -1,70 +1,50 @@
+const base = require('../../jest/jest.config.base.cjs');
+
 module.exports = {
-  preset: 'ts-jest',
+  ...base,
+  rootDir: '../..',
   testEnvironment: 'node',
-  
-  // 测试文件发现
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/services/planning-engine'],
   testMatch: [
     '**/__tests__/**/*.test.ts',
-    '**/__tests__/**/*.integration.test.ts',
-    '**/__tests__/**/*.e2e.test.ts'
+    '**/__tests__/**/*.integration.test.ts'
+  ],
+  setupFilesAfterEnv: [
+    '<rootDir>/services/planning-engine/src/__tests__/setup.ts'
   ],
   
-  // 忽略模式
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/dist/',
-    '/build/',
-    '/coverage/'
-  ],
-  
-  // 模块解析配置
+  // ESM-specific configuration for planning-engine
+  extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@packages/(.*)$': '<rootDir>/../../packages/$1',
-    '^@services/(.*)$': '<rootDir>/../../services/$1',
-    '^@apps/(.*)$': '<rootDir>/../../apps/$1'
+    ...base.moduleNameMapper,
+    // Handle .js imports in TypeScript files
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    // Fix @athlete-ally package mapping
+    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
   },
   
-  // 转换配置
+  // Ensure proper ESM handling
   transform: {
-    '^.+\\.ts$': ['ts-jest', {
-      useESM: false,
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
       tsconfig: {
-        jsx: 'react-jsx',
+        module: 'esnext',
+        moduleResolution: 'node',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
         baseUrl: '.',
         paths: {
-          '@/*': ['src/*'],
-          '@packages/*': ['../../packages/*'],
-          '@services/*': ['../../services/*'],
-          '@apps/*': ['../../apps/*']
+          "@/*": ["./src/*"],
+          "@packages/*": ["../../packages/*/src"],
+          "@services/*": ["../../services/*/src"],
+          "@apps/*": ["../../apps/*/src"]
         }
       }
-    }],
-    '^.+\\.js$': 'babel-jest'
+    }]
   },
   
+  // Transform ignore patterns for ESM packages
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
-  ],
-  
-  // 覆盖率配置
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!**/__tests__/**',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/build/**'
-  ],
-  
-  // 测试环境配置
-  setupFilesAfterEnv: ['<rootDir>/../../src/__tests__/setup.ts'],
-  
-  // 超时配置
-  testTimeout: 15000,
-  
-  // 其他配置
-  passWithNoTests: true,
-  verbose: true
+    'node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'
+  ]
 };

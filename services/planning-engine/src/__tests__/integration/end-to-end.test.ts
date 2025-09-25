@@ -1,5 +1,5 @@
 // Jest globals are available without import
-import { generateTrainingPlan } from '../../llm.js';
+import { generateTrainingPlan } from '../../llm.ts';
 
 describe('End-to-End Integration Tests', () => {
 

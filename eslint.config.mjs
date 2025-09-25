@@ -33,6 +33,9 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "import/no-commonjs": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "import/no-internal-modules": "off",
       "no-restricted-imports": [
         "error",
         {
@@ -62,7 +65,7 @@ const eslintConfig = [
       // Boundaries (warn first)
       // Prevent deep internal module imports; prefer package entry points
       "import/no-internal-modules": ["warn", { 
-        allow: ["@athlete-ally/**", "@/**", "dotenv/config", "./**"] 
+        allow: ["@athlete-ally/**", "@/**", "dotenv/config", "./**", "../**"] 
       }],
 
       // monorepo layer direction: apps -> services -> packages

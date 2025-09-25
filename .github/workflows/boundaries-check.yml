@@ -48,7 +48,7 @@ jobs:
           echo "🔍 Checking boundaries for new/modified files..."
           
           # Get list of changed TypeScript/TSX files
-          CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' || true)
+          CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' || true)"
           
           if [ -z "$CHANGED_FILES" ]; then
             echo "✅ No TypeScript files changed, skipping boundary check"
