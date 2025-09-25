@@ -20,8 +20,9 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
 
       const data = await response.json();
       reply.status(response.status).send(data);
-    } catch (error) {
-      reply.status(500).send({ error: 'Internal server error', message: error.message });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      reply.status(500).send({ error: 'Internal server error', message: errMsg });
     }
   });
 
@@ -39,8 +40,9 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
 
       const data = await response.json();
       reply.status(response.status).send(data);
-    } catch (error) {
-      reply.status(500).send({ error: 'Internal server error', message: error.message });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      reply.status(500).send({ error: 'Internal server error', message: errMsg });
     }
   });
 
@@ -58,8 +60,9 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
 
       const data = await response.json();
       reply.status(response.status).send(data);
-    } catch (error) {
-      reply.status(500).send({ error: 'Internal server error', message: error.message });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      reply.status(500).send({ error: 'Internal server error', message: errMsg });
     }
   });
 
@@ -77,8 +80,9 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
 
       const data = await response.json();
       reply.status(response.status).send(data);
-    } catch (error) {
-      reply.status(500).send({ error: 'Internal server error', message: error.message });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      reply.status(500).send({ error: 'Internal server error', message: errMsg });
     }
   });
 
