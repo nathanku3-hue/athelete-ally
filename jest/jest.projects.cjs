@@ -11,11 +11,13 @@
  * - npm run test:integration (integration only)
  */
 
+const path = require('path');
+
 module.exports = {
   projects: [
-    '<rootDir>/jest/jest.config.frontend.cjs',
-    '<rootDir>/jest/jest.config.services.cjs',
-    '<rootDir>/jest/jest.config.integration.cjs'
+    path.resolve(__dirname, 'jest.config.frontend.cjs'),
+    path.resolve(__dirname, 'jest.config.services.cjs'),
+    path.resolve(__dirname, 'jest.config.integration.cjs')
   ],
   
   // CI并发控制 - 避免CI容器在高并发下不稳定

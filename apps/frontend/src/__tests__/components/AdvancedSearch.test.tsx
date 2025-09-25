@@ -101,7 +101,9 @@ describe('AdvancedSearch', () => {
       />
     );
 
-    const clearButton = screen.getByRole('button', { name: /clear/i });
+    // Clear button is the last button with X icon (ghost variant)
+    const buttons = screen.getAllByRole('button');
+    const clearButton = buttons[buttons.length - 1]; // Last button is the clear button
     await user.click(clearButton);
 
     expect(mockOnClear).toHaveBeenCalled();

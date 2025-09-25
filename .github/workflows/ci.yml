@@ -157,7 +157,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Prisma clients
         run: |
@@ -166,6 +166,14 @@ jobs:
           sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
           chmod +x scripts/generate-prisma-clients.sh
           bash ./scripts/generate-prisma-clients.sh
+          
+          # Verify Prisma client generation
+          if [ -d "services/planning-engine/node_modules/.prisma/client" ]; then
+            echo "✅ Planning-engine Prisma client generated successfully"
+          else
+            echo "❌ Planning-engine Prisma client not found"
+            exit 1
+          fi
 
       - name: Validate configuration
         run: |
@@ -272,7 +280,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Validate OpenAPI contracts
         run: |
@@ -333,7 +341,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Validate production configuration
         run: |
@@ -372,7 +380,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Prisma clients
         run: |
@@ -460,7 +468,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run security audit
         run: npm audit --audit-level=high
@@ -530,7 +538,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run performance tests
         run: npx turbo run test:performance --filter="...[origin/main]" || echo "No performance tests found"
@@ -559,7 +567,7 @@ jobs:
             services/**/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Download test artifacts
         uses: actions/download-artifact@v4

@@ -23,7 +23,15 @@
       "@/*": ["./src/*"],
       "@packages/*": ["../../packages/*/src"],
       "@services/*": ["../../services/*/src"],
-      "@apps/*": ["../../apps/*/src"]
+      "@apps/*": ["../../apps/*/src"],
+      "@athlete-ally/event-bus": ["../../packages/event-bus/src"],
+      "@athlete-ally/event-bus/*": ["../../packages/event-bus/src/*"],
+      "@athlete-ally/contracts": ["../../packages/contracts/events"],
+      "@athlete-ally/contracts/*": ["../../packages/contracts/events/*"],
+      "@athlete-ally/shared": ["../../packages/shared/src"],
+      "@athlete-ally/shared/*": ["../../packages/shared/src/*"],
+      "@athlete-ally/shared-types": ["../../packages/shared-types/src"],
+      "@athlete-ally/shared-types/*": ["../../packages/shared-types/src/*"]
     }
   },
   "include": ["src/**/*"],
