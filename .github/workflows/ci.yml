@@ -585,9 +585,9 @@ jobs:
 
       - name: Validate Dockerfile formatting
         run: |
-          echo Dockerfile lines: $(wc -l < Dockerfile)
+          echo "Dockerfile lines: $(wc -l < Dockerfile)"
           head -n 20 Dockerfile || true
-          echo Hex (first 160 bytes):
+          echo "Hex (first 160 bytes):"
           hexdump -C Dockerfile | head -n 10 || true
 
       - name: Dry build (no push)
