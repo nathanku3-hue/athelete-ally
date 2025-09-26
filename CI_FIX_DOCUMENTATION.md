@@ -113,3 +113,4 @@ git checkout HEAD~1 -- scripts/generate-prisma-clients.sh
 **Commit**: `1e376ab` - `ci: fix generate-prisma-clients.sh permission denied error`
 **Files Modified**: 2 (`.github/workflows/ci.yml`, `scripts/generate-prisma-clients.sh`)
 **Lines Changed**: -18 (net reduction due to optimization)
+
