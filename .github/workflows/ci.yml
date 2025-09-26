@@ -210,6 +210,17 @@ jobs:
           done
           [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
 
+      - name: CI Debug - Verify Workflow Usage
+        run: |
+          set -euo pipefail
+          echo "🔍 CI Debug Information:"
+          echo "HEAD: $(git rev-parse HEAD)"
+          echo "Workflow file contains Generate Prisma clients step:"
+          grep -n "Generate Prisma clients" .github/workflows/ci.yml || echo "❌ Step not found"
+          echo "Current working directory: $(pwd)"
+          echo "Available services with Prisma schemas:"
+          find services -name "schema.prisma" -type f | head -10
+
       - name: Validate configuration
         run: |
           set -euo pipefail

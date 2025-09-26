@@ -137,7 +137,7 @@ export class AuditService {
         skip: query.offset || 0
       });
 
-      return logs.map((log: any) => ({
+      return logs.map((log) => ({
         id: log.id,
         action: log.action,
         userId: log.userId,
