@@ -193,8 +193,8 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ protocol, onShare, isOpen, on
           </div>
           
           {/* 权限选择 */}
-          <div className="space-y-2">
-            <Label>权限设置</Label>
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">权限设置</legend>
             <div className="grid grid-cols-2 gap-2">
               {(['read', 'write', 'execute', 'share'] as Permission[]).map(permission => (
                 <div key={permission} className="flex items-center space-x-2">
@@ -212,7 +212,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ protocol, onShare, isOpen, on
                 </div>
               ))}
             </div>
-          </div>
+          </fieldset>
           
           {/* 过期时间 */}
           <div className="space-y-2">
