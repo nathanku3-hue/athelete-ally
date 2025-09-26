@@ -214,8 +214,8 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}" >> $GITHUB_ENV
-          echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
+          echo "GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}" >> "$GITHUB_ENV"
+          echo "REGISTRY=ghcr.io" >> "$GITHUB_ENV"
 
       - name: Show Docker versions
         run: |
