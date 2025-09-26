@@ -94,7 +94,7 @@ export class PermissionService {
         role: permission.role as PermissionRole,
         permissions: permission.permissions as Permission[],
         isActive: permission.isActive,
-        expiresAt: permission.expiresAt
+        expiresAt: permission.expiresAt || undefined,
       };
     } catch (error) {
       console.error('Get user permissions failed:', error);

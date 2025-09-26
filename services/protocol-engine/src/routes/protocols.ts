@@ -56,8 +56,8 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
         description,
         category,
         difficulty,
-        parameters: encryptedParameters,
-        adaptations: encryptedAdaptations,
+        parameters: encryptedParameters as any,
+        adaptations: encryptedAdaptations as any,
         visibility: visibility as any,
         dataClassification: dataClassification as any,
         ownerId: userId,
@@ -270,11 +270,11 @@ router.put('/:id', requirePermission(Permission.WRITE), async (req: Authenticate
 
     // 加密敏感数据
     if (parameters !== undefined) {
-      updateData.parameters = encryptionService.encryptProtocolParameters(parameters);
+      updateData.parameters = encryptionService.encryptProtocolParameters(parameters) as any;
     }
     if (adaptations !== undefined) {
       updateData.adaptations = adaptations 
-        ? encryptionService.encryptUserAdaptations(adaptations)
+        ? encryptionService.encryptUserAdaptations(adaptations) as any
         : null;
     }
 

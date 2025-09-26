@@ -108,6 +108,7 @@ model Protocol {
   
   // Optional protocol-level configuration & classification
   parameters  Json?    // Flexible configuration at protocol level
+  adaptations Json?   // User-specific adaptations for the protocol
   dataClassification DataClassification @default(INTERNAL)
   
   // Relations
@@ -249,11 +250,13 @@ model ProtocolPermission {
 model AuditLog {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
+  timestamp   DateTime @default(now()) // Alias for createdAt to match code expectations
   
   // Operation details
   action      String   // CREATE, READ, UPDATE, DELETE, SHARE, etc.
   resourceType String  // PROTOCOL, BLOCK, SESSION, etc.
   resourceId  String
+  severity    String   @default("INFO") // INFO, WARNING, ERROR, CRITICAL
   
   // User context
   userId      String

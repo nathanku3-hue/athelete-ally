@@ -83,9 +83,10 @@ export class AuditService {
           resourceId: entry.resourceId,
           details: entry.details || {},
           severity: entry.severity,
-          ipAddress: entry.ipAddress,
+          result: 'SUCCESS', // Default to SUCCESS for audit logging
+          ip: entry.ipAddress,
           userAgent: entry.userAgent,
-          tenantId: entry.tenantId,
+          tenantId: entry.tenantId || 'default',
           timestamp: new Date()
         }
       });
@@ -131,12 +132,24 @@ export class AuditService {
 
       const logs = await prisma.auditLog.findMany({
         where,
-        orderBy: { timestamp: 'desc' },
+        orderBy: { createdAt: 'desc' },
         take: query.limit || 100,
         skip: query.offset || 0
       });
 
-      return logs;
+      return logs.map(log => ({
+        id: log.id,
+        action: log.action,
+        userId: log.userId,
+        resourceType: log.resourceType,
+        resourceId: log.resourceId,
+        details: log.details,
+        severity: log.severity,
+        ipAddress: log.ip || undefined,
+        userAgent: log.userAgent || undefined,
+        tenantId: log.tenantId,
+        timestamp: log.createdAt
+      }));
     } catch (error) {
       console.error('Audit query failed:', error);
       return [];
@@ -379,7 +392,7 @@ export class AuditService {
 
       const result = await prisma.auditLog.deleteMany({
         where: {
-          timestamp: {
+          createdAt: {
             lt: cutoffDate
           }
         }
