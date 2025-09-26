@@ -302,6 +302,13 @@ jobs:
           # Kill any remaining node processes on port 3000
           lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
+      - name: Ensure test results directory exists
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          echo "Test results directory created/verified"
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -495,13 +502,37 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            # Tag for PRs: ghcr.io/…:pr-<number>
+            type=ref,event=pr
+            # Short SHA tag with a safe prefix: ghcr.io/…:sha-<7>
+            type=sha,format=short,prefix=sha-
+            # Latest tag only on main
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
       - name: Build and push preview images
-        run: |
-          # 构建服务镜像 - 使用正确的 Monorepo 构建模式
-          docker build -t athlete-ally-frontend:preview-${{ github.event.number }} -f ./Dockerfile .
-          docker build -t athlete-ally-gateway-bff:preview-${{ github.event.number }} -f ./apps/gateway-bff/Dockerfile .
-          docker build -t athlete-ally-profile-onboarding:preview-${{ github.event.number }} -f ./services/profile-onboarding/Dockerfile .
-          docker build -t athlete-ally-planning-engine:preview-${{ github.event.number }} -f ./services/planning-engine/Dockerfile .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: false
 
       - name: Comment PR with preview info
         uses: actions/github-script@v7
@@ -513,11 +544,9 @@ jobs:
               repo: context.repo.repo,
               body: '🚀 **Preview Environment Ready!**\n\n' +
                     'Your changes have been built and are ready for testing.\n\n' +
-                    '**Services:**\n' +
-                    '- Frontend: `athlete-ally-frontend:preview-${{ github.event.number }}`\n' +
-                    '- Gateway BFF: `athlete-ally-gateway-bff:preview-${{ github.event.number }}`\n' +
-                    '- Profile Onboarding: `athlete-ally-profile-onboarding:preview-${{ github.event.number }}`\n' +
-                    '- Planning Engine: `athlete-ally-planning-engine:preview-${{ github.event.number }}`\n\n' +
+                    '**Docker Images:**\n' +
+                    '- Main Image: `ghcr.io/${{ github.repository }}:pr-${{ github.event.number }}`\n' +
+                    '- SHA Tag: `ghcr.io/${{ github.repository }}:sha-${{ github.sha }}`\n\n' +
                     '**Next Steps:**\n' +
                     '1. Deploy to preview environment\n' +
                     '2. Run integration tests\n' +

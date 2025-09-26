@@ -6,7 +6,7 @@ WORKDIR /app
 # Dependencies layer (dev deps for build)
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci && npm cache clean --force
+RUN npm ci --ignore-scripts && npm cache clean --force
 
 # Builder (root build compiles monorepo; Next.js app at apps/frontend)
 FROM base AS builder
