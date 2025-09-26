@@ -55,6 +55,7 @@ jobs:
         if: always()
         with:
           name: contract-test-results
+          if-no-files-found: ignore
           path: packages/contracts/coverage/
 
   # 數據庫模型測試
@@ -103,6 +104,7 @@ jobs:
         if: always()
         with:
           name: database-test-results
+          if-no-files-found: ignore
           path: packages/contracts/coverage/
 
   # API 端點測試
@@ -260,6 +262,7 @@ jobs:
         if: always()
         with:
           name: integration-test-results
+          if-no-files-found: ignore
           path: packages/contracts/coverage/
 
       # 清理测试基础设施服务 (项目范围)
@@ -299,6 +302,7 @@ jobs:
         if: always()
         with:
           name: performance-test-results
+          if-no-files-found: ignore
           path: packages/contracts/performance-results/
 
   # 測試報告聚合
@@ -337,6 +341,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: comprehensive-test-report
+          if-no-files-found: ignore
           path: test-results/
 
   # 代碼質量檢查
@@ -371,4 +376,3 @@ jobs:
         run: |
           npm run test:coverage -w packages/contracts
           npm run coverage:check -w packages/contracts
-
