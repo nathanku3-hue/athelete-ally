@@ -10,11 +10,6 @@ module.exports = {
 
   // Unify module resolution from TS paths
   moduleNameMapper: {
-    // Prisma client module mapping for Pattern A (per-service clients)
-    '^\\.\\./prisma/generated/client/index\\.js$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
-    '^\\.\\./prisma/generated/client$': '<rootDir>/services/planning-engine/prisma/generated/client',
-    '^\\.\\./prisma/generated/client/index$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
-    '^\\.\\./prisma/generated/client/index\\.ts$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
     // Specific @athlete-ally package mappings (must come before generic mapping)
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
     '^@athlete-ally/contracts/events/(.*)$': '<rootDir>/packages/contracts/events/$1',
