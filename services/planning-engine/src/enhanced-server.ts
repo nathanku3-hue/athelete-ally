@@ -6,7 +6,7 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { PrismaClient } from '../prisma/generated/client/index.js';
+import { PrismaClient } from '@prisma/client';
 import { Redis } from 'ioredis';
 import { configObject } from './config/environment.js';
 // 健康检查功能已集成到主服务器中
