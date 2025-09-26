@@ -168,14 +168,14 @@ jobs:
           bash ./scripts/generate-prisma-clients.sh
           
           # Verify Prisma client generation
-          if [ -d "services/planning-engine/node_modules/.prisma/client" ]; then
+          if [ -d "services/planning-engine/prisma/generated/client" ]; then
             echo "✅ Planning-engine Prisma client generated successfully"
           else
             echo "❌ Planning-engine Prisma client not found"
             exit 1
           fi
           
-          if [ -d "node_modules/@prisma/client" ]; then
+          if [ -d "services/protocol-engine/prisma/generated/client" ]; then
             echo "✅ Protocol-engine Prisma client generated successfully"
           else
             echo "❌ Protocol-engine Prisma client not found"

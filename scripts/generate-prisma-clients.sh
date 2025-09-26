@@ -12,11 +12,15 @@ for service in services/*/; do
     service_name=$(basename "$service")
     echo "Generating Prisma client for $service_name..."
     
-    # Try workspace command first, fallback to direct prisma generate
-    if [ "$service_name" = "planning-engine" ]; then
-      npm run db:generate -w services/planning-engine || (cd "$service" && npx prisma generate)
+    # Generate to service-local output path
+    (cd "$service" && npx prisma generate)
+    
+    # Verify generation
+    if [ -d "$service/prisma/generated/client" ]; then
+      echo "✅ $service_name Prisma client generated successfully"
     else
-      (cd "$service" && npx prisma generate)
+      echo "❌ $service_name Prisma client generation failed"
+      exit 1
     fi
   fi
 done
