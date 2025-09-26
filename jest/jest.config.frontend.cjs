@@ -14,6 +14,10 @@ module.exports = {
     // Exclude Playwright E2E tests from Jest runs
     '/apps/frontend/src/__tests__/e2e/',
     '/apps/frontend/tests/e2e/',
+    // Exclude environment/integration harness tests from unit jsdom run
+    // These rely on real services and are covered by separate workflows/jobs
+    '/apps/frontend/tests/integration/',
+    '/apps/frontend/src/__tests__/integration/',
     // Exclude legacy integration-like tests from unit tests
     '/apps/frontend/tests/permissions/',
     '/apps/frontend/tests/security/'
