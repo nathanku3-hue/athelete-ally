@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { PrismaClient } from './prisma/generated/client/index.js';
+import { PrismaClient } from '../prisma/generated/client/index.js';
 import protocolsRouter from './routes/protocols';
 import { auditService, AuditAction, AuditSeverity } from './services/audit';
 
