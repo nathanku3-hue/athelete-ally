@@ -17,6 +17,7 @@
     "start": "next start apps/frontend",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
+    "prisma:generate": "bash ./scripts/generate-prisma-clients.sh",
     "test": "jest --projects jest/jest.projects.cjs",
     "test:projects": "jest --projects jest/jest.projects.cjs",
     "test:frontend": "jest --config jest/jest.config.frontend.cjs",

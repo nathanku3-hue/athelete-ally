@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '../prisma/generated/client/index.js';
+import { PrismaClient } from '../../prisma/generated/client';
 import { permissionService, Permission } from '../services/permissions';
 import { encryptionService, DataClassification } from '../services/encryption';
 import { auditService, AuditAction, AuditSeverity } from '../services/audit';

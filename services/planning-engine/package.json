@@ -18,7 +18,7 @@
     "start": "node dist/index.js",
     "start:health": "node dist/simple-server.js",
     "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate",
+    "prisma:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
     "test": "jest --config jest.config.cjs --passWithNoTests --testTimeout=10000 --maxWorkers=1",
