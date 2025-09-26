@@ -47,6 +47,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma clients (all services)
+        run: |
+          set -euo pipefail
+          bash ./scripts/generate-prisma-clients.sh
+
+      - name: Verify Prisma clients (per service)
+        run: |
+          set -euo pipefail
+          echo "🔎 Verifying per-service Prisma clients..."
+          missing=0
+          for svc in services/*; do
+            if [ -f "$svc/prisma/schema.prisma" ]; then
+              echo "• $svc: expect $svc/prisma/generated/client"
+              if [ -d "$svc/prisma/generated/client" ]; then
+                echo "  ✅ found"
+              else
+                echo "  ❌ missing $svc/prisma/generated/client"
+                ls -la "$svc/prisma" || true
+                missing=1
+              fi
+            fi
+          done
+          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
+
       - name: Run linting
         run: npm run lint
 

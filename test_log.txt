@@ -1,0 +1,1540 @@
+test	Set up job	﻿2025-09-26T10:52:14.9802315Z Current runner version: '2.328.0'
+test	Set up job	2025-09-26T10:52:14.9828050Z ##[group]Runner Image Provisioner
+test	Set up job	2025-09-26T10:52:14.9828929Z Hosted Compute Agent
+test	Set up job	2025-09-26T10:52:14.9829721Z Version: 20250912.392
+test	Set up job	2025-09-26T10:52:14.9830351Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+test	Set up job	2025-09-26T10:52:14.9831071Z Build Date: 2025-09-12T15:23:14Z
+test	Set up job	2025-09-26T10:52:14.9831620Z ##[endgroup]
+test	Set up job	2025-09-26T10:52:14.9832412Z ##[group]Operating System
+test	Set up job	2025-09-26T10:52:14.9833225Z Ubuntu
+test	Set up job	2025-09-26T10:52:14.9834028Z 24.04.3
+test	Set up job	2025-09-26T10:52:14.9834881Z LTS
+test	Set up job	2025-09-26T10:52:14.9835687Z ##[endgroup]
+test	Set up job	2025-09-26T10:52:14.9836502Z ##[group]Runner Image
+test	Set up job	2025-09-26T10:52:14.9837637Z Image: ubuntu-24.04
+test	Set up job	2025-09-26T10:52:14.9838275Z Version: 20250922.53.1
+test	Set up job	2025-09-26T10:52:14.9839292Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250922.53/images/ubuntu/Ubuntu2404-Readme.md
+test	Set up job	2025-09-26T10:52:14.9841097Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250922.53
+test	Set up job	2025-09-26T10:52:14.9842312Z ##[endgroup]
+test	Set up job	2025-09-26T10:52:14.9843548Z ##[group]GITHUB_TOKEN Permissions
+test	Set up job	2025-09-26T10:52:14.9845656Z Contents: read
+test	Set up job	2025-09-26T10:52:14.9846270Z Metadata: read
+test	Set up job	2025-09-26T10:52:14.9846816Z Packages: write
+test	Set up job	2025-09-26T10:52:14.9847305Z ##[endgroup]
+test	Set up job	2025-09-26T10:52:14.9849979Z Secret source: Actions
+test	Set up job	2025-09-26T10:52:14.9850729Z Prepare workflow directory
+test	Set up job	2025-09-26T10:52:15.0425785Z Prepare all required actions
+test	Set up job	2025-09-26T10:52:15.0464498Z Getting action download info
+test	Set up job	2025-09-26T10:52:15.5504045Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+test	Set up job	2025-09-26T10:52:15.7348445Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+test	Set up job	2025-09-26T10:52:15.8258177Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+test	Set up job	2025-09-26T10:52:17.2396329Z Complete job name: test
+test	Checkout code (selected ref)	﻿2025-09-26T10:52:17.3093029Z ##[group]Run actions/checkout@v4
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3093952Z with:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3094425Z   ref: refs/pull/1/merge
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3094941Z   repository: nathanku3-hue/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3095699Z   token: ***
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3096123Z   ssh-strict: true
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3096539Z   ssh-user: git
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3096967Z   persist-credentials: true
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3097433Z   clean: true
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3097863Z   sparse-checkout-cone-mode: true
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3098380Z   fetch-depth: 1
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3098793Z   fetch-tags: false
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3099200Z   show-progress: true
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3099860Z   lfs: false
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3100289Z   submodules: false
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3100720Z   set-safe-directory: true
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3101446Z env:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3101838Z   NODE_VERSION: 20
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3102266Z   REGISTRY: ghcr.io
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3102717Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3103269Z   CODECOV_TOKEN: 
+test	Checkout code (selected ref)	2025-09-26T10:52:17.3103721Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4212206Z Syncing repository: nathanku3-hue/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4214194Z ##[group]Getting Git version info
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4215049Z Working directory is '/home/runner/work/athelete-ally/athelete-ally'
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4216120Z [command]/usr/bin/git version
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4293888Z git version 2.51.0
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4321573Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4336171Z Temporarily overriding HOME='/home/runner/work/_temp/c13df50c-e7a9-4f66-a9e9-cf0e3b9654b9' before making global git config changes
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4338534Z Adding repository directory to the temporary git global config as a safe directory
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4341744Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/athelete-ally/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4380543Z Deleting the contents of '/home/runner/work/athelete-ally/athelete-ally'
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4384631Z ##[group]Initializing the repository
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4388546Z [command]/usr/bin/git init /home/runner/work/athelete-ally/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4514353Z hint: Using 'master' as the name for the initial branch. This default branch name
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4516173Z hint: is subject to change. To configure the initial branch name to use in all
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4517458Z hint: of your new repositories, which will suppress this warning, call:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4518179Z hint:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4518732Z hint: 	git config --global init.defaultBranch <name>
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4519966Z hint:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4520963Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4522568Z hint: 'development'. The just-created branch can be renamed via this command:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4523334Z hint:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4523745Z hint: 	git branch -m <name>
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4524213Z hint:
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4525055Z hint: Disable this message with "git config set advice.defaultBranchName false"
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4526443Z Initialized empty Git repository in /home/runner/work/athelete-ally/athelete-ally/.git/
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4531512Z [command]/usr/bin/git remote add origin https://github.com/nathanku3-hue/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4569079Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4570709Z ##[group]Disabling automatic garbage collection
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4574155Z [command]/usr/bin/git config --local gc.auto 0
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4604356Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4605737Z ##[group]Setting up auth
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4612498Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	Checkout code (selected ref)	2025-09-26T10:52:17.4644786Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	Checkout code (selected ref)	2025-09-26T10:52:17.5006863Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	Checkout code (selected ref)	2025-09-26T10:52:17.5040932Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	Checkout code (selected ref)	2025-09-26T10:52:17.5276570Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+test	Checkout code (selected ref)	2025-09-26T10:52:17.5312546Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:17.5314142Z ##[group]Fetching the repository
+test	Checkout code (selected ref)	2025-09-26T10:52:17.5323138Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +refs/pull/1/merge:refs/remotes/pull/1/merge
+test	Checkout code (selected ref)	2025-09-26T10:52:18.2993169Z From https://github.com/nathanku3-hue/athelete-ally
+test	Checkout code (selected ref)	2025-09-26T10:52:18.2995362Z  * [new ref]         refs/pull/1/merge -> pull/1/merge
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3025922Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3026928Z ##[group]Determining the checkout info
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3028424Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3034092Z [command]/usr/bin/git sparse-checkout disable
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3077840Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3106805Z ##[group]Checking out the ref
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3111266Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1/merge
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3597786Z Note: switching to 'refs/remotes/pull/1/merge'.
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3599093Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3600547Z You are in 'detached HEAD' state. You can look around, make experimental
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3603157Z changes and commit them, and you can discard any commits you make in this
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3605531Z state without impacting any branches by switching back to a branch.
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3607022Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3608220Z If you want to create a new branch to retain commits you create, you may
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3610975Z do so (now or later) by using -c with the switch command. Example:
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3612299Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3612840Z   git switch -c <new-branch-name>
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3613760Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3614397Z Or undo this operation with:
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3615160Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3615908Z   git switch -
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3616515Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3617495Z Turn off this advice by setting config variable advice.detachedHead to false
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3618984Z 
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3620982Z HEAD is now at 580e7aa Merge fde9e6c670b78f12f3be23b8dc271902c5a78164 into e29b8055cfb179301a2c9fe817546c91399ed1c4
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3624845Z ##[endgroup]
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3651818Z [command]/usr/bin/git log -1 --format=%H
+test	Checkout code (selected ref)	2025-09-26T10:52:18.3677263Z 580e7aa768cac6935b641ed146ce4a9f615893e8
+test	Setup Node.js	﻿2025-09-26T10:52:18.3991913Z ##[group]Run actions/setup-node@v4
+test	Setup Node.js	2025-09-26T10:52:18.3993610Z with:
+test	Setup Node.js	2025-09-26T10:52:18.3995013Z   node-version: 20.18.0
+test	Setup Node.js	2025-09-26T10:52:18.3996478Z   cache: npm
+test	Setup Node.js	2025-09-26T10:52:18.3998067Z   cache-dependency-path: package-lock.json
+test	Setup Node.js	2025-09-26T10:52:18.4000249Z   always-auth: false
+test	Setup Node.js	2025-09-26T10:52:18.4001631Z   check-latest: false
+test	Setup Node.js	2025-09-26T10:52:18.4003544Z   token: ***
+test	Setup Node.js	2025-09-26T10:52:18.4004760Z env:
+test	Setup Node.js	2025-09-26T10:52:18.4005936Z   NODE_VERSION: 20
+test	Setup Node.js	2025-09-26T10:52:18.4007276Z   REGISTRY: ghcr.io
+test	Setup Node.js	2025-09-26T10:52:18.4008737Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Setup Node.js	2025-09-26T10:52:18.4010690Z   CODECOV_TOKEN: 
+test	Setup Node.js	2025-09-26T10:52:18.4012057Z ##[endgroup]
+test	Setup Node.js	2025-09-26T10:52:18.5835087Z Attempting to download 20.18.0...
+test	Setup Node.js	2025-09-26T10:52:19.3722367Z Acquiring 20.18.0 - x64 from https://github.com/actions/node-versions/releases/download/20.18.0-11182621166/node-20.18.0-linux-x64.tar.gz
+test	Setup Node.js	2025-09-26T10:52:19.8497274Z Extracting ...
+test	Setup Node.js	2025-09-26T10:52:19.8637990Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/db548676-b1c1-45a0-9967-9f440ba2a781 -f /home/runner/work/_temp/83ed4e0c-5944-49ad-8d17-c820c4393c6f
+test	Setup Node.js	2025-09-26T10:52:20.8711730Z Adding to the cache ...
+test	Setup Node.js	2025-09-26T10:52:22.4668150Z ##[group]Environment details
+test	Setup Node.js	2025-09-26T10:52:22.6921289Z node: v20.18.0
+test	Setup Node.js	2025-09-26T10:52:22.6921972Z npm: 10.8.2
+test	Setup Node.js	2025-09-26T10:52:22.6922322Z yarn: 1.22.22
+test	Setup Node.js	2025-09-26T10:52:22.6923232Z ##[endgroup]
+test	Setup Node.js	2025-09-26T10:52:22.6945572Z [command]/opt/hostedtoolcache/node/20.18.0/x64/bin/npm config get cache
+test	Setup Node.js	2025-09-26T10:52:22.7951028Z /home/runner/.npm
+test	Setup Node.js	2025-09-26T10:52:23.0558286Z Cache hit for: node-cache-Linux-x64-npm-cf2664d24e7d9789ba480a50d1c41588a5a72e0c9c3802dce7535ee781fa5829
+test	Setup Node.js	2025-09-26T10:52:24.3557561Z Received 4194304 of 285091756 (1.5%), 4.0 MBs/sec
+test	Setup Node.js	2025-09-26T10:52:25.3569585Z Received 100663296 of 285091756 (35.3%), 48.0 MBs/sec
+test	Setup Node.js	2025-09-26T10:52:26.3570307Z Received 213909504 of 285091756 (75.0%), 68.0 MBs/sec
+test	Setup Node.js	2025-09-26T10:52:27.3578633Z Received 280897452 of 285091756 (98.5%), 66.9 MBs/sec
+test	Setup Node.js	2025-09-26T10:52:27.3971689Z Received 285091756 of 285091756 (100.0%), 67.3 MBs/sec
+test	Setup Node.js	2025-09-26T10:52:27.3972612Z Cache Size: ~272 MB (285091756 B)
+test	Setup Node.js	2025-09-26T10:52:27.4029708Z [command]/usr/bin/tar -xf /home/runner/work/_temp/2d95a7b1-88b2-49e5-8b76-495c432fecb9/cache.tzst -P -C /home/runner/work/athelete-ally/athelete-ally --use-compress-program unzstd
+test	Setup Node.js	2025-09-26T10:52:28.0377004Z Cache restored successfully
+test	Setup Node.js	2025-09-26T10:52:28.0933407Z Cache restored from key: node-cache-Linux-x64-npm-cf2664d24e7d9789ba480a50d1c41588a5a72e0c9c3802dce7535ee781fa5829
+test	Show tool versions	﻿2025-09-26T10:52:28.1110275Z ##[group]Run node -v
+test	Show tool versions	2025-09-26T10:52:28.1110610Z [36;1mnode -v[0m
+test	Show tool versions	2025-09-26T10:52:28.1110821Z [36;1mnpm -v[0m
+test	Show tool versions	2025-09-26T10:52:28.1150393Z shell: /usr/bin/bash -e {0}
+test	Show tool versions	2025-09-26T10:52:28.1150648Z env:
+test	Show tool versions	2025-09-26T10:52:28.1150845Z   NODE_VERSION: 20
+test	Show tool versions	2025-09-26T10:52:28.1151058Z   REGISTRY: ghcr.io
+test	Show tool versions	2025-09-26T10:52:28.1151274Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Show tool versions	2025-09-26T10:52:28.1151535Z   CODECOV_TOKEN: 
+test	Show tool versions	2025-09-26T10:52:28.1151742Z ##[endgroup]
+test	Show tool versions	2025-09-26T10:52:28.1262669Z v20.18.0
+test	Show tool versions	2025-09-26T10:52:28.2147338Z 10.8.2
+test	Install dependencies	﻿2025-09-26T10:52:28.2234795Z ##[group]Run npm ci
+test	Install dependencies	2025-09-26T10:52:28.2235084Z [36;1mnpm ci[0m
+test	Install dependencies	2025-09-26T10:52:28.2270698Z shell: /usr/bin/bash -e {0}
+test	Install dependencies	2025-09-26T10:52:28.2270958Z env:
+test	Install dependencies	2025-09-26T10:52:28.2271135Z   NODE_VERSION: 20
+test	Install dependencies	2025-09-26T10:52:28.2271325Z   REGISTRY: ghcr.io
+test	Install dependencies	2025-09-26T10:52:28.2271545Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Install dependencies	2025-09-26T10:52:28.2272098Z   CODECOV_TOKEN: 
+test	Install dependencies	2025-09-26T10:52:28.2272282Z ##[endgroup]
+test	Install dependencies	2025-09-26T10:52:36.2573501Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+test	Install dependencies	2025-09-26T10:52:36.4645514Z npm warn deprecated supertest@6.3.4: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
+test	Install dependencies	2025-09-26T10:52:36.5065436Z npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+test	Install dependencies	2025-09-26T10:52:36.5309894Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.5550776Z npm warn deprecated abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+test	Install dependencies	2025-09-26T10:52:36.6161886Z npm warn deprecated acorn-import-assertions@1.9.0: package has been renamed to acorn-import-attributes
+test	Install dependencies	2025-09-26T10:52:36.8377331Z npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+test	Install dependencies	2025-09-26T10:52:36.8414388Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.8424625Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.8431920Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.8436415Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.8445013Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.8501359Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:36.8523732Z npm warn deprecated glob@8.1.0: Glob versions prior to v9 are no longer supported
+test	Install dependencies	2025-09-26T10:52:37.0049204Z npm warn deprecated domexception@4.0.0: Use your platform's native DOMException instead
+test	Install dependencies	2025-09-26T10:52:38.8071089Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+test	Install dependencies	2025-09-26T10:52:39.6086352Z npm warn deprecated superagent@8.1.2: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+test	Install dependencies	2025-09-26T10:52:47.9154120Z npm warn deprecated @opentelemetry/otlp-proto-exporter-base@0.45.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+test	Install dependencies	2025-09-26T10:52:47.9217644Z npm warn deprecated @opentelemetry/otlp-proto-exporter-base@0.46.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+test	Install dependencies	2025-09-26T10:52:50.4530589Z npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+test	Install dependencies	2025-09-26T10:52:56.5909042Z 
+test	Install dependencies	2025-09-26T10:52:56.5911971Z > athlete-ally@0.1.0 preinstall
+test	Install dependencies	2025-09-26T10:52:56.5912692Z > node scripts/check-node-version.js
+test	Install dependencies	2025-09-26T10:52:56.5912924Z 
+test	Install dependencies	2025-09-26T10:52:56.6491684Z ✅ Node.js version check passed: v20.18.0
+test	Install dependencies	2025-09-26T10:52:56.6784550Z 
+test	Install dependencies	2025-09-26T10:52:56.6785798Z added 1642 packages, and audited 1661 packages in 28s
+test	Install dependencies	2025-09-26T10:52:56.6786241Z 
+test	Install dependencies	2025-09-26T10:52:56.6786612Z 273 packages are looking for funding
+test	Install dependencies	2025-09-26T10:52:56.6787143Z   run `npm fund` for details
+test	Install dependencies	2025-09-26T10:52:56.6802073Z 
+test	Install dependencies	2025-09-26T10:52:56.6802706Z found 0 vulnerabilities
+test	Run linting	﻿2025-09-26T10:52:56.8033706Z ##[group]Run npm run lint
+test	Run linting	2025-09-26T10:52:56.8033999Z [36;1mnpm run lint[0m
+test	Run linting	2025-09-26T10:52:56.8066616Z shell: /usr/bin/bash -e {0}
+test	Run linting	2025-09-26T10:52:56.8066853Z env:
+test	Run linting	2025-09-26T10:52:56.8067023Z   NODE_VERSION: 20
+test	Run linting	2025-09-26T10:52:56.8067206Z   REGISTRY: ghcr.io
+test	Run linting	2025-09-26T10:52:56.8067418Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Run linting	2025-09-26T10:52:56.8067665Z   CODECOV_TOKEN: 
+test	Run linting	2025-09-26T10:52:56.8068038Z ##[endgroup]
+test	Run linting	2025-09-26T10:52:56.9198079Z 
+test	Run linting	2025-09-26T10:52:56.9198737Z > athlete-ally@0.1.0 lint
+test	Run linting	2025-09-26T10:52:56.9199249Z > eslint
+test	Run linting	2025-09-26T10:52:56.9199713Z 
+test	Run type checking	﻿2025-09-26T10:52:58.3036399Z ##[group]Run npm run type-check
+test	Run type checking	2025-09-26T10:52:58.3036722Z [36;1mnpm run type-check[0m
+test	Run type checking	2025-09-26T10:52:58.3069174Z shell: /usr/bin/bash -e {0}
+test	Run type checking	2025-09-26T10:52:58.3069620Z env:
+test	Run type checking	2025-09-26T10:52:58.3069805Z   NODE_VERSION: 20
+test	Run type checking	2025-09-26T10:52:58.3069999Z   REGISTRY: ghcr.io
+test	Run type checking	2025-09-26T10:52:58.3070245Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Run type checking	2025-09-26T10:52:58.3070507Z   CODECOV_TOKEN: 
+test	Run type checking	2025-09-26T10:52:58.3070691Z ##[endgroup]
+test	Run type checking	2025-09-26T10:52:58.4291871Z 
+test	Run type checking	2025-09-26T10:52:58.4292631Z > athlete-ally@0.1.0 type-check
+test	Run type checking	2025-09-26T10:52:58.4293198Z > tsc --noEmit
+test	Run type checking	2025-09-26T10:52:58.4293419Z 
+test	Start Frontend Service	﻿2025-09-26T10:53:00.3508665Z ##[group]Run echo "🚀 Starting frontend service for tests..."
+test	Start Frontend Service	2025-09-26T10:53:00.3509604Z [36;1mecho "🚀 Starting frontend service for tests..."[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3510135Z [36;1mcd apps/frontend[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3510537Z [36;1mnpm run build[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3510889Z [36;1mnpm start &[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3511239Z [36;1mFRONTEND_PID=$![0m
+test	Start Frontend Service	2025-09-26T10:53:00.3511708Z [36;1mecho "FRONTEND_PID=$FRONTEND_PID" >> "$GITHUB_ENV"[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3512195Z [36;1m[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3512546Z [36;1m# Wait for frontend to be ready[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3513141Z [36;1mecho "⏳ Waiting for frontend service to be ready..."[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3513669Z [36;1mfor i in {1..30}; do[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3514242Z [36;1m  if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3514876Z [36;1m    echo "✅ Frontend service is ready!"[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3515318Z [36;1m    break[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3515641Z [36;1m  fi[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3516083Z [36;1m  echo "Waiting for frontend... (attempt $i/30)"[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3516570Z [36;1m  sleep 2[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3516870Z [36;1mdone[0m
+test	Start Frontend Service	2025-09-26T10:53:00.3565400Z shell: /usr/bin/bash -e {0}
+test	Start Frontend Service	2025-09-26T10:53:00.3565811Z env:
+test	Start Frontend Service	2025-09-26T10:53:00.3566103Z   NODE_VERSION: 20
+test	Start Frontend Service	2025-09-26T10:53:00.3566431Z   REGISTRY: ghcr.io
+test	Start Frontend Service	2025-09-26T10:53:00.3566789Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Start Frontend Service	2025-09-26T10:53:00.3567227Z   CODECOV_TOKEN: 
+test	Start Frontend Service	2025-09-26T10:53:00.3567545Z ##[endgroup]
+test	Start Frontend Service	2025-09-26T10:53:00.3625904Z 🚀 Starting frontend service for tests...
+test	Start Frontend Service	2025-09-26T10:53:00.4721043Z 
+test	Start Frontend Service	2025-09-26T10:53:00.4721607Z > athlete-ally@0.1.0 build
+test	Start Frontend Service	2025-09-26T10:53:00.4722199Z > next build apps/frontend
+test	Start Frontend Service	2025-09-26T10:53:00.4722487Z 
+test	Start Frontend Service	2025-09-26T10:53:01.0507268Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+test	Start Frontend Service	2025-09-26T10:53:01.0731406Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+test	Start Frontend Service	2025-09-26T10:53:01.0732635Z This information is used to shape Next.js' roadmap and prioritize features.
+test	Start Frontend Service	2025-09-26T10:53:01.0733723Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+test	Start Frontend Service	2025-09-26T10:53:01.0734449Z https://nextjs.org/telemetry
+test	Start Frontend Service	2025-09-26T10:53:01.0734656Z 
+test	Start Frontend Service	2025-09-26T10:53:01.1275522Z    ▲ Next.js 15.5.3
+test	Start Frontend Service	2025-09-26T10:53:01.1276150Z    - Experiments (use with caution):
+test	Start Frontend Service	2025-09-26T10:53:01.1276783Z      ✓ optimizeCss
+test	Start Frontend Service	2025-09-26T10:53:01.1277443Z      · optimizePackageImports
+test	Start Frontend Service	2025-09-26T10:53:01.1277747Z 
+test	Start Frontend Service	2025-09-26T10:53:01.2216997Z    Creating an optimized production build ...
+test	Start Frontend Service	2025-09-26T10:53:08.8229624Z 
+test	Start Frontend Service	2025-09-26T10:53:08.8231633Z [1m[33mwarn[39m[22m - The `content` option in your Tailwind CSS configuration is missing or empty.
+test	Start Frontend Service	2025-09-26T10:53:08.8232792Z [1m[33mwarn[39m[22m - Configure your content sources or your generated CSS will be missing styles.
+test	Start Frontend Service	2025-09-26T10:53:08.8233499Z [1m[33mwarn[39m[22m - https://tailwindcss.com/docs/content-configuration
+test	Start Frontend Service	2025-09-26T10:53:10.9669236Z  ✓ Compiled successfully in 9.4s
+test	Start Frontend Service	2025-09-26T10:53:10.9712096Z    Skipping linting
+test	Start Frontend Service	2025-09-26T10:53:10.9714511Z    Checking validity of types ...
+test	Start Frontend Service	2025-09-26T10:53:20.9614268Z    Collecting page data ...
+test	Start Frontend Service	2025-09-26T10:53:22.9166113Z    Generating static pages (0/28) ...
+test	Start Frontend Service	2025-09-26T10:53:23.6895125Z    Generating static pages (7/28) 
+test	Start Frontend Service	2025-09-26T10:53:23.7620003Z    Generating static pages (14/28) 
+test	Start Frontend Service	2025-09-26T10:53:23.7816035Z    Generating static pages (21/28) 
+test	Start Frontend Service	2025-09-26T10:53:23.8693944Z  ✓ Generating static pages (28/28)
+test	Start Frontend Service	2025-09-26T10:53:24.8867657Z    Finalizing page optimization ...
+test	Start Frontend Service	2025-09-26T10:53:24.8868541Z    Collecting build traces ...
+test	Start Frontend Service	2025-09-26T10:53:43.0620854Z 
+test	Start Frontend Service	2025-09-26T10:53:43.0695832Z Route (app)                                Size  First Load JS
+test	Start Frontend Service	2025-09-26T10:53:43.0697042Z ┌ ○ /                                    1.9 kB         231 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0697936Z ├ ○ /_not-found                           187 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0699765Z ├ ƒ /api/health                           114 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0700643Z ├ ƒ /api/v1/exercise-sets                 114 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0701642Z ├ ƒ /api/v1/fatigue/status                113 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0702554Z ├ ƒ /api/v1/plans/current                 114 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0703499Z ├ ƒ /api/v1/plans/status                  114 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0704481Z ├ ƒ /api/v1/workouts/summary              114 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0705366Z ├ ○ /dashboard                          1.07 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0706236Z ├ ○ /fatigue-assessment                 1.94 kB         231 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0707077Z ├ ○ /feedback                           2.41 kB         231 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0707874Z ├ ○ /onboarding                           509 B         229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0708698Z ├ ○ /onboarding/availability            1.35 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0709757Z ├ ○ /onboarding/equipment               1.54 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0710606Z ├ ○ /onboarding/generating              2.67 kB         231 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0711427Z ├ ○ /onboarding/intent                  1.08 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0712227Z ├ ○ /onboarding/proficiency             1.51 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0713025Z ├ ○ /onboarding/purpose                 1.98 kB         231 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0713773Z ├ ○ /onboarding/season                  1.77 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0714431Z ├ ○ /onboarding/success                 1.36 kB         230 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0715082Z ├ ○ /onboarding/summary                 2.51 kB         231 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0715674Z ├ ○ /plan                               3.14 kB         232 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0716244Z ├ ƒ /plans/[planId]                     7.54 kB         236 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0716870Z ├ ○ /progress                           5.03 kB         234 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0717493Z ├ ○ /training/plans                     3.43 kB         232 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0718203Z ├ ○ /training/sessions                  2.95 kB         232 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0718980Z └ ƒ /workout/[sessionId]                3.36 kB         232 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0719780Z + First Load JS shared by all            229 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0720451Z   ├ chunks/common-1263d5c2bda20e05.js   30.5 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0721159Z   └ chunks/vendors-0b3472a044029b61.js   196 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0721862Z   └ other shared chunks (total)         1.91 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0722184Z 
+test	Start Frontend Service	2025-09-26T10:53:43.0722197Z 
+test	Start Frontend Service	2025-09-26T10:53:43.0722592Z ƒ Middleware                            33.3 kB
+test	Start Frontend Service	2025-09-26T10:53:43.0722887Z 
+test	Start Frontend Service	2025-09-26T10:53:43.0723232Z ○  (Static)   prerendered as static content
+test	Start Frontend Service	2025-09-26T10:53:43.0723859Z ƒ  (Dynamic)  server-rendered on demand
+test	Start Frontend Service	2025-09-26T10:53:43.0724191Z 
+test	Start Frontend Service	2025-09-26T10:53:43.1414207Z ⏳ Waiting for frontend service to be ready...
+test	Start Frontend Service	2025-09-26T10:53:43.1493394Z Waiting for frontend... (attempt 1/30)
+test	Start Frontend Service	2025-09-26T10:53:43.2521513Z 
+test	Start Frontend Service	2025-09-26T10:53:43.2522132Z > athlete-ally@0.1.0 start
+test	Start Frontend Service	2025-09-26T10:53:43.2522789Z > next start apps/frontend
+test	Start Frontend Service	2025-09-26T10:53:43.2523562Z 
+test	Start Frontend Service	2025-09-26T10:53:43.5073613Z    ▲ Next.js 15.5.3
+test	Start Frontend Service	2025-09-26T10:53:43.5076137Z    - Local:        http://localhost:3000
+test	Start Frontend Service	2025-09-26T10:53:43.5076721Z    - Network:      http://10.1.0.242:3000
+test	Start Frontend Service	2025-09-26T10:53:43.5077116Z 
+test	Start Frontend Service	2025-09-26T10:53:43.5078015Z  ✓ Starting...
+test	Start Frontend Service	2025-09-26T10:53:43.6242392Z  ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+test	Start Frontend Service	2025-09-26T10:53:43.6931648Z  ✓ Ready in 345ms
+test	Start Frontend Service	2025-09-26T10:53:45.2570757Z ✅ Frontend service is ready!
+test	Run tests	﻿2025-09-26T10:53:50.2722957Z ##[group]Run npm run test:coverage
+test	Run tests	2025-09-26T10:53:50.2723261Z [36;1mnpm run test:coverage[0m
+test	Run tests	2025-09-26T10:53:50.2755736Z shell: /usr/bin/bash -e {0}
+test	Run tests	2025-09-26T10:53:50.2755957Z env:
+test	Run tests	2025-09-26T10:53:50.2756125Z   NODE_VERSION: 20
+test	Run tests	2025-09-26T10:53:50.2756304Z   REGISTRY: ghcr.io
+test	Run tests	2025-09-26T10:53:50.2756513Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Run tests	2025-09-26T10:53:50.2776542Z   CODECOV_TOKEN: 
+test	Run tests	2025-09-26T10:53:50.2776797Z   FRONTEND_PID: 2426
+test	Run tests	2025-09-26T10:53:50.2777024Z ##[endgroup]
+test	Run tests	2025-09-26T10:53:50.3873106Z 
+test	Run tests	2025-09-26T10:53:50.3875915Z > athlete-ally@0.1.0 test:coverage
+test	Run tests	2025-09-26T10:53:50.3876454Z > jest --coverage
+test	Run tests	2025-09-26T10:53:50.3876652Z 
+test	Run tests	2025-09-26T10:53:50.7242242Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7242653Z 
+test	Run tests	2025-09-26T10:53:50.7243060Z   Unknown option "testTimeout" with value 15000 was found.
+test	Run tests	2025-09-26T10:53:50.7244022Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7244567Z 
+test	Run tests	2025-09-26T10:53:50.7244819Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7245534Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7245813Z 
+test	Run tests	2025-09-26T10:53:50.7258912Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7259166Z 
+test	Run tests	2025-09-26T10:53:50.7259672Z   Unknown option "passWithNoTests" with value true was found.
+test	Run tests	2025-09-26T10:53:50.7260541Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7260978Z 
+test	Run tests	2025-09-26T10:53:50.7261194Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7261736Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7262074Z 
+test	Run tests	2025-09-26T10:53:50.7265506Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7265784Z 
+test	Run tests	2025-09-26T10:53:50.7266074Z   Unknown option "verbose" with value true was found.
+test	Run tests	2025-09-26T10:53:50.7266855Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7267218Z 
+test	Run tests	2025-09-26T10:53:50.7267358Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7267699Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7267915Z 
+test	Run tests	2025-09-26T10:53:50.7290677Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7290942Z 
+test	Run tests	2025-09-26T10:53:50.7291195Z   Unknown option "testTimeout" with value 15000 was found.
+test	Run tests	2025-09-26T10:53:50.7291764Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7292278Z 
+test	Run tests	2025-09-26T10:53:50.7292519Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7293157Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7293620Z 
+test	Run tests	2025-09-26T10:53:50.7297772Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7298036Z 
+test	Run tests	2025-09-26T10:53:50.7298392Z   Unknown option "passWithNoTests" with value true was found.
+test	Run tests	2025-09-26T10:53:50.7299184Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7299814Z 
+test	Run tests	2025-09-26T10:53:50.7300014Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7300490Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7300789Z 
+test	Run tests	2025-09-26T10:53:50.7303615Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7304968Z 
+test	Run tests	2025-09-26T10:53:50.7305314Z   Unknown option "verbose" with value true was found.
+test	Run tests	2025-09-26T10:53:50.7306129Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7306601Z 
+test	Run tests	2025-09-26T10:53:50.7306820Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7307355Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7307701Z 
+test	Run tests	2025-09-26T10:53:50.7314334Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7314601Z 
+test	Run tests	2025-09-26T10:53:50.7315255Z   Unknown option "testTimeout" with value 15000 was found.
+test	Run tests	2025-09-26T10:53:50.7316008Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7316450Z 
+test	Run tests	2025-09-26T10:53:50.7316652Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7317111Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7317440Z 
+test	Run tests	2025-09-26T10:53:50.7321064Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7321323Z 
+test	Run tests	2025-09-26T10:53:50.7321656Z   Unknown option "passWithNoTests" with value true was found.
+test	Run tests	2025-09-26T10:53:50.7322437Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7323239Z 
+test	Run tests	2025-09-26T10:53:50.7323474Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7323957Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7324280Z 
+test	Run tests	2025-09-26T10:53:50.7327222Z ● Validation Warning:
+test	Run tests	2025-09-26T10:53:50.7327468Z 
+test	Run tests	2025-09-26T10:53:50.7327737Z   Unknown option "verbose" with value true was found.
+test	Run tests	2025-09-26T10:53:50.7328470Z   This is probably a typing mistake. Fixing it will remove this message.
+test	Run tests	2025-09-26T10:53:50.7328936Z 
+test	Run tests	2025-09-26T10:53:50.7329133Z   Configuration Documentation:
+test	Run tests	2025-09-26T10:53:50.7329792Z   https://jestjs.io/docs/configuration
+test	Run tests	2025-09-26T10:53:50.7330114Z 
+test	Run tests	2025-09-26T10:53:51.0647166Z jest-haste-map: Haste module naming collision: athlete-ally
+test	Run tests	2025-09-26T10:53:51.0647891Z   The following files share their name; please adjust your hasteImpl:
+test	Run tests	2025-09-26T10:53:51.0648357Z     * <rootDir>/package.json
+test	Run tests	2025-09-26T10:53:51.0648774Z     * <rootDir>/apps/frontend/.next/standalone/package.json
+test	Run tests	2025-09-26T10:53:51.0649100Z 
+test	Run tests	2025-09-26T10:53:52.2205350Z PASS apps/frontend/src/lib/protocols/__tests__/v3-protocol-engine.test.ts
+test	Run tests	2025-09-26T10:53:52.2207281Z   V3ProtocolEngine
+test	Run tests	2025-09-26T10:53:52.2207929Z     RPE 觸發決策器測試
+test	Run tests	2025-09-26T10:53:52.2208397Z       場景 A: 常規訓練 (STANDARD 協議)
+test	Run tests	2025-09-26T10:53:52.2210975Z         ✓ 應該在核心動作的最後一組觸發 RPE (3 ms)
+test	Run tests	2025-09-26T10:53:52.2211531Z         ✓ 不應該在核心動作的非最後一組觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2212076Z         ✓ 不應該在輔助動作觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2212556Z         ✓ 不應該在非核心動作類型觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2213089Z       場景 B: 頂峰組訓練 (TOP_SET_AMRAP 協議)
+test	Run tests	2025-09-26T10:53:52.2213549Z         ✓ 應該在關鍵組觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2213986Z         ✓ 不應該在非關鍵組觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2214514Z         ✓ 不應該在輔助動作的關鍵組觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2215071Z       場景 C: 最大力量測試 (MAX_STRENGTH_TEST 協議)
+test	Run tests	2025-09-26T10:53:52.2215585Z         ✓ 應該在每次試舉都觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2216491Z         ✓ 應該在每次試舉都觸發 RPE，無論組數 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2217119Z         ✓ 應該在輔助動作也觸發 RPE (1 ms)
+test	Run tests	2025-09-26T10:53:52.2217519Z       邊界情況測試
+test	Run tests	2025-09-26T10:53:52.2217896Z         ✓ 應該處理無效的協議 ID (1 ms)
+test	Run tests	2025-09-26T10:53:52.2218314Z         ✓ 應該處理空上下文 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2218721Z         ✓ 應該處理高強度組觸發條件
+test	Run tests	2025-09-26T10:53:52.2219098Z     適應性規則引擎測試
+test	Run tests	2025-09-26T10:53:52.2219617Z       場景 A: 進展順利
+test	Run tests	2025-09-26T10:53:52.2220060Z         ✓ 應該在力量持續增長時建議增加強度 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2220448Z       場景 B: 遇到阻力
+test	Run tests	2025-09-26T10:53:52.2220747Z         ✓ 應該在 RPE 趨勢上升時建議降低負荷 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2221023Z         ✓ 應該在高疲勞水平時建議休息
+test	Run tests	2025-09-26T10:53:52.2221257Z       場景 C: 減載協議
+test	Run tests	2025-09-26T10:53:52.2221501Z         ✓ 應該在滿足減載條件時建議減載 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2221744Z       邊界情況測試
+test	Run tests	2025-09-26T10:53:52.2221954Z         ✓ 應該處理空上下文
+test	Run tests	2025-09-26T10:53:52.2222174Z         ✓ 應該處理無效的協議 ID (1 ms)
+test	Run tests	2025-09-26T10:53:52.2222426Z         ✓ 應該處理不完整的 RPE 數據
+test	Run tests	2025-09-26T10:53:52.2222646Z     協議管理測試
+test	Run tests	2025-09-26T10:53:52.2222852Z       ✓ 應該獲取所有協議 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2223072Z       ✓ 應該根據 ID 獲取特定協議
+test	Run tests	2025-09-26T10:53:52.2223325Z       ✓ 應該根據訓練日類型獲取協議 (1 ms)
+test	Run tests	2025-09-26T10:53:52.2223552Z     性能測試
+test	Run tests	2025-09-26T10:53:52.2223787Z       ✓ 應該快速處理 RPE 觸發決策 (2 ms)
+test	Run tests	2025-09-26T10:53:52.2224032Z       ✓ 應該快速處理適應性規則評估 (5 ms)
+test	Run tests	2025-09-26T10:53:52.2224165Z 
+test	Run tests	2025-09-26T10:53:52.6368997Z   console.warn
+test	Run tests	2025-09-26T10:53:52.6369786Z     Warning: JWT_SECRET not set; using dev-only default.
+test	Run tests	2025-09-26T10:53:52.6370071Z 
+test	Run tests	2025-09-26T10:53:52.6370424Z     [0m [90m  8 |[39m }
+test	Run tests	2025-09-26T10:53:52.6371743Z      [90m  9 |[39m [36mif[39m (process[33m.[39menv[33m.[39m[33mNODE_ENV[39m [33m!==[39m [32m'production'[39m [33m&&[39m [33m![39mrawJwtSecret) {
+test	Run tests	2025-09-26T10:53:52.6372856Z     [31m[1m>[22m[39m[90m 10 |[39m   console[33m.[39mwarn([32m'Warning: JWT_SECRET not set; using dev-only default.'[39m)[33m;[39m
+test	Run tests	2025-09-26T10:53:52.6373540Z      [90m    |[39m           [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:52.6373877Z      [90m 11 |[39m }
+test	Run tests	2025-09-26T10:53:52.6374531Z      [90m 12 |[39m [36mexport[39m [36mconst[39m [33mJWT_SECRET[39m [33m=[39m rawJwtSecret [33m||[39m [32m'dev-only-jwt-secret'[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:52.6375752Z      [90m 13 |[39m [36mexport[39m [36mconst[39m [33mJWT_EXPIRES_IN[39m [33m=[39m process[33m.[39menv[33m.[39m[33mJWT_EXPIRES_IN[39m [33m||[39m [32m'24h'[39m[33m;[39m[0m
+test	Run tests	2025-09-26T10:53:52.6376234Z 
+test	Run tests	2025-09-26T10:53:52.6376415Z       at Object.warn (packages/shared/src/auth/jwt.ts:10:11)
+test	Run tests	2025-09-26T10:53:52.6376806Z       at Object.require (packages/shared/src/index.ts:10:1)
+test	Run tests	2025-09-26T10:53:52.6377311Z       at Object.<anonymous> (apps/frontend/src/__tests__/api/permissions-api.test.ts:8:1)
+test	Run tests	2025-09-26T10:53:52.6377630Z 
+test	Run tests	2025-09-26T10:53:52.8638658Z PASS apps/frontend/src/__tests__/api/permissions-api.test.ts
+test	Run tests	2025-09-26T10:53:52.8641228Z   PermissionsAPIClient
+test	Run tests	2025-09-26T10:53:52.8641626Z     checkPermission
+test	Run tests	2025-09-26T10:53:52.8642282Z       ✓ 应该正确检查用户权限 (3 ms)
+test	Run tests	2025-09-26T10:53:52.8642709Z       ✓ 应该处理权限检查失败 (21 ms)
+test	Run tests	2025-09-26T10:53:52.8643075Z     getUserPermissions
+test	Run tests	2025-09-26T10:53:52.8643538Z       ✓ 应该正确获取用户权限 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8643901Z     getProtocolShares
+test	Run tests	2025-09-26T10:53:52.8644302Z       ✓ 应该正确获取协议分享列表
+test	Run tests	2025-09-26T10:53:52.8644631Z     shareProtocol
+test	Run tests	2025-09-26T10:53:52.8645014Z       ✓ 应该正确分享协议 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8645361Z     updateProtocolShare
+test	Run tests	2025-09-26T10:53:52.8645781Z       ✓ 应该正确更新分享权限 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8646149Z     revokeProtocolShare
+test	Run tests	2025-09-26T10:53:52.8646682Z       ✓ 应该正确撤销分享
+test	Run tests	2025-09-26T10:53:52.8647022Z     acceptProtocolShare
+test	Run tests	2025-09-26T10:53:52.8647409Z       ✓ 应该正确接受分享
+test	Run tests	2025-09-26T10:53:52.8647722Z     rejectProtocolShare
+test	Run tests	2025-09-26T10:53:52.8648128Z       ✓ 应该正确拒绝分享 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8648451Z     getReceivedShares
+test	Run tests	2025-09-26T10:53:52.8648853Z       ✓ 应该正确获取收到的分享 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8649188Z     getSentShares
+test	Run tests	2025-09-26T10:53:52.8649798Z       ✓ 应该正确获取发送的分享 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8650161Z     setProtocolPublic
+test	Run tests	2025-09-26T10:53:52.8650567Z       ✓ 应该正确设置协议公开状态 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8650953Z     copyPublicProtocol
+test	Run tests	2025-09-26T10:53:52.8651362Z       ✓ 应该正确复制公开协议 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8651722Z     getPublicProtocols
+test	Run tests	2025-09-26T10:53:52.8652133Z       ✓ 应该正确获取公开协议列表 (2 ms)
+test	Run tests	2025-09-26T10:53:52.8652476Z     searchUsers
+test	Run tests	2025-09-26T10:53:52.8652834Z       ✓ 应该正确搜索用户
+test	Run tests	2025-09-26T10:53:52.8653149Z     getPermissionStats
+test	Run tests	2025-09-26T10:53:52.8653546Z       ✓ 应该正确获取权限统计
+test	Run tests	2025-09-26T10:53:52.8653886Z     错误处理
+test	Run tests	2025-09-26T10:53:52.8654741Z       ✓ 应该正确处理网络错误 (2 ms)
+test	Run tests	2025-09-26T10:53:52.8655221Z       ✓ 应该正确处理API错误响应 (4 ms)
+test	Run tests	2025-09-26T10:53:52.8655651Z       ✓ 应该正确处理空响应 (1 ms)
+test	Run tests	2025-09-26T10:53:52.8655870Z 
+test	Run tests	2025-09-26T10:53:53.8514320Z   console.warn
+test	Run tests	2025-09-26T10:53:53.8514888Z     Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+test	Run tests	2025-09-26T10:53:53.8515220Z 
+test	Run tests	2025-09-26T10:53:53.8515635Z     [0m [90m 132 |[39m       [36mreturn[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:53.8515962Z      [90m 133 |[39m     }
+test	Run tests	2025-09-26T10:53:53.8516493Z     [31m[1m>[22m[39m[90m 134 |[39m     originalWarn[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+test	Run tests	2025-09-26T10:53:53.8517393Z      [90m     |[39m                  [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:53.8517733Z      [90m 135 |[39m   }[33m;[39m
+test	Run tests	2025-09-26T10:53:53.8518022Z      [90m 136 |[39m })[33m;[39m
+test	Run tests	2025-09-26T10:53:53.8518281Z      [90m 137 |[39m[0m
+test	Run tests	2025-09-26T10:53:53.8518418Z 
+test	Run tests	2025-09-26T10:53:53.8518625Z       at console.warn (apps/frontend/src/__tests__/setup.ts:134:18)
+test	Run tests	2025-09-26T10:53:53.8519098Z       at node_modules/@radix-ui/react-dialog/src/dialog.tsx:543:36
+test	Run tests	2025-09-26T10:53:53.8519812Z       at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+test	Run tests	2025-09-26T10:53:53.8520500Z       at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+test	Run tests	2025-09-26T10:53:53.8521222Z       at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+test	Run tests	2025-09-26T10:53:53.8521957Z       at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+test	Run tests	2025-09-26T10:53:53.8522660Z       at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+test	Run tests	2025-09-26T10:53:53.8523330Z       at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+test	Run tests	2025-09-26T10:53:53.8523970Z       at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+test	Run tests	2025-09-26T10:53:53.8524571Z       at commitRootImpl (node_modules/react-dom/cjs/react-dom.development.js:26974:5)
+test	Run tests	2025-09-26T10:53:53.8525131Z       at commitRoot (node_modules/react-dom/cjs/react-dom.development.js:26721:5)
+test	Run tests	2025-09-26T10:53:53.8525731Z       at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:26156:3)
+test	Run tests	2025-09-26T10:53:53.8526370Z       at flushSyncCallbacks (node_modules/react-dom/cjs/react-dom.development.js:12042:22)
+test	Run tests	2025-09-26T10:53:53.8526941Z       at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+test	Run tests	2025-09-26T10:53:53.8527409Z       at act (node_modules/react/cjs/react.development.js:2582:11)
+test	Run tests	2025-09-26T10:53:53.8527840Z       at node_modules/@testing-library/react/dist/act-compat.js:47:25
+test	Run tests	2025-09-26T10:53:53.8528329Z       at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+test	Run tests	2025-09-26T10:53:53.8528828Z       at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+test	Run tests	2025-09-26T10:53:53.8529527Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/dom/dist/events.js:110:36)
+test	Run tests	2025-09-26T10:53:53.8530212Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/react/dist/fire-event.js:15:52)
+test	Run tests	2025-09-26T10:53:53.8530924Z       at Object.<anonymous> (apps/frontend/src/__tests__/permissions/ProtocolPermissionsManager.test.tsx:183:15)
+test	Run tests	2025-09-26T10:53:53.8531311Z 
+test	Run tests	2025-09-26T10:53:54.0129137Z   console.warn
+test	Run tests	2025-09-26T10:53:54.0130452Z     Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+test	Run tests	2025-09-26T10:53:54.0131156Z 
+test	Run tests	2025-09-26T10:53:54.0131987Z     [0m [90m 132 |[39m       [36mreturn[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0132542Z      [90m 133 |[39m     }
+test	Run tests	2025-09-26T10:53:54.0133460Z     [31m[1m>[22m[39m[90m 134 |[39m     originalWarn[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0134383Z      [90m     |[39m                  [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:54.0135174Z      [90m 135 |[39m   }[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0135533Z      [90m 136 |[39m })[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0135830Z      [90m 137 |[39m[0m
+test	Run tests	2025-09-26T10:53:54.0136138Z 
+test	Run tests	2025-09-26T10:53:54.0137127Z       at console.warn (apps/frontend/src/__tests__/setup.ts:134:18)
+test	Run tests	2025-09-26T10:53:54.0137673Z       at node_modules/@radix-ui/react-dialog/src/dialog.tsx:543:36
+test	Run tests	2025-09-26T10:53:54.0138337Z       at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+test	Run tests	2025-09-26T10:53:54.0139152Z       at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+test	Run tests	2025-09-26T10:53:54.0140369Z       at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+test	Run tests	2025-09-26T10:53:54.0141134Z       at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+test	Run tests	2025-09-26T10:53:54.0141804Z       at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+test	Run tests	2025-09-26T10:53:54.0142444Z       at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+test	Run tests	2025-09-26T10:53:54.0143051Z       at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+test	Run tests	2025-09-26T10:53:54.0143621Z       at commitRootImpl (node_modules/react-dom/cjs/react-dom.development.js:26974:5)
+test	Run tests	2025-09-26T10:53:54.0144149Z       at commitRoot (node_modules/react-dom/cjs/react-dom.development.js:26721:5)
+test	Run tests	2025-09-26T10:53:54.0144715Z       at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:26156:3)
+test	Run tests	2025-09-26T10:53:54.0145316Z       at flushSyncCallbacks (node_modules/react-dom/cjs/react-dom.development.js:12042:22)
+test	Run tests	2025-09-26T10:53:54.0145840Z       at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+test	Run tests	2025-09-26T10:53:54.0146282Z       at act (node_modules/react/cjs/react.development.js:2582:11)
+test	Run tests	2025-09-26T10:53:54.0146698Z       at node_modules/@testing-library/react/dist/act-compat.js:47:25
+test	Run tests	2025-09-26T10:53:54.0147188Z       at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+test	Run tests	2025-09-26T10:53:54.0147685Z       at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+test	Run tests	2025-09-26T10:53:54.0148255Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/dom/dist/events.js:110:36)
+test	Run tests	2025-09-26T10:53:54.0148934Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/react/dist/fire-event.js:15:52)
+test	Run tests	2025-09-26T10:53:54.0149754Z       at Object.<anonymous> (apps/frontend/src/__tests__/permissions/ProtocolPermissionsManager.test.tsx:280:15)
+test	Run tests	2025-09-26T10:53:54.0150148Z 
+test	Run tests	2025-09-26T10:53:54.0728402Z   console.warn
+test	Run tests	2025-09-26T10:53:54.0729324Z     Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+test	Run tests	2025-09-26T10:53:54.0730049Z 
+test	Run tests	2025-09-26T10:53:54.0730609Z     [0m [90m 132 |[39m       [36mreturn[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0731075Z      [90m 133 |[39m     }
+test	Run tests	2025-09-26T10:53:54.0731662Z     [31m[1m>[22m[39m[90m 134 |[39m     originalWarn[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0732351Z      [90m     |[39m                  [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:54.0732719Z      [90m 135 |[39m   }[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0733007Z      [90m 136 |[39m })[33m;[39m
+test	Run tests	2025-09-26T10:53:54.0733259Z      [90m 137 |[39m[0m
+test	Run tests	2025-09-26T10:53:54.0733388Z 
+test	Run tests	2025-09-26T10:53:54.0733597Z       at console.warn (apps/frontend/src/__tests__/setup.ts:134:18)
+test	Run tests	2025-09-26T10:53:54.0734020Z       at node_modules/@radix-ui/react-dialog/src/dialog.tsx:543:36
+test	Run tests	2025-09-26T10:53:54.0734577Z       at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+test	Run tests	2025-09-26T10:53:54.0735250Z       at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+test	Run tests	2025-09-26T10:53:54.0735955Z       at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+test	Run tests	2025-09-26T10:53:54.0737157Z       at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+test	Run tests	2025-09-26T10:53:54.0737841Z       at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+test	Run tests	2025-09-26T10:53:54.0738479Z       at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+test	Run tests	2025-09-26T10:53:54.0739098Z       at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+test	Run tests	2025-09-26T10:53:54.0739864Z       at commitRootImpl (node_modules/react-dom/cjs/react-dom.development.js:26974:5)
+test	Run tests	2025-09-26T10:53:54.0740559Z       at commitRoot (node_modules/react-dom/cjs/react-dom.development.js:26721:5)
+test	Run tests	2025-09-26T10:53:54.0741160Z       at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:26156:3)
+test	Run tests	2025-09-26T10:53:54.0741754Z       at flushSyncCallbacks (node_modules/react-dom/cjs/react-dom.development.js:12042:22)
+test	Run tests	2025-09-26T10:53:54.0742284Z       at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+test	Run tests	2025-09-26T10:53:54.0742728Z       at act (node_modules/react/cjs/react.development.js:2582:11)
+test	Run tests	2025-09-26T10:53:54.0743144Z       at node_modules/@testing-library/react/dist/act-compat.js:47:25
+test	Run tests	2025-09-26T10:53:54.0743638Z       at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+test	Run tests	2025-09-26T10:53:54.0744130Z       at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+test	Run tests	2025-09-26T10:53:54.0744694Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/dom/dist/events.js:110:36)
+test	Run tests	2025-09-26T10:53:54.0745388Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/react/dist/fire-event.js:15:52)
+test	Run tests	2025-09-26T10:53:54.0746106Z       at Object.<anonymous> (apps/frontend/src/__tests__/permissions/ProtocolPermissionsManager.test.tsx:303:15)
+test	Run tests	2025-09-26T10:53:54.0746484Z 
+test	Run tests	2025-09-26T10:53:54.1273776Z   console.warn
+test	Run tests	2025-09-26T10:53:54.1274815Z     Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+test	Run tests	2025-09-26T10:53:54.1275514Z 
+test	Run tests	2025-09-26T10:53:54.1276116Z     [0m [90m 132 |[39m       [36mreturn[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1276713Z      [90m 133 |[39m     }
+test	Run tests	2025-09-26T10:53:54.1277771Z     [31m[1m>[22m[39m[90m 134 |[39m     originalWarn[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1278609Z      [90m     |[39m                  [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:54.1279029Z      [90m 135 |[39m   }[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1279654Z      [90m 136 |[39m })[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1280012Z      [90m 137 |[39m[0m
+test	Run tests	2025-09-26T10:53:54.1280185Z 
+test	Run tests	2025-09-26T10:53:54.1280446Z       at console.warn (apps/frontend/src/__tests__/setup.ts:134:18)
+test	Run tests	2025-09-26T10:53:54.1281010Z       at node_modules/@radix-ui/react-dialog/src/dialog.tsx:543:36
+test	Run tests	2025-09-26T10:53:54.1281727Z       at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+test	Run tests	2025-09-26T10:53:54.1282600Z       at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+test	Run tests	2025-09-26T10:53:54.1283497Z       at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+test	Run tests	2025-09-26T10:53:54.1284417Z       at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+test	Run tests	2025-09-26T10:53:54.1285291Z       at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+test	Run tests	2025-09-26T10:53:54.1286124Z       at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+test	Run tests	2025-09-26T10:53:54.1286929Z       at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+test	Run tests	2025-09-26T10:53:54.1287675Z       at commitRootImpl (node_modules/react-dom/cjs/react-dom.development.js:26974:5)
+test	Run tests	2025-09-26T10:53:54.1288363Z       at commitRoot (node_modules/react-dom/cjs/react-dom.development.js:26721:5)
+test	Run tests	2025-09-26T10:53:54.1289113Z       at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:26156:3)
+test	Run tests	2025-09-26T10:53:54.1290744Z       at flushSyncCallbacks (node_modules/react-dom/cjs/react-dom.development.js:12042:22)
+test	Run tests	2025-09-26T10:53:54.1291800Z       at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+test	Run tests	2025-09-26T10:53:54.1292608Z       at act (node_modules/react/cjs/react.development.js:2582:11)
+test	Run tests	2025-09-26T10:53:54.1293069Z       at node_modules/@testing-library/react/dist/act-compat.js:47:25
+test	Run tests	2025-09-26T10:53:54.1293584Z       at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+test	Run tests	2025-09-26T10:53:54.1294631Z       at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+test	Run tests	2025-09-26T10:53:54.1295214Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/dom/dist/events.js:110:36)
+test	Run tests	2025-09-26T10:53:54.1295898Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/react/dist/fire-event.js:15:52)
+test	Run tests	2025-09-26T10:53:54.1296652Z       at Object.<anonymous> (apps/frontend/src/__tests__/permissions/ProtocolPermissionsManager.test.tsx:332:15)
+test	Run tests	2025-09-26T10:53:54.1297038Z 
+test	Run tests	2025-09-26T10:53:54.1746608Z   console.warn
+test	Run tests	2025-09-26T10:53:54.1747524Z     Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+test	Run tests	2025-09-26T10:53:54.1748077Z 
+test	Run tests	2025-09-26T10:53:54.1748694Z     [0m [90m 132 |[39m       [36mreturn[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1749254Z      [90m 133 |[39m     }
+test	Run tests	2025-09-26T10:53:54.1750360Z     [31m[1m>[22m[39m[90m 134 |[39m     originalWarn[33m.[39mcall(console[33m,[39m [33m...[39margs)[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1751256Z      [90m     |[39m                  [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:54.1751780Z      [90m 135 |[39m   }[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1752277Z      [90m 136 |[39m })[33m;[39m
+test	Run tests	2025-09-26T10:53:54.1752702Z      [90m 137 |[39m[0m
+test	Run tests	2025-09-26T10:53:54.1752835Z 
+test	Run tests	2025-09-26T10:53:54.1753058Z       at console.warn (apps/frontend/src/__tests__/setup.ts:134:18)
+test	Run tests	2025-09-26T10:53:54.1753526Z       at node_modules/@radix-ui/react-dialog/src/dialog.tsx:543:36
+test	Run tests	2025-09-26T10:53:54.1754075Z       at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+test	Run tests	2025-09-26T10:53:54.1754719Z       at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+test	Run tests	2025-09-26T10:53:54.1755397Z       at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+test	Run tests	2025-09-26T10:53:54.1756110Z       at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+test	Run tests	2025-09-26T10:53:54.1756770Z       at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+test	Run tests	2025-09-26T10:53:54.1757389Z       at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+test	Run tests	2025-09-26T10:53:54.1757981Z       at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+test	Run tests	2025-09-26T10:53:54.1758551Z       at commitRootImpl (node_modules/react-dom/cjs/react-dom.development.js:26974:5)
+test	Run tests	2025-09-26T10:53:54.1759090Z       at commitRoot (node_modules/react-dom/cjs/react-dom.development.js:26721:5)
+test	Run tests	2025-09-26T10:53:54.1759895Z       at performSyncWorkOnRoot (node_modules/react-dom/cjs/react-dom.development.js:26156:3)
+test	Run tests	2025-09-26T10:53:54.1760492Z       at flushSyncCallbacks (node_modules/react-dom/cjs/react-dom.development.js:12042:22)
+test	Run tests	2025-09-26T10:53:54.1761008Z       at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+test	Run tests	2025-09-26T10:53:54.1761459Z       at act (node_modules/react/cjs/react.development.js:2582:11)
+test	Run tests	2025-09-26T10:53:54.1761875Z       at node_modules/@testing-library/react/dist/act-compat.js:47:25
+test	Run tests	2025-09-26T10:53:54.1762369Z       at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:107:28)
+test	Run tests	2025-09-26T10:53:54.1762866Z       at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+test	Run tests	2025-09-26T10:53:54.1763430Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/dom/dist/events.js:110:36)
+test	Run tests	2025-09-26T10:53:54.1764505Z       at Function.fireEvent.<computed> [as click] (node_modules/@testing-library/react/dist/fire-event.js:15:52)
+test	Run tests	2025-09-26T10:53:54.1765231Z       at Object.<anonymous> (apps/frontend/src/__tests__/permissions/ProtocolPermissionsManager.test.tsx:352:15)
+test	Run tests	2025-09-26T10:53:54.1765663Z 
+test	Run tests	2025-09-26T10:53:54.2486389Z PASS apps/frontend/src/__tests__/permissions/ProtocolPermissionsManager.test.tsx
+test	Run tests	2025-09-26T10:53:54.2486965Z   ProtocolPermissionsManager
+test	Run tests	2025-09-26T10:53:54.2487884Z     ✓ 应该正确渲染权限管理组件 (91 ms)
+test	Run tests	2025-09-26T10:53:54.2488166Z     ✓ 应该显示分享设置标签页 (23 ms)
+test	Run tests	2025-09-26T10:53:54.2488423Z     ✓ 应该显示公开协议开关 (22 ms)
+test	Run tests	2025-09-26T10:53:54.2488686Z     ✓ 应该显示空状态当没有分享时 (13 ms)
+test	Run tests	2025-09-26T10:53:54.2489005Z     ✓ 应该打开分享对话框当点击分享按钮时 (83 ms)
+test	Run tests	2025-09-26T10:53:54.2489271Z     ✓ 应该显示权限说明 (62 ms)
+test	Run tests	2025-09-26T10:53:54.2490167Z     ✓ 应该显示公开设置说明 (44 ms)
+test	Run tests	2025-09-26T10:53:54.2490386Z   ShareDialog
+test	Run tests	2025-09-26T10:53:54.2490649Z     ✓ 应该正确渲染分享对话框 (54 ms)
+test	Run tests	2025-09-26T10:53:54.2490888Z     ✓ 应该允许选择权限 (62 ms)
+test	Run tests	2025-09-26T10:53:54.2491142Z     ✓ 应该允许设置过期时间 (44 ms)
+test	Run tests	2025-09-26T10:53:54.2491376Z     ✓ 应该允许添加分享消息 (46 ms)
+test	Run tests	2025-09-26T10:53:54.2491586Z   PermissionIndicator
+test	Run tests	2025-09-26T10:53:54.2491827Z     ✓ 应该正确显示权限图标 (46 ms)
+test	Run tests	2025-09-26T10:53:54.2491953Z 
+test	Run tests	2025-09-26T10:53:54.3499880Z   console.log
+test	Run tests	2025-09-26T10:53:54.3501033Z     模擬完成訓練組: test-user-1758884034346/session-1758884034346 {
+test	Run tests	2025-09-26T10:53:54.3501743Z       exerciseId: 'bicep_curl',
+test	Run tests	2025-09-26T10:53:54.3502218Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3502658Z       reps: 12,
+test	Run tests	2025-09-26T10:53:54.3503027Z       weight: 25,
+test	Run tests	2025-09-26T10:53:54.3503415Z       isCoreLift: false
+test	Run tests	2025-09-26T10:53:54.3503803Z     }
+test	Run tests	2025-09-26T10:53:54.3504005Z 
+test	Run tests	2025-09-26T10:53:54.3504472Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3504921Z 
+test	Run tests	2025-09-26T10:53:54.3508086Z   console.log
+test	Run tests	2025-09-26T10:53:54.3508804Z     模擬檢查 RPE 觸發: test-user-1758884034346/session-1758884034346
+test	Run tests	2025-09-26T10:53:54.3509051Z 
+test	Run tests	2025-09-26T10:53:54.3509489Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3509822Z 
+test	Run tests	2025-09-26T10:53:54.3512271Z   console.log
+test	Run tests	2025-09-26T10:53:54.3513284Z     調試信息: exerciseId=bicep_curl, currentSetNumber=1, totalSets=3, isCoreLift=false, isLastSet=false, shouldTrigger=false
+test	Run tests	2025-09-26T10:53:54.3513703Z 
+test	Run tests	2025-09-26T10:53:54.3513998Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3514341Z 
+test	Run tests	2025-09-26T10:53:54.3520327Z   console.log
+test	Run tests	2025-09-26T10:53:54.3520991Z     模擬完成訓練組: test-user-1758884034346/session-1758884034346 {
+test	Run tests	2025-09-26T10:53:54.3521537Z       exerciseId: 'bicep_curl',
+test	Run tests	2025-09-26T10:53:54.3521803Z       setNumber: 2,
+test	Run tests	2025-09-26T10:53:54.3521984Z       reps: 12,
+test	Run tests	2025-09-26T10:53:54.3522164Z       weight: 25,
+test	Run tests	2025-09-26T10:53:54.3522356Z       isCoreLift: false
+test	Run tests	2025-09-26T10:53:54.3522551Z     }
+test	Run tests	2025-09-26T10:53:54.3522657Z 
+test	Run tests	2025-09-26T10:53:54.3522964Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3523301Z 
+test	Run tests	2025-09-26T10:53:54.3525064Z   console.log
+test	Run tests	2025-09-26T10:53:54.3525575Z     模擬檢查 RPE 觸發: test-user-1758884034346/session-1758884034346
+test	Run tests	2025-09-26T10:53:54.3525796Z 
+test	Run tests	2025-09-26T10:53:54.3526074Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3526395Z 
+test	Run tests	2025-09-26T10:53:54.3528973Z   console.log
+test	Run tests	2025-09-26T10:53:54.3529903Z     調試信息: exerciseId=bicep_curl, currentSetNumber=2, totalSets=3, isCoreLift=false, isLastSet=false, shouldTrigger=false
+test	Run tests	2025-09-26T10:53:54.3530318Z 
+test	Run tests	2025-09-26T10:53:54.3530604Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3530922Z 
+test	Run tests	2025-09-26T10:53:54.3534864Z   console.log
+test	Run tests	2025-09-26T10:53:54.3535484Z     模擬完成訓練組: test-user-1758884034346/session-1758884034346 {
+test	Run tests	2025-09-26T10:53:54.3535840Z       exerciseId: 'bicep_curl',
+test	Run tests	2025-09-26T10:53:54.3536431Z       setNumber: 3,
+test	Run tests	2025-09-26T10:53:54.3536613Z       reps: 12,
+test	Run tests	2025-09-26T10:53:54.3536796Z       weight: 25,
+test	Run tests	2025-09-26T10:53:54.3536984Z       isCoreLift: false
+test	Run tests	2025-09-26T10:53:54.3537187Z     }
+test	Run tests	2025-09-26T10:53:54.3537276Z 
+test	Run tests	2025-09-26T10:53:54.3537574Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3537898Z 
+test	Run tests	2025-09-26T10:53:54.3539675Z   console.log
+test	Run tests	2025-09-26T10:53:54.3540161Z     模擬檢查 RPE 觸發: test-user-1758884034346/session-1758884034346
+test	Run tests	2025-09-26T10:53:54.3540573Z 
+test	Run tests	2025-09-26T10:53:54.3540851Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3541165Z 
+test	Run tests	2025-09-26T10:53:54.3543088Z   console.log
+test	Run tests	2025-09-26T10:53:54.3543846Z     調試信息: exerciseId=bicep_curl, currentSetNumber=3, totalSets=3, isCoreLift=false, isLastSet=true, shouldTrigger=false
+test	Run tests	2025-09-26T10:53:54.3544236Z 
+test	Run tests	2025-09-26T10:53:54.3544515Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3544830Z 
+test	Run tests	2025-09-26T10:53:54.3558695Z   console.log
+test	Run tests	2025-09-26T10:53:54.3559315Z     模擬完成訓練組: test-user-1758884034354/session-1758884034354 {
+test	Run tests	2025-09-26T10:53:54.3559971Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3560272Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3560465Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3560648Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3560849Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3561049Z     }
+test	Run tests	2025-09-26T10:53:54.3561144Z 
+test	Run tests	2025-09-26T10:53:54.3561463Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3561825Z 
+test	Run tests	2025-09-26T10:53:54.3563403Z   console.log
+test	Run tests	2025-09-26T10:53:54.3563896Z     模擬檢查 RPE 觸發: test-user-1758884034354/session-1758884034354
+test	Run tests	2025-09-26T10:53:54.3564128Z 
+test	Run tests	2025-09-26T10:53:54.3564421Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3564760Z 
+test	Run tests	2025-09-26T10:53:54.3566558Z   console.log
+test	Run tests	2025-09-26T10:53:54.3567294Z     調試信息: exerciseId=squat, currentSetNumber=1, totalSets=3, isCoreLift=true, isLastSet=false, shouldTrigger=false
+test	Run tests	2025-09-26T10:53:54.3567702Z 
+test	Run tests	2025-09-26T10:53:54.3568002Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3568343Z 
+test	Run tests	2025-09-26T10:53:54.3571622Z   console.log
+test	Run tests	2025-09-26T10:53:54.3572228Z     模擬完成訓練組: test-user-1758884034354/session-1758884034354 {
+test	Run tests	2025-09-26T10:53:54.3572552Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3572780Z       setNumber: 2,
+test	Run tests	2025-09-26T10:53:54.3572987Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3573165Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3573361Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3573556Z     }
+test	Run tests	2025-09-26T10:53:54.3573651Z 
+test	Run tests	2025-09-26T10:53:54.3573973Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3574325Z 
+test	Run tests	2025-09-26T10:53:54.3575993Z   console.log
+test	Run tests	2025-09-26T10:53:54.3576496Z     模擬檢查 RPE 觸發: test-user-1758884034354/session-1758884034354
+test	Run tests	2025-09-26T10:53:54.3576869Z 
+test	Run tests	2025-09-26T10:53:54.3577329Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3577856Z 
+test	Run tests	2025-09-26T10:53:54.3579771Z   console.log
+test	Run tests	2025-09-26T10:53:54.3580816Z     調試信息: exerciseId=squat, currentSetNumber=2, totalSets=3, isCoreLift=true, isLastSet=false, shouldTrigger=false
+test	Run tests	2025-09-26T10:53:54.3581486Z 
+test	Run tests	2025-09-26T10:53:54.3582015Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3582518Z 
+test	Run tests	2025-09-26T10:53:54.3584973Z   console.log
+test	Run tests	2025-09-26T10:53:54.3585582Z     模擬完成訓練組: test-user-1758884034354/session-1758884034354 {
+test	Run tests	2025-09-26T10:53:54.3586009Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3586233Z       setNumber: 3,
+test	Run tests	2025-09-26T10:53:54.3586422Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3586605Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3586790Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3586980Z     }
+test	Run tests	2025-09-26T10:53:54.3587286Z 
+test	Run tests	2025-09-26T10:53:54.3587601Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3587936Z 
+test	Run tests	2025-09-26T10:53:54.3588956Z   console.log
+test	Run tests	2025-09-26T10:53:54.3589755Z     模擬檢查 RPE 觸發: test-user-1758884034354/session-1758884034354
+test	Run tests	2025-09-26T10:53:54.3590122Z 
+test	Run tests	2025-09-26T10:53:54.3590604Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3591144Z 
+test	Run tests	2025-09-26T10:53:54.3591906Z   console.log
+test	Run tests	2025-09-26T10:53:54.3592865Z     調試信息: exerciseId=squat, currentSetNumber=3, totalSets=3, isCoreLift=true, isLastSet=true, shouldTrigger=true
+test	Run tests	2025-09-26T10:53:54.3593807Z 
+test	Run tests	2025-09-26T10:53:54.3594296Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3594870Z 
+test	Run tests	2025-09-26T10:53:54.3615469Z   console.log
+test	Run tests	2025-09-26T10:53:54.3616320Z     模擬完成訓練組: test-user-1758884034360/session-1758884034360 {
+test	Run tests	2025-09-26T10:53:54.3616871Z       exerciseId: 'bicep_curl',
+test	Run tests	2025-09-26T10:53:54.3617275Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3617580Z       reps: 12,
+test	Run tests	2025-09-26T10:53:54.3617874Z       weight: 25,
+test	Run tests	2025-09-26T10:53:54.3618180Z       isCoreLift: false
+test	Run tests	2025-09-26T10:53:54.3618495Z     }
+test	Run tests	2025-09-26T10:53:54.3618647Z 
+test	Run tests	2025-09-26T10:53:54.3619025Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3619608Z 
+test	Run tests	2025-09-26T10:53:54.3619979Z   console.log
+test	Run tests	2025-09-26T10:53:54.3620605Z     模擬完成訓練組: test-user-1758884034360/session-1758884034360 {
+test	Run tests	2025-09-26T10:53:54.3621155Z       exerciseId: 'bicep_curl',
+test	Run tests	2025-09-26T10:53:54.3621530Z       setNumber: 2,
+test	Run tests	2025-09-26T10:53:54.3621836Z       reps: 12,
+test	Run tests	2025-09-26T10:53:54.3622129Z       weight: 25,
+test	Run tests	2025-09-26T10:53:54.3622433Z       isCoreLift: false
+test	Run tests	2025-09-26T10:53:54.3622795Z     }
+test	Run tests	2025-09-26T10:53:54.3622948Z 
+test	Run tests	2025-09-26T10:53:54.3623487Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3623868Z 
+test	Run tests	2025-09-26T10:53:54.3624579Z   console.log
+test	Run tests	2025-09-26T10:53:54.3625180Z     模擬完成訓練組: test-user-1758884034360/session-1758884034360 {
+test	Run tests	2025-09-26T10:53:54.3625665Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3626018Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3626317Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3626605Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3626907Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3627214Z     }
+test	Run tests	2025-09-26T10:53:54.3627369Z 
+test	Run tests	2025-09-26T10:53:54.3627881Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3628394Z 
+test	Run tests	2025-09-26T10:53:54.3629217Z   console.log
+test	Run tests	2025-09-26T10:53:54.3629935Z     模擬完成訓練組: test-user-1758884034360/session-1758884034360 {
+test	Run tests	2025-09-26T10:53:54.3630412Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3630764Z       setNumber: 2,
+test	Run tests	2025-09-26T10:53:54.3631061Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3631347Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3631648Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3631968Z     }
+test	Run tests	2025-09-26T10:53:54.3632124Z 
+test	Run tests	2025-09-26T10:53:54.3632535Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3632864Z 
+test	Run tests	2025-09-26T10:53:54.3633637Z   console.log
+test	Run tests	2025-09-26T10:53:54.3634233Z     模擬檢查 RPE 觸發: test-user-1758884034360/session-1758884034360
+test	Run tests	2025-09-26T10:53:54.3634594Z 
+test	Run tests	2025-09-26T10:53:54.3635089Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3635684Z 
+test	Run tests	2025-09-26T10:53:54.3637822Z   console.log
+test	Run tests	2025-09-26T10:53:54.3638855Z     調試信息: exerciseId=squat, currentSetNumber=2, totalSets=2, isCoreLift=true, isLastSet=true, shouldTrigger=true
+test	Run tests	2025-09-26T10:53:54.3639616Z 
+test	Run tests	2025-09-26T10:53:54.3639925Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3640246Z 
+test	Run tests	2025-09-26T10:53:54.3693203Z   console.log
+test	Run tests	2025-09-26T10:53:54.3693836Z     模擬完成訓練組: test-user-1758884034368/session-1758884034368 {
+test	Run tests	2025-09-26T10:53:54.3694523Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3694753Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3694945Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3695122Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3695318Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3695512Z     }
+test	Run tests	2025-09-26T10:53:54.3695608Z 
+test	Run tests	2025-09-26T10:53:54.3695927Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3696264Z 
+test	Run tests	2025-09-26T10:53:54.3696901Z   console.log
+test	Run tests	2025-09-26T10:53:54.3697366Z     模擬完成訓練組: test-user-1758884034368/session-1758884034368 {
+test	Run tests	2025-09-26T10:53:54.3697848Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3698071Z       setNumber: 2,
+test	Run tests	2025-09-26T10:53:54.3698263Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3698439Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3698633Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3698830Z     }
+test	Run tests	2025-09-26T10:53:54.3698925Z 
+test	Run tests	2025-09-26T10:53:54.3699241Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3699939Z 
+test	Run tests	2025-09-26T10:53:54.3701933Z   console.log
+test	Run tests	2025-09-26T10:53:54.3702440Z     模擬完成訓練組: test-user-1758884034368/session-1758884034368 {
+test	Run tests	2025-09-26T10:53:54.3702772Z       exerciseId: 'bench_press',
+test	Run tests	2025-09-26T10:53:54.3703010Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3703197Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3703371Z       weight: 115,
+test	Run tests	2025-09-26T10:53:54.3703563Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3703756Z     }
+test	Run tests	2025-09-26T10:53:54.3703850Z 
+test	Run tests	2025-09-26T10:53:54.3704156Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3704505Z 
+test	Run tests	2025-09-26T10:53:54.3705710Z   console.log
+test	Run tests	2025-09-26T10:53:54.3706288Z     模擬完成訓練組: test-user-1758884034368/session-1758884034368 {
+test	Run tests	2025-09-26T10:53:54.3706807Z       exerciseId: 'bench_press',
+test	Run tests	2025-09-26T10:53:54.3707134Z       setNumber: 2,
+test	Run tests	2025-09-26T10:53:54.3707331Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3707510Z       weight: 115,
+test	Run tests	2025-09-26T10:53:54.3707695Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3707897Z     }
+test	Run tests	2025-09-26T10:53:54.3707990Z 
+test	Run tests	2025-09-26T10:53:54.3708293Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3708637Z 
+test	Run tests	2025-09-26T10:53:54.3709906Z   console.log
+test	Run tests	2025-09-26T10:53:54.3710437Z     模擬檢查 RPE 觸發: test-user-1758884034368/session-1758884034368
+test	Run tests	2025-09-26T10:53:54.3710662Z 
+test	Run tests	2025-09-26T10:53:54.3710957Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:341:11)
+test	Run tests	2025-09-26T10:53:54.3711294Z 
+test	Run tests	2025-09-26T10:53:54.3713010Z   console.log
+test	Run tests	2025-09-26T10:53:54.3714075Z     調試信息: exerciseId=bench_press, currentSetNumber=2, totalSets=2, isCoreLift=true, isLastSet=true, shouldTrigger=true
+test	Run tests	2025-09-26T10:53:54.3714755Z 
+test	Run tests	2025-09-26T10:53:54.3715089Z       at checkRpeTrigger (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:358:11)
+test	Run tests	2025-09-26T10:53:54.3715410Z 
+test	Run tests	2025-09-26T10:53:54.3726370Z   console.log
+test	Run tests	2025-09-26T10:53:54.3727007Z     模擬完成訓練組: test-user-1758884034371/session-1758884034371 {
+test	Run tests	2025-09-26T10:53:54.3727337Z       exerciseId: 'squat',
+test	Run tests	2025-09-26T10:53:54.3727556Z       setNumber: 1,
+test	Run tests	2025-09-26T10:53:54.3727739Z       reps: 5,
+test	Run tests	2025-09-26T10:53:54.3727919Z       weight: 135,
+test	Run tests	2025-09-26T10:53:54.3728119Z       isCoreLift: true
+test	Run tests	2025-09-26T10:53:54.3728314Z     }
+test	Run tests	2025-09-26T10:53:54.3728415Z 
+test	Run tests	2025-09-26T10:53:54.3728719Z       at completeExerciseSet (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:295:11)
+test	Run tests	2025-09-26T10:53:54.3729063Z 
+test	Run tests	2025-09-26T10:53:54.3731907Z   console.log
+test	Run tests	2025-09-26T10:53:54.3732614Z     模擬獲取預填數據: test-user-1758884034371/session-1758884034371 { exerciseId: 'squat', setNumber: 2 }
+test	Run tests	2025-09-26T10:53:54.3733002Z 
+test	Run tests	2025-09-26T10:53:54.3733337Z       at getSetPrefillData (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:370:11)
+test	Run tests	2025-09-26T10:53:54.3733662Z 
+test	Run tests	2025-09-26T10:53:54.3743930Z   console.log
+test	Run tests	2025-09-26T10:53:54.3744599Z     模擬獲取預填數據: test-user-1758884034373/session-1758884034373 { exerciseId: 'squat', setNumber: 1 }
+test	Run tests	2025-09-26T10:53:54.3744929Z 
+test	Run tests	2025-09-26T10:53:54.3745444Z       at getSetPrefillData (apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts:370:11)
+test	Run tests	2025-09-26T10:53:54.3745775Z 
+test	Run tests	2025-09-26T10:53:54.3764168Z PASS apps/frontend/tests/jest-e2e/rpe-trigger-logic.test.ts
+test	Run tests	2025-09-26T10:53:54.3764770Z   RPE Trigger Logic E2E Tests
+test	Run tests	2025-09-26T10:53:54.3765355Z     WKO-IN-02: 條件觸發式 RPE (核心測試)
+test	Run tests	2025-09-26T10:53:54.3765771Z       ✓ should NOT trigger RPE for accessory exercises (9 ms)
+test	Run tests	2025-09-26T10:53:54.3766221Z       ✓ should trigger RPE for core exercises on final set (5 ms)
+test	Run tests	2025-09-26T10:53:54.3766710Z       ✓ should handle mixed core and accessory exercises correctly (8 ms)
+test	Run tests	2025-09-26T10:53:54.3767442Z       ✓ should handle multiple core exercises correctly (3 ms)
+test	Run tests	2025-09-26T10:53:54.3767782Z     WKO-IN-01: 日誌預填寫
+test	Run tests	2025-09-26T10:53:54.3768144Z       ✓ should pre-fill weight and reps for subsequent sets (2 ms)
+test	Run tests	2025-09-26T10:53:54.3768554Z       ✓ should not pre-fill for first set (1 ms)
+test	Run tests	2025-09-26T10:53:54.3768741Z 
+test	Run tests	2025-09-26T10:53:54.5489286Z FAIL services/planning-engine/src/__tests__/performance/planning-engine-performance.test.ts
+test	Run tests	2025-09-26T10:53:54.5490525Z   ● Test suite failed to run
+test	Run tests	2025-09-26T10:53:54.5490694Z 
+test	Run tests	2025-09-26T10:53:54.5490791Z     Configuration error:
+test	Run tests	2025-09-26T10:53:54.5490942Z 
+test	Run tests	2025-09-26T10:53:54.5491177Z     Could not locate module ../prisma/generated/client/index.js mapped as:
+test	Run tests	2025-09-26T10:53:54.5491845Z     /home/runner/work/athelete-ally/athelete-ally/services/planning-engine/prisma/generated/client/index.js.
+test	Run tests	2025-09-26T10:53:54.5492249Z 
+test	Run tests	2025-09-26T10:53:54.5492418Z     Please check your configuration for these entries:
+test	Run tests	2025-09-26T10:53:54.5492710Z     {
+test	Run tests	2025-09-26T10:53:54.5492901Z       "moduleNameMapper": {
+test	Run tests	2025-09-26T10:53:54.5493604Z         "/^\.\.\/prisma\/generated\/client\/index\.js$/": "/home/runner/work/athelete-ally/athelete-ally/services/planning-engine/prisma/generated/client/index.js"
+test	Run tests	2025-09-26T10:53:54.5494198Z       },
+test	Run tests	2025-09-26T10:53:54.5494380Z       "resolver": undefined
+test	Run tests	2025-09-26T10:53:54.5494582Z     }
+test	Run tests	2025-09-26T10:53:54.5494687Z 
+test	Run tests	2025-09-26T10:53:54.5495053Z     [0m [90m 2 |[39m [90m// the colocated index.d.ts from the Prisma generated client folder.[39m
+test	Run tests	2025-09-26T10:53:54.5495707Z      [90m 3 |[39m [90m// This avoids TS2307 during type-check when moduleResolution is node16.[39m
+test	Run tests	2025-09-26T10:53:54.5496525Z     [31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { [33mPrismaClient[39m } [36mfrom[39m [32m'../prisma/generated/client/index.js'[39m[33m;[39m
+test	Run tests	2025-09-26T10:53:54.5497076Z      [90m   |[39m [31m[1m^[22m[39m
+test	Run tests	2025-09-26T10:53:54.5497338Z      [90m 5 |[39m
+test	Run tests	2025-09-26T10:53:54.5497834Z      [90m 6 |[39m [36mconst[39m globalForPrisma [33m=[39m globalThis [36mas[39m unknown [36mas[39m {
+test	Run tests	2025-09-26T10:53:54.5498487Z      [90m 7 |[39m   prisma[33m:[39m [33mPrismaClient[39m [33m|[39m undefined[33m;[39m[0m
+test	Run tests	2025-09-26T10:53:54.5498781Z 
+test	Run tests	2025-09-26T10:53:54.5499104Z       at createNoMappedModuleFoundError (node_modules/jest-resolve/build/resolver.js:759:17)
+test	Run tests	2025-09-26T10:53:54.5500119Z       at Object.require (services/planning-engine/src/db.ts:4:1)
+test	Run tests	2025-09-26T10:53:54.5500667Z       at Object.require (services/planning-engine/src/optimization/async-plan-generator.ts:3:1)
+test	Run tests	2025-09-26T10:53:54.5501414Z       at Object.<anonymous> (services/planning-engine/src/__tests__/performance/planning-engine-performance.test.ts:6:1)
+test	Run tests	2025-09-26T10:53:54.5502070Z 
+test	Run tests	2025-09-26T10:53:54.7863193Z PASS apps/frontend/tests/contracts/onboarding-unification.test.ts
+test	Run tests	2025-09-26T10:53:54.7864458Z   Onboarding合同统一测试
+test	Run tests	2025-09-26T10:53:54.7865273Z     OnboardingPayloadSchema验证
+test	Run tests	2025-09-26T10:53:54.7866098Z       ✓ 应该接受有效的onboarding数据 (3 ms)
+test	Run tests	2025-09-26T10:53:54.7866802Z       ✓ 应该拒绝无效的userId格式 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7867450Z       ✓ 应该拒绝无效的availabilityDays值 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7868119Z       ✓ 应该拒绝无效的proficiency值 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7868707Z       ✓ 应该接受可选的字段
+test	Run tests	2025-09-26T10:53:54.7869252Z     availabilityDays类型统一
+test	Run tests	2025-09-26T10:53:54.7870090Z       ✓ availabilityDays应该是数字类型 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7870842Z       ✓ 应该拒绝字符串数组类型的availabilityDays
+test	Run tests	2025-09-26T10:53:54.7871619Z       ✓ availabilityDays应该在1-7范围内 (2 ms)
+test	Run tests	2025-09-26T10:53:54.7872253Z     步骤验证功能
+test	Run tests	2025-09-26T10:53:54.7872797Z       ✓ 应该正确验证步骤1（目的和目标）
+test	Run tests	2025-09-26T10:53:54.7873410Z       ✓ 应该正确验证步骤2（技能水平） (1 ms)
+test	Run tests	2025-09-26T10:53:54.7874059Z       ✓ 应该正确验证步骤3（赛季和目标）
+test	Run tests	2025-09-26T10:53:54.7874641Z       ✓ 应该正确验证步骤4（可用性）
+test	Run tests	2025-09-26T10:53:54.7875166Z       ✓ 应该正确验证步骤5（设备） (1 ms)
+test	Run tests	2025-09-26T10:53:54.7875739Z       ✓ 应该正确验证步骤6（恢复习惯）
+test	Run tests	2025-09-26T10:53:54.7876246Z     进度计算功能
+test	Run tests	2025-09-26T10:53:54.7876727Z       ✓ 应该正确计算步骤进度 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7877727Z     合同兼容性测试
+test	Run tests	2025-09-26T10:53:54.7878339Z       ✓ 应该与前端API路由兼容
+test	Run tests	2025-09-26T10:53:54.7878932Z       ✓ 应该与Gateway BFF兼容 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7879854Z       ✓ 应该与Profile Onboarding服务兼容
+test	Run tests	2025-09-26T10:53:54.7880540Z     错误处理测试
+test	Run tests	2025-09-26T10:53:54.7881081Z       ✓ 应该提供详细的验证错误信息
+test	Run tests	2025-09-26T10:53:54.7881654Z       ✓ 应该处理空数据 (1 ms)
+test	Run tests	2025-09-26T10:53:54.7882221Z       ✓ 应该处理非对象数据
+test	Run tests	2025-09-26T10:53:54.7882559Z 
+test	Run tests	2025-09-26T10:53:55.2839597Z   console.log
+test	Run tests	2025-09-26T10:53:55.2840621Z     模擬延遲加載訓練計畫: test-user-123 (2000ms)
+test	Run tests	2025-09-26T10:53:55.2841029Z 
+test	Run tests	2025-09-26T10:53:55.2841774Z       at getTrainingPlanWithDelay (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:129:11)
+test	Run tests	2025-09-26T10:53:55.2842432Z 
+test	Run tests	2025-09-26T10:53:55.2845928Z   console.log
+test	Run tests	2025-09-26T10:53:55.2846445Z     模擬延遲加載訓練計畫: test-user-123 (100ms)
+test	Run tests	2025-09-26T10:53:55.2846743Z 
+test	Run tests	2025-09-26T10:53:55.2847326Z       at getTrainingPlanWithDelay (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:129:11)
+test	Run tests	2025-09-26T10:53:55.3865695Z 
+test	Run tests	2025-09-26T10:53:55.3866174Z   console.log
+test	Run tests	2025-09-26T10:53:55.3866878Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.3867148Z 
+test	Run tests	2025-09-26T10:53:55.3867644Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3868188Z 
+test	Run tests	2025-09-26T10:53:55.3878603Z   console.log
+test	Run tests	2025-09-26T10:53:55.3878938Z     模擬響應式佈局: test-user-123 (600x800)
+test	Run tests	2025-09-26T10:53:55.3879285Z 
+test	Run tests	2025-09-26T10:53:55.3880122Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3880644Z 
+test	Run tests	2025-09-26T10:53:55.3891939Z   console.log
+test	Run tests	2025-09-26T10:53:55.3892297Z     模擬響應式佈局: test-user-123 (767x800)
+test	Run tests	2025-09-26T10:53:55.3892540Z 
+test	Run tests	2025-09-26T10:53:55.3893057Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3893490Z 
+test	Run tests	2025-09-26T10:53:55.3896630Z   console.log
+test	Run tests	2025-09-26T10:53:55.3896940Z     模擬響應式佈局: test-user-123 (768x800)
+test	Run tests	2025-09-26T10:53:55.3897206Z 
+test	Run tests	2025-09-26T10:53:55.3897696Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3898094Z 
+test	Run tests	2025-09-26T10:53:55.3900887Z   console.log
+test	Run tests	2025-09-26T10:53:55.3901231Z     模擬響應式佈局: test-user-123 (769x800)
+test	Run tests	2025-09-26T10:53:55.3901460Z 
+test	Run tests	2025-09-26T10:53:55.3901933Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3902703Z 
+test	Run tests	2025-09-26T10:53:55.3911468Z   console.log
+test	Run tests	2025-09-26T10:53:55.3911863Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.3912087Z 
+test	Run tests	2025-09-26T10:53:55.3912547Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3912947Z 
+test	Run tests	2025-09-26T10:53:55.3919226Z   console.log
+test	Run tests	2025-09-26T10:53:55.3919801Z     模擬更新訓練計畫數據: test-user-123 {
+test	Run tests	2025-09-26T10:53:55.3920087Z       exercises: [
+test	Run tests	2025-09-26T10:53:55.3920446Z         { id: 'squat', weight: 135, reps: 5 },
+test	Run tests	2025-09-26T10:53:55.3920844Z         { id: 'bench', weight: 115, reps: 5 }
+test	Run tests	2025-09-26T10:53:55.3921562Z       ]
+test	Run tests	2025-09-26T10:53:55.3921887Z     }
+test	Run tests	2025-09-26T10:53:55.3922020Z 
+test	Run tests	2025-09-26T10:53:55.3922421Z       at updateTrainingPlanData (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:174:11)
+test	Run tests	2025-09-26T10:53:55.3922852Z 
+test	Run tests	2025-09-26T10:53:55.3924076Z   console.log
+test	Run tests	2025-09-26T10:53:55.3924465Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.3924675Z 
+test	Run tests	2025-09-26T10:53:55.3925083Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3925506Z 
+test	Run tests	2025-09-26T10:53:55.3940755Z   console.log
+test	Run tests	2025-09-26T10:53:55.3941493Z     模擬響應式佈局: test-user-123 (375x667)
+test	Run tests	2025-09-26T10:53:55.3941951Z 
+test	Run tests	2025-09-26T10:53:55.3942645Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3943300Z 
+test	Run tests	2025-09-26T10:53:55.3945718Z   console.log
+test	Run tests	2025-09-26T10:53:55.3946390Z     模擬響應式佈局: test-user-123 (667x375)
+test	Run tests	2025-09-26T10:53:55.3946854Z 
+test	Run tests	2025-09-26T10:53:55.3947562Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3948211Z 
+test	Run tests	2025-09-26T10:53:55.3957339Z   console.log
+test	Run tests	2025-09-26T10:53:55.3958021Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.3958449Z 
+test	Run tests	2025-09-26T10:53:55.3959194Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3960069Z 
+test	Run tests	2025-09-26T10:53:55.3969590Z   console.log
+test	Run tests	2025-09-26T10:53:55.3970176Z     模擬響應式佈局: test-user-123 (800x800)
+test	Run tests	2025-09-26T10:53:55.3970488Z 
+test	Run tests	2025-09-26T10:53:55.3971083Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3971724Z 
+test	Run tests	2025-09-26T10:53:55.3975283Z   console.log
+test	Run tests	2025-09-26T10:53:55.3975890Z     模擬響應式佈局: test-user-123 (600x800)
+test	Run tests	2025-09-26T10:53:55.3976196Z 
+test	Run tests	2025-09-26T10:53:55.3976780Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3977458Z 
+test	Run tests	2025-09-26T10:53:55.3980917Z   console.log
+test	Run tests	2025-09-26T10:53:55.3981506Z     模擬響應式佈局: test-user-123 (1000x800)
+test	Run tests	2025-09-26T10:53:55.3981825Z 
+test	Run tests	2025-09-26T10:53:55.3982398Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3983046Z 
+test	Run tests	2025-09-26T10:53:55.3986374Z   console.log
+test	Run tests	2025-09-26T10:53:55.3986947Z     模擬響應式佈局: test-user-123 (400x800)
+test	Run tests	2025-09-26T10:53:55.3987250Z 
+test	Run tests	2025-09-26T10:53:55.3987843Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3988506Z 
+test	Run tests	2025-09-26T10:53:55.3991826Z   console.log
+test	Run tests	2025-09-26T10:53:55.3992419Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.3992739Z 
+test	Run tests	2025-09-26T10:53:55.3993316Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.3993960Z 
+test	Run tests	2025-09-26T10:53:55.4003760Z   console.log
+test	Run tests	2025-09-26T10:53:55.4004348Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.4004649Z 
+test	Run tests	2025-09-26T10:53:55.4005247Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4005912Z 
+test	Run tests	2025-09-26T10:53:55.4009162Z   console.log
+test	Run tests	2025-09-26T10:53:55.4009915Z     模擬響應式佈局: test-user-123 (400x800)
+test	Run tests	2025-09-26T10:53:55.4010230Z 
+test	Run tests	2025-09-26T10:53:55.4010800Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4011859Z 
+test	Run tests	2025-09-26T10:53:55.4061618Z   console.log
+test	Run tests	2025-09-26T10:53:55.4062291Z     模擬響應式佈局: test-user-123 (320x800)
+test	Run tests	2025-09-26T10:53:55.4062614Z 
+test	Run tests	2025-09-26T10:53:55.4063200Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4063824Z 
+test	Run tests	2025-09-26T10:53:55.4068674Z   console.log
+test	Run tests	2025-09-26T10:53:55.4069260Z     模擬響應式佈局: test-user-123 (480x800)
+test	Run tests	2025-09-26T10:53:55.4069820Z 
+test	Run tests	2025-09-26T10:53:55.4070406Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4071427Z 
+test	Run tests	2025-09-26T10:53:55.4075017Z   console.log
+test	Run tests	2025-09-26T10:53:55.4075591Z     模擬響應式佈局: test-user-123 (768x800)
+test	Run tests	2025-09-26T10:53:55.4075896Z 
+test	Run tests	2025-09-26T10:53:55.4076475Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4077097Z 
+test	Run tests	2025-09-26T10:53:55.4081231Z   console.log
+test	Run tests	2025-09-26T10:53:55.4081819Z     模擬響應式佈局: test-user-123 (1024x800)
+test	Run tests	2025-09-26T10:53:55.4082151Z 
+test	Run tests	2025-09-26T10:53:55.4082725Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4083361Z 
+test	Run tests	2025-09-26T10:53:55.4087065Z   console.log
+test	Run tests	2025-09-26T10:53:55.4087655Z     模擬響應式佈局: test-user-123 (1200x800)
+test	Run tests	2025-09-26T10:53:55.4087986Z 
+test	Run tests	2025-09-26T10:53:55.4088583Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4089211Z 
+test	Run tests	2025-09-26T10:53:55.4093549Z   console.log
+test	Run tests	2025-09-26T10:53:55.4094135Z     模擬響應式佈局: test-user-123 (1440x800)
+test	Run tests	2025-09-26T10:53:55.4094471Z 
+test	Run tests	2025-09-26T10:53:55.4095047Z       at getTrainingPlanLayout (apps/frontend/tests/jest-e2e/responsive-layout.test.ts:153:11)
+test	Run tests	2025-09-26T10:53:55.4095687Z 
+test	Run tests	2025-09-26T10:53:55.4160670Z PASS apps/frontend/tests/jest-e2e/responsive-layout.test.ts
+test	Run tests	2025-09-26T10:53:55.4161399Z   Responsive Layout E2E Tests
+test	Run tests	2025-09-26T10:53:55.4162072Z     PLN-UI-01: 響應式佈局與加載狀態
+test	Run tests	2025-09-26T10:53:55.4162761Z       ✓ should display skeleton screen during loading (104 ms)
+test	Run tests	2025-09-26T10:53:55.4163631Z       ✓ should switch to dual-column layout on wide screens (1 ms)
+test	Run tests	2025-09-26T10:53:55.4164490Z       ✓ should switch to single-column layout on narrow screens (2 ms)
+test	Run tests	2025-09-26T10:53:55.4165313Z       ✓ should handle breakpoint transition smoothly (2 ms)
+test	Run tests	2025-09-26T10:53:55.4166131Z       ✓ should maintain layout stability during data updates (2 ms)
+test	Run tests	2025-09-26T10:53:55.4166928Z       ✓ should handle mobile orientation changes (1 ms)
+test	Run tests	2025-09-26T10:53:55.4167611Z     Layout Performance
+test	Run tests	2025-09-26T10:53:55.4168370Z       ✓ should load within performance budget (1 ms)
+test	Run tests	2025-09-26T10:53:55.4169664Z       ✓ should handle rapid resize events (3 ms)
+test	Run tests	2025-09-26T10:53:55.4170345Z     Content Responsiveness
+test	Run tests	2025-09-26T10:53:55.4171186Z       ✓ should adjust content density based on screen size (2 ms)
+test	Run tests	2025-09-26T10:53:55.4172321Z       ✓ should maintain readability across all screen sizes (8 ms)
+test	Run tests	2025-09-26T10:53:55.4172925Z 
+test	Run tests	2025-09-26T10:53:56.4777468Z PASS apps/frontend/src/__tests__/components/AdvancedSearch.test.tsx
+test	Run tests	2025-09-26T10:53:56.4778307Z   AdvancedSearch
+test	Run tests	2025-09-26T10:53:56.4779045Z     ✓ renders search input and filter button (24 ms)
+test	Run tests	2025-09-26T10:53:56.4779730Z     ✓ calls onSearch when search button is clicked (86 ms)
+test	Run tests	2025-09-26T10:53:56.4780183Z     ✓ calls onSearch when Enter key is pressed (46 ms)
+test	Run tests	2025-09-26T10:53:56.4780625Z     ✓ calls onClear when clear button is clicked (31 ms)
+test	Run tests	2025-09-26T10:53:56.4781090Z     ✓ shows filter panel when filter button is clicked (27 ms)
+test	Run tests	2025-09-26T10:53:56.4781521Z     ✓ handles multiselect filter correctly (66 ms)
+test	Run tests	2025-09-26T10:53:56.4781916Z     ✓ handles select filter correctly (48 ms)
+test	Run tests	2025-09-26T10:53:56.4782265Z     ✓ handles range filter correctly (70 ms)
+test	Run tests	2025-09-26T10:53:56.4782607Z     ✓ shows active filter badges (58 ms)
+test	Run tests	2025-09-26T10:53:56.4783025Z     ✓ removes filter badge when close button is clicked (93 ms)
+test	Run tests	2025-09-26T10:53:56.4783272Z 
+test	Run tests	2025-09-26T10:53:56.5591516Z   console.log
+test	Run tests	2025-09-26T10:53:56.5592241Z     模擬重量轉換: 135 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5592942Z 
+test	Run tests	2025-09-26T10:53:56.5593317Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5593660Z 
+test	Run tests	2025-09-26T10:53:56.5610133Z   console.log
+test	Run tests	2025-09-26T10:53:56.5610542Z     模擬重量轉換: 61.2 kg -> lbs
+test	Run tests	2025-09-26T10:53:56.5610697Z 
+test	Run tests	2025-09-26T10:53:56.5610988Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5611307Z 
+test	Run tests	2025-09-26T10:53:56.5622091Z   console.log
+test	Run tests	2025-09-26T10:53:56.5622475Z     模擬重量轉換: 135 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5622856Z 
+test	Run tests	2025-09-26T10:53:56.5623180Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5623492Z 
+test	Run tests	2025-09-26T10:53:56.5661880Z   console.log
+test	Run tests	2025-09-26T10:53:56.5662370Z     模擬重量轉換: 225 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5662526Z 
+test	Run tests	2025-09-26T10:53:56.5662814Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5663133Z 
+test	Run tests	2025-09-26T10:53:56.5666824Z   console.log
+test	Run tests	2025-09-26T10:53:56.5667214Z     模擬重量轉換: 315 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5667366Z 
+test	Run tests	2025-09-26T10:53:56.5667654Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5667975Z 
+test	Run tests	2025-09-26T10:53:56.5672030Z   console.log
+test	Run tests	2025-09-26T10:53:56.5672387Z     模擬重量轉換: 45 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5672536Z 
+test	Run tests	2025-09-26T10:53:56.5672814Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5673132Z 
+test	Run tests	2025-09-26T10:53:56.5690037Z   console.log
+test	Run tests	2025-09-26T10:53:56.5690921Z     模擬重量轉換: 2.5 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5691423Z 
+test	Run tests	2025-09-26T10:53:56.5692580Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5693192Z 
+test	Run tests	2025-09-26T10:53:56.5700764Z   console.log
+test	Run tests	2025-09-26T10:53:56.5701380Z     模擬重量轉換: 5 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5701765Z 
+test	Run tests	2025-09-26T10:53:56.5702384Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5702971Z 
+test	Run tests	2025-09-26T10:53:56.5706096Z   console.log
+test	Run tests	2025-09-26T10:53:56.5706577Z     模擬重量轉換: 10 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5706815Z 
+test	Run tests	2025-09-26T10:53:56.5707331Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5707889Z 
+test	Run tests	2025-09-26T10:53:56.5720430Z   console.log
+test	Run tests	2025-09-26T10:53:56.5720909Z     模擬重量轉換: 0 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5721136Z 
+test	Run tests	2025-09-26T10:53:56.5721613Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5722175Z 
+test	Run tests	2025-09-26T10:53:56.5724965Z   console.log
+test	Run tests	2025-09-26T10:53:56.5725380Z     模擬重量轉換: 1 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5725586Z 
+test	Run tests	2025-09-26T10:53:56.5725985Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5726315Z 
+test	Run tests	2025-09-26T10:53:56.5729692Z   console.log
+test	Run tests	2025-09-26T10:53:56.5730109Z     模擬重量轉換: 1000 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5730355Z 
+test	Run tests	2025-09-26T10:53:56.5731249Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5731783Z 
+test	Run tests	2025-09-26T10:53:56.5741711Z   console.log
+test	Run tests	2025-09-26T10:53:56.5742170Z     模擬獲取訓練計畫: test-user-123
+test	Run tests	2025-09-26T10:53:56.5742426Z 
+test	Run tests	2025-09-26T10:53:56.5742927Z       at getTrainingPlan (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:142:11)
+test	Run tests	2025-09-26T10:53:56.5743469Z 
+test	Run tests	2025-09-26T10:53:56.5748893Z   console.log
+test	Run tests	2025-09-26T10:53:56.5749553Z     模擬切換重量單位: test-user-123 -> kg
+test	Run tests	2025-09-26T10:53:56.5749831Z 
+test	Run tests	2025-09-26T10:53:56.5750331Z       at switchWeightUnit (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:166:11)
+test	Run tests	2025-09-26T10:53:56.5751154Z 
+test	Run tests	2025-09-26T10:53:56.5752998Z   console.log
+test	Run tests	2025-09-26T10:53:56.5753388Z     模擬獲取訓練計畫: test-user-123
+test	Run tests	2025-09-26T10:53:56.5753538Z 
+test	Run tests	2025-09-26T10:53:56.5753825Z       at getTrainingPlan (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:142:11)
+test	Run tests	2025-09-26T10:53:56.5754152Z 
+test	Run tests	2025-09-26T10:53:56.5756633Z   console.log
+test	Run tests	2025-09-26T10:53:56.5757025Z     模擬重量轉換: 135 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5757180Z 
+test	Run tests	2025-09-26T10:53:56.5757470Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5757782Z 
+test	Run tests	2025-09-26T10:53:56.5760589Z   console.log
+test	Run tests	2025-09-26T10:53:56.5761002Z     模擬重量轉換: 115 lbs -> kg
+test	Run tests	2025-09-26T10:53:56.5761225Z 
+test	Run tests	2025-09-26T10:53:56.5761691Z       at convertWeight (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:117:11)
+test	Run tests	2025-09-26T10:53:56.5762090Z 
+test	Run tests	2025-09-26T10:53:56.5773436Z   console.log
+test	Run tests	2025-09-26T10:53:56.5774199Z     模擬設置用戶偏好: test-user-123 -> kg
+test	Run tests	2025-09-26T10:53:56.5774526Z 
+test	Run tests	2025-09-26T10:53:56.5775134Z       at setUserWeightPreference (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:185:11)
+test	Run tests	2025-09-26T10:53:56.5775777Z 
+test	Run tests	2025-09-26T10:53:56.5777930Z   console.log
+test	Run tests	2025-09-26T10:53:56.5778434Z     模擬獲取訓練計畫: test-user-123
+test	Run tests	2025-09-26T10:53:56.5778700Z 
+test	Run tests	2025-09-26T10:53:56.5779233Z       at getTrainingPlan (apps/frontend/tests/jest-e2e/weight-conversion.test.ts:142:11)
+test	Run tests	2025-09-26T10:53:56.5780122Z 
+test	Run tests	2025-09-26T10:53:56.5800255Z PASS apps/frontend/tests/jest-e2e/weight-conversion.test.ts
+test	Run tests	2025-09-26T10:53:56.5800914Z   Weight Conversion E2E Tests
+test	Run tests	2025-09-26T10:53:56.5801482Z     PLN-FUNC-01: 科學化重量單位轉換
+test	Run tests	2025-09-26T10:53:56.5802274Z       ✓ should convert 135 lbs to 61.2 kg using scientific rounding (3 ms)
+test	Run tests	2025-09-26T10:53:56.5803055Z       ✓ should convert 61.2 kg back to 134.9 lbs (1 ms)
+test	Run tests	2025-09-26T10:53:56.5803879Z       ✓ should handle multiple weight conversions in training plan (6 ms)
+test	Run tests	2025-09-26T10:53:56.5804661Z       ✓ should maintain precision for small weights (3 ms)
+test	Run tests	2025-09-26T10:53:56.5805358Z       ✓ should handle edge cases correctly (3 ms)
+test	Run tests	2025-09-26T10:53:56.5805943Z     Training Plan Weight Display
+test	Run tests	2025-09-26T10:53:56.5806718Z       ✓ should update all weights in training plan when unit changes (3 ms)
+test	Run tests	2025-09-26T10:53:56.5807563Z       ✓ should maintain user preference across sessions (2 ms)
+test	Run tests	2025-09-26T10:53:56.5807955Z 
+test	Run tests	2025-09-26T10:53:56.6647774Z   console.log
+test	Run tests	2025-09-26T10:53:56.6648681Z     模擬 Onboarding 步驟: proficiency {
+test	Run tests	2025-09-26T10:53:56.6649225Z       userId: 'test-user-1758884036662',
+test	Run tests	2025-09-26T10:53:56.6649993Z       proficiency: 'intermediate',
+test	Run tests	2025-09-26T10:53:56.6650425Z       step: 1
+test	Run tests	2025-09-26T10:53:56.6650726Z     }
+test	Run tests	2025-09-26T10:53:56.6650908Z 
+test	Run tests	2025-09-26T10:53:56.6651599Z       at simulateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:132:11)
+test	Run tests	2025-09-26T10:53:56.6652314Z 
+test	Run tests	2025-09-26T10:53:56.6656692Z   console.log
+test	Run tests	2025-09-26T10:53:56.6657945Z     模擬 Onboarding 步驟: purpose { userId: 'test-user-1758884036662', purpose: 'performance', step: 2 }
+test	Run tests	2025-09-26T10:53:56.6658699Z 
+test	Run tests	2025-09-26T10:53:56.6659639Z       at simulateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:132:11)
+test	Run tests	2025-09-26T10:53:56.6660391Z 
+test	Run tests	2025-09-26T10:53:56.6663830Z   console.log
+test	Run tests	2025-09-26T10:53:56.6664820Z     模擬 Onboarding 步驟: season { userId: 'test-user-1758884036662', season: null, step: 3 }
+test	Run tests	2025-09-26T10:53:56.6665917Z 
+test	Run tests	2025-09-26T10:53:56.6666699Z       at simulateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:132:11)
+test	Run tests	2025-09-26T10:53:56.6667430Z 
+test	Run tests	2025-09-26T10:53:56.6670012Z   console.log
+test	Run tests	2025-09-26T10:53:56.6670702Z     模擬 Onboarding 步驟: availability {
+test	Run tests	2025-09-26T10:53:56.6671316Z       userId: 'test-user-1758884036662',
+test	Run tests	2025-09-26T10:53:56.6672056Z       availabilityDays: [ 'monday', 'wednesday', 'friday' ],
+test	Run tests	2025-09-26T10:53:56.6672769Z       preferredTimeSlots: [ '18:00', '19:00' ],
+test	Run tests	2025-09-26T10:53:56.6673372Z       weeklyGoalDays: 3,
+test	Run tests	2025-09-26T10:53:56.6674206Z       step: 4
+test	Run tests	2025-09-26T10:53:56.6674643Z     }
+test	Run tests	2025-09-26T10:53:56.6674937Z 
+test	Run tests	2025-09-26T10:53:56.6675700Z       at simulateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:132:11)
+test	Run tests	2025-09-26T10:53:56.6676446Z 
+test	Run tests	2025-09-26T10:53:56.6679196Z   console.log
+test	Run tests	2025-09-26T10:53:56.6680103Z     模擬 Onboarding 步驟: equipment {
+test	Run tests	2025-09-26T10:53:56.6680716Z       userId: 'test-user-1758884036662',
+test	Run tests	2025-09-26T10:53:56.6681284Z       accessType: 'full_gym',
+test	Run tests	2025-09-26T10:53:56.6681900Z       equipment: [ 'barbell', 'dumbbells', 'squat_rack' ],
+test	Run tests	2025-09-26T10:53:56.6682550Z       step: 5
+test	Run tests	2025-09-26T10:53:56.6682970Z     }
+test	Run tests	2025-09-26T10:53:56.6683226Z 
+test	Run tests	2025-09-26T10:53:56.6683988Z       at simulateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:132:11)
+test	Run tests	2025-09-26T10:53:56.6684714Z 
+test	Run tests	2025-09-26T10:53:56.6686942Z   console.log
+test	Run tests	2025-09-26T10:53:56.6687660Z     模擬獲取 Onboarding 數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6688088Z 
+test	Run tests	2025-09-26T10:53:56.6688795Z       at getOnboardingData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:147:11)
+test	Run tests	2025-09-26T10:53:56.6689717Z 
+test	Run tests	2025-09-26T10:53:56.6705907Z   console.log
+test	Run tests	2025-09-26T10:53:56.6706735Z     模擬導航: test-user-1758884036662 -> proficiency (back)
+test	Run tests	2025-09-26T10:53:56.6707235Z 
+test	Run tests	2025-09-26T10:53:56.6707991Z       at navigateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:176:11)
+test	Run tests	2025-09-26T10:53:56.6708729Z 
+test	Run tests	2025-09-26T10:53:56.6714142Z   console.log
+test	Run tests	2025-09-26T10:53:56.6714856Z     模擬獲取 Onboarding 數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6715324Z 
+test	Run tests	2025-09-26T10:53:56.6716056Z       at getOnboardingData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:147:11)
+test	Run tests	2025-09-26T10:53:56.6716737Z 
+test	Run tests	2025-09-26T10:53:56.6719624Z   console.log
+test	Run tests	2025-09-26T10:53:56.6720318Z     模擬獲取 Onboarding 數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6720761Z 
+test	Run tests	2025-09-26T10:53:56.6721471Z       at getOnboardingData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:147:11)
+test	Run tests	2025-09-26T10:53:56.6722216Z 
+test	Run tests	2025-09-26T10:53:56.6725033Z   console.log
+test	Run tests	2025-09-26T10:53:56.6725808Z     模擬導航: test-user-1758884036662 -> purpose (forward)
+test	Run tests	2025-09-26T10:53:56.6726303Z 
+test	Run tests	2025-09-26T10:53:56.6727061Z       at navigateOnboardingStep (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:176:11)
+test	Run tests	2025-09-26T10:53:56.6727772Z 
+test	Run tests	2025-09-26T10:53:56.6729889Z   console.log
+test	Run tests	2025-09-26T10:53:56.6730634Z     模擬獲取 Onboarding 數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6731063Z 
+test	Run tests	2025-09-26T10:53:56.6731785Z       at getOnboardingData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:147:11)
+test	Run tests	2025-09-26T10:53:56.6732482Z 
+test	Run tests	2025-09-26T10:53:56.6735129Z   console.log
+test	Run tests	2025-09-26T10:53:56.6735816Z     模擬獲取 Onboarding 數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6736260Z 
+test	Run tests	2025-09-26T10:53:56.6736966Z       at getOnboardingData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:147:11)
+test	Run tests	2025-09-26T10:53:56.6737597Z 
+test	Run tests	2025-09-26T10:53:56.6758393Z   console.log
+test	Run tests	2025-09-26T10:53:56.6759176Z     模擬獲取 Onboarding Summary: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6759838Z 
+test	Run tests	2025-09-26T10:53:56.6760640Z       at getOnboardingSummary (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:164:11)
+test	Run tests	2025-09-26T10:53:56.6761355Z 
+test	Run tests	2025-09-26T10:53:56.6766473Z   console.log
+test	Run tests	2025-09-26T10:53:56.6767211Z     模擬獲取 Onboarding 數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6768160Z 
+test	Run tests	2025-09-26T10:53:56.6768923Z       at getOnboardingData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:147:11)
+test	Run tests	2025-09-26T10:53:56.6769783Z 
+test	Run tests	2025-09-26T10:53:56.6822683Z   console.log
+test	Run tests	2025-09-26T10:53:56.6823620Z     模擬清理測試數據: test-user-1758884036662
+test	Run tests	2025-09-26T10:53:56.6824103Z 
+test	Run tests	2025-09-26T10:53:56.6824803Z       at cleanupTestData (apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts:188:11)
+test	Run tests	2025-09-26T10:53:56.6825443Z 
+test	Run tests	2025-09-26T10:53:56.6838826Z PASS apps/frontend/tests/jest-e2e/onboarding-data-persistence.test.ts
+test	Run tests	2025-09-26T10:53:56.6840408Z   Onboarding Data Persistence E2E Tests
+test	Run tests	2025-09-26T10:53:56.6841152Z     ONB-E2E-01: 數據持久性與流程完整性
+test	Run tests	2025-09-26T10:53:56.6841947Z       ✓ should persist onboarding data across all steps (7 ms)
+test	Run tests	2025-09-26T10:53:56.6842881Z       ✓ should maintain data when navigating back and forward (5 ms)
+test	Run tests	2025-09-26T10:53:56.6843633Z     ONB-SUM-01: Summary 頁面數據顯示
+test	Run tests	2025-09-26T10:53:56.6844440Z       ✓ should display complete onboarding data in summary (7 ms)
+test	Run tests	2025-09-26T10:53:56.6845005Z 
+test	Run tests	2025-09-26T10:53:56.9100715Z PASS apps/frontend/src/__tests__/components/PlanCard.test.tsx
+test	Run tests	2025-09-26T10:53:56.9101640Z   PlanCard
+test	Run tests	2025-09-26T10:53:56.9102467Z     ✓ renders plan information correctly (15 ms)
+test	Run tests	2025-09-26T10:53:56.9103287Z     ✓ calls onSelect when select button is clicked (7 ms)
+test	Run tests	2025-09-26T10:53:56.9104133Z     ✓ calls onEdit when edit button is clicked (5 ms)
+test	Run tests	2025-09-26T10:53:56.9105069Z     ✓ displays difficulty badge with correct styling (6 ms)
+test	Run tests	2025-09-26T10:53:56.9105779Z     ✓ renders all tags (5 ms)
+test	Run tests	2025-09-26T10:53:56.9106195Z 
+test	Run tests	2025-09-26T10:53:57.0994362Z PASS apps/frontend/src/__tests__/hooks/useTrainingQueries.test.tsx
+test	Run tests	2025-09-26T10:53:57.0995244Z   useTrainingQueries
+test	Run tests	2025-09-26T10:53:57.0996189Z     ✓ should initialize usePlans with default values (8 ms)
+test	Run tests	2025-09-26T10:53:57.0996960Z     ✓ should handle usePlan with valid id (2 ms)
+test	Run tests	2025-09-26T10:53:57.0997760Z     ✓ should initialize useCreatePlan mutation (1 ms)
+test	Run tests	2025-09-26T10:53:57.0998292Z 
+test	Run tests	2025-09-26T10:53:57.1301309Z PASS services/analytics/src/__tests__/integration.test.ts
+test	Run tests	2025-09-26T10:53:57.1301733Z   Analytics Service
+test	Run tests	2025-09-26T10:53:57.1302231Z     ✓ should be able to run tests (1 ms)
+test	Run tests	2025-09-26T10:53:57.1302416Z 
+test	Run tests	2025-09-26T10:53:57.1572882Z PASS services/job-scheduler/src/__tests__/integration.test.ts
+test	Run tests	2025-09-26T10:53:57.1573353Z   Job Scheduler Service
+test	Run tests	2025-09-26T10:53:57.1573814Z     ✓ should be able to run tests
+test	Run tests	2025-09-26T10:53:57.1574011Z 
+test	Run tests	2025-09-26T10:53:57.1867028Z PASS services/exercises/src/__tests__/integration.test.ts
+test	Run tests	2025-09-26T10:53:57.1867483Z   Exercises Service
+test	Run tests	2025-09-26T10:53:57.1867956Z     ✓ should be able to run tests
+test	Run tests	2025-09-26T10:53:57.1868127Z 
+test	Run tests	2025-09-26T10:53:57.2141603Z PASS services/workouts/src/__tests__/integration.test.ts
+test	Run tests	2025-09-26T10:53:57.2142253Z   Workouts Service
+test	Run tests	2025-09-26T10:53:57.2142929Z     ✓ should be able to run tests (1 ms)
+test	Run tests	2025-09-26T10:53:57.2143239Z 
+test	Run tests	2025-09-26T10:53:57.2443603Z PASS services/fatigue/src/__tests__/integration.test.ts
+test	Run tests	2025-09-26T10:53:57.2444525Z   Fatigue Service
+test	Run tests	2025-09-26T10:53:57.2445493Z     ✓ should be able to run tests (1 ms)
+test	Run tests	2025-09-26T10:53:57.2445989Z 
+test	Run tests	2025-09-26T10:53:57.3242280Z ------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------
+test	Run tests	2025-09-26T10:53:57.3244097Z File                                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                               
+test	Run tests	2025-09-26T10:53:57.3245708Z ------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------
+test	Run tests	2025-09-26T10:53:57.3253719Z All files                                 |   46.28 |    31.89 |    39.6 |   45.22 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3254754Z  apps/frontend/src/components/permissions |   53.84 |    39.13 |   21.42 |   56.47 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3256123Z   ProtocolPermissionsManager.tsx          |   53.84 |    39.13 |   21.42 |   56.47 | 130-134,139-145,169-182,204-238,288-303,309-319,325-334,340-351,359,431-546                     
+test	Run tests	2025-09-26T10:53:57.3257041Z  apps/frontend/src/components/training    |     100 |       75 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3258271Z   PlanCard.tsx                            |     100 |       75 |     100 |     100 | 74-81                                                                                           
+test	Run tests	2025-09-26T10:53:57.3259140Z  apps/frontend/src/components/ui          |      94 |    90.47 |   88.09 |   95.51 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3260207Z   advanced-search.tsx                     |   93.61 |    91.07 |    90.9 |   95.45 | 142,179                                                                                         
+test	Run tests	2025-09-26T10:53:57.3260825Z   badge.tsx                               |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3261771Z   button.tsx                              |     100 |    83.33 |     100 |     100 | 36                                                                                              
+test	Run tests	2025-09-26T10:53:57.3262774Z   card.tsx                                |    92.1 |      100 |   83.33 |   95.23 | 62                                                                                              
+test	Run tests	2025-09-26T10:53:57.3263836Z   dialog.tsx                              |    87.5 |      100 |   66.66 |      90 | 70-72,101                                                                                       
+test	Run tests	2025-09-26T10:53:57.3264950Z   input.tsx                               |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3265963Z   label.tsx                               |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3267005Z   switch.tsx                              |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3268011Z   tabs.tsx                                |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3269077Z  apps/frontend/src/hooks                  |   34.66 |      100 |    15.9 |   34.66 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3270569Z   useTrainingQueries.ts                   |   34.66 |      100 |    15.9 |   34.66 | 9-12,36-38,44-51,57-62,69-71,77-79,85-90,96-103,109-115,121-128,134-140,147-149,156-158,164-166 
+test	Run tests	2025-09-26T10:53:57.3271848Z  apps/frontend/src/lib                    |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3272889Z   utils.ts                                |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3273996Z  apps/frontend/src/lib/api                |   66.19 |    66.66 |   53.84 |   66.19 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3275187Z   permissions-api.ts                      |   88.63 |    91.66 |   81.81 |   88.63 | 104,338-354,403-430                                                                             
+test	Run tests	2025-09-26T10:53:57.3276671Z   training.ts                             |   29.62 |    41.66 |   17.64 |   29.62 | 21-25,38-115                                                                                    
+test	Run tests	2025-09-26T10:53:57.3277872Z  apps/frontend/src/lib/protocols          |      85 |    60.41 |      95 |   87.67 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3279148Z   v3-protocol-engine.ts                   |      85 |    60.41 |      95 |   87.67 | 266,280,314-317,345,388-394,416                                                                 
+test	Run tests	2025-09-26T10:53:57.3280852Z  packages/contracts/events                |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3281987Z   index.ts                                |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3282970Z   schemas.ts                              |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3284012Z  packages/event-bus/src                   |   17.24 |     2.32 |      25 |   17.94 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3285091Z   config.ts                               |   84.61 |        0 |     100 |   84.61 | 15-16                                                                                           
+test	Run tests	2025-09-26T10:53:57.3286057Z   index.ts                                |    8.33 |        0 |    8.69 |    8.82 | 65-381                                                                                          
+test	Run tests	2025-09-26T10:53:57.3287061Z   validator.ts                            |   26.08 |     4.76 |   14.28 |   26.08 | 34-117                                                                                          
+test	Run tests	2025-09-26T10:53:57.3288232Z  packages/shared-types/src                |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3289342Z   index.ts                                |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3290660Z  packages/shared-types/src/schemas        |   72.58 |    73.07 |      30 |   73.68 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3291764Z   api.ts                                  |      75 |      100 |       0 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3292810Z   enhanced-plan.ts                        |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3293871Z   feedback.ts                             |     100 |      100 |     100 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3294893Z   onboarding.ts                           |    92.3 |       95 |      75 |      92 | 56,129                                                                                          
+test	Run tests	2025-09-26T10:53:57.3295954Z   rpe.ts                                  |   38.09 |        0 |       0 |   38.09 | 29,55-63,75-83,95-103                                                                           
+test	Run tests	2025-09-26T10:53:57.3297023Z  packages/shared/src                      |   33.04 |     3.44 |    8.69 |   33.33 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3298474Z   error-handler.ts                        |   26.66 |     3.44 |   10.52 |   26.92 | 57-136,147-169,185-205,212-246,253-283,293-335,341-374                                          
+test	Run tests	2025-09-26T10:53:57.3299872Z   index.ts                                |     100 |      100 |       0 |     100 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3300917Z  packages/shared/src/auth                 |   27.63 |    21.42 |   11.11 |      28 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3302221Z   jwt.ts                                  |   38.23 |     42.1 |    12.5 |   38.23 | 7,43-77,96-125                                                                                  
+test	Run tests	2025-09-26T10:53:57.3303272Z   middleware.ts                           |    14.7 |        0 |       0 |   15.15 | 6-28,37-50,60-72,82-84                                                                          
+test	Run tests	2025-09-26T10:53:57.3304333Z   test-utils.ts                           |    37.5 |     12.5 |      25 |    37.5 | 35-63                                                                                           
+test	Run tests	2025-09-26T10:53:57.3305409Z  packages/shared/src/config               |   53.33 |        0 |       0 |   53.33 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3306509Z   ports.ts                                |   53.33 |        0 |       0 |   53.33 | 39,44-45,50,61,66,75                                                                            
+test	Run tests	2025-09-26T10:53:57.3307662Z  packages/shared/src/security             |   13.63 |        0 |       0 |   13.63 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3308799Z   secure-id.ts                            |   13.63 |        0 |       0 |   13.63 | 12-64,76-104                                                                                    
+test	Run tests	2025-09-26T10:53:57.3310124Z  services/planning-engine/src             |   90.32 |        0 |   95.65 |   90.32 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3311243Z   config.ts                               |    93.1 |        0 |     100 |    93.1 | 52-53                                                                                           
+test	Run tests	2025-09-26T10:53:57.3312202Z   llm.ts                                  |      50 |      100 |       0 |      50 | 41                                                                                              
+test	Run tests	2025-09-26T10:53:57.3313424Z  services/planning-engine/src/concurrency |   24.61 |     6.89 |   23.07 |   24.61 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3314690Z   controller.ts                           |   24.61 |     6.89 |   23.07 |   24.61 | 59-179                                                                                          
+test	Run tests	2025-09-26T10:53:57.3315885Z  services/planning-engine/src/events      |    9.04 |        0 |    9.37 |    9.13 |                                                                                                 
+test	Run tests	2025-09-26T10:53:57.3317116Z   jetstream-consumer.ts                   |    4.34 |        0 |    5.26 |    4.42 | 66-348                                                                                          
+test	Run tests	2025-09-26T10:53:57.3318213Z   processor.ts                            |   15.47 |        0 |   15.38 |   15.47 | 55-242                                                                                          
+test	Run tests	2025-09-26T10:53:57.3319860Z ------------------------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------
+test	Run tests	2025-09-26T10:53:57.3852363Z Test Suites: 1 failed, 3 skipped, 16 passed, 17 of 20 total
+test	Run tests	2025-09-26T10:53:57.3853635Z Tests:       19 skipped, 126 passed, 145 total
+test	Run tests	2025-09-26T10:53:57.3854110Z Snapshots:   0 total
+test	Run tests	2025-09-26T10:53:57.3854455Z Time:        6.291 s
+test	Run tests	2025-09-26T10:53:57.3854852Z Ran all test suites in 2 projects.
+test	Run tests	2025-09-26T10:53:57.4390688Z ##[error]Process completed with exit code 1.
+test	Stop Frontend Service	﻿2025-09-26T10:53:57.4435880Z ##[group]Run echo "🛑 Stopping frontend service..."
+test	Stop Frontend Service	2025-09-26T10:53:57.4436284Z [36;1mecho "🛑 Stopping frontend service..."[0m
+test	Stop Frontend Service	2025-09-26T10:53:57.4436570Z [36;1mif [ -n "$FRONTEND_PID" ]; then[0m
+test	Stop Frontend Service	2025-09-26T10:53:57.4436851Z [36;1m  kill "$FRONTEND_PID" 2>/dev/null || true[0m
+test	Stop Frontend Service	2025-09-26T10:53:57.4437116Z [36;1mfi[0m
+test	Stop Frontend Service	2025-09-26T10:53:57.4437343Z [36;1m# Kill any remaining node processes on port 3000[0m
+test	Stop Frontend Service	2025-09-26T10:53:57.4437687Z [36;1mlsof -ti:3000 | xargs kill -9 2>/dev/null || true[0m
+test	Stop Frontend Service	2025-09-26T10:53:57.4470025Z shell: /usr/bin/bash -e {0}
+test	Stop Frontend Service	2025-09-26T10:53:57.4470253Z env:
+test	Stop Frontend Service	2025-09-26T10:53:57.4470419Z   NODE_VERSION: 20
+test	Stop Frontend Service	2025-09-26T10:53:57.4470620Z   REGISTRY: ghcr.io
+test	Stop Frontend Service	2025-09-26T10:53:57.4470834Z   IMAGE_NAME: nathanku3-hue/athelete-ally
+test	Stop Frontend Service	2025-09-26T10:53:57.4471088Z   CODECOV_TOKEN: 
+test	Stop Frontend Service	2025-09-26T10:53:57.4471267Z   FRONTEND_PID: 2426
+test	Stop Frontend Service	2025-09-26T10:53:57.4471460Z ##[endgroup]
+test	Stop Frontend Service	2025-09-26T10:53:57.4523761Z 🛑 Stopping frontend service...
+test	Post Checkout code (selected ref)	﻿2025-09-26T10:53:57.4965545Z Post job cleanup.
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.5960838Z [command]/usr/bin/git version
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6006855Z git version 2.51.0
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6052009Z Temporarily overriding HOME='/home/runner/work/_temp/6e3df631-0290-4025-a3f0-7fa9aef60dba' before making global git config changes
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6052943Z Adding repository directory to the temporary git global config as a safe directory
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6057679Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/athelete-ally/athelete-ally
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6093846Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6127475Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6364570Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6387549Z http.https://github.com/.extraheader
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6403263Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test	Post Checkout code (selected ref)	2025-09-26T10:53:57.6437887Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	Complete job	﻿2025-09-26T10:53:57.6809954Z Cleaning up orphan processes
+test	Complete job	2025-09-26T10:53:57.7092427Z Terminate orphan process: pid (2440) (next-server (v15.5.3))
