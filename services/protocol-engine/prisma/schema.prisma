@@ -106,6 +106,10 @@ model Protocol {
   principles  String[] // Core training principles
   requirements String[] // Equipment, time, experience requirements
   
+  // Optional protocol-level configuration & classification
+  parameters  Json?    // Flexible configuration at protocol level
+  dataClassification DataClassification @default(INTERNAL)
+  
   // Relations
   blocks      Block[]
   templates   ProtocolTemplate[]
