@@ -505,6 +505,7 @@ jobs:
       - name: Ensure test-results dir (pre-tests)
         run: mkdir -p test-results
 
+      - name: Run tests via Jest orchestrator (non-blocking)
         env:
           JEST_JUNIT_OUTPUT: test-results/junit-mandatory.xml
         run: |
