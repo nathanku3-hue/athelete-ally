@@ -167,6 +167,8 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     needs: [sanity, quality]
+    outputs:
+      has_artifacts: ${{ steps.results_meta.outputs.has_files }}
     steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
@@ -309,11 +311,25 @@ jobs:
           mkdir -p test-results
           echo "Test results directory created/verified"
 
+      - name: Determine if test artifacts exist
+        id: results_meta
+        if: always()
+        run: |
+          set -euo pipefail
+          files=$( (ls -1 test-results 2>/dev/null || true) | wc -l )
+          cov=$( (find coverage -type f 2>/dev/null || true) | wc -l )
+          j=0; [ -f junit.xml ] && j=1 || j=0
+          if [ "$files" -gt 0 ] || [ "$cov" -gt 0 ] || [ "$j" -gt 0 ]; then
+            echo "has_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_files=false" >> $GITHUB_OUTPUT
+          fi
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
+          if-no-files-found: ignore
           path: |
             test-results/**
             coverage/**
@@ -449,6 +465,8 @@ jobs:
     name: Test Check (Non-Blocking)
     runs-on: ubuntu-latest
     needs: [quality, contracts]
+    outputs:
+      has_artifacts: ${{ steps.results_meta.outputs.has_files }}
     continue-on-error: true
     steps:
       - name: Checkout
@@ -488,6 +506,37 @@ jobs:
           # Use orchestrator config with controlled concurrency
           JEST_MAX_WORKERS=1 npx jest --config jest/jest.projects.cjs --runInBand --passWithNoTests
           echo "✅ Orchestrator tests completed!"
+
+      - name: Ensure test results directory exists
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p test-results
+          echo "Test results directory created/verified"
+
+      - name: Determine if test artifacts exist
+        id: results_meta
+        if: always()
+        run: |
+          set -euo pipefail
+          files=$( (ls -1 test-results 2>/dev/null || true) | wc -l )
+          cov=$( (find coverage -type f 2>/dev/null || true) | wc -l )
+          j=0; [ -f junit.xml ] && j=1 || j=0
+          if [ "$files" -gt 0 ] || [ "$cov" -gt 0 ] || [ "$j" -gt 0 ]; then
+            echo "has_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_files=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-mandatory
+          if-no-files-found: ignore
+          path: |
+            test-results/**
+            coverage/**
+            junit.xml
 
   # 预览环境部署 (仅PR)
   preview:
@@ -681,10 +730,19 @@ jobs:
         run: npm ci
 
       - name: Download test artifacts
+        if: ${{ needs.test.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: test-results
           path: test-results/
+        continue-on-error: true
+
+      - name: Download test artifacts (mandatory)
+        if: ${{ needs.test-mandatory.outputs.has_artifacts == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results-mandatory
+          path: test-results-mandatory/
         continue-on-error: true
 
       - name: Generate test report
