@@ -64,35 +64,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma clients
+      - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          # Fix script permissions and execute
-          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
-          chmod +x scripts/generate-prisma-clients.sh
           bash ./scripts/generate-prisma-clients.sh
 
       - name: Verify Prisma clients (per service)
         run: |
           set -euo pipefail
-          echo "🔎 Verifying per-service Prisma clients (Pattern A)..."
+          echo "🔎 Verifying per-service Prisma clients..."
           missing=0
           for svc in services/*; do
             if [ -f "$svc/prisma/schema.prisma" ]; then
-              echo "• checking $svc/prisma/generated/client"
+              echo "• $svc: expect $svc/prisma/generated/client"
               if [ -d "$svc/prisma/generated/client" ]; then
-                echo "  ✅ $svc OK"
+                echo "  ✅ found"
               else
-                echo "  ❌ $svc missing prisma/generated/client"
+                echo "  ❌ missing $svc/prisma/generated/client"
                 ls -la "$svc/prisma" || true
                 missing=1
               fi
             fi
           done
-          if [ "$missing" -ne 0 ]; then
-            echo "❌ One or more services missing generated Prisma client"
-            exit 1
-          fi
+          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
 
       - name: Verify tsx availability
         run: npx tsx --version
@@ -114,8 +108,19 @@ jobs:
           path: reports/deps/eslint-boundaries.json
           retention-days: 7
 
-      - name: Type check
+      - name: Type check (force no stale cache)
+        env:
+          TURBO_FORCE: "true"
         run: npx turbo run type-check
+
+      - name: Upload Prisma client dirs (debug)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma-clients-${{ github.run_id }}
+          path: |
+            services/*/prisma/generated/client
+            services/*/prisma/schema.prisma
 
       - name: Enforce no large tracked files
         run: |
@@ -181,50 +186,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma clients
+      - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          # Fix script permissions and execute
-          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
-          chmod +x scripts/generate-prisma-clients.sh
           bash ./scripts/generate-prisma-clients.sh
-          
-          # Verify Prisma client generation
-          if [ -d "services/planning-engine/prisma/generated/client" ]; then
-            echo "✅ Planning-engine Prisma client generated successfully"
-          else
-            echo "❌ Planning-engine Prisma client not found"
-            exit 1
-          fi
-          
-          if [ -d "services/protocol-engine/prisma/generated/client" ]; then
-            echo "✅ Protocol-engine Prisma client generated successfully"
-          else
-            echo "❌ Protocol-engine Prisma client not found"
-            exit 1
-          fi
 
       - name: Verify Prisma clients (per service)
         run: |
           set -euo pipefail
-          echo "🔎 Verifying per-service Prisma clients (Pattern A)..."
+          echo "🔎 Verifying per-service Prisma clients..."
           missing=0
           for svc in services/*; do
             if [ -f "$svc/prisma/schema.prisma" ]; then
-              echo "• checking $svc/prisma/generated/client"
+              echo "• $svc: expect $svc/prisma/generated/client"
               if [ -d "$svc/prisma/generated/client" ]; then
-                echo "  ✅ $svc OK"
+                echo "  ✅ found"
               else
-                echo "  ❌ $svc missing prisma/generated/client"
+                echo "  ❌ missing $svc/prisma/generated/client"
                 ls -la "$svc/prisma" || true
                 missing=1
               fi
             fi
           done
-          if [ "$missing" -ne 0 ]; then
-            echo "❌ One or more services missing generated Prisma client"
-            exit 1
-          fi
+          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
 
       - name: Validate configuration
         run: |
