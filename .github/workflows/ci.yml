@@ -302,6 +302,16 @@ jobs:
           # Kill any remaining node processes on port 3000
           lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            test-results/**
+            coverage/**
+            junit.xml
+
   # 合同校验
   contracts:
     name: Contract Validation
@@ -388,6 +398,32 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Generate Prisma clients (all services)
+        run: |
+          set -euo pipefail
+          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
+          chmod +x scripts/generate-prisma-clients.sh
+          bash ./scripts/generate-prisma-clients.sh
+
+      - name: Verify Prisma clients (per service)
+        run: |
+          set -euo pipefail
+          echo "🔎 Verifying per-service Prisma clients..."
+          missing=0
+          for svc in services/*; do
+            if [ -f "$svc/prisma/schema.prisma" ]; then
+              echo "• $svc expects $svc/prisma/generated/client/index.js"
+              if [ -f "$svc/prisma/generated/client/index.js" ]; then
+                echo "  ✅ found"
+              else
+                echo "  ❌ missing $svc/prisma/generated/client"
+                ls -la "$svc/prisma" || true
+                missing=1
+              fi
+            fi
+          done
+          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
 
       - name: Validate production configuration
         run: |

@@ -5,7 +5,7 @@
       "cache": false
     },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^prisma:generate", "prisma:generate", "^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "lib/**", "generated/**"]
     },
     "dev": {
