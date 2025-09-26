@@ -9,8 +9,12 @@ on:
   workflow_dispatch:
 
 jobs:
+  sanity:
+    uses: ./.github/workflows/_sanity-reuse.yml
+
   contracts-guard:
     runs-on: ubuntu-latest
+    needs: [sanity]
     if: github.event_name == 'pull_request'
     
     steps:
@@ -24,6 +28,7 @@ jobs:
         with:
           node-version: '20.18.0'
           cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path || 'package-lock.json' }}
 
       - name: Install dependencies
         run: npm ci

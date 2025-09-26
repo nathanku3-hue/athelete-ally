@@ -22,6 +22,9 @@ on:
         description: 'Cache dependency path for npm (newline-separated list of package-lock.json files)'
         value: ${{ jobs.sanity-and-locks.outputs.cache-dependency-path }}
 
+permissions:
+  contents: read
+
 jobs:
   sanity-and-locks:
     name: Sanity Check and Lock Discovery
