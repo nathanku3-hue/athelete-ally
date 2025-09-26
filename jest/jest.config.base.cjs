@@ -1,6 +1,35 @@
 // Base Jest config for monorepo (CommonJS to avoid ESM interop issues)
 const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('../tsconfig.base.json');
+const path = require('path');
+
+// Load tsconfig compilerOptions robustly. We now keep a root wrapper
+// tsconfig.base.json that extends the centralized config under
+// config/typescript/tsconfig.base.json. Resolve both locations and gracefully
+// handle wrappers without compilerOptions.
+function loadCompilerOptions() {
+  const candidates = [
+    path.resolve(__dirname, '../config/typescript/tsconfig.base.json'),
+    path.resolve(__dirname, '../tsconfig.base.json'),
+  ];
+  for (const p of candidates) {
+    try {
+      // eslint-disable-next-line import/no-dynamic-require, global-require
+      const cfg = require(p);
+      if (cfg && cfg.compilerOptions) return cfg.compilerOptions;
+      if (cfg && cfg.extends) {
+        const extPath = path.resolve(path.dirname(p), cfg.extends);
+        // eslint-disable-next-line import/no-dynamic-require, global-require
+        const extCfg = require(extPath);
+        if (extCfg && extCfg.compilerOptions) return extCfg.compilerOptions;
+      }
+    } catch (_) {
+      // ignore and try next candidate
+    }
+  }
+  return {};
+}
+
+const compilerOptions = loadCompilerOptions();
 
 module.exports = {
   rootDir: '..',
