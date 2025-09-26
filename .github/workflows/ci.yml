@@ -281,17 +281,23 @@ jobs:
           echo "📋 Planning Engine Test List:"
           npx jest --config services/planning-engine/jest.config.cjs --listTests --runInBand
 
+      - name: Ensure test-results dir (pre-tests)
+        run: mkdir -p test-results
       - name: Run Services Tests (Known Good Path)
+        env:
+          JEST_JUNIT_OUTPUT: test-results/junit-services.xml
         run: |
           set -euo pipefail
           echo "🧪 Running services tests with known good configuration..."
-          npm run test:services
+          npm run test:services -- --reporters=default --reporters=jest-junit
 
       - name: Run Frontend Tests (Known Good Path)
+        env:
+          JEST_JUNIT_OUTPUT: test-results/junit-frontend.xml
         run: |
           set -euo pipefail
           echo "🧪 Running frontend tests with known good configuration..."
-          npm run test:frontend
+          npm run test:frontend -- --reporters=default --reporters=jest-junit
 
       - name: Stop Frontend Service
         if: always()
@@ -496,15 +502,18 @@ jobs:
           sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
           chmod +x scripts/generate-prisma-clients.sh
           bash ./scripts/generate-prisma-clients.sh
+      - name: Ensure test-results dir (pre-tests)
+        run: mkdir -p test-results
 
-      - name: Run tests via orchestrator (Non-Blocking)
+        env:
+          JEST_JUNIT_OUTPUT: test-results/junit-mandatory.xml
         run: |
           set -euo pipefail
           echo "🧪 Running tests via Jest orchestrator (non-blocking)..."
           echo "Node version: $(node -v)"
           echo "Jest version: $(npx jest --version)"
           # Use orchestrator config with controlled concurrency
-          JEST_MAX_WORKERS=1 npx jest --config jest/jest.projects.cjs --runInBand --passWithNoTests
+          JEST_MAX_WORKERS=1 npx jest --config jest/jest.projects.cjs --runInBand --passWithNoTests --reporters=default --reporters=jest-junit
           echo "✅ Orchestrator tests completed!"
 
       - name: Ensure test results directory exists
