@@ -114,6 +114,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-logs-${{ github.run_id }}
+          if-no-files-found: ignore
           path: |
             services/planning-engine/test-results/
             services/planning-engine/logs/
