@@ -324,8 +324,8 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          files=$( (ls -1 test-results 2>/dev/null || true) | wc -l )
-          cov=$( (find coverage -type f 2>/dev/null || true) | wc -l )
+          files="$( (ls -1 test-results 2>/dev/null || true) | wc -l )"
+          cov="$( (find coverage -type f 2>/dev/null || true) | wc -l )"
           j=0; [ -f junit.xml ] && j=1 || j=0
           if [ "$files" -gt 0 ] || [ "$cov" -gt 0 ] || [ "$j" -gt 0 ]; then
             echo "has_files=true" >> $GITHUB_OUTPUT
@@ -531,8 +531,8 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          files=$( (ls -1 test-results 2>/dev/null || true) | wc -l )
-          cov=$( (find coverage -type f 2>/dev/null || true) | wc -l )
+          files="$( (ls -1 test-results 2>/dev/null || true) | wc -l )"
+          cov="$( (find coverage -type f 2>/dev/null || true) | wc -l )"
           j=0; [ -f junit.xml ] && j=1 || j=0
           if [ "$files" -gt 0 ] || [ "$cov" -gt 0 ] || [ "$j" -gt 0 ]; then
             echo "has_files=true" >> $GITHUB_OUTPUT
