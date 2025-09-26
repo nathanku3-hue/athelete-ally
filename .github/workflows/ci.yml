@@ -72,6 +72,28 @@ jobs:
           chmod +x scripts/generate-prisma-clients.sh
           bash ./scripts/generate-prisma-clients.sh
 
+      - name: Verify Prisma clients (per service)
+        run: |
+          set -euo pipefail
+          echo "🔎 Verifying per-service Prisma clients (Pattern A)..."
+          missing=0
+          for svc in services/*; do
+            if [ -f "$svc/prisma/schema.prisma" ]; then
+              echo "• checking $svc/prisma/generated/client"
+              if [ -d "$svc/prisma/generated/client" ]; then
+                echo "  ✅ $svc OK"
+              else
+                echo "  ❌ $svc missing prisma/generated/client"
+                ls -la "$svc/prisma" || true
+                missing=1
+              fi
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "❌ One or more services missing generated Prisma client"
+            exit 1
+          fi
+
       - name: Verify tsx availability
         run: npx tsx --version
 
@@ -179,6 +201,28 @@ jobs:
             echo "✅ Protocol-engine Prisma client generated successfully"
           else
             echo "❌ Protocol-engine Prisma client not found"
+            exit 1
+          fi
+
+      - name: Verify Prisma clients (per service)
+        run: |
+          set -euo pipefail
+          echo "🔎 Verifying per-service Prisma clients (Pattern A)..."
+          missing=0
+          for svc in services/*; do
+            if [ -f "$svc/prisma/schema.prisma" ]; then
+              echo "• checking $svc/prisma/generated/client"
+              if [ -d "$svc/prisma/generated/client" ]; then
+                echo "  ✅ $svc OK"
+              else
+                echo "  ❌ $svc missing prisma/generated/client"
+                ls -la "$svc/prisma" || true
+                missing=1
+              fi
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "❌ One or more services missing generated Prisma client"
             exit 1
           fi
 

@@ -12,6 +12,13 @@ for service in services/*/; do
     service_name=$(basename "$service")
     echo "Generating Prisma client for $service_name..."
     
+    # Check Pattern A compliance
+    if ! grep -q 'output *= *"./generated/client"' "$service/prisma/schema.prisma"; then
+      echo "❌ $service_name schema missing generator output './generated/client' (Pattern A required)"
+      echo "Expected: generator client { output = \"./generated/client\" }"
+      exit 1
+    fi
+    
     # Generate to service-local output path
     (cd "$service" && npx prisma generate)
     
