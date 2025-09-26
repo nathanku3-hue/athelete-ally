@@ -40,3 +40,6 @@ pnpm-lock.yaml text eol=lf
 *.config.ts text eol=lf
 *.config.mjs text eol=lf
 *.config.cjs text eol=lf
+
+# Git hooks (no extension): force LF for shebang compatibility
+.githooks/* text eol=lf
