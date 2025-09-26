@@ -269,7 +269,6 @@ export class DatabaseOptimizer {
             name: true,
             description: true,
             status: true,
-            progress: true,
             createdAt: true,
             updatedAt: true,
             microcycles: {

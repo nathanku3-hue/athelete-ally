@@ -4,6 +4,7 @@ import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
+import { Prisma } from '@prisma/client';
 // 使用统一的日志记录
 // 使用console进行日志记录，避免循环依赖
 
@@ -260,7 +261,7 @@ export class AsyncPlanGenerator {
         status: 'completed',
         name: planData.name,
         description: planData.description,
-        content: planData,
+        content: planData as any,
         microcycles: {
           create: planData.microcycles.map((mc: any) => ({
             weekNumber: mc.weekNumber,

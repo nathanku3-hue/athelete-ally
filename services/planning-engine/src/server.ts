@@ -8,6 +8,7 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
+import { Prisma } from '@prisma/client';
 import { OnboardingCompletedEvent, PlanGenerationRequestedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
 import { toPlanGenerationRequest, toPlanGenerationRequestFromRequested } from './validation/plan-request.js';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
@@ -118,7 +119,7 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
         status: 'completed',
         name: planData.name,
         description: planData.description,
-        content: planData,
+        content: planData as any,
         microcycles: {
           create: planData.microcycles.map((mc: any) => ({
             weekNumber: mc.weekNumber,

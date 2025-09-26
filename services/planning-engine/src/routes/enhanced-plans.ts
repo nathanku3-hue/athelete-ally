@@ -164,7 +164,7 @@ export async function enhancedPlanRoutes(fastify: FastifyInstance) {
       const feedback = request.body as z.infer<typeof RPEFeedbackSchema>;
       
       // 保存RPE反馈到数据库
-      const savedFeedback = await prisma.rpeFeedback.create({
+      const savedFeedback = await prisma.rPEFeedback.create({
         data: {
           sessionId: feedback.sessionId,
           exerciseId: feedback.exerciseId,
@@ -300,7 +300,7 @@ export async function enhancedPlanRoutes(fastify: FastifyInstance) {
       }
 
       // 获取RPE反馈和性能指标
-      const rpeFeedback = await prisma.rpeFeedback.findMany({
+      const rpeFeedback = await prisma.rPEFeedback.findMany({
         where: { sessionId: { in: plan.microcycles.flatMap((mc: any) => mc.sessions.map((s: any) => s.id)) } },
         orderBy: { timestamp: 'desc' },
         take: 20,
