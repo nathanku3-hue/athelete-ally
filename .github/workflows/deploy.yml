@@ -50,18 +50,20 @@ jobs:
             type=ref,event=pr
             type=sha,format=short,prefix=sha-
 
-      - name: Login to GHCR (PAT fallback)
-        # Guard secrets usage: GH Actions removes `secrets` context on fork PRs
-        if: ${{ github.event_name != 'pull_request' && secrets.GHCR_TOKEN != '' }}
+      - name: Login to GHCR (PAT if available)
+        id: pat_login
+        # Never reference `secrets.*` in `if` — it may not exist on PRs. Gate only on event.
+        if: ${{ github.event_name != 'pull_request' }}
+        continue-on-error: true
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Login to GHCR (GITHUB_TOKEN)
-        # On non-PR events, fall back to the repo's GITHUB_TOKEN if PAT is absent
-        if: ${{ github.event_name != 'pull_request' && secrets.GHCR_TOKEN == '' }}
+      - name: Login to GHCR (fallback to GITHUB_TOKEN)
+        # Only run if PAT login did not succeed
+        if: ${{ github.event_name != 'pull_request' && steps.pat_login.outcome != 'success' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
