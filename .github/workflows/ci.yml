@@ -583,6 +583,16 @@ jobs:
             # Latest tag only on main
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
+      - name: Validate Dockerfile formatting
+        run: |
+          echo Dockerfile lines: $(wc -l < Dockerfile)
+          head -n 20 Dockerfile || true
+          echo Hex (first 160 bytes):
+          hexdump -C Dockerfile | head -n 10 || true
+
+      - name: Dry build (no push)
+        run: |
+          docker build --progress=plain -f Dockerfile .
       - name: Build and push preview images
         uses: docker/build-push-action@v5
         with:
