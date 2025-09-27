@@ -1,6 +1,4 @@
-# @swc/jest Migration Guide
-
-## Overview
+\n> DEPRECATED: Repo has migrated back to ts-jest due to Alpine SWC instability. This document is retained for historical reference. The shared SWC config ((removed)) has been removed.\n\n## Overview
 
 This guide documents the migration from `ts-jest` to `@swc/jest` for Node.js services in the monorepo. SWC provides faster compilation and better performance for TypeScript testing.
 
@@ -44,7 +42,7 @@ module.exports = {
   ],
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': ['@swc/jest', { 
-      configFile: '../../scripts/swc.jest.config.json' 
+      configFile: '../../(removed)' 
     }],
   },
   collectCoverageFrom: [
@@ -57,7 +55,7 @@ module.exports = {
 };
 ```
 
-**Important**: Use the shared SWC configuration file at `scripts/swc.jest.config.json` to ensure consistency across services.
+**Important**: Use the shared SWC configuration file at `(removed)` to ensure consistency across services.
 
 ### 3. Validation Steps
 

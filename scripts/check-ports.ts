@@ -1,17 +1,17 @@
 #!/usr/bin/env tsx
 /**
- * 端口冲突检测脚本
+ * ????????
  * 
- * 功能:
- * - 检查基础设施端口可用性 (PostgreSQL: 5432, Redis: 6379, NATS: 4222)
- * - 支持检查特定端口 (通过命令行参数)
- * - 提供详细的错误信息和解决建议
- * - 跨平台兼容 (Windows/Linux/macOS)
+ * ??:
+ * - ??????????? (PostgreSQL: 5432, Redis: 6379, NATS: 4222)
+ * - ???????? (???????)
+ * - ??????????????
+ * - ????? (Windows/Linux/macOS)
  * 
- * 使用方法:
- *   npm run check-ports                    # 检查所有端口
- *   npm run check-ports 5432 6379 4222    # 检查特定端口
- *   npx tsx scripts/check-ports.ts 5432   # 直接调用
+ * ????:
+ *   npm run check-ports                    # ??????
+ *   npm run check-ports 5432 6379 4222    # ??????
+ *   npx tsx scripts/check-ports.ts 5432   # ????
  */
 
 import { createServer } from 'net';
@@ -65,24 +65,24 @@ class PortChecker {
   }
 
   async checkAllPorts(): Promise<void> {
-    console.log('🔍 Checking port availability...\n');
+    console.log('?? Checking port availability...\n');
 
-    // 检查微服务端口
-    console.log('📦 Microservices:');
+    // ???????
+    console.log('?? Microservices:');
     for (const port of getMicroservicePorts()) {
       const service = Object.keys(SERVICE_PORTS).find(key => SERVICE_PORTS[key as keyof typeof SERVICE_PORTS] === port) || 'Unknown';
       await this.checkPort(port, service);
     }
 
-    // 检查前端端口
-    console.log('\n🌐 Frontend:');
+    // ??????
+    console.log('\n?? Frontend:');
     for (const port of getFrontendPorts()) {
       const service = Object.keys(SERVICE_PORTS).find(key => SERVICE_PORTS[key as keyof typeof SERVICE_PORTS] === port) || 'Unknown';
       await this.checkPort(port, service);
     }
 
-    // 检查基础设施端口
-    console.log('\n🏗️ Infrastructure:');
+    // ????????
+    console.log('\n??? Infrastructure:');
     for (const port of getInfrastructurePorts()) {
       const service = Object.keys(SERVICE_PORTS).find(key => SERVICE_PORTS[key as keyof typeof SERVICE_PORTS] === port) || 'Unknown';
       await this.checkPort(port, service);
@@ -92,26 +92,26 @@ class PortChecker {
   }
 
   private printResults(): void {
-    console.log('\n📊 Port Check Results:');
+    console.log('\n?? Port Check Results:');
     console.log('=' .repeat(50));
 
     const available = this.results.filter(r => r.available);
     const unavailable = this.results.filter(r => !r.available);
 
     if (available.length > 0) {
-      console.log('\n✅ Available ports:');
+      console.log('\n? Available ports:');
       available.forEach(result => {
-        console.log(`  ✓ Port ${result.port} (${result.service})`);
+        console.log(`  ? Port ${result.port} (${result.service})`);
       });
     }
 
     if (unavailable.length > 0) {
-      console.log('\n❌ Unavailable ports:');
+      console.log('\n? Unavailable ports:');
       unavailable.forEach(result => {
-        console.log(`  ✗ Port ${result.port} (${result.service}) - ${result.error}`);
+        console.log(`  ? Port ${result.port} (${result.service}) - ${result.error}`);
       });
       
-      console.log('\n🚨 Action required:');
+      console.log('\n?? Action required:');
       console.log('  1. Project-scoped cleanup:');
       console.log('     docker compose -f ./preview.compose.yaml down -v --remove-orphans');
       console.log('  2. Use alternative ports:');
@@ -123,26 +123,26 @@ class PortChecker {
       
       process.exit(1);
     } else {
-      console.log('\n🎉 All ports are available!');
-      console.log('✅ Ready to start all services');
+      console.log('\n?? All ports are available!');
+      console.log('? Ready to start all services');
     }
   }
 }
 
-// 主函数
+// ???
 async function main() {
   const checker = new PortChecker();
   
-  // 检查命令行参数
+  // ???????
   const args = process.argv.slice(2);
   
   if (args.length > 0) {
-    // 检查特定端口
-    console.log('🔍 Checking specific ports...\n');
+    // ??????
+    console.log('?? Checking specific ports...\n');
     for (const portStr of args) {
       const port = parseInt(portStr, 10);
       if (isNaN(port)) {
-        console.error(`❌ Invalid port: ${portStr}`);
+        console.error(`? Invalid port: ${portStr}`);
         process.exit(1);
       }
       
@@ -152,10 +152,11 @@ async function main() {
     
     checker.printResults();
   } else {
-    // 检查所有端口
+    // ??????
     await checker.checkAllPorts();
   }
 }
 
-// 运行检查
+// ????
 main().catch(console.error);
+
