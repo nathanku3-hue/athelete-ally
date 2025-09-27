@@ -1,6 +1,6 @@
 {
-  "\": "https://json-schema.org/draft/2020-12/schema",
-  "\": "https://athlete-ally.dev/schemas/normalized/heart_rate.v1.json",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://athlete-ally.dev/schemas/normalized/heart_rate.v1.json",
   "title": "Normalized Heart Rate v1",
   "type": "object",
   "$defs": {
@@ -57,3 +57,4 @@
   "required": ["version", "domain", "user_id", "received_at", "source", "samples"],
   "additionalProperties": false
 }
+
