@@ -9,7 +9,7 @@ on:
 
 env:
   # Align to .nvmrc
-  NODE_VERSION: '20'
+  NODE_VERSION: '20.18.0'
   NPM_VERSION: '10.9.3'
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
           npm config list -l || true
           echo "::endgroup::"
 
-      # 尝试1: 包含生命周期脚本 (postinstall等)
+      # ??1: ???????? (postinstall?)
       - name: npm ci (foreground scripts)
         id: ci_fg
         continue-on-error: true
@@ -48,7 +48,7 @@ jobs:
           set -o pipefail
           npm ci --foreground-scripts 2>&1 | tee npm-ci-foreground.log
 
-      # 尝试2: 隔离依赖图解析和生命周期脚本
+      # ??2: ??????????????
       - name: npm ci (ignore scripts)
         id: ci_ign
         if: steps.ci_fg.outcome == 'failure'
@@ -57,23 +57,23 @@ jobs:
           set -o pipefail
           npm ci --ignore-scripts 2>&1 | tee npm-ci-ignore-scripts.log
 
-      # 依赖树和去重诊断
+      # ????????
       - name: Dump dependency tree
         run: |
           npm ls --all --json > npm-ls.json || true
 
       - name: Dedupe (dry-run)
         run: |
-          # npm dedupe --dry-run 在最近的npm 10中支持
+          # npm dedupe --dry-run ????npm 10???
           npm dedupe --dry-run 2>&1 | tee npm-dedupe-dry-run.log || true
 
-      # 安全概览 (不会阻塞作业)
+      # ???? (??????)
       - name: npm audit (json)
         continue-on-error: true
         run: |
           npm audit --json > npm-audit.json || true
 
-      # 总结结果以便快速分类
+      # ??????????
       - name: Summarize diagnostics
         run: |
           {
@@ -98,8 +98,9 @@ jobs:
             diagnostics-summary.txt
           retention-days: 14
 
-      # 可选: 仅在npm ci (foreground)成功时继续构建
+      # ??: ??npm ci (foreground)???????
       - name: Build (only if npm ci succeeded)
         if: steps.ci_fg.outcome == 'success'
         run: |
           npm run build
+
