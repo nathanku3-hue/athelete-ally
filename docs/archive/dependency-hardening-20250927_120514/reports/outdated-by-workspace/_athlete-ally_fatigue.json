@@ -1,0 +1,77 @@
+{
+  "@opentelemetry/api": {
+    "wanted": "1.9.0",
+    "latest": "1.9.0",
+    "dependent": "fatigue"
+  },
+  "@opentelemetry/exporter-jaeger": {
+    "wanted": "1.30.1",
+    "latest": "2.1.0",
+    "dependent": "fatigue"
+  },
+  "@opentelemetry/exporter-prometheus": {
+    "wanted": "0.45.1",
+    "latest": "0.205.0",
+    "dependent": "fatigue"
+  },
+  "@opentelemetry/instrumentation": {
+    "current": "0.45.1",
+    "wanted": "0.45.1",
+    "latest": "0.205.0",
+    "dependent": "fatigue",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\fatigue\\node_modules\\@opentelemetry\\instrumentation"
+  },
+  "@opentelemetry/instrumentation-fs": {
+    "current": "0.12.0",
+    "wanted": "0.12.0",
+    "latest": "0.25.0",
+    "dependent": "fatigue",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\fatigue\\node_modules\\@opentelemetry\\instrumentation-fs"
+  },
+  "@opentelemetry/instrumentation-http": {
+    "current": "0.45.1",
+    "wanted": "0.45.1",
+    "latest": "0.205.0",
+    "dependent": "fatigue",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\fatigue\\node_modules\\@opentelemetry\\instrumentation-http"
+  },
+  "@opentelemetry/resources": {
+    "wanted": "1.30.1",
+    "latest": "2.1.0",
+    "dependent": "fatigue"
+  },
+  "@opentelemetry/sdk-node": {
+    "wanted": "0.45.1",
+    "latest": "0.205.0",
+    "dependent": "fatigue"
+  },
+  "@opentelemetry/semantic-conventions": {
+    "current": "1.18.1",
+    "wanted": "1.37.0",
+    "latest": "1.37.0",
+    "dependent": "fatigue",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\fatigue\\node_modules\\@opentelemetry\\semantic-conventions"
+  },
+  "@prisma/client": {
+    "wanted": "5.22.0",
+    "latest": "6.16.2",
+    "dependent": "fatigue"
+  },
+  "@swc/core": {
+    "current": "1.13.5",
+    "wanted": "1.13.19",
+    "latest": "1.13.19",
+    "dependent": "fatigue",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\fatigue\\node_modules\\@swc\\core"
+  },
+  "fastify": {
+    "wanted": "4.29.1",
+    "latest": "5.6.1",
+    "dependent": "fatigue"
+  },
+  "zod": {
+    "wanted": "3.25.76",
+    "latest": "4.1.11",
+    "dependent": "fatigue"
+  }
+}
