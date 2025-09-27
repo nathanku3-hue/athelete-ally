@@ -140,3 +140,138 @@ Last Updated: 2025-09-27
 
 ## Appendix B: Error Model (HTTP)
 - 400 invalid_signature | 409 duplicate_event | 429 rate_limited | 500 internal.
+## 15. Architecture Diagrams
+
+### 15.1 Webhook ? Normalize ? Serve (Sequence)
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Oura as Oura Cloud
+    participant API as Ingestion API (Webhooks)
+    participant Sig as Signature Verifier
+    participant IDEM as Idempotency Gate
+    participant S3 as Object Storage (S3-compatible)
+    participant NATS as NATS JetStream (health.raw.oura.*)
+    participant Norm as Normalizer Worker
+    participant PG as Postgres (health schema)
+    participant Bus2 as NATS JetStream (health.normalized.*)
+
+    Oura->>API: POST /v1/webhooks/oura (payload, headers)
+    API->>Sig: Verify signature (HMAC)
+    alt signature valid
+        Sig-->>API: ok
+        API->>IDEM: compute dedupe key (provider+eventId+ts)
+        alt not duplicate
+            IDEM-->>API: allow
+            API->>S3: PUT raw payload (key by provider/date/user/eventId)
+            API->>NATS: Publish health.raw.oura.webhook {envelope+objectKey}
+            NATS-->>Norm: deliver (durable consumer)
+            Norm->>S3: GET raw payload
+            Norm->>Norm: validate + map to shared-types
+            Norm->>PG: INSERT normalized rows (upsert)
+            Norm->>Bus2: Publish health.normalized.user.{userId}.metrics
+            Bus2-->>Norm: ack
+            Norm-->>NATS: ack
+            API-->>Oura: 202 Accepted
+        else duplicate
+            IDEM-->>API: reject (duplicate)
+            API-->>Oura: 409 Conflict
+        end
+    else signature invalid
+        Sig-->>API: invalid
+        API-->>Oura: 400 invalid_signature
+    end
+```
+
+### 15.2 Backfill/Sync Job (Sequence)
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client as Internal Client
+    participant Jobs as Jobs API
+    participant Sched as Job Scheduler
+    participant Sync as Backfill Worker
+    participant Oura as Oura API
+    participant S3 as Object Storage
+    participant NATS as NATS JetStream (health.raw.oura.*)
+    participant Norm as Normalizer Worker
+    participant PG as Postgres
+
+    Client->>Jobs: POST /v1/health/oura/sync {userId, range}
+    Jobs->>Sched: enqueue job
+    Sched->>Sync: NATS health.sync.oura.job.{jobId}
+    Sync->>Oura: GET /v2/.. (paged)
+    loop pages
+        Oura-->>Sync: 200 (page)
+        Sync->>S3: PUT raw page object(s)
+        Sync->>NATS: Publish health.raw.oura.activities {envelope+objectKey}
+        NATS-->>Norm: deliver
+        Norm->>S3: GET raw
+        Norm->>PG: UPSERT normalized rows
+        Norm-->>NATS: ack
+    end
+    Sync->>Sched: update status progress=100
+    Jobs-->>Client: 200 {jobId, status}
+```
+
+### 15.3 Components and Data Flows (Flowchart)
+```mermaid
+flowchart LR
+    subgraph Provider
+      Oura[Oura Cloud]
+    end
+
+    subgraph Ingestion
+      API[Webhook API]\n(Signature + Idempotency)
+    end
+
+    subgraph Messaging[NATS JetStream]
+      RAW[health.raw.oura.*]
+      NORM[health.normalized.*]
+      SYNC[health.sync.oura.*]
+    end
+
+    subgraph Storage
+      S3[(S3 Raw Objects)]
+      PG[(Postgres\nhealth schema)]
+    end
+
+    subgraph Workers
+      Normalizer[Normalizer Worker]
+      Backfill[Backfill Worker]
+    end
+
+    subgraph Serving
+      Reads[REST v1 Reads]
+    end
+
+    Oura -->|webhook| API
+    API -->|store raw| S3
+    API -->|publish| RAW
+    RAW --> Normalizer
+    Normalizer -->|fetch raw| S3
+    Normalizer -->|normalized rows| PG
+    Normalizer -->|publish| NORM
+    Reads -->|SELECT| PG
+
+    Reads -.->|trigger| SYNC
+    SYNC --> Backfill
+    Backfill -->|pull| Oura
+    Backfill -->|store raw| S3
+    Backfill -->|publish| RAW
+```
+
+### 15.4 Deployment View (Optional)
+```mermaid
+flowchart TB
+  User[(Internal Clients)] --> GW[API Gateway]
+  GW --> ING[Ingestion Service]
+  ING --> NATS[(NATS JS Cluster)]
+  ING --> S3[(S3 Bucket)]
+  NATS --> W1[Normalizer Deployment]
+  NATS --> W2[Backfill Deployment]
+  W1 --> PG[(Postgres)]
+  W2 --> S3
+  Admin[(Backoffice)] --> Reads[Health Read API]
+  Reads --> PG
+```
