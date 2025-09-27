@@ -73,7 +73,7 @@ describe('Planning Engine Performance Tests', () => {
 
   beforeEach(() => {
     // ????
-    mockRedis.cache.clear();
+    (mockRedis as any).cache.clear();
   });
 
   afterAll(async () => {
