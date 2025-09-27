@@ -2,8 +2,8 @@
   "extends": "../../config/typescript/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "../..",
-    "rootDir": "src",
-    "outDir": "dist"
+    "noEmit": true,
+    "paths": {}
   },
   "include": [
     "src/**/*.ts",
