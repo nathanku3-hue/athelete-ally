@@ -1,0 +1,3 @@
+# No-op Non-Breaking Updates Patch
+
+`npm outdated` indicates only major-version updates available. No safe minor/patch updates within semver ranges were applied.
