@@ -1,0 +1,22 @@
+{
+  "@opentelemetry/auto-instrumentations-node": {
+    "wanted": "0.40.3",
+    "latest": "0.64.1",
+    "dependent": "otel-preset"
+  },
+  "@opentelemetry/resources": {
+    "wanted": "1.30.1",
+    "latest": "2.1.0",
+    "dependent": "otel-preset"
+  },
+  "@opentelemetry/sdk-node": {
+    "wanted": "0.45.1",
+    "latest": "0.205.0",
+    "dependent": "otel-preset"
+  },
+  "@opentelemetry/semantic-conventions": {
+    "wanted": "1.37.0",
+    "latest": "1.37.0",
+    "dependent": "otel-preset"
+  }
+}

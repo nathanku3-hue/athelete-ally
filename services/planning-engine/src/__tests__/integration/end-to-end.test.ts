@@ -9,12 +9,12 @@ describe.skip('End-to-End Integration Tests', () => {
     // TODO: Implement LLM integration - https://github.com/nathanku3/athelete-ally/issues/LLM_INTEGRATION
     const request = {
       userId: 'test-user-123',
-      proficiency: 'intermediate',
-      season: 'offseason',
+      proficiency: 'intermediate' as const,
+      season: 'offseason' as const,
       availabilityDays: 3,
       weeklyGoalDays: 4,
       equipment: ['bodyweight', 'dumbbells'],
-      purpose: 'general_fitness'
+      purpose: 'general_fitness' as const
     };
 
     const plan = await generateTrainingPlan(request);
@@ -29,7 +29,7 @@ describe.skip('End-to-End Integration Tests', () => {
     expect(plan.microcycles.length).toBeGreaterThan(0);
 
     // ????????
-    const firstMicrocycle = plan.microcycles[0];
+    const firstMicrocycle = plan.microcycles[0] as any;
     expect(firstMicrocycle.weekNumber).toBeGreaterThan(0);
     expect(firstMicrocycle.name).toBeDefined();
     expect(['preparation', 'competition', 'recovery', 'transition']).toContain(firstMicrocycle.phase);
@@ -60,15 +60,15 @@ describe.skip('End-to-End Integration Tests', () => {
     // TODO: Implement LLM integration - https://github.com/nathanku3/athelete-ally/issues/LLM_INTEGRATION
     const proficiencies = ['beginner', 'intermediate', 'advanced'];
     
-    for (const proficiency of proficiencies) {
+    for (const proficiency of ['beginner', 'intermediate', 'advanced'] as const) {
       const request = {
         userId: `test-user-${proficiency}`,
         proficiency,
-        season: 'offseason',
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 4,
         equipment: ['bodyweight'],
-        purpose: 'general_fitness'
+        purpose: 'general_fitness' as const
       };
 
       const plan = await generateTrainingPlan(request);
@@ -90,12 +90,12 @@ describe.skip('End-to-End Integration Tests', () => {
     for (const equipment of equipmentConfigs) {
       const request = {
         userId: `test-user-${equipment.join('-')}`,
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 4,
         equipment,
-        purpose: 'general_fitness'
+        purpose: 'general_fitness' as const
       };
 
       const plan = await generateTrainingPlan(request);
@@ -104,8 +104,8 @@ describe.skip('End-to-End Integration Tests', () => {
       expect(plan.microcycles.length).toBeGreaterThan(0);
       
       // ??????????
-      const allExercises = plan.microcycles.flatMap(mc => 
-        mc.sessions.flatMap(session => session.exercises)
+      const allExercises = plan.microcycles.flatMap((mc: any) => 
+        mc.sessions.flatMap((session: any) => session.exercises)
       );
       
       // ?????????
