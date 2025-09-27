@@ -1,8 +1,8 @@
 // Jest globals are available without import
-import { generateTrainingPlan } from '../../llm.ts';
+import { generateTrainingPlan } from '../../llm';
 
 describe.skip('End-to-End Integration Tests', () => {
-  // TODO: 修复ESM Prisma mock问题 - 需要集成测试环境
+  // TODO: ??ESM Prisma mock?? - ????????
   // Issue: https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
 
   it.skip('should generate a training plan with valid schema', async () => {
@@ -19,7 +19,7 @@ describe.skip('End-to-End Integration Tests', () => {
 
     const plan = await generateTrainingPlan(request);
 
-    // 验证基本结构
+    // ??????
     expect(plan).toBeDefined();
     expect(plan.name).toBeDefined();
     expect(plan.description).toBeDefined();
@@ -28,14 +28,14 @@ describe.skip('End-to-End Integration Tests', () => {
     expect(Array.isArray(plan.microcycles)).toBe(true);
     expect(plan.microcycles.length).toBeGreaterThan(0);
 
-    // 验证第一个微周期
+    // ????????
     const firstMicrocycle = plan.microcycles[0];
     expect(firstMicrocycle.weekNumber).toBeGreaterThan(0);
     expect(firstMicrocycle.name).toBeDefined();
     expect(['preparation', 'competition', 'recovery', 'transition']).toContain(firstMicrocycle.phase);
     expect(Array.isArray(firstMicrocycle.sessions)).toBe(true);
 
-    // 验证第一个会话
+    // ???????
     if (firstMicrocycle.sessions.length > 0) {
       const firstSession = firstMicrocycle.sessions[0];
       expect(firstSession.dayOfWeek).toBeGreaterThanOrEqual(1);
@@ -44,7 +44,7 @@ describe.skip('End-to-End Integration Tests', () => {
       expect(firstSession.duration).toBeGreaterThan(0);
       expect(Array.isArray(firstSession.exercises)).toBe(true);
 
-      // 验证第一个练习
+      // ???????
       if (firstSession.exercises.length > 0) {
         const firstExercise = firstSession.exercises[0];
         expect(firstExercise.name).toBeDefined();
@@ -103,12 +103,12 @@ describe.skip('End-to-End Integration Tests', () => {
       expect(plan).toBeDefined();
       expect(plan.microcycles.length).toBeGreaterThan(0);
       
-      // 验证练习中使用的设备
+      // ??????????
       const allExercises = plan.microcycles.flatMap(mc => 
         mc.sessions.flatMap(session => session.exercises)
       );
       
-      // 至少应该有一些练习
+      // ?????????
       expect(allExercises.length).toBeGreaterThan(0);
     }
   }, 30000);
