@@ -405,7 +405,7 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
     }
 
     // Ensure required properties are provided
-    const exerciseData = {
+    const exerciseDataWithDefaults = {
       exerciseName: parsed.data.exerciseName || '',
       exerciseId: parsed.data.exerciseId || '',
       category: parsed.data.category || '',
@@ -417,7 +417,7 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
       targetRest: parsed.data.targetRest || 0,
       ...parsed.data
     };
-    const exercise = await sessionManager.addExerciseToSession(id, userId, exerciseData);
+    const exercise = await sessionManager.addExerciseToSession(id, userId, exerciseDataWithDefaults);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {
@@ -446,7 +446,7 @@ server.post('/exercises/:id/records', async (request, reply) => {
     }
 
     // Ensure required properties are provided
-    const recordData = {
+    const recordDataWithDefaults = {
       targetReps: parsed.data.targetReps || 0,
       targetWeight: parsed.data.targetWeight || 0,
       targetDuration: parsed.data.targetDuration || 0,
@@ -461,7 +461,7 @@ server.post('/exercises/:id/records', async (request, reply) => {
       notes: parsed.data.notes || '',
       ...parsed.data
     };
-    const record = await sessionManager.addRecordToExercise(id, userId, recordData);
+    const record = await sessionManager.addRecordToExercise(id, userId, recordDataWithDefaults);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {
@@ -640,7 +640,11 @@ server.post('/goals', async (request, reply) => {
       targetValue: parsed.data.targetValue || 0,
       startDate: parsed.data.startDate || new Date(),
       targetDate: parsed.data.targetDate || new Date(),
-      milestones: parsed.data.milestones || [],
+      milestones: parsed.data.milestones?.map(m => ({
+        value: m.value ?? 0,
+        date: m.date ?? new Date(),
+        description: m.description ?? ''
+      })) || [],
       ...parsed.data
     };
     const goal = await achievementEngine.createWorkoutGoal(goalData);

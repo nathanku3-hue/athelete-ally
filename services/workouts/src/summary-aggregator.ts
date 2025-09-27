@@ -141,7 +141,7 @@ export class SummaryAggregator {
 
       // 计算进度指标
       const weeklyGoalCompletion = this.calculateGoalCompletion(completedWorkouts.length, 4); // 假设目标是4次/周
-      const consistencyScore = this.calculateConsistencyScore(userId, weekStart);
+      const consistencyScore = await this.calculateConsistencyScore(userId, weekStart);
 
       // 创建摘要数据
       const summaryData: UserSummaryData = {
