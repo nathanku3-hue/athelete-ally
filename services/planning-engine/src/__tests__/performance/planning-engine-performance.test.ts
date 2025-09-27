@@ -73,7 +73,7 @@ describe('Planning Engine Performance Tests', () => {
 
   beforeEach(() => {
     // ????
-    mockRedis.cache.clear();
+    (mockRedis as any).cache.clear();
   });
 
   afterAll(async () => {
@@ -85,8 +85,8 @@ describe('Planning Engine Performance Tests', () => {
     it('???????????', async () => {
       const request = {
         userId: 'test-user-1',
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 3,
         equipment: ['bodyweight', 'dumbbells'],
@@ -204,8 +204,8 @@ describe('Planning Engine Performance Tests', () => {
       // Issue: Prisma updateMany mock not working correctly in ESM environment
       const requests = Array.from({ length: 10 }, (_, i) => ({
         userId: `user-${i}`,
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 3,
         equipment: ['bodyweight'],
@@ -272,8 +272,8 @@ describe('Planning Engine Performance Tests', () => {
             jobId: `job-${user}-${req}`,
             request: {
               userId: `user-${user}`,
-              proficiency: 'intermediate',
-              season: 'offseason',
+              proficiency: 'intermediate' as const,
+              season: 'offseason' as const,
               availabilityDays: 3,
               weeklyGoalDays: 3,
               equipment: ['bodyweight'],
@@ -314,8 +314,8 @@ describe('Planning Engine Performance Tests', () => {
       // ????????
       const requests = Array.from({ length: 1000 }, (_, i) => ({
         userId: `user-${i}`,
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 3,
         equipment: ['bodyweight'],
