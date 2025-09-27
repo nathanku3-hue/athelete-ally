@@ -1,25 +1,52 @@
 # Ingest Webhooks API
 
-Base path: `/ingest/webhooks/{provider}`
+## Overview
+The Ingest Webhooks API receives real-time data from third-party fitness providers (Garmin, Oura, etc.) and publishes raw events to the event bus for processing.
 
-- Method: POST
-- Path params:
-  - `provider`: `garmin` | `oura`
-- Headers:
-  - `content-type: application/json`
-  - `x-provider-signature`: HMAC or `authorization: bearer <jwt>` (provider-specific)
-  - `x-delivery-id`: unique delivery id from provider (used for idempotency)
-  - `x-timestamp`: RFC3339 timestamp
-  - `idempotency-key`: optional; if absent we derive from `x-delivery-id`
-- AuthN/Z: request must pass provider verification (HMAC over raw body with shared secret, or provider JWT).
+## Base Configuration
+- **Base Path**: `/ingest/webhooks/{provider}`
+- **Protocol**: HTTPS only
+- **Rate Limiting**: 1000 requests/minute per provider
+- **Timeout**: 30 seconds
 
-## Response Codes
-- 202 Accepted `{ "accepted": true, "delivery_id": "...", "trace_id": "..." }`
-- 400 Bad Request (malformed JSON)
-- 401 Unauthorized (signature invalid)
-- 409 Conflict (duplicate delivery)
-- 429 Too Many Requests (backpressure)
-- 5xx Transient error (provider should retry with exponential backoff)
+## Supported Providers
+- `garmin`: Garmin Connect webhooks
+- `oura`: Oura Ring API webhooks
+- `fitbit`: Fitbit webhooks (planned)
+- `apple`: Apple Health webhooks (planned)
+
+## Authentication & Security
+Each provider uses different authentication methods:
+- **Garmin**: HMAC-SHA256 signature verification
+- **Oura**: JWT token validation
+- **Fitbit**: OAuth2 bearer token
+- **Apple**: Certificate-based validation
+
+## Endpoints
+
+### POST /ingest/webhooks/{provider}
+Receives webhook data from fitness providers.
+
+**Path Parameters:**
+- `provider` (string, required): Provider identifier (`garmin`, `oura`, `fitbit`, `apple`)
+
+**Headers:**
+- `content-type: application/json` (required)
+- `x-provider-signature: <signature>` (required, provider-specific)
+- `x-delivery-id: <uuid>` (required, unique delivery identifier)
+- `x-timestamp: <RFC3339>` (required, request timestamp)
+- `idempotency-key: <uuid>` (optional, defaults to x-delivery-id)
+
+**Request Body:**
+Provider-specific JSON payload containing fitness data.
+
+**Response Codes:**
+- `202 Accepted`: Successfully queued for processing
+- `400 Bad Request`: Malformed request or invalid JSON
+- `401 Unauthorized`: Invalid signature or authentication
+- `409 Conflict`: Duplicate delivery (already processed)
+- `429 Too Many Requests`: Rate limit exceeded
+- `5xx Server Error`: Transient error (retry with exponential backoff)
 
 ## Emitted Events
 - Subject: `athlete-ally.raw.{provider}.{domain}.v1`
