@@ -254,7 +254,17 @@ server.post('/sessions', async (request, reply) => {
       return reply.code(400).send({ error: 'Invalid session data' });
     }
 
-    const session = await sessionManager.createSession(parsed.data);
+    // Ensure required properties are provided
+    const sessionData = {
+      userId: parsed.data.userId || '',
+      planId: parsed.data.planId || '',
+      sessionName: parsed.data.sessionName || '',
+      location: parsed.data.location || '',
+      weather: parsed.data.weather || '',
+      temperature: parsed.data.temperature || 0,
+      ...parsed.data
+    };
+    const session = await sessionManager.createSession(sessionData);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {
@@ -394,7 +404,20 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
       return reply.code(400).send({ error: 'Invalid exercise data' });
     }
 
-    const exercise = await sessionManager.addExerciseToSession(id, userId, parsed.data);
+    // Ensure required properties are provided
+    const exerciseDataWithDefaults = {
+      exerciseName: parsed.data.exerciseName || '',
+      exerciseId: parsed.data.exerciseId || '',
+      category: parsed.data.category || '',
+      order: parsed.data.order || 0,
+      targetSets: parsed.data.targetSets || 0,
+      targetReps: parsed.data.targetReps || 0,
+      targetWeight: parsed.data.targetWeight || 0,
+      targetDuration: parsed.data.targetDuration || 0,
+      targetRest: parsed.data.targetRest || 0,
+      ...parsed.data
+    };
+    const exercise = await sessionManager.addExerciseToSession(id, userId, exerciseDataWithDefaults);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {
@@ -422,7 +445,23 @@ server.post('/exercises/:id/records', async (request, reply) => {
       return reply.code(400).send({ error: 'Invalid record data' });
     }
 
-    const record = await sessionManager.addRecordToExercise(id, userId, parsed.data);
+    // Ensure required properties are provided
+    const recordDataWithDefaults = {
+      targetReps: parsed.data.targetReps || 0,
+      targetWeight: parsed.data.targetWeight || 0,
+      targetDuration: parsed.data.targetDuration || 0,
+      setNumber: parsed.data.setNumber || 0,
+      actualReps: parsed.data.actualReps || 0,
+      actualWeight: parsed.data.actualWeight || 0,
+      actualDuration: parsed.data.actualDuration || 0,
+      restTime: parsed.data.restTime || 0,
+      rpe: parsed.data.rpe || 0,
+      form: parsed.data.form || 0,
+      difficulty: parsed.data.difficulty || 0,
+      notes: parsed.data.notes || '',
+      ...parsed.data
+    };
+    const record = await sessionManager.addRecordToExercise(id, userId, recordDataWithDefaults);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {
@@ -528,7 +567,20 @@ server.post('/records', async (request, reply) => {
       return reply.code(400).send({ error: 'Invalid record data' });
     }
 
-    const record = await achievementEngine.createPersonalRecord(parsed.data);
+    // Ensure required properties are provided
+    const personalRecordData = {
+      value: parsed.data.value || 0,
+      recordType: parsed.data.recordType || 'max_weight' as const,
+      exerciseName: parsed.data.exerciseName || '',
+      userId: parsed.data.userId || '',
+      exerciseId: parsed.data.exerciseId || '',
+      setNumber: parsed.data.setNumber || 0,
+      notes: parsed.data.notes || '',
+      unit: parsed.data.unit || '',
+      sessionId: parsed.data.sessionId || '',
+      ...parsed.data
+    };
+    const record = await achievementEngine.createPersonalRecord(personalRecordData);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {
@@ -578,7 +630,24 @@ server.post('/goals', async (request, reply) => {
       return reply.code(400).send({ error: 'Invalid goal data' });
     }
 
-    const goal = await achievementEngine.createWorkoutGoal(parsed.data);
+    // Ensure required properties are provided
+    const goalData = {
+      ...parsed.data,
+      exerciseName: parsed.data.exerciseName || '',
+      userId: parsed.data.userId || '',
+      exerciseId: parsed.data.exerciseId || '',
+      unit: parsed.data.unit || '',
+      goalType: parsed.data.goalType || 'weight' as const,
+      targetValue: parsed.data.targetValue || 0,
+      startDate: parsed.data.startDate || new Date(),
+      targetDate: parsed.data.targetDate || new Date(),
+      milestones: parsed.data.milestones?.map(m => ({
+        value: m.value ?? 0,
+        date: m.date ?? new Date(),
+        description: m.description ?? ''
+      })) || []
+    };
+    const goal = await achievementEngine.createWorkoutGoal(goalData);
 
     const responseTime = (Date.now() - startTime) / 1000;
     businessMetrics.apiResponseTime.record(responseTime, {

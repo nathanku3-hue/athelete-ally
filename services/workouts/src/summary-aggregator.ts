@@ -47,8 +47,8 @@ export class SummaryAggregator {
     // 连接到事件总线
     await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
 
-    // 订阅计划生成完成事件，触发摘要更新
-    await eventBus.subscribeToPlanGenerated(this.handlePlanGenerated.bind(this));
+    // 订阅计划生成请求事件，触发摘要更新
+    await eventBus.subscribeToPlanGenerationRequested(this.handlePlanGenerated.bind(this));
 
     // 每小时运行一次全量更新
     this.intervalId = setInterval(() => {
@@ -141,7 +141,7 @@ export class SummaryAggregator {
 
       // 计算进度指标
       const weeklyGoalCompletion = this.calculateGoalCompletion(completedWorkouts.length, 4); // 假设目标是4次/周
-      const consistencyScore = this.calculateConsistencyScore(userId, weekStart);
+      const consistencyScore = await this.calculateConsistencyScore(userId, weekStart);
 
       // 创建摘要数据
       const summaryData: UserSummaryData = {
@@ -228,7 +228,7 @@ export class SummaryAggregator {
     return Math.min(100, Math.round((completed / goal) * 100));
   }
 
-  private async calculateConsistencyScore(userId: string, weekStart: Date): number {
+  private async calculateConsistencyScore(userId: string, weekStart: Date): Promise<number> {
     // 计算过去4周的一致性评分
     const fourWeeksAgo = new Date(weekStart);
     fourWeeksAgo.setDate(weekStart.getDate() - 28);
