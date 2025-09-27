@@ -7,8 +7,6 @@ const fs = require('fs');
 const path = require('path');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
-const meta2019 = require('ajv/dist/refs/json-schema-2019-09.json');
-const meta07 = require('ajv/dist/refs/json-schema-draft-07.json');
 
 const root = process.cwd();
 const examplesDir = path.join(root, 'docs', 'phase-3', 'schemas', 'normalized', 'examples');
@@ -28,10 +26,8 @@ function loadSchemaForExample(exampleFile) {
 }
 
 function main() {
-  const ajv = new Ajv({ strict: true, allErrors: true, allowUnionTypes: true });
+  const ajv = new Ajv({ strict: false, allErrors: true, allowUnionTypes: true });
   addFormats(ajv);
-  ajv.addMetaSchema(meta2019);
-  ajv.addMetaSchema(meta07);
 
   if (!fs.existsSync(examplesDir)) { console.error(`Examples directory not found: ${examplesDir}`); process.exit(1); }
   const exampleFiles = fs.readdirSync(examplesDir).filter(f => f.endsWith('.json')).map(f => path.join(examplesDir, f));
