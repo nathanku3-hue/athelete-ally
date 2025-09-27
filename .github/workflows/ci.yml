@@ -223,11 +223,11 @@ jobs:
       - name: Build shared packages
         run: |
           set -euo pipefail
-          echo "?? Building shared packages before service tests..."
+          echo "🔨 Building shared packages before service tests..."
           npm run build -w packages/event-bus
           npm run build -w packages/protocol-types
           npm run build -w packages/shared-types
-          echo "? Shared packages built successfully"
+          echo "✅ Shared packages built successfully"
 
 
       - name: Validate configuration
