@@ -66,7 +66,7 @@ check_ports() {
 build_frontend() {
     log_info "????Docker??..."
     
-    if docker build -t athlete-ally/frontend:latest -f Dockerfile.production .; then
+    if docker build -t athlete-ally/frontend:latest -f Dockerfile .; then
         log_success "????????"
     else
         log_error "????????"
