@@ -1,6 +1,6 @@
 # Multi-stage build (monorepo-aware, Node 20.18.0)
 FROM node:20.18.0-alpine AS base
-RUN apk add --no-cache libc6-compat curl
+RUN apk add --no-cache libc6-compat gcompat curl
 WORKDIR /app
 
 # Dependencies layer (dev deps for build)
@@ -41,3 +41,4 @@ ENV HOSTNAME=0.0.0.0
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD curl -fsS http://localhost:3000/api/health || exit 1
 
 CMD ["node", "server.js"]
+

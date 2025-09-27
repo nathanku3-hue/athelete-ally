@@ -10,27 +10,20 @@ module.exports = {
     '/src/__tests__/setup.ts'
   ],
   transform: {
-    '^.+\\.ts$': ['@swc/jest', {
-      jsc: {
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
         target: 'es2020',
-        parser: {
-          syntax: 'typescript',
-          decorators: true,
-        },
-        transform: {
-          legacyDecorator: true,
-          decoratorMetadata: true,
-        },
-      },
-      module: {
-        type: 'commonjs',
-      },
-    }],
+        module: 'commonjs',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true
+      }
+    }]
   },
+  moduleFileExtensions: ['ts', 'js', 'json'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
-    '!src/**/__tests__/**',
+    '!src/**/__tests__/**'
   ],
   testTimeout: 10000,
   passWithNoTests: true
