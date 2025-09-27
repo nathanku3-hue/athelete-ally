@@ -425,3 +425,24 @@ npx turbo run db:migrate
 ---
 
 **记住**: The Ally Workflow 是我们团队的质量保证，每一个步骤都是为了确保我们交付的代码是高质量、可维护、可扩展的。遵循这个工作流，我们就能持续交付价值，同时保持代码库的健康状态。
+
+---
+
+## Node Version Setup (20.18.x)
+
+- nvm (macOS/Linux)
+  `ash
+  nvm install 20.18.0
+  nvm use 20.18.0
+  `
+- Volta (cross-platform)
+  `ash
+  volta pin node@20.18.0 npm@10.9.3
+  `
+- Windows (nvs)
+  `powershell
+  nvs add 20.18.0
+  nvs use 20.18.0
+  `
+
+These match .nvmrc and package.json engines, and avoid CI discrepancies.
