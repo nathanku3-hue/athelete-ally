@@ -36,8 +36,8 @@ athlete-ally-original/
 ├── jest.config.js        # Jest测试配置
 ├── docker-compose.v3.yml # Docker Compose配置
 ├── Dockerfile            # Docker构建文件
-├── Dockerfile.production # 生产环境Docker文件
-├── preview.compose.yaml  # 预览环境配置
+├── Dockerfile # 生产环境Docker文件
+├── docker-compose/preview.yml  # 预览环境配置
 ├── env.example           # 环境变量示例
 └── env.development.example # 开发环境示例
 ```

@@ -104,7 +104,7 @@ function Build-Frontend {
     
     Write-Info "构建前端Docker镜像..."
     try {
-        docker build -t athlete-ally/frontend:latest -f Dockerfile.production .
+        docker build -t athlete-ally/frontend:latest -f Dockerfile .
         Write-Success "前端镜像构建成功"
     }
     catch {
@@ -142,7 +142,7 @@ function Start-Backend {
 function Start-Monitoring {
     Write-Info "启动监控服务..."
     try {
-        docker compose -f preview.compose.yaml up -d prometheus grafana postgres redis nats
+        docker compose -f docker-compose/preview.yml up -d prometheus grafana postgres redis nats
         Write-Success "监控服务启动成功"
     }
     catch {

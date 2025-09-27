@@ -66,7 +66,7 @@ check_ports() {
 build_frontend() {
     log_info "构建前端Docker镜像..."
     
-    if docker build -t athlete-ally/frontend:latest -f Dockerfile.production .; then
+    if docker build -t athlete-ally/frontend:latest -f Dockerfile .; then
         log_success "前端镜像构建成功"
     else
         log_error "前端镜像构建失败"
@@ -101,7 +101,7 @@ start_backend() {
 start_monitoring() {
     log_info "启动监控服务..."
     
-    if docker compose -f preview.compose.yaml up -d prometheus grafana postgres redis nats; then
+    if docker compose -f docker-compose/preview.yml up -d prometheus grafana postgres redis nats; then
         log_success "监控服务启动成功"
     else
         log_warning "监控服务可能已在运行，继续..."
