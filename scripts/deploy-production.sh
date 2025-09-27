@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# Phase 2 生产部署脚本
-# 用于快速部署到生产环境
+# Phase 2 ??????
+# ???????????
 
 set -e
 
-echo "🚀 开始Phase 2生产部署..."
+echo "?? ??Phase 2????..."
 
-# 颜色定义
+# ????
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 日志函数
+# ????
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -31,161 +31,161 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 检查Docker是否运行
+# ??Docker????
 check_docker() {
-    log_info "检查Docker状态..."
+    log_info "??Docker??..."
     if ! docker info > /dev/null 2>&1; then
-        log_error "Docker未运行，请启动Docker Desktop"
+        log_error "Docker???????Docker Desktop"
         exit 1
     fi
-    log_success "Docker运行正常"
+    log_success "Docker????"
 }
 
-# 检查端口是否可用
+# ????????
 check_ports() {
-    log_info "检查端口可用性..."
+    log_info "???????..."
     
-    # 检查前端端口3000
+    # ??????3000
     if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
-        log_warning "端口3000已被占用，正在停止现有服务..."
+        log_warning "??3000?????????????..."
         docker stop frontend 2>/dev/null || true
         docker rm frontend 2>/dev/null || true
     fi
     
-    # 检查后端端口4102
+    # ??????4102
     if lsof -Pi :4102 -sTCP:LISTEN -t >/dev/null 2>&1; then
-        log_warning "端口4102已被占用，正在停止现有服务..."
+        log_warning "??4102?????????????..."
         docker stop planning-engine 2>/dev/null || true
         docker rm planning-engine 2>/dev/null || true
     fi
     
-    log_success "端口检查完成"
+    log_success "??????"
 }
 
-# 构建前端镜像
+# ??????
 build_frontend() {
-    log_info "构建前端Docker镜像..."
+    log_info "????Docker??..."
     
     if docker build -t athlete-ally/frontend:latest -f Dockerfile.production .; then
-        log_success "前端镜像构建成功"
+        log_success "????????"
     else
-        log_error "前端镜像构建失败"
+        log_error "????????"
         exit 1
     fi
 }
 
-# 启动前端服务
+# ??????
 start_frontend() {
-    log_info "启动前端服务..."
+    log_info "??????..."
     
     if docker run -d -p 3000:3000 --name frontend --restart unless-stopped athlete-ally/frontend:latest; then
-        log_success "前端服务启动成功"
+        log_success "????????"
     else
-        log_error "前端服务启动失败"
+        log_error "????????"
         exit 1
     fi
 }
 
-# 启动后端服务
+# ??????
 start_backend() {
-    log_info "启动后端服务..."
+    log_info "??????..."
     
     if docker run -d -p 4102:4102 --name planning-engine --restart unless-stopped athlete-ally/planning-engine:simple; then
-        log_success "后端服务启动成功"
+        log_success "????????"
     else
-        log_warning "后端服务可能已在运行，继续..."
+        log_warning "?????????????..."
     fi
 }
 
-# 启动监控服务
+# ??????
 start_monitoring() {
-    log_info "启动监控服务..."
+    log_info "??????..."
     
-    if docker compose -f preview.compose.yaml up -d prometheus grafana postgres redis nats; then
-        log_success "监控服务启动成功"
+    if docker compose -f docker-compose/preview.yml up -d prometheus grafana postgres redis nats; then
+        log_success "????????"
     else
-        log_warning "监控服务可能已在运行，继续..."
+        log_warning "?????????????..."
     fi
 }
 
-# 健康检查
+# ????
 health_check() {
-    log_info "执行健康检查..."
+    log_info "??????..."
     
-    # 等待服务启动
+    # ??????
     sleep 10
     
-    # 检查前端服务
+    # ??????
     if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
-        log_success "前端服务健康检查通过"
+        log_success "??????????"
     else
-        log_error "前端服务健康检查失败"
+        log_error "??????????"
         return 1
     fi
     
-    # 检查后端服务
+    # ??????
     if curl -f http://localhost:4102/health > /dev/null 2>&1; then
-        log_success "后端服务健康检查通过"
+        log_success "??????????"
     else
-        log_error "后端服务健康检查失败"
+        log_error "??????????"
         return 1
     fi
     
-    # 检查监控服务
+    # ??????
     if curl -f http://localhost:9090/-/healthy > /dev/null 2>&1; then
-        log_success "监控服务健康检查通过"
+        log_success "??????????"
     else
-        log_warning "监控服务健康检查失败，但不影响核心功能"
+        log_warning "???????????????????"
     fi
 }
 
-# 显示服务状态
+# ??????
 show_status() {
-    log_info "显示服务状态..."
+    log_info "??????..."
     
     echo ""
-    echo "📊 服务状态:"
+    echo "?? ????:"
     echo "=================="
     docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
     
     echo ""
-    echo "🌐 访问地址:"
+    echo "?? ????:"
     echo "=================="
-    echo "前端应用: http://localhost:3000"
-    echo "后端API: http://localhost:4102"
-    echo "API文档: http://localhost:4102/docs"
-    echo "监控面板: http://localhost:9090"
+    echo "????: http://localhost:3000"
+    echo "??API: http://localhost:4102"
+    echo "API??: http://localhost:4102/docs"
+    echo "????: http://localhost:9090"
     echo "Grafana: http://localhost:3001"
     
     echo ""
-    echo "🔧 管理命令:"
+    echo "?? ????:"
     echo "=================="
-    echo "查看日志: docker logs frontend"
-    echo "停止服务: docker stop frontend planning-engine"
-    echo "重启服务: docker restart frontend planning-engine"
-    echo "查看状态: docker ps"
+    echo "????: docker logs frontend"
+    echo "????: docker stop frontend planning-engine"
+    echo "????: docker restart frontend planning-engine"
+    echo "????: docker ps"
 }
 
-# 运行测试
+# ????
 run_tests() {
-    log_info "运行部署验证测试..."
+    log_info "????????..."
     
     if npm run test:api; then
-        log_success "API测试通过"
+        log_success "API????"
     else
-        log_warning "API测试失败，但服务可能仍然可用"
+        log_warning "API??????????????"
     fi
     
     if npm run test:frontend; then
-        log_success "前端测试通过"
+        log_success "??????"
     else
-        log_warning "前端测试失败，但服务可能仍然可用"
+        log_warning "????????????????"
     fi
 }
 
-# 主函数
+# ???
 main() {
-    echo "🎉 Phase 2 生产部署开始"
+    echo "?? Phase 2 ??????"
     echo "========================"
     
     check_docker
@@ -196,23 +196,24 @@ main() {
     start_monitoring
     
     if health_check; then
-        log_success "所有服务健康检查通过"
+        log_success "??????????"
     else
-        log_warning "部分服务健康检查失败，请检查日志"
+        log_warning "????????????????"
     fi
     
     run_tests
     show_status
     
     echo ""
-    log_success "🎉 Phase 2 生产部署完成！"
+    log_success "?? Phase 2 ???????"
     echo ""
-    echo "系统已就绪，可以开始使用！"
-    echo "如有问题，请查看日志或联系开发团队。"
+    echo "?????????????"
+    echo "??????????????????"
 }
 
-# 执行主函数
+# ?????
 main "$@"
+
 
 
 

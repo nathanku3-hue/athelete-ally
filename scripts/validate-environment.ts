@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 
 /**
- * 环境验证脚本
- * 全面验证开发环境配置和依赖
+ * ??????
+ * ?????????????
  */
 
 import { config } from 'dotenv';
@@ -13,7 +13,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// 加载环境变量
+// ??????
 config();
 
 interface ValidationResult {
@@ -38,7 +38,7 @@ interface EnvironmentStatus {
 }
 
 /**
- * 检查Node.js版本
+ * ??Node.js??
  */
 async function checkNodeVersion(): Promise<{ status: 'pass' | 'fail' | 'warning'; message: string }> {
   try {
@@ -47,19 +47,19 @@ async function checkNodeVersion(): Promise<{ status: 'pass' | 'fail' | 'warning'
     const majorVersion = parseInt(version.split('.')[0]);
     
     if (majorVersion >= 18) {
-      return { status: 'pass', message: `Node.js ${version} (推荐版本)` };
+      return { status: 'pass', message: `Node.js ${version} (????)` };
     } else if (majorVersion >= 16) {
-      return { status: 'warning', message: `Node.js ${version} (最低支持版本，建议升级到18+)` };
+      return { status: 'warning', message: `Node.js ${version} (????????????18+)` };
     } else {
-      return { status: 'fail', message: `Node.js ${version} (版本过低，需要16+)` };
+      return { status: 'fail', message: `Node.js ${version} (???????16+)` };
     }
   } catch (error) {
-    return { status: 'fail', message: 'Node.js 未安装' };
+    return { status: 'fail', message: 'Node.js ???' };
   }
 }
 
 /**
- * 检查npm版本
+ * ??npm??
  */
 async function checkNpmVersion(): Promise<{ status: 'pass' | 'fail' | 'warning'; message: string }> {
   try {
@@ -67,12 +67,12 @@ async function checkNpmVersion(): Promise<{ status: 'pass' | 'fail' | 'warning';
     const version = stdout.trim();
     return { status: 'pass', message: `npm ${version}` };
   } catch (error) {
-    return { status: 'fail', message: 'npm 未安装' };
+    return { status: 'fail', message: 'npm ???' };
   }
 }
 
 /**
- * 检查Docker
+ * ??Docker
  */
 async function checkDocker(): Promise<{ status: 'pass' | 'fail' | 'warning'; message: string }> {
   try {
@@ -80,12 +80,12 @@ async function checkDocker(): Promise<{ status: 'pass' | 'fail' | 'warning'; mes
     const version = stdout.trim();
     return { status: 'pass', message: `Docker ${version}` };
   } catch (error) {
-    return { status: 'fail', message: 'Docker 未安装或未运行' };
+    return { status: 'fail', message: 'Docker ???????' };
   }
 }
 
 /**
- * 检查Docker Compose
+ * ??Docker Compose
  */
 async function checkDockerCompose(): Promise<{ status: 'pass' | 'fail' | 'warning'; message: string }> {
   try {
@@ -93,12 +93,12 @@ async function checkDockerCompose(): Promise<{ status: 'pass' | 'fail' | 'warnin
     const version = stdout.trim();
     return { status: 'pass', message: `Docker Compose ${version}` };
   } catch (error) {
-    return { status: 'fail', message: 'Docker Compose 未安装' };
+    return { status: 'fail', message: 'Docker Compose ???' };
   }
 }
 
 /**
- * 检查端口占用
+ * ??????
  */
 async function checkPorts(): Promise<{ status: 'pass' | 'fail' | 'warning'; message: string; details?: any }> {
   const ports = [3000, 4000, 5432, 6379, 4222];
@@ -111,23 +111,23 @@ async function checkPorts(): Promise<{ status: 'pass' | 'fail' | 'warning'; mess
         occupiedPorts.push(port);
       }
     } catch (error) {
-      // 端口未被占用
+      // ??????
     }
   }
   
   if (occupiedPorts.length === 0) {
-    return { status: 'pass', message: '所有必需端口都可用' };
+    return { status: 'pass', message: '?????????' };
   } else {
     return { 
       status: 'warning', 
-      message: `以下端口被占用: ${occupiedPorts.join(', ')}`,
+      message: `???????: ${occupiedPorts.join(', ')}`,
       details: { occupiedPorts }
     };
   }
 }
 
 /**
- * 检查环境变量
+ * ??????
  */
 function checkEnvironmentVariables(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   const requiredVars = [
@@ -150,7 +150,7 @@ function checkEnvironmentVariables(): { status: 'pass' | 'fail' | 'warning'; mes
   if (missingVars.length > 0) {
     return { 
       status: 'fail', 
-      message: `缺少必需的环境变量: ${missingVars.join(', ')}`,
+      message: `?????????: ${missingVars.join(', ')}`,
       details: { missingVars }
     };
   }
@@ -158,16 +158,16 @@ function checkEnvironmentVariables(): { status: 'pass' | 'fail' | 'warning'; mes
   if (placeholderVars.length > 0) {
     return { 
       status: 'warning', 
-      message: `环境变量包含占位符: ${placeholderVars.join(', ')}`,
+      message: `?????????: ${placeholderVars.join(', ')}`,
       details: { placeholderVars }
     };
   }
   
-  return { status: 'pass', message: '环境变量配置正确' };
+  return { status: 'pass', message: '????????' };
 }
 
 /**
- * 检查文件结构
+ * ??????
  */
 function checkFileStructure(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   const requiredFiles = [
@@ -175,7 +175,7 @@ function checkFileStructure(): { status: 'pass' | 'fail' | 'warning'; message: s
     'next.config.mjs',
     'tsconfig.json',
     'tailwind.config.mjs',
-    'preview.compose.yaml',
+    'docker-compose/preview.yml',
     'env.example',
     'src/app/layout.tsx',
     'src/app/page.tsx',
@@ -193,24 +193,24 @@ function checkFileStructure(): { status: 'pass' | 'fail' | 'warning'; message: s
   if (missingFiles.length > 0) {
     return { 
       status: 'fail', 
-      message: `缺少必需的文件: ${missingFiles.join(', ')}`,
+      message: `???????: ${missingFiles.join(', ')}`,
       details: { missingFiles }
     };
   }
   
-  return { status: 'pass', message: '文件结构完整' };
+  return { status: 'pass', message: '??????' };
 }
 
 /**
- * 检查依赖安装
+ * ??????
  */
 async function checkDependencies(): Promise<{ status: 'pass' | 'fail' | 'warning'; message: string; details?: any }> {
   try {
     if (!existsSync('node_modules')) {
-      return { status: 'fail', message: '依赖未安装，请运行 npm install' };
+      return { status: 'fail', message: '????????? npm install' };
     }
     
-    // 检查关键依赖
+    // ??????
     const keyDependencies = [
       'next',
       'react',
@@ -232,19 +232,19 @@ async function checkDependencies(): Promise<{ status: 'pass' | 'fail' | 'warning
     if (missingDeps.length > 0) {
       return { 
         status: 'warning', 
-        message: `缺少关键依赖: ${missingDeps.join(', ')}`,
+        message: `??????: ${missingDeps.join(', ')}`,
         details: { missingDeps }
       };
     }
     
-    return { status: 'pass', message: '依赖安装完整' };
+    return { status: 'pass', message: '??????' };
   } catch (error) {
-    return { status: 'fail', message: '无法检查依赖状态' };
+    return { status: 'fail', message: '????????' };
   }
 }
 
 /**
- * 检查TypeScript配置
+ * ??TypeScript??
  */
 function checkTypeScriptConfig(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   try {
@@ -253,33 +253,33 @@ function checkTypeScriptConfig(): { status: 'pass' | 'fail' | 'warning'; message
     const issues: string[] = [];
     
     if (!tsconfig.compilerOptions) {
-      issues.push('缺少 compilerOptions');
+      issues.push('?? compilerOptions');
     }
     
     if (!tsconfig.compilerOptions.strict) {
-      issues.push('建议启用 strict 模式');
+      issues.push('???? strict ??');
     }
     
     if (!tsconfig.compilerOptions.paths) {
-      issues.push('缺少路径映射配置');
+      issues.push('????????');
     }
     
     if (issues.length > 0) {
       return { 
         status: 'warning', 
-        message: `TypeScript配置问题: ${issues.join(', ')}`,
+        message: `TypeScript????: ${issues.join(', ')}`,
         details: { issues }
       };
     }
     
-    return { status: 'pass', message: 'TypeScript配置正确' };
+    return { status: 'pass', message: 'TypeScript????' };
   } catch (error) {
-    return { status: 'fail', message: '无法读取TypeScript配置' };
+    return { status: 'fail', message: '????TypeScript??' };
   }
 }
 
 /**
- * 检查Next.js配置
+ * ??Next.js??
  */
 function checkNextConfig(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   try {
@@ -288,70 +288,70 @@ function checkNextConfig(): { status: 'pass' | 'fail' | 'warning'; message: stri
     const issues: string[] = [];
     
     if (!nextConfig.experimental?.serverComponentsExternalPackages?.includes('@prisma/client')) {
-      issues.push('缺少 Prisma 外部包配置');
+      issues.push('?? Prisma ?????');
     }
     
     if (!nextConfig.env?.GATEWAY_BFF_URL) {
-      issues.push('缺少 Gateway BFF URL 环境变量');
+      issues.push('?? Gateway BFF URL ????');
     }
     
     if (!nextConfig.rewrites) {
-      issues.push('缺少 API 代理配置');
+      issues.push('?? API ????');
     }
     
     if (issues.length > 0) {
       return { 
         status: 'warning', 
-        message: `Next.js配置问题: ${issues.join(', ')}`,
+        message: `Next.js????: ${issues.join(', ')}`,
         details: { issues }
       };
     }
     
-    return { status: 'pass', message: 'Next.js配置正确' };
+    return { status: 'pass', message: 'Next.js????' };
   } catch (error) {
-    return { status: 'fail', message: '无法读取Next.js配置' };
+    return { status: 'fail', message: '????Next.js??' };
   }
 }
 
 /**
- * 执行所有验证检查
+ * ????????
  */
 async function validateEnvironment(): Promise<EnvironmentStatus> {
-  console.log('🔍 开始环境验证...\n');
+  console.log('?? ??????...\n');
   
   const results: ValidationResult[] = [];
   
-  // 1. 系统环境检查
-  console.log('1. 检查系统环境...');
+  // 1. ??????
+  console.log('1. ??????...');
   const systemChecks = [
-    { name: 'Node.js版本', check: await checkNodeVersion() },
-    { name: 'npm版本', check: await checkNpmVersion() },
+    { name: 'Node.js??', check: await checkNodeVersion() },
+    { name: 'npm??', check: await checkNpmVersion() },
     { name: 'Docker', check: await checkDocker() },
     { name: 'Docker Compose', check: await checkDockerCompose() },
-    { name: '端口占用', check: await checkPorts() },
+    { name: '????', check: await checkPorts() },
   ];
   
   results.push({
-    category: '系统环境',
+    category: '????',
     checks: systemChecks.map(c => ({ name: c.name, ...c.check }))
   });
   
-  // 2. 项目配置检查
-  console.log('2. 检查项目配置...');
+  // 2. ??????
+  console.log('2. ??????...');
   const configChecks = [
-    { name: '环境变量', check: checkEnvironmentVariables() },
-    { name: '文件结构', check: checkFileStructure() },
-    { name: '依赖安装', check: await checkDependencies() },
-    { name: 'TypeScript配置', check: checkTypeScriptConfig() },
-    { name: 'Next.js配置', check: checkNextConfig() },
+    { name: '????', check: checkEnvironmentVariables() },
+    { name: '????', check: checkFileStructure() },
+    { name: '????', check: await checkDependencies() },
+    { name: 'TypeScript??', check: checkTypeScriptConfig() },
+    { name: 'Next.js??', check: checkNextConfig() },
   ];
   
   results.push({
-    category: '项目配置',
+    category: '????',
     checks: configChecks.map(c => ({ name: c.name, ...c.check }))
   });
   
-  // 计算统计信息
+  // ??????
   const allChecks = results.flatMap(r => r.checks);
   const summary = {
     total: allChecks.length,
@@ -360,7 +360,7 @@ async function validateEnvironment(): Promise<EnvironmentStatus> {
     warnings: allChecks.filter(c => c.status === 'warning').length,
   };
   
-  // 确定整体状态
+  // ??????
   let overall: 'healthy' | 'unhealthy' | 'warning';
   if (summary.failed > 0) {
     overall = 'unhealthy';
@@ -378,63 +378,63 @@ async function validateEnvironment(): Promise<EnvironmentStatus> {
 }
 
 /**
- * 打印验证结果
+ * ??????
  */
 function printResults(status: EnvironmentStatus) {
-  console.log('\n📊 验证结果汇总\n');
+  console.log('\n?? ??????\n');
   
-  // 打印整体状态
+  // ??????
   const statusEmoji = {
-    healthy: '✅',
-    warning: '⚠️',
-    unhealthy: '❌',
+    healthy: '?',
+    warning: '??',
+    unhealthy: '?',
   };
   
-  console.log(`${statusEmoji[status.overall]} 整体状态: ${status.overall.toUpperCase()}`);
-  console.log(`📈 统计: ${status.summary.passed} 通过, ${status.summary.warnings} 警告, ${status.summary.failed} 失败\n`);
+  console.log(`${statusEmoji[status.overall]} ????: ${status.overall.toUpperCase()}`);
+  console.log(`?? ??: ${status.summary.passed} ??, ${status.summary.warnings} ??, ${status.summary.failed} ??\n`);
   
-  // 打印详细结果
+  // ??????
   for (const result of status.results) {
-    console.log(`📁 ${result.category}`);
+    console.log(`?? ${result.category}`);
     
     for (const check of result.checks) {
       const emoji = {
-        pass: '✅',
-        warning: '⚠️',
-        fail: '❌',
+        pass: '?',
+        warning: '??',
+        fail: '?',
       };
       
       console.log(`  ${emoji[check.status]} ${check.name}: ${check.message}`);
       
       if (check.details) {
-        console.log(`    详情: ${JSON.stringify(check.details, null, 2)}`);
+        console.log(`    ??: ${JSON.stringify(check.details, null, 2)}`);
       }
     }
     console.log('');
   }
   
-  // 打印建议
+  // ????
   if (status.overall !== 'healthy') {
-    console.log('💡 建议:');
+    console.log('?? ??:');
     
     if (status.summary.failed > 0) {
-      console.log('  - 请修复所有失败项后再继续开发');
+      console.log('  - ??????????????');
     }
     
     if (status.summary.warnings > 0) {
-      console.log('  - 建议修复警告项以获得最佳开发体验');
+      console.log('  - ????????????????');
     }
     
-    console.log('  - 运行 npm run validate-env 重新验证');
-    console.log('  - 运行 npm run preview:up 启动开发环境');
+    console.log('  - ?? npm run validate-env ????');
+    console.log('  - ?? npm run preview:up ??????');
   } else {
-    console.log('🎉 环境验证通过！可以开始开发了');
-    console.log('💡 运行 npm run preview:up 启动开发环境');
+    console.log('?? ??????????????');
+    console.log('?? ?? npm run preview:up ??????');
   }
 }
 
 /**
- * 主函数
+ * ???
  */
 async function main() {
   try {
@@ -447,7 +447,7 @@ async function main() {
       process.exit(0);
     }
   } catch (error) {
-    console.error('❌ 环境验证失败:', error);
+    console.error('? ??????:', error);
     process.exit(1);
   }
 }
@@ -457,3 +457,4 @@ if (require.main === module) {
 }
 
 export { validateEnvironment };
+
