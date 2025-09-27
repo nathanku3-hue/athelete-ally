@@ -220,6 +220,15 @@ jobs:
           done
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
+      - name: Build shared packages
+        run: |
+          set -euo pipefail
+          echo "?? Building shared packages before service tests..."
+          npm run build -w packages/event-bus
+          npm run build -w packages/protocol-types
+          npm run build -w packages/shared-types
+          echo "? Shared packages built successfully"
+
       - name: CI Debug - Verify Workflow Usage
         run: |
           set -euo pipefail

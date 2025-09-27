@@ -47,6 +47,10 @@ class DatabaseOptimizer {
   async batchUpdateStatus(updates: any[]): Promise<void> {
     // ??????
   }
+  
+  async updatePlanStatusBatch(updates: any[]): Promise<void> {
+    // ??????
+  }
 }
 
 describe('Planning Engine Performance Tests', () => {
@@ -175,6 +179,9 @@ describe('Planning Engine Performance Tests', () => {
       const tasks = Array.from({ length: 5 }, (_, i) => ({
         id: `task-${i}`,
         data: { userId: `user-${i}` },
+        retries: 0,
+        maxRetries: 3,
+        createdAt: new Date(),
       }));
 
       const startTime = Date.now();
@@ -204,12 +211,12 @@ describe('Planning Engine Performance Tests', () => {
       // Issue: Prisma updateMany mock not working correctly in ESM environment
       const requests = Array.from({ length: 10 }, (_, i) => ({
         userId: `user-${i}`,
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 3,
         equipment: ['bodyweight'],
-        purpose: 'general_fitness',
+        purpose: 'general_fitness' as const,
       }));
 
       const jobIds = Array.from({ length: 10 }, (_, i) => `job-${i}`);
