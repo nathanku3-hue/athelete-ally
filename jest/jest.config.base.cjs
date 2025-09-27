@@ -85,6 +85,9 @@ module.exports = {
   
   // Enable ESM support for Jest (moved to transform config)
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
+  
+  // Handle ESM modules in packages
+  extensionsToTreatAsEsm: ['.ts'],
 
   testTimeout: 15000,
   passWithNoTests: true,
