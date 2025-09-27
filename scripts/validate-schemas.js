@@ -12,46 +12,26 @@ const root = process.cwd();
 const examplesDir = path.join(root, 'docs', 'phase-3', 'schemas', 'normalized', 'examples');
 const schemasDir = path.join(root, 'docs', 'phase-3', 'schemas', 'normalized');
 
-function readJSON(p) {
-  return JSON.parse(fs.readFileSync(p, 'utf8'));
-}
+function readJSON(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 
 function loadSchemaForExample(exampleFile) {
   const base = path.basename(exampleFile); // e.g., heart_rate.v1.example.json
   const match = base.match(/^(.*)\.v(\d+)\.example\.json$/);
-  if (!match) {
-    throw new Error(`Unexpected example filename: ${base}`);
-  }
+  if (!match) throw new Error(`Unexpected example filename: ${base}`);
   const domain = match[1];
   const version = match[2];
   const schemaPath = path.join(schemasDir, `${domain}.v${version}.json`);
-  if (!fs.existsSync(schemaPath)) {
-    throw new Error(`Schema not found for example ${base}: ${schemaPath}`);
-  }
+  if (!fs.existsSync(schemaPath)) throw new Error(`Schema not found for example ${base}: ${schemaPath}`);
   return schemaPath;
 }
 
 function main() {
-  const ajv = new Ajv({
-    strict: true,
-    allErrors: true,
-    allowUnionTypes: true
-  });
+  const ajv = new Ajv({ strict: true, allErrors: true, allowUnionTypes: true });
   addFormats(ajv);
 
-  if (!fs.existsSync(examplesDir)) {
-    console.error(`Examples directory not found: ${examplesDir}`);
-    process.exit(1);
-  }
-
-  const exampleFiles = fs.readdirSync(examplesDir)
-    .filter(f => f.endsWith('.json'))
-    .map(f => path.join(examplesDir, f));
-
-  if (exampleFiles.length === 0) {
-    console.warn('No example files found to validate.');
-    return;
-  }
+  if (!fs.existsSync(examplesDir)) { console.error(`Examples directory not found: ${examplesDir}`); process.exit(1); }
+  const exampleFiles = fs.readdirSync(examplesDir).filter(f => f.endsWith('.json')).map(f => path.join(examplesDir, f));
+  if (exampleFiles.length === 0) { console.warn('No example files found to validate.'); return; }
 
   let failures = 0;
   for (const ex of exampleFiles) {
@@ -62,13 +42,11 @@ function main() {
       const validate = ajv.compile(schema);
       const ok = validate(data);
       if (ok) {
-        console.log(`VALID: ${path.basename(ex)} ?`);
+        console.log(`VALID: ${path.basename(ex)} ✅`);
       } else {
         failures++;
-        console.error(`INVALID: ${path.basename(ex)} ?`);
-        for (const err of validate.errors || []) {
-          console.error(`  ? ${err.instancePath || '/'} ${err.message}`);
-        }
+        console.error(`INVALID: ${path.basename(ex)} ❌`);
+        for (const err of validate.errors || []) console.error(`  ❌ ${err.instancePath || '/'} ${err.message}`);
       }
     } catch (e) {
       failures++;
@@ -76,14 +54,8 @@ function main() {
     }
   }
 
-  if (failures > 0) {
-    console.error(`Schema validation failed for ${failures} example(s).`);
-    process.exit(1);
-  } else {
-    console.log('All examples conform to their schemas.');
-  }
+  if (failures > 0) { console.error(`Schema validation failed for ${failures} example(s).`); process.exit(1); }
+  else { console.log('All examples conform to their schemas.'); }
 }
 
-if (require.main === module) {
-  main();
-}
+if (require.main === module) main();

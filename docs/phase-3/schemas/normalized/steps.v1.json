@@ -1,0 +1,58 @@
+{
+  "\": "https://json-schema.org/draft/2020-12/schema",
+  "\": "https://athlete-ally.dev/schemas/normalized/steps.v1.json",
+  "title": "Normalized Steps v1",
+  "type": "object",
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "const": "v1" },
+        "domain": { "type": "string" },
+        "user_id": { "type": "string", "minLength": 1 },
+        "received_at": { "type": "string", "format": "date-time" },
+        "source": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "event_id": { "type": "string" },
+            "delivery_id": { "type": "string" }
+          },
+          "required": ["provider"],
+          "additionalProperties": true
+        }
+      },
+      "required": ["version", "domain", "user_id", "received_at", "source"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "version": { "type": "string", "const": "v1" },
+    "domain": { "type": "string", "const": "steps" },
+    "user_id": { "type": "string" },
+    "received_at": { "type": "string", "format": "date-time" },
+    "source": { "\": "#//metadata/properties/source" },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "steps": { "type": "integer", "minimum": 0 },
+          "window_sec": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["timestamp", "steps"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["version", "domain", "user_id", "received_at", "source", "samples"],
+  "additionalProperties": false
+}

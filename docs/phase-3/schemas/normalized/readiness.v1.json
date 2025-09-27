@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://athlete-ally.dev/schemas/normalized/readiness.v1.json",
+  "title": "Normalized Readiness v1",
+  "type": "object",
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "const": "v1" },
+        "domain": { "type": "string" },
+        "user_id": { "type": "string", "minLength": 1 },
+        "received_at": { "type": "string", "format": "date-time" },
+        "source": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "event_id": { "type": "string" },
+            "delivery_id": { "type": "string" }
+          },
+          "required": ["provider"],
+          "additionalProperties": true
+        }
+      },
+      "required": ["version", "domain", "user_id", "received_at", "source"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "version": { "type": "string", "const": "v1" },
+    "domain": { "type": "string", "const": "readiness" },
+    "user_id": { "type": "string" },
+    "received_at": { "type": "string", "format": "date-time" },
+    "source": { "$ref": "#/$defs/metadata/properties/source" },
+    "assessment_date": { "type": "string", "format": "date" },
+    "overall_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "components": {
+      "type": "object",
+      "properties": {
+        "hrv_score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "sleep_score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "recovery_score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "training_load_score": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "required": ["hrv_score", "sleep_score", "recovery_score"],
+      "additionalProperties": false
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["training", "recovery", "nutrition", "sleep"] },
+          "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+          "message": { "type": "string", "minLength": 1 },
+          "action": { "type": "string" }
+        },
+        "required": ["type", "priority", "message"],
+        "additionalProperties": false
+      }
+    },
+    "data_freshness": {
+      "type": "object",
+      "properties": {
+        "hrv_age_minutes": { "type": "integer", "minimum": 0 },
+        "sleep_age_minutes": { "type": "integer", "minimum": 0 },
+        "training_age_minutes": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["version", "domain", "user_id", "received_at", "source", "assessment_date", "overall_score", "components"],
+  "additionalProperties": false
+}
