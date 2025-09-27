@@ -1,0 +1,33 @@
+{
+  "@prisma/client": {
+    "wanted": "5.22.0",
+    "latest": "6.16.2",
+    "dependent": "analytics"
+  },
+  "@swc/core": {
+    "current": "1.13.5",
+    "wanted": "1.13.19",
+    "latest": "1.13.19",
+    "dependent": "analytics",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\analytics\\node_modules\\@swc\\core"
+  },
+  "@typescript-eslint/eslint-plugin": {
+    "current": "6.21.0",
+    "wanted": "6.21.0",
+    "latest": "8.44.1",
+    "dependent": "analytics",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\analytics\\node_modules\\@typescript-eslint\\eslint-plugin"
+  },
+  "@typescript-eslint/parser": {
+    "current": "6.21.0",
+    "wanted": "6.21.0",
+    "latest": "8.44.1",
+    "dependent": "analytics",
+    "location": "E:\\vibe\\athlete-ally-original\\services\\analytics\\node_modules\\@typescript-eslint\\parser"
+  },
+  "prisma": {
+    "wanted": "5.22.0",
+    "latest": "6.16.2",
+    "dependent": "analytics"
+  }
+}

@@ -104,7 +104,7 @@ function Build-Frontend {
     
     Write-Info "????Docker??..."
     try {
-        docker build -t athlete-ally/frontend:latest -f Dockerfile.production .
+        docker build -t athlete-ally/frontend:latest -f Dockerfile .
         Write-Success "????????"
     }
     catch {

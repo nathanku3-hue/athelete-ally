@@ -1,0 +1,16 @@
+{
+  "@typescript-eslint/eslint-plugin": {
+    "current": "6.21.0",
+    "wanted": "6.21.0",
+    "latest": "8.44.1",
+    "dependent": "contracts",
+    "location": "E:\\vibe\\athlete-ally-original\\packages\\contracts\\node_modules\\@typescript-eslint\\eslint-plugin"
+  },
+  "@typescript-eslint/parser": {
+    "current": "6.21.0",
+    "wanted": "6.21.0",
+    "latest": "8.44.1",
+    "dependent": "contracts",
+    "location": "E:\\vibe\\athlete-ally-original\\packages\\contracts\\node_modules\\@typescript-eslint\\parser"
+  }
+}

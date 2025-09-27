@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-# 授予必要的權限以創建 PR 評論
+# ?????????? PR ??
 permissions:
   contents: read
   packages: write
@@ -22,7 +22,7 @@ env:
   NODE_VERSION: '20.18.0'
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-  # CI环境变量
+  # CI????
   NODE_ENV: test
   PROMETHEUS_PORT: 9090
   GRAFANA_PORT: 3001
@@ -31,17 +31,23 @@ env:
   OPENAI_API_KEY: test_openai_key_for_ci
   JWT_SECRET: test_jwt_secret_for_ci
   ENCRYPTION_KEY: test_encryption_key_for_ci
-  # 服务 URLs
+  # ?? URLs
   FRONTEND_URL: http://localhost:3000
   GATEWAY_BFF_URL: http://localhost:4000
   API_BASE_URL: http://localhost:4000
-
+  NPM_CONFIG_FETCH_RETRIES: "5"
+  NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: "20000"
+  NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: "120000"
+  NPM_CONFIG_NETWORK_TIMEOUT: "600000"
+  NPM_CONFIG_REGISTRY: "https://registry.npmjs.org/"
+  NPM_CONFIG_AUDIT: "false"
+  NPM_CONFIG_FUND: "false"
 jobs:
   # Sanity check and lock discovery
   sanity:
     uses: ./.github/workflows/_sanity-reuse.yml
 
-  # 代码质量检查
+  # ??????
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
@@ -74,21 +80,21 @@ jobs:
       - name: Verify Prisma clients (per service)
         run: |
           set -euo pipefail
-          echo "🔎 Verifying per-service Prisma clients..."
+          echo "?? Verifying per-service Prisma clients..."
           missing=0
           for svc in services/*; do
             if [ -f "$svc/prisma/schema.prisma" ]; then
-              echo "• $svc: expect $svc/prisma/generated/client"
+              echo "? $svc: expect $svc/prisma/generated/client"
               if [ -d "$svc/prisma/generated/client" ]; then
-                echo "  ✅ found"
+                echo "  ? found"
               else
-                echo "  ❌ missing $svc/prisma/generated/client"
+                echo "  ? missing $svc/prisma/generated/client"
                 ls -la "$svc/prisma" || true
                 missing=1
               fi
             fi
           done
-          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
+          [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: Verify tsx availability
         run: npx tsx --version
@@ -164,7 +170,7 @@ jobs:
           if [ -n "$bad" ]; then echo "Sensitive files detected:" && echo "$bad" && exit 1; fi
           echo "No sensitive env files"
 
-  # 单元测试
+  # ????
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -198,29 +204,29 @@ jobs:
       - name: Verify Prisma clients (per service)
         run: |
           set -euo pipefail
-          echo "🔎 Verifying per-service Prisma clients..."
+          echo "?? Verifying per-service Prisma clients..."
           missing=0
           for svc in services/*; do
             if [ -f "$svc/prisma/schema.prisma" ]; then
-              echo "• $svc: expect $svc/prisma/generated/client"
+              echo "? $svc: expect $svc/prisma/generated/client"
               if [ -d "$svc/prisma/generated/client" ]; then
-                echo "  ✅ found"
+                echo "  ? found"
               else
-                echo "  ❌ missing $svc/prisma/generated/client"
+                echo "  ? missing $svc/prisma/generated/client"
                 ls -la "$svc/prisma" || true
                 missing=1
               fi
             fi
           done
-          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
+          [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: CI Debug - Verify Workflow Usage
         run: |
           set -euo pipefail
-          echo "🔍 CI Debug Information:"
+          echo "?? CI Debug Information:"
           echo "HEAD: $(git rev-parse HEAD)"
           echo "Workflow file contains Generate Prisma clients step:"
-          grep -n "Generate Prisma clients" .github/workflows/ci.yml || echo "❌ Step not found"
+          grep -n "Generate Prisma clients" .github/workflows/ci.yml || echo "? Step not found"
           echo "Current working directory: $(pwd)"
           echo "Available services with Prisma schemas:"
           find services -name "schema.prisma" -type f | head -10
@@ -228,17 +234,17 @@ jobs:
       - name: Validate configuration
         run: |
           set -euo pipefail
-          echo "🔍 验证环境配置..."
-          # 检查必要的环境变量是否存在
+          echo "?? ??????..."
+          # ?????????????
           if [ -z "${NODE_ENV:-}" ]; then
             export NODE_ENV=test
           fi
-          echo "✅ 配置验证完成"
+          echo "? ??????"
 
       - name: Start Frontend Service
         run: |
           set -euo pipefail
-          echo "🚀 Starting frontend service for tests..."
+          echo "?? Starting frontend service for tests..."
           cd apps/frontend
           npm run build
           npm start &
@@ -246,10 +252,10 @@ jobs:
           echo "FRONTEND_PID=${FRONTEND_PID}" >> "${GITHUB_OUTPUT}"
           
           # Wait for frontend to be ready
-          echo "⏳ Waiting for frontend service to be ready..."
+          echo "? Waiting for frontend service to be ready..."
           for i in {1..30}; do
             if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
-              echo "✅ Frontend service is ready!"
+              echo "? Frontend service is ready!"
               break
             fi
             echo "Waiting for frontend... (attempt ${i}/30)"
@@ -259,7 +265,7 @@ jobs:
       - name: CI Environment Diagnostics
         run: |
           set -euo pipefail
-          echo "🔍 CI Environment Diagnostics:"
+          echo "?? CI Environment Diagnostics:"
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
           echo "Jest version: $(npx jest --version)"
@@ -267,7 +273,7 @@ jobs:
           echo "REDIS_URL: ${REDIS_URL:-unset}"
           echo "NODE_ENV: ${NODE_ENV:-unset}"
           
-          echo "📦 Cache Diagnostics:"
+          echo "?? Cache Diagnostics:"
           echo "Cache dependency path: ${CACHE_DEPENDENCY_PATH:-unset}"
           if [ -n "${CACHE_DEPENDENCY_PATH:-}" ]; then
             echo "Cache files count: $(echo "${CACHE_DEPENDENCY_PATH}" | wc -l)"
@@ -278,9 +284,9 @@ jobs:
       - name: Planning Engine Jest Diagnostics
         run: |
           set -euo pipefail
-          echo "🔍 Planning Engine Jest Configuration:"
+          echo "?? Planning Engine Jest Configuration:"
           npx jest --config services/planning-engine/jest.config.cjs --showConfig | head -n 50
-          echo "📋 Planning Engine Test List:"
+          echo "?? Planning Engine Test List:"
           npx jest --config services/planning-engine/jest.config.cjs --listTests --runInBand
 
       - name: Ensure test-results dir (pre-tests)
@@ -290,7 +296,7 @@ jobs:
           JEST_JUNIT_OUTPUT: test-results/junit-services.xml
         run: |
           set -euo pipefail
-          echo "🧪 Running services tests with known good configuration..."
+          echo "?? Running services tests with known good configuration..."
           npm run test:services -- --reporters=default --reporters=jest-junit
 
       - name: Run Frontend Tests (Known Good Path)
@@ -298,14 +304,14 @@ jobs:
           JEST_JUNIT_OUTPUT: test-results/junit-frontend.xml
         run: |
           set -euo pipefail
-          echo "🧪 Running frontend tests with known good configuration..."
+          echo "?? Running frontend tests with known good configuration..."
           npm run test:frontend -- --reporters=default --reporters=jest-junit
 
       - name: Stop Frontend Service
         if: always()
         run: |
           set -euo pipefail
-          echo "🛑 Stopping frontend service..."
+          echo "?? Stopping frontend service..."
           if [ -n "${FRONTEND_PID:-}" ]; then
             kill "${FRONTEND_PID}" 2>/dev/null || true
           fi
@@ -343,7 +349,7 @@ jobs:
             coverage/**
             junit.xml
 
-  # 合同校验
+  # ????
   contracts:
     name: Contract Validation
     runs-on: ubuntu-latest
@@ -371,19 +377,19 @@ jobs:
 
       - name: Validate OpenAPI contracts
         run: |
-          # 检查 OpenAPI 语法
+          # ?? OpenAPI ??
           if [ -f packages/contracts/openapi.yaml ]; then
             echo "Validating OpenAPI contract..."
-            # 使用Node.js YAML解析器检查语法
+            # ??Node.js YAML???????
             node -e "
               const fs = require('fs');
               const yaml = require('js-yaml');
               try {
                 const content = fs.readFileSync('packages/contracts/openapi.yaml', 'utf8');
                 yaml.load(content);
-                console.log('✅ OpenAPI YAML syntax is valid');
+                console.log('? OpenAPI YAML syntax is valid');
               } catch (e) {
-                console.error('❌ OpenAPI YAML syntax error:', e.message);
+                console.error('? OpenAPI YAML syntax error:', e.message);
                 process.exit(1);
               }
             " || echo "OpenAPI validation failed"
@@ -391,12 +397,12 @@ jobs:
             echo "OpenAPI file not found, skipping validation"
           fi
           
-          # 检查 Proto 文件语法
+          # ?? Proto ????
           if command -v protoc &> /dev/null; then
             if [ -d packages/contracts/proto ]; then
               echo "Validating Proto files..."
               protoc --proto_path=packages/contracts/proto --js_out=import_style=commonjs,binary:. packages/contracts/proto/*.proto
-              echo "✅ Proto files validation completed"
+              echo "? Proto files validation completed"
             else
               echo "Proto directory not found, skipping validation"
             fi
@@ -404,7 +410,7 @@ jobs:
             echo "protoc not available, skipping proto validation"
           fi
 
-  # 构建检查 - 强制性阻塞检查
+  # ???? - ???????
   build:
     name: Build Check (Blocking)
     runs-on: ubuntu-latest
@@ -440,35 +446,35 @@ jobs:
       - name: Verify Prisma clients (per service)
         run: |
           set -euo pipefail
-          echo "🔎 Verifying per-service Prisma clients..."
+          echo "?? Verifying per-service Prisma clients..."
           missing=0
           for svc in services/*; do
             if [ -f "$svc/prisma/schema.prisma" ]; then
-              echo "• $svc expects $svc/prisma/generated/client/index.js"
+              echo "? $svc expects $svc/prisma/generated/client/index.js"
               if [ -f "$svc/prisma/generated/client/index.js" ]; then
-                echo "  ✅ found"
+                echo "  ? found"
               else
-                echo "  ❌ missing $svc/prisma/generated/client"
+                echo "  ? missing $svc/prisma/generated/client"
                 ls -la "$svc/prisma" || true
                 missing=1
               fi
             fi
           done
-          [ "$missing" -eq 0 ] || { echo "❌ Prisma client missing"; exit 1; }
+          [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: Validate production configuration
         run: |
-          echo "🔍 验证生产环境配置..."
+          echo "?? ????????..."
           export NODE_ENV=production
-          echo "✅ 生产环境配置验证通过"
+          echo "? ??????????"
 
       - name: Build all packages (Mandatory)
         run: |
-          echo "🚀 执行强制性构建检查..."
+          echo "?? ?????????..."
           npx turbo run build
-          echo "✅ 所有包构建成功！"
+          echo "? ????????"
 
-  # 测试检查 - 非阻塞检查 (使用orchestrator)
+  # ???? - ????? (??orchestrator)
   test-mandatory:
     name: Test Check (Non-Blocking)
     runs-on: ubuntu-latest
@@ -512,12 +518,12 @@ jobs:
           JEST_JUNIT_OUTPUT: test-results/junit-mandatory.xml
         run: |
           set -euo pipefail
-          echo "🧪 Running tests via Jest orchestrator (non-blocking)..."
+          echo "?? Running tests via Jest orchestrator (non-blocking)..."
           echo "Node version: $(node -v)"
           echo "Jest version: $(npx jest --version)"
           # Use orchestrator config with controlled concurrency
           JEST_MAX_WORKERS=1 npx jest --config jest/jest.projects.cjs --runInBand --passWithNoTests --reporters=default --reporters=jest-junit
-          echo "✅ Orchestrator tests completed!"
+          echo "? Orchestrator tests completed!"
 
       - name: Ensure test results directory exists
         if: always()
@@ -550,7 +556,7 @@ jobs:
             coverage/**
             junit.xml
 
-  # 预览环境部署 (仅PR)
+  # ?????? (?PR)
   preview:
     name: Preview Environment
     runs-on: ubuntu-latest
@@ -576,9 +582,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            # Tag for PRs: ghcr.io/…:pr-<number>
+            # Tag for PRs: ghcr.io/?:pr-<number>
             type=ref,event=pr
-            # Short SHA tag with a safe prefix: ghcr.io/…:sha-<7>
+            # Short SHA tag with a safe prefix: ghcr.io/?:sha-<7>
             type=sha,format=short,prefix=sha-
             # Latest tag only on main
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
@@ -613,7 +619,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🚀 **Preview Environment Ready!**\n\n' +
+              body: '?? **Preview Environment Ready!**\n\n' +
                     'Your changes have been built and are ready for testing.\n\n' +
                     '**Docker Images:**\n' +
                     '- Main Image: `ghcr.io/${{ github.repository }}:pr-${{ github.event.number }}`\n' +
@@ -624,7 +630,7 @@ jobs:
                     '3. Manual testing by team members'
             })
 
-  # 安全扫描
+  # ????
   security:
     name: Security Scan
     runs-on: ubuntu-latest
@@ -658,7 +664,7 @@ jobs:
       - name: Run dependency check
         run: npx audit-ci --config audit-ci.json || true
 
-      # Snyk安全扫描 - 可选的安全检查
+      # Snyk???? - ???????
       - name: Install Snyk CLI
         if: ${{ env.SNYK_TOKEN != '' }}
         run: npm i -g snyk@latest
@@ -673,10 +679,10 @@ jobs:
 
       - name: Check for high-risk dependencies
         run: |
-          echo "🔍 Checking for high-risk dependencies..."
+          echo "?? Checking for high-risk dependencies..."
           npm audit --audit-level=high --json > audit-results.json || true
           
-          # 检查是否有高危漏洞
+          # ?????????
           if [ -f audit-results.json ]; then
             HIGH_RISK=$(node -e "
               const fs = require('fs');
@@ -687,15 +693,15 @@ jobs:
             ")
             
             if [ "$HIGH_RISK" -gt 0 ]; then
-              echo "❌ Found $HIGH_RISK high-risk vulnerabilities!"
+              echo "? Found $HIGH_RISK high-risk vulnerabilities!"
               echo "Please review and update dependencies before merging."
               exit 1
             else
-              echo "✅ No high-risk vulnerabilities found"
+              echo "? No high-risk vulnerabilities found"
             fi
           fi
 
-  # 性能测试 (可选)
+  # ???? (??)
   performance:
     name: Performance Test
     runs-on: ubuntu-latest
@@ -725,7 +731,7 @@ jobs:
       - name: Run performance tests
         run: npx turbo run test:performance --filter="...[origin/main]" || echo "No performance tests found"
 
-  # 测试报告生成
+  # ??????
   test-report:
     name: Generate Test Report
     runs-on: ubuntu-latest
@@ -777,7 +783,7 @@ jobs:
           name: test-report
           path: test-results/report.html
 
-  # 最终状态
+  # ????
   e2e-pw:
     name: E2E (Playwright, chromium)
     runs-on: ubuntu-latest
@@ -825,7 +831,7 @@ jobs:
     steps:
       - name: Pipeline Status
         run: |
-          echo "✅ All checks passed! Pipeline successful."
+          echo "? All checks passed! Pipeline successful."
           echo "Quality: ${{ needs.quality.result }}"
           echo "Test: ${{ needs.test.result }}"
           echo "Contracts: ${{ needs.contracts.result }}"
@@ -915,3 +921,27 @@ jobs:
           path: |
             health-smoke-log.txt
             health-test-results.json
+
+  docs-schemas:
+    name: Docs Schemas Validation
+    runs-on: ubuntu-latest
+    needs: sanity
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate normalized examples against JSON Schemas
+        run: npm run validate:schemas

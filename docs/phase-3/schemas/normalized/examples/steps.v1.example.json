@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "domain": "steps",
+  "user_id": "user-123",
+  "received_at": "2025-09-27T12:34:56Z",
+  "source": {
+    "provider": "garmin",
+    "event_id": "evt-4",
+    "delivery_id": "del-4"
+  },
+  "samples": [
+    { "timestamp": "2025-09-27T09:00:00Z", "steps": 220, "window_sec": 300 },
+    { "timestamp": "2025-09-27T09:05:00Z", "steps": 310, "window_sec": 300 }
+  ],
+  "summary": { "total": 12450 }
+}

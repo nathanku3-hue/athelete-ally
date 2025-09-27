@@ -1,0 +1,20 @@
+npm error code ELSPROBLEMS
+npm error extraneous: @emnapi/runtime@1.5.0 E:\vibe\athlete-ally-original\node_modules\@emnapi\runtime
+npm error invalid: @swc/helpers@0.5.15 E:\vibe\athlete-ally-original\node_modules\@swc\helpers
+npm error invalid: @opentelemetry/api@1.9.0 E:\vibe\athlete-ally-original\node_modules\@opentelemetry\api
+npm error missing: data-uri-to-buffer@^4.0.0, required by node-fetch@3.3.2
+npm error missing: fetch-blob@^3.1.4, required by node-fetch@3.3.2
+npm error missing: formdata-polyfill@^4.0.10, required by node-fetch@3.3.2
+npm error invalid: ws@8.17.1 E:\vibe\athlete-ally-original\node_modules\ws
+npm error missing: array-flatten@1.1.1, required by express@4.21.2
+npm error missing: utils-merge@1.0.1, required by express@4.21.2
+npm error invalid: ansi-styles@4.3.0 E:\vibe\athlete-ally-original\node_modules\ansi-styles
+npm error invalid: json5@1.0.2 E:\vibe\athlete-ally-original\node_modules\json5
+npm error missing: @types/json-schema@^7.0.12, required by @typescript-eslint/utils@6.21.0
+npm error missing: @types/semver@^7.5.0, required by @typescript-eslint/utils@6.21.0
+npm error missing: globby@^11.1.0, required by @typescript-eslint/typescript-estree@6.21.0
+npm error invalid: @jridgewell/trace-mapping@0.3.31 E:\vibe\athlete-ally-original\node_modules\@jridgewell\trace-mapping
+npm error missing: destroy@1.2.0, required by body-parser@1.20.3
+npm error missing: destroy@1.2.0, required by send@0.19.0
+npm error missing: acorn-import-attributes@^1.9.5, required by import-in-the-middle@1.7.4
+npm error A complete log of this run can be found in: C:\Users\Lenovo\AppData\Local\npm-cache\_logs\2025-09-27T04_13_38_774Z-debug-0.log
