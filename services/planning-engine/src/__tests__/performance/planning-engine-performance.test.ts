@@ -1,12 +1,12 @@
-// Planning Engine 性能测试
+// Planning Engine ????
 // Jest globals are available without import
 // Global mocks are provided by global-mocks.ts
 
-// 模拟导入 - 在测试环境中使用模拟实现
-import { AsyncPlanGenerator } from '../../optimization/async-plan-generator.ts';
-import { ConcurrencyController } from '../../concurrency/controller.ts';
+// ???? - ????????????
+import { AsyncPlanGenerator } from '../../optimization/async-plan-generator';
+import { ConcurrencyController } from '../../concurrency/controller';
 
-// 模拟Redis客户端
+// ??Redis???
 class MockRedis {
   private cache = new Map<string, { value: string; expires: number }>();
 
@@ -35,17 +35,17 @@ class MockRedis {
   }
 }
 
-// 模拟事件发布器
+// ???????
 class MockEventPublisher {
   async publishPlanGenerated(event: any): Promise<void> {
     console.log('Mock: Publishing plan generated event', event.eventId);
   }
 }
 
-// 模拟数据库优化器
+// ????????
 class DatabaseOptimizer {
   async batchUpdateStatus(updates: any[]): Promise<void> {
-    // 模拟批量更新
+    // ??????
   }
 }
 
@@ -57,13 +57,13 @@ describe('Planning Engine Performance Tests', () => {
   let mockRedis: MockRedis;
 
   beforeAll(async () => {
-    // 初始化模拟组件
+    // ???????
     mockRedis = new MockRedis();
     eventPublisher = new MockEventPublisher();
     concurrencyController = new ConcurrencyController();
     databaseOptimizer = new DatabaseOptimizer();
     
-    // 初始化异步计划生成器
+    // ??????????
     asyncPlanGenerator = new AsyncPlanGenerator(
       mockRedis,
       concurrencyController,
@@ -72,17 +72,17 @@ describe('Planning Engine Performance Tests', () => {
   });
 
   beforeEach(() => {
-    // 清理缓存
+    // ????
     mockRedis.cache.clear();
   });
 
   afterAll(async () => {
-    // 清理资源
+    // ????
     await asyncPlanGenerator.cleanupCache();
   });
 
-  describe('缓存性能测试', () => {
-    it('应该能够缓存和检索计划', async () => {
+  describe('??????', () => {
+    it('???????????', async () => {
       const request = {
         userId: 'test-user-1',
         proficiency: 'intermediate',
@@ -123,16 +123,16 @@ describe('Planning Engine Performance Tests', () => {
         ],
       };
 
-      // 测试缓存设置
-      const cacheKey = asyncPlanGenerator['generateCacheKey'](request);
-      await asyncPlanGenerator['cache'].set(cacheKey, mockPlan, 3600);
+      // ??????
+      const cacheKey = (asyncPlanGenerator as any)['generateCacheKey'](request);
+      await (asyncPlanGenerator as any)['cache'].set(cacheKey, mockPlan, 3600);
 
-      // 测试缓存检索
-      const cachedPlan = await asyncPlanGenerator['cache'].get(cacheKey);
+      // ??????
+      const cachedPlan = await (asyncPlanGenerator as any)['cache'].get(cacheKey);
       expect(cachedPlan).toEqual(mockPlan);
     });
 
-    it('应该正确处理缓存过期', async () => {
+    it('??????????', async () => {
       const request = {
         userId: 'test-user-2',
         proficiency: 'beginner',
@@ -150,25 +150,25 @@ describe('Planning Engine Performance Tests', () => {
         microcycles: [],
       };
 
-      // 设置短期缓存（1秒）
-      const cacheKey = asyncPlanGenerator['generateCacheKey'](request);
-      await asyncPlanGenerator['cache'].set(cacheKey, mockPlan, 1);
+      // ???????1??
+      const cacheKey = (asyncPlanGenerator as any)['generateCacheKey'](request);
+      await (asyncPlanGenerator as any)['cache'].set(cacheKey, mockPlan, 1);
 
-      // 立即检索应该成功
-      let cachedPlan = await asyncPlanGenerator['cache'].get(cacheKey);
+      // ????????
+      let cachedPlan = await (asyncPlanGenerator as any)['cache'].get(cacheKey);
       expect(cachedPlan).toEqual(mockPlan);
 
-      // 等待过期
+      // ????
       await new Promise(resolve => setTimeout(resolve, 1100));
 
-      // 过期后检索应该返回null
-      cachedPlan = await asyncPlanGenerator['cache'].get(cacheKey);
+      // ?????????null
+      cachedPlan = await (asyncPlanGenerator as any)['cache'].get(cacheKey);
       expect(cachedPlan).toBeNull();
     });
   });
 
-  describe('并发控制性能测试', () => {
-    it('应该正确处理并发限制', async () => {
+  describe('????????', () => {
+    it('??????????', async () => {
       const maxConcurrent = 2;
       concurrencyController.setMaxConcurrency('plan_generation', maxConcurrent);
 
@@ -183,7 +183,7 @@ describe('Planning Engine Performance Tests', () => {
           'plan_generation',
           task,
           async () => {
-            // 模拟处理时间
+            // ??????
             await new Promise(resolve => setTimeout(resolve, 100));
           }
         )
@@ -192,14 +192,14 @@ describe('Planning Engine Performance Tests', () => {
       await Promise.all(promises);
       const duration = Date.now() - startTime;
 
-      // 由于并发限制，总时间应该大于串行执行时间
-      expect(duration).toBeGreaterThan(200); // 至少需要3个批次
-      expect(duration).toBeLessThan(1000); // 但应该远小于串行执行时间
+      // ????????????????????
+      expect(duration).toBeGreaterThan(200); // ????3???
+      expect(duration).toBeLessThan(1000); // ????????????
     });
   });
 
-  describe('队列性能测试', () => {
-    it.skip('应该正确处理任务队列', async () => {
+  describe('??????', () => {
+    it.skip('??????????', async () => {
       // TODO: Fix ESM Prisma mock issue - https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
       // Issue: Prisma updateMany mock not working correctly in ESM environment
       const requests = Array.from({ length: 10 }, (_, i) => ({
@@ -214,7 +214,7 @@ describe('Planning Engine Performance Tests', () => {
 
       const jobIds = Array.from({ length: 10 }, (_, i) => `job-${i}`);
 
-      // 提交所有任务
+      // ??????
       const startTime = Date.now();
       const promises = jobIds.map((jobId, index) =>
         asyncPlanGenerator.generatePlanAsync(jobId, requests[index], 1)
@@ -223,18 +223,18 @@ describe('Planning Engine Performance Tests', () => {
       await Promise.all(promises);
       const duration = Date.now() - startTime;
 
-      // 检查队列状态
+      // ??????
       const queueStatus = asyncPlanGenerator.getQueueStatus();
-      expect(queueStatus.queueLength).toBe(0); // 所有任务应该已处理
-      expect(queueStatus.processingCount).toBe(0); // 没有正在处理的任务
+      expect(queueStatus.queueLength).toBe(0); // ?????????
+      expect(queueStatus.processingCount).toBe(0); // ?????????
 
-      console.log(`处理10个任务耗时: ${duration}ms`);
-      expect(duration).toBeLessThan(5000); // 应该在5秒内完成
+      console.log(`??10?????: ${duration}ms`);
+      expect(duration).toBeLessThan(5000); // ???5????
     });
   });
 
-  describe('数据库优化性能测试', () => {
-    it('应该能够批量更新状态', async () => {
+  describe('?????????', () => {
+    it('??????????', async () => {
       const updates = Array.from({ length: 100 }, (_, i) => ({
         planId: `plan-${i}`,
         status: 'completed',
@@ -243,23 +243,23 @@ describe('Planning Engine Performance Tests', () => {
 
       const startTime = Date.now();
       
-      // 注意：这里会失败，因为数据库连接不存在
-      // 但我们可以测试批量操作的逻辑
+      // ???????????????????
+      // ??????????????
       try {
         await databaseOptimizer.updatePlanStatusBatch(updates);
       } catch (error) {
-        // 预期的数据库连接错误
+        // ??????????
         expect(error).toBeDefined();
       }
 
       const duration = Date.now() - startTime;
-      console.log(`批量更新100个状态耗时: ${duration}ms`);
-      expect(duration).toBeLessThan(1000); // 应该在1秒内完成
+      console.log(`????100?????: ${duration}ms`);
+      expect(duration).toBeLessThan(1000); // ???1????
     });
   });
 
-  describe('端到端性能测试', () => {
-    it.skip('应该能够处理高并发计划生成请求', async () => {
+  describe('???????', () => {
+    it.skip('???????????????', async () => {
       // TODO: Fix ESM Prisma mock issue - https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
       // Issue: Prisma updateMany mock not working correctly in ESM environment
       const concurrentUsers = 20;
@@ -285,7 +285,7 @@ describe('Planning Engine Performance Tests', () => {
 
       const startTime = Date.now();
       
-      // 提交所有请求
+      // ??????
       const promises = allRequests.map(({ jobId, request }) =>
         asyncPlanGenerator.generatePlanAsync(jobId, request, 1)
       );
@@ -293,25 +293,25 @@ describe('Planning Engine Performance Tests', () => {
       await Promise.all(promises);
       const duration = Date.now() - startTime;
 
-      console.log(`处理${allRequests.length}个并发请求耗时: ${duration}ms`);
-      console.log(`平均每个请求: ${duration / allRequests.length}ms`);
+      console.log(`??${allRequests.length}???????: ${duration}ms`);
+      console.log(`??????: ${duration / allRequests.length}ms`);
       
-      // 检查队列状态
+      // ??????
       const queueStatus = asyncPlanGenerator.getQueueStatus();
       expect(queueStatus.queueLength).toBe(0);
       expect(queueStatus.processingCount).toBe(0);
 
-      // 性能断言
-      expect(duration).toBeLessThan(10000); // 应该在10秒内完成
-      expect(duration / allRequests.length).toBeLessThan(100); // 平均每个请求应该小于100ms
+      // ????
+      expect(duration).toBeLessThan(10000); // ???10????
+      expect(duration / allRequests.length).toBeLessThan(100); // ??????????100ms
     });
   });
 
-  describe('内存使用测试', () => {
-    it('应该能够处理大量缓存数据而不泄漏内存', async () => {
+  describe('??????', () => {
+    it('??????????????????', async () => {
       const initialMemory = process.memoryUsage().heapUsed;
       
-      // 创建大量缓存数据
+      // ????????
       const requests = Array.from({ length: 1000 }, (_, i) => ({
         userId: `user-${i}`,
         proficiency: 'intermediate',
@@ -322,10 +322,10 @@ describe('Planning Engine Performance Tests', () => {
         purpose: 'general_fitness',
       }));
 
-      // 填充缓存
+      // ????
       for (let i = 0; i < requests.length; i++) {
-        const cacheKey = asyncPlanGenerator['generateCacheKey'](requests[i]);
-        await asyncPlanGenerator['cache'].set(cacheKey, {
+        const cacheKey = (asyncPlanGenerator as any)['generateCacheKey'](requests[i]);
+        await (asyncPlanGenerator as any)['cache'].set(cacheKey, {
           name: `Plan ${i}`,
           description: `Description ${i}`,
           duration: 4,
@@ -336,18 +336,18 @@ describe('Planning Engine Performance Tests', () => {
       const afterCacheMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = afterCacheMemory - initialMemory;
       
-      console.log(`缓存1000个计划后内存增加: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB`);
+      console.log(`??1000????????: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB`);
       
-      // 清理缓存
+      // ????
       await asyncPlanGenerator.cleanupCache();
       
       const afterCleanupMemory = process.memoryUsage().heapUsed;
       const memoryAfterCleanup = afterCleanupMemory - initialMemory;
       
-      console.log(`清理缓存后内存变化: ${(memoryAfterCleanup / 1024 / 1024).toFixed(2)}MB`);
+      console.log(`?????????: ${(memoryAfterCleanup / 1024 / 1024).toFixed(2)}MB`);
       
-      // 内存使用应该合理
-      expect(memoryIncrease).toBeLessThan(100 * 1024 * 1024); // 应该小于100MB
+      // ????????
+      expect(memoryIncrease).toBeLessThan(100 * 1024 * 1024); // ????100MB
     });
   });
 });
