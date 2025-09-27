@@ -25,37 +25,70 @@ function loadSchemaForExample(exampleFile) {
   return schemaPath;
 }
 
+function validateExample(ajv, exampleFile) {
+  try {
+    const schemaPath = loadSchemaForExample(exampleFile);
+    const schema = readJSON(schemaPath);
+    const data = readJSON(exampleFile);
+    const validate = ajv.compile(schema);
+    const isValid = validate(data);
+    
+    return {
+      isValid,
+      errors: validate.errors || [],
+      fileName: path.basename(exampleFile)
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      errors: [{ message: error.message }],
+      fileName: path.basename(exampleFile)
+    };
+  }
+}
+
 function main() {
   const ajv = new Ajv({ strict: true, allErrors: true, allowUnionTypes: true });
   addFormats(ajv);
 
-  if (!fs.existsSync(examplesDir)) { console.error(`Examples directory not found: ${examplesDir}`); process.exit(1); }
-  const exampleFiles = fs.readdirSync(examplesDir).filter(f => f.endsWith('.json')).map(f => path.join(examplesDir, f));
-  if (exampleFiles.length === 0) { console.warn('No example files found to validate.'); return; }
+  // Validate directory structure
+  if (!fs.existsSync(examplesDir)) { 
+    console.error(`❌ Examples directory not found: ${examplesDir}`); 
+    process.exit(1); 
+  }
+  
+  const exampleFiles = fs.readdirSync(examplesDir)
+    .filter(f => f.endsWith('.json'))
+    .map(f => path.join(examplesDir, f));
+    
+  if (exampleFiles.length === 0) { 
+    console.warn('⚠️  No example files found to validate.'); 
+    return; 
+  }
 
+  console.log(`🔍 Validating ${exampleFiles.length} example files...`);
+  
   let failures = 0;
-  for (const ex of exampleFiles) {
-    try {
-      const schemaPath = loadSchemaForExample(ex);
-      const schema = readJSON(schemaPath);
-      const data = readJSON(ex);
-      const validate = ajv.compile(schema);
-      const ok = validate(data);
-      if (ok) {
-        console.log(`VALID: ${path.basename(ex)} ?`);
-      } else {
-        failures++;
-        console.error(`INVALID: ${path.basename(ex)} ?`);
-        for (const err of validate.errors || []) console.error(`  ? ${err.instancePath || '/'} ${err.message}`);
-      }
-    } catch (e) {
+  for (const exampleFile of exampleFiles) {
+    const result = validateExample(ajv, exampleFile);
+    
+    if (result.isValid) {
+      console.log(`✅ VALID: ${result.fileName}`);
+    } else {
       failures++;
-      console.error(`ERROR: ${path.basename(ex)} -> ${(e && e.message) || e}`);
+      console.error(`❌ INVALID: ${result.fileName}`);
+      for (const err of result.errors) {
+        console.error(`  ❌ ${err.instancePath || '/'} ${err.message}`);
+      }
     }
   }
 
-  if (failures > 0) { console.error(`Schema validation failed for ${failures} example(s).`); process.exit(1); }
-  else { console.log('All examples conform to their schemas.'); }
+  if (failures > 0) { 
+    console.error(`\n❌ Schema validation failed for ${failures} example(s).`); 
+    process.exit(1); 
+  } else { 
+    console.log('\n✅ All examples conform to their schemas.'); 
+  }
 }
 
 if (require.main === module) main();

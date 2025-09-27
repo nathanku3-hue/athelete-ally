@@ -44,7 +44,7 @@ const compilerOptions = loadCompilerOptions();
 module.exports = {
   rootDir: '..',
   preset: 'ts-jest',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 
   // Unify module resolution from TS paths
@@ -83,16 +83,11 @@ module.exports = {
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
   
-  // Enable ESM support for Jest (moved to transform config)
+  // Enable ESM support for Jest
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
   
-  // Handle ESM modules in packages
-  extensionsToTreatAsEsm: ['.ts'],
-
+  // Test configuration
   testTimeout: 15000,
   passWithNoTests: true,
-  verbose: true,
-  // Remove deprecated options that cause warnings
-  // runInBand is handled by CI, not config
-  // testTimeout is already set above
+  verbose: true
 };

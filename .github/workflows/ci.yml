@@ -229,26 +229,16 @@ jobs:
           npm run build -w packages/shared-types
           echo "? Shared packages built successfully"
 
-      - name: CI Debug - Verify Workflow Usage
-        run: |
-          set -euo pipefail
-          echo "?? CI Debug Information:"
-          echo "HEAD: $(git rev-parse HEAD)"
-          echo "Workflow file contains Generate Prisma clients step:"
-          grep -n "Generate Prisma clients" .github/workflows/ci.yml || echo "? Step not found"
-          echo "Current working directory: $(pwd)"
-          echo "Available services with Prisma schemas:"
-          find services -name "schema.prisma" -type f | head -10
 
       - name: Validate configuration
         run: |
           set -euo pipefail
-          echo "?? ??????..."
-          # ?????????????
+          echo "🔧 Validating test environment..."
+          # Ensure NODE_ENV is set for tests
           if [ -z "${NODE_ENV:-}" ]; then
             export NODE_ENV=test
           fi
-          echo "? ??????"
+          echo "✅ Environment validated"
 
       - name: Start Frontend Service
         run: |

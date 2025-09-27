@@ -76,12 +76,12 @@ describe('Planning Engine Performance Tests', () => {
   });
 
   beforeEach(() => {
-    // ????
+    // Clear Redis cache for test isolation
     (mockRedis as any).cache.clear();
   });
 
   afterAll(async () => {
-    // ????
+    // Cleanup async plan generator resources
     await asyncPlanGenerator.cleanupCache();
   });
 
