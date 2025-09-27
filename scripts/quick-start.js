@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * 🚀 快速启动验证脚本
- * 作者: 后端团队
- * 版本: 1.0.0
+ * ?? ????????
+ * ??: ????
+ * ??: 1.0.0
  * 
- * 功能:
- * - 一键启动开发环境
- * - 自动验证所有服务
- * - 提供实时状态监控
+ * ??:
+ * - ????????
+ * - ????????
+ * - ????????
  */
 
 const { spawn, exec } = require('child_process');
@@ -16,7 +16,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// 颜色输出
+// ????
 const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
@@ -31,7 +31,7 @@ function colorize(text, color) {
   return `${colors[color]}${text}${colors.reset}`;
 }
 
-// 服务配置
+// ????
 const SERVICES = [
   { name: 'Frontend', port: 3000, url: 'http://localhost:3000' },
   { name: 'Gateway BFF', port: 4000, url: 'http://localhost:4000' },
@@ -43,7 +43,7 @@ const SERVICES = [
   { name: 'Analytics', port: 4106, url: 'http://localhost:4106' },
 ];
 
-// 检查端口是否被占用
+// ?????????
 function checkPort(port) {
   return new Promise((resolve) => {
     const server = http.createServer();
@@ -54,7 +54,7 @@ function checkPort(port) {
   });
 }
 
-// 检查服务健康状态
+// ????????
 async function checkServiceHealth(service) {
   try {
     const response = await fetch(`${service.url}/health`, {
@@ -67,7 +67,7 @@ async function checkServiceHealth(service) {
   }
 }
 
-// 等待服务启动
+// ??????
 async function waitForService(service, maxAttempts = 30) {
   for (let i = 0; i < maxAttempts; i++) {
     const isHealthy = await checkServiceHealth(service);
@@ -79,13 +79,13 @@ async function waitForService(service, maxAttempts = 30) {
   return false;
 }
 
-// 启动Docker服务
+// ??Docker??
 function startDockerServices() {
   return new Promise((resolve, reject) => {
-    console.log(colorize('🐳 启动Docker服务...', 'blue'));
+    console.log(colorize('?? ??Docker??...', 'blue'));
     
     const dockerProcess = spawn('docker', [
-      'compose', '-f', 'preview.compose.yaml', 'up', '--build', '-d'
+      'compose', '-f', 'docker-compose/preview.yml', 'up', '--build', '-d'
     ], {
       stdio: 'inherit',
       shell: true
@@ -93,24 +93,24 @@ function startDockerServices() {
     
     dockerProcess.on('close', (code) => {
       if (code === 0) {
-        console.log(colorize('✅ Docker服务启动完成', 'green'));
+        console.log(colorize('? Docker??????', 'green'));
         resolve();
       } else {
-        console.log(colorize('❌ Docker服务启动失败', 'red'));
-        reject(new Error(`Docker启动失败，退出码: ${code}`));
+        console.log(colorize('? Docker??????', 'red'));
+        reject(new Error(`Docker????????: ${code}`));
       }
     });
     
     dockerProcess.on('error', (error) => {
-      console.log(colorize(`❌ Docker启动错误: ${error.message}`, 'red'));
+      console.log(colorize(`? Docker????: ${error.message}`, 'red'));
       reject(error);
     });
   });
 }
 
-// 检查所有服务状态
+// ????????
 async function checkAllServices() {
-  console.log(colorize('\n🔍 检查服务状态...', 'blue'));
+  console.log(colorize('\n?? ??????...', 'blue'));
   
   const results = [];
   
@@ -120,7 +120,7 @@ async function checkAllServices() {
     
     const status = isHealthy ? 'UP' : isPortOpen ? 'STARTING' : 'DOWN';
     const statusColor = isHealthy ? 'green' : isPortOpen ? 'yellow' : 'red';
-    const statusIcon = isHealthy ? '✅' : isPortOpen ? '⏳' : '❌';
+    const statusIcon = isHealthy ? '?' : isPortOpen ? '?' : '?';
     
     console.log(`   ${statusIcon} ${service.name}: ${colorize(status, statusColor)}`);
     
@@ -135,77 +135,78 @@ async function checkAllServices() {
   return results;
 }
 
-// 显示服务访问信息
+// ????????
 function showServiceInfo() {
-  console.log(colorize('\n🌐 服务访问信息:', 'bold'));
+  console.log(colorize('\n?? ??????:', 'bold'));
   console.log('=' .repeat(50));
-  console.log(`📱 前端应用: ${colorize('http://localhost:3000', 'cyan')}`);
-  console.log(`🔌 API网关: ${colorize('http://localhost:4000', 'cyan')}`);
-  console.log(`📊 监控面板: ${colorize('http://localhost:9090', 'cyan')}`);
-  console.log(`📈 仪表板: ${colorize('http://localhost:3001', 'cyan')}`);
-  console.log(`🔍 链路追踪: ${colorize('http://localhost:16686', 'cyan')}`);
+  console.log(`?? ????: ${colorize('http://localhost:3000', 'cyan')}`);
+  console.log(`?? API??: ${colorize('http://localhost:4000', 'cyan')}`);
+  console.log(`?? ????: ${colorize('http://localhost:9090', 'cyan')}`);
+  console.log(`?? ???: ${colorize('http://localhost:3001', 'cyan')}`);
+  console.log(`?? ????: ${colorize('http://localhost:16686', 'cyan')}`);
   console.log('');
-  console.log(colorize('💡 提示:', 'yellow'));
-  console.log('   - 使用 Ctrl+C 停止所有服务');
-  console.log('   - 查看日志: npm run dev:logs');
-  console.log('   - 健康检查: npm run services:health-check');
-  console.log('   - 重启服务: npm run dev:restart');
+  console.log(colorize('?? ??:', 'yellow'));
+  console.log('   - ?? Ctrl+C ??????');
+  console.log('   - ????: npm run dev:logs');
+  console.log('   - ????: npm run services:health-check');
+  console.log('   - ????: npm run dev:restart');
 }
 
-// 主函数
+// ???
 async function main() {
-  console.log(colorize('🚀 Athlete Ally 快速启动', 'bold'));
+  console.log(colorize('?? Athlete Ally ????', 'bold'));
   console.log(colorize('========================', 'cyan'));
   
   try {
-    // 1. 检查环境
-    console.log(colorize('\n📋 检查环境配置...', 'blue'));
+    // 1. ????
+    console.log(colorize('\n?? ??????...', 'blue'));
     const envCheck = spawn('npm', ['run', 'env:validate'], { stdio: 'inherit' });
     await new Promise((resolve, reject) => {
       envCheck.on('close', (code) => {
         if (code === 0) resolve();
-        else reject(new Error('环境配置验证失败'));
+        else reject(new Error('????????'));
       });
     });
     
-    // 2. 启动Docker服务
+    // 2. ??Docker??
     await startDockerServices();
     
-    // 3. 等待服务启动
-    console.log(colorize('\n⏳ 等待服务启动...', 'blue'));
+    // 3. ??????
+    console.log(colorize('\n? ??????...', 'blue'));
     await new Promise(resolve => setTimeout(resolve, 10000));
     
-    // 4. 检查服务状态
+    // 4. ??????
     const serviceResults = await checkAllServices();
     
-    // 5. 显示结果
+    // 5. ????
     const healthyServices = serviceResults.filter(s => s.healthy).length;
     const totalServices = serviceResults.length;
     
-    console.log(colorize(`\n📊 启动结果: ${healthyServices}/${totalServices} 服务健康`, 'bold'));
+    console.log(colorize(`\n?? ????: ${healthyServices}/${totalServices} ????`, 'bold'));
     
     if (healthyServices === totalServices) {
-      console.log(colorize('🎉 所有服务启动成功！', 'green'));
+      console.log(colorize('?? ?????????', 'green'));
       showServiceInfo();
     } else {
-      console.log(colorize('⚠️  部分服务可能还在启动中...', 'yellow'));
-      console.log(colorize('💡 建议等待几分钟后运行: npm run services:health-check', 'yellow'));
+      console.log(colorize('??  ???????????...', 'yellow'));
+      console.log(colorize('?? ??????????: npm run services:health-check', 'yellow'));
     }
     
   } catch (error) {
-    console.error(colorize(`❌ 启动失败: ${error.message}`, 'red'));
-    console.log(colorize('\n🔧 故障排除建议:', 'yellow'));
-    console.log('   1. 检查Docker是否正在运行');
-    console.log('   2. 检查端口是否被占用');
-    console.log('   3. 查看详细日志: npm run dev:logs');
-    console.log('   4. 清理环境: npm run dev:clean');
+    console.error(colorize(`? ????: ${error.message}`, 'red'));
+    console.log(colorize('\n?? ??????:', 'yellow'));
+    console.log('   1. ??Docker??????');
+    console.log('   2. ?????????');
+    console.log('   3. ??????: npm run dev:logs');
+    console.log('   4. ????: npm run dev:clean');
     process.exit(1);
   }
 }
 
-// 运行主函数
+// ?????
 if (require.main === module) {
   main();
 }
 
 module.exports = { checkAllServices, startDockerServices };
+
