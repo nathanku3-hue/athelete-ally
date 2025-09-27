@@ -27,6 +27,17 @@ module.exports = {
     '<rootDir>/src/__tests__/setup.ts'
   ],
   testEnvironmentOptions: { url: 'http://localhost:3000' },
+
+  // Frontend path aliases (explicit to avoid tsconfig loader edge cases)
+  moduleNameMapper: {
+    ...(base.moduleNameMapper || {}),
+    '^@/(.*)$': '<rootDir>/apps/frontend/src/$1',
+    '^@components/(.*)$': '<rootDir>/apps/frontend/src/components/$1',
+    '^@hooks/(.*)$': '<rootDir>/apps/frontend/src/hooks/$1',
+    '^@lib/(.*)$': '<rootDir>/apps/frontend/src/lib/$1',
+    '^@contexts/(.*)$': '<rootDir>/apps/frontend/src/contexts/$1'
+  },
+
   // Increase timeout for CI environment
   testTimeout: 15000
 };
