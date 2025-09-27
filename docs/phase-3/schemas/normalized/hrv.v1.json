@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://athlete-ally.dev/schemas/normalized/hrv.v1.json",
+  "title": "Normalized HRV v1",
+  "type": "object",
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "const": "v1" },
+        "domain": { "type": "string" },
+        "user_id": { "type": "string", "minLength": 1 },
+        "received_at": { "type": "string", "format": "date-time" },
+        "source": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "event_id": { "type": "string" },
+            "delivery_id": { "type": "string" }
+          },
+          "required": ["provider"],
+          "additionalProperties": true
+        }
+      },
+      "required": ["version", "domain", "user_id", "received_at", "source"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "version": { "type": "string", "const": "v1" },
+    "domain": { "type": "string", "const": "hrv" },
+    "user_id": { "type": "string" },
+    "received_at": { "type": "string", "format": "date-time" },
+    "source": { "$ref": "#/$defs/metadata/properties/source" },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "rmssd_ms": { "type": "number", "minimum": 0 }
+        },
+        "required": ["timestamp", "rmssd_ms"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["version", "domain", "user_id", "received_at", "source", "samples"],
+  "additionalProperties": false
+}
