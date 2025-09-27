@@ -632,6 +632,7 @@ server.post('/goals', async (request, reply) => {
 
     // Ensure required properties are provided
     const goalData = {
+      ...parsed.data,
       exerciseName: parsed.data.exerciseName || '',
       userId: parsed.data.userId || '',
       exerciseId: parsed.data.exerciseId || '',
@@ -644,8 +645,7 @@ server.post('/goals', async (request, reply) => {
         value: m.value ?? 0,
         date: m.date ?? new Date(),
         description: m.description ?? ''
-      })) || [],
-      ...parsed.data
+      })) || []
     };
     const goal = await achievementEngine.createWorkoutGoal(goalData);
 
