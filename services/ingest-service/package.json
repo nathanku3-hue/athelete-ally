@@ -1,5 +1,5 @@
 {
-  "name": "@athlete-ally/ingest",
+  "name": "@athlete-ally/ingest-service",
   "version": "1.0.0",
   "description": "Data ingestion service for Athlete Ally",
   "main": "dist/index.js",
