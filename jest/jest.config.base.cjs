@@ -44,29 +44,33 @@ const compilerOptions = loadCompilerOptions();
 module.exports = {
   rootDir: '..',
   preset: 'ts-jest',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 
-  // Unify module resolution from TS paths
+  // Module resolution mapping (order matters - specific before generic)
   moduleNameMapper: {
-    // Specific @athlete-ally package mappings (must come before generic mapping)
+    // @athlete-ally packages (specific mappings first)
+    '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
+    '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
     '^@athlete-ally/contracts/events/(.*)$': '<rootDir>/packages/contracts/events/$1',
     '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/$1',
-    // Specific llm.js mappings (must come before generic .js mapping)
-    '^(\\.\\./)*services/planning-engine/src/llm\\.js$': '<rootDir>/services/planning-engine/src/llm.ts',
-    '^(\\.\\./)*services/planning-engine/src/llm$': '<rootDir>/services/planning-engine/src/llm.ts',
-    // Legacy shims removed after Vitest?Jest migration
-    '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
-    // Handle .js imports in TypeScript files (ESM compatibility) - must come after specific mappings
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    // Generic @athlete-ally package mapping (must come last)
     '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
-    // ESM imports resolved by ts-jest automatically (after specific mappings)
+    
+    // Legacy test data shims
+    '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
+    
+    // Specific db.js mappings (precedence over generic ESM rule)
+    '^services/planning-engine/src/db\\.js$': '<rootDir>/services/planning-engine/src/db.ts',
+    
+    // ESM compatibility (.js imports in TypeScript) - must be last
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    
+    // TypeScript path mappings from tsconfig
     ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' }))
   },
 
-  // TypeScript transform aligned to monorepo tsconfig paths
+  // Transform configuration
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       useESM: true,
@@ -83,13 +87,8 @@ module.exports = {
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
   
-  // Enable ESM support for Jest (moved to transform config)
+  // Enable ESM support for Jest
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
-
-  testTimeout: 15000,
-  passWithNoTests: true,
-  verbose: true,
-  // Remove deprecated options that cause warnings
-  // runInBand is handled by CI, not config
-  // testTimeout is already set above
+  
+  // Test configuration - removed deprecated options for Jest 29.7.0 compatibility
 };

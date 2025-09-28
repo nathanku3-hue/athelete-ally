@@ -33,9 +33,9 @@ jest.mock('@prisma/client', () => ({
 // Mock database module with ESM virtual mock for all import paths
 const mockPrisma = createPrismaMock();
 
-// Mock all possible db.js import paths
-jest.mock('../db.js', () => ({ prisma: mockPrisma }), { virtual: true });
-jest.mock('./db.js', () => ({ prisma: mockPrisma }), { virtual: true });
+// Mock all possible db import paths (extensionless for ESM compatibility)
+jest.mock('../db', () => ({ prisma: mockPrisma }), { virtual: true });
+jest.mock('./db', () => ({ prisma: mockPrisma }), { virtual: true });
 
 // Mock Redis client
 jest.mock('ioredis', () => {
