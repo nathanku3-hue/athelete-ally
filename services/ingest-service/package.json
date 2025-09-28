@@ -17,7 +17,8 @@
     "@athlete-ally/shared-types": "*",
     "fastify": "^4.28.1",
     "zod": "^3.25.76",
-    "nats": "^2.19.0"
+    "nats": "^2.19.0",
+    "@athlete-ally/contracts": "*"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
