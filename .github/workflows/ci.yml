@@ -868,7 +868,7 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies (npm ci)
-      run: npm ci --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Print Jest version
         run: npx jest --version
 
