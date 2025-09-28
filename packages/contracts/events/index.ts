@@ -100,4 +100,4 @@ export const EVENT_TOPICS = {
 } as const;
 
 // Export schemas from dedicated file
-export * from './schemas.js';
+export * from './schemas';
