@@ -31,10 +31,17 @@ services:
     ports:
       - "4222:4222"
       - "8222:8222"
-
-  
-      OURA_WEBHOOK_SECRET: 
-      OURA_IDEMPOTENCY_TTL_SECONDS: 
+  ingest:
+    build:
+      context: .
+      dockerfile: services/ingest-service/Dockerfile
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4101
+      NATS_URL: nats://nats:4222
+      OURA_WEBHOOK_SECRET: ${OURA_WEBHOOK_SECRET:-change-me}
+      OURA_IDEMPOTENCY_TTL_SECONDS: ${OURA_IDEMPOTENCY_TTL_SECONDS:-600}
     ports:
       - "4101:4101"
     volumes:
@@ -48,7 +55,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
-
   normalize:
     build:
       context: .
@@ -167,4 +173,6 @@ services:
 
 volumes:
   pgdata:
+
+
 
