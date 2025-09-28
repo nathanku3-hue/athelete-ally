@@ -21,6 +21,11 @@ services:
 
   nats:
     image: nats:2.10-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8222/varz > /dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     container_name: athlete-ally-nats
     command: ["-js", "-m", "8222"]
     ports:
@@ -30,7 +35,7 @@ services:
   ingest:
     build:
       context: .
-      dockerfile: services/ingest/Dockerfile
+      dockerfile: services/ingest-service/Dockerfile
     command: npm run dev
     environment:
       NODE_ENV: development
@@ -39,11 +44,11 @@ services:
     ports:
       - "4101:4101"
     volumes:
-      - ./services/ingest:/usr/src/app
+      - ./services/ingest-service:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       nats:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4101/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 5s
@@ -53,7 +58,7 @@ services:
   normalize:
     build:
       context: .
-      dockerfile: services/normalize/Dockerfile
+      dockerfile: services/normalize-service/Dockerfile
     command: npm run dev
     environment:
       NODE_ENV: development
@@ -63,13 +68,13 @@ services:
     ports:
       - "4102:4102"
     volumes:
-      - ./services/normalize:/usr/src/app
+      - ./services/normalize-service:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
       nats:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4102/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 5s
@@ -79,7 +84,7 @@ services:
   insights:
     build:
       context: .
-      dockerfile: services/insights/Dockerfile
+      dockerfile: services/insights-engine/Dockerfile
     command: npm run dev
     environment:
       NODE_ENV: development
@@ -88,7 +93,7 @@ services:
     ports:
       - "4103:4103"
     volumes:
-      - ./services/insights:/usr/src/app
+      - ./services/insights-engine:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       postgres:
@@ -120,7 +125,7 @@ services:
       postgres:
         condition: service_healthy
       nats:
-        condition: service_started
+        condition: service_healthy
 
   redis:
     profiles: ["planning"]
