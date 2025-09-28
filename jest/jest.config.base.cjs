@@ -60,7 +60,10 @@ module.exports = {
     // Legacy test data shims
     '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
     
-    // ESM compatibility (.js imports in TypeScript)
+    // Specific db.js mappings (precedence over generic ESM rule)
+    '^services/planning-engine/src/db\\.js$': '<rootDir>/services/planning-engine/src/db.ts',
+    
+    // ESM compatibility (.js imports in TypeScript) - must be last
     '^(\\.{1,2}/.*)\\.js$': '$1',
     
     // TypeScript path mappings from tsconfig
