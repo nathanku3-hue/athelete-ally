@@ -8,13 +8,13 @@ Local Stack (Phase 3)
 Usage
 
 - Build and up (default stack):
-  docker compose up --build
+  npm run dev:compose
 
 - With planning engine:
   docker compose --profile planning up --build
 
 - With observability UI:
-  docker compose --profile obs up --build
+  npm run dev:compose:obs
 
 - Combine profiles:
   docker compose --profile planning --profile obs up --build
