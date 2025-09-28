@@ -62,7 +62,7 @@ export interface RegisterOuraOptions {
 }
 
 export function registerOuraWebhookRoutes(app: FastifyInstance, options: RegisterOuraOptions = {}) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
   const rawBodyPlugin = require('fastify-raw-body');
   app.register(rawBodyPlugin, { field: 'rawBody', global: false, encoding: 'utf8', runFirst: true });
 
@@ -81,7 +81,7 @@ export function registerOuraWebhookRoutes(app: FastifyInstance, options: Registe
           return reply.code(500).send({ error: 'Webhook not configured' });
         }
 
-        // @ts-ignore added by fastify-raw-body
+        // @ts-expect-error added by fastify-raw-body
         const rawBody: string = (request as any).rawBody || '';
         const sigHeader = (request.headers['x-oura-signature'] || request.headers['x-oura-signature-sha256']) as any;
 
