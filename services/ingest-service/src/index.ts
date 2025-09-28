@@ -1,10 +1,14 @@
 import Fastify from 'fastify';
+import { registerOuraWebhookRoutes } from './oura';
+import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
 
-const fastify = Fastify({
-  logger: true
-});
+
+
+// NATS connection for vendor publishes (Oura)\nlet natsVendor: NatsConnection | null = null;
+
+// Register Oura webhook route (HMAC verify + TTL idempotency)\nregisterOuraWebhookRoutes(fastify, { publish: async (subject, data) => {\n  try {\n    if (!natsVendor) {\n      const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';\n      natsVendor = await connectNats({ servers: natsUrl });\n    }\n    await natsVendor.publish(subject, data);\n  } catch (e) {\n    fastify.log.error({ e }, 'Failed to publish Oura webhook to NATS');\n  }\n}});
 
 // EventBus connection
 let eventBus: EventBus | null = null;

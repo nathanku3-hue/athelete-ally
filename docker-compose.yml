@@ -32,15 +32,9 @@ services:
       - "4222:4222"
       - "8222:8222"
 
-  ingest:
-    build:
-      context: .
-      dockerfile: services/ingest-service/Dockerfile
-    command: npm run dev
-    environment:
-      NODE_ENV: development
-      PORT: 4101
-      NATS_URL: nats://nats:4222
+  
+      OURA_WEBHOOK_SECRET: 
+      OURA_IDEMPOTENCY_TTL_SECONDS: 
     ports:
       - "4101:4101"
     volumes:
@@ -173,3 +167,4 @@ services:
 
 volumes:
   pgdata:
+
