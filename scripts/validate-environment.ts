@@ -172,13 +172,13 @@ function checkEnvironmentVariables(): { status: 'pass' | 'fail' | 'warning'; mes
 function checkFileStructure(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   const requiredFiles = [
     'package.json',
-    'next.config.mjs',
-    'tsconfig.json',
-    'tailwind.config.mjs',
+    'apps/frontend/next.config.mjs',
+    'apps/frontend/tsconfig.json',
+    'apps/frontend/tailwind.config.mjs',
     'docker-compose/preview.yml',
     'env.example',
-    'src/app/layout.tsx',
-    'src/app/page.tsx',
+    'apps/frontend/src/app/layout.tsx',
+    'apps/frontend/src/app/page.tsx',
     'packages/shared/src/index.ts',
   ];
   
@@ -248,7 +248,7 @@ async function checkDependencies(): Promise<{ status: 'pass' | 'fail' | 'warning
  */
 function checkTypeScriptConfig(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   try {
-    const tsconfig = require('./tsconfig.json');
+    const tsconfig = require('./apps/frontend/tsconfig.json');
     
     const issues: string[] = [];
     
@@ -283,7 +283,7 @@ function checkTypeScriptConfig(): { status: 'pass' | 'fail' | 'warning'; message
  */
 function checkNextConfig(): { status: 'pass' | 'fail' | 'warning'; message: string; details?: any } {
   try {
-    const nextConfig = require('./next.config.mjs');
+    const nextConfig = require('./apps/frontend/next.config.mjs');
     
     const issues: string[] = [];
     
