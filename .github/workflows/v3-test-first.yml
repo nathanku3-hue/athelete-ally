@@ -45,6 +45,8 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
+
+
         run: npm ci --no-audit --no-fund
       - name: Run contract tests
         run: npm run test:contracts -w packages/contracts
@@ -91,6 +93,8 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
+
+
         run: npm ci --no-audit --no-fund
       - name: Run database tests
         run: npm run test:database -w packages/contracts
@@ -125,6 +129,8 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
+
+
         run: npm ci --no-audit --no-fund
       - name: Run API tests
         run: npm run test:api -w packages/contracts
@@ -288,6 +294,8 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
+
+
         run: npm ci --no-audit --no-fund
       - name: Run performance tests
         run: npm run test:performance -w packages/contracts
@@ -321,6 +329,8 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
+
+
         run: npm ci --no-audit --no-fund
       - name: Download all test results
         uses: actions/download-artifact@v4
@@ -358,6 +368,8 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
+
+
         run: npm ci --no-audit --no-fund
       - name: Run ESLint
         run: npx turbo run lint

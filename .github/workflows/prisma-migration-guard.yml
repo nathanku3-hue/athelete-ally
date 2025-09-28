@@ -42,7 +42,9 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path || 'package-lock.json' }}
 
       - name: Install dependencies
-      run: npm ci --no-audit --no-fund
+
+
+        run: npm ci --no-audit --no-fund
       - name: Wait for PostgreSQL
         run: |
           echo "⏳ Waiting for PostgreSQL to be ready..."
