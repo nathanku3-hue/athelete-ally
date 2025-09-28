@@ -1,0 +1,23 @@
+// Prisma schema for insights service
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReadinessScore {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  score     Int      // 0-100
+  drivers   Json     // { hrv_delta: number, trend_3d: number, data_freshness: number }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("readiness_scores")
+}
