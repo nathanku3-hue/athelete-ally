@@ -1,0 +1,170 @@
+name: athlete-ally
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: athlete-ally-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-athlete}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-athlete}
+      POSTGRES_DB: ${POSTGRES_DB:-athlete}
+    ports:
+      - "${POSTGRES_HOST_PORT:-55432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: athlete-ally-nats
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
+  ingest:
+    build:
+      context: .
+      dockerfile: services/ingest/Dockerfile
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4101
+      NATS_URL: nats://nats:4222
+    ports:
+      - "4101:4101"
+    volumes:
+      - ./services/ingest:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      nats:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4101/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  normalize:
+    build:
+      context: .
+      dockerfile: services/normalize/Dockerfile
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4102
+      NATS_URL: nats://nats:4222
+      DATABASE_URL: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete}@postgres:5432/athlete_normalize
+    ports:
+      - "4102:4102"
+    volumes:
+      - ./services/normalize:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4102/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  insights:
+    build:
+      context: .
+      dockerfile: services/insights/Dockerfile
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4103
+      DATABASE_URL: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete}@postgres:5432/athlete_insights
+    ports:
+      - "4103:4103"
+    volumes:
+      - ./services/insights:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4103/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Optional: planning engine and redis under profile `planning`
+  planning-engine:
+    profiles: ["planning"]
+    build:
+      context: .
+      dockerfile: services/planning-engine/Dockerfile
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4104
+      PLANNING_DATABASE_URL: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete}@postgres:5432/athlete_planning
+      NATS_URL: nats://nats:4222
+    ports:
+      - "4104:4104"
+    volumes:
+      - ./services/planning-engine:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  redis:
+    profiles: ["planning"]
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # Observability (opt-in) under profile `obs`
+  otel-collector:
+    profiles: ["obs"]
+    image: otel/opentelemetry-collector:0.98.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4318:4318" # OTLP HTTP
+
+  prometheus:
+    profiles: ["obs"]
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  jaeger:
+    profiles: ["obs"]
+    image: jaegertracing/all-in-one:1.58
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+
+  grafana:
+    profiles: ["obs"]
+    image: grafana/grafana:11.2.0
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:

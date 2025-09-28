@@ -158,7 +158,7 @@ async function calculateDataFreshness(userId: string, date: Date): Promise<numbe
 
 const start = async () => {
   try {
-    const port = parseInt(process.env.PORT || '4109');
+    const port = parseInt(process.env.PORT || '4103');
     await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`Insights service listening on port ${port}`);
   } catch (err) {

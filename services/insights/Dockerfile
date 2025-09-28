@@ -1,5 +1,5 @@
 # --- STAGE 1: Builder ---
-FROM node:lts-alpine AS builder
+FROM node:20.18-slim AS builder
 WORKDIR /app
 
 # 關鍵：從根上下文，拷貝所有構建所需的文件
@@ -20,11 +20,11 @@ RUN cd services/insights && npx prisma generate
 RUN npx turbo run build --filter=insights
 
 # --- STAGE 2: Runner ---
-FROM node:lts-alpine
+FROM node:20.18-slim
 WORKDIR /usr/src/app
 
 # 安裝 OpenSSL 和必要的系統庫
-RUN apk add --no-cache openssl ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
 
 # 從 builder 階段，拷貝編譯好的產物和完整的依賴
 # 注意路徑是相對於 builder 內部的 /app 目錄
@@ -41,7 +41,7 @@ RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
 # 暴露端口
-EXPOSE 4109
+EXPOSE 4103
 
 # 啟動服務器的命令
 CMD ["node", "dist/index.js"]

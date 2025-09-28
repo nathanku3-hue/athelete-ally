@@ -1,5 +1,5 @@
 # --- STAGE 1: Builder ---
-FROM node:lts-alpine AS builder
+FROM node:20.18-alpine AS builder
 WORKDIR /app
 
 # 關鍵：從根上下文，拷貝所有構建所需的文件
@@ -17,7 +17,7 @@ RUN npm ci
 RUN npx turbo run build --filter=ingest
 
 # --- STAGE 2: Runner ---
-FROM node:lts-alpine
+FROM node:20.18-alpine
 WORKDIR /usr/src/app
 
 # 安裝 OpenSSL 和必要的系統庫
@@ -37,7 +37,7 @@ RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
 # 暴露端口
-EXPOSE 4107
+EXPOSE 4101
 
 # 啟動服務器的命令
 CMD ["node", "dist/index.js"]

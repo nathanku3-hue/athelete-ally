@@ -1,20 +1,22 @@
 import Fastify from 'fastify';
-import { connect } from 'nats';
+import { EventBus } from '@athlete-ally/event-bus';
+import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
 
 const fastify = Fastify({
   logger: true
 });
 
-// NATS connection
-let nc: any = null;
+// EventBus connection
+let eventBus: EventBus | null = null;
 
-async function connectNATS() {
+async function connectEventBus() {
   try {
     const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
-    nc = await connect({ servers: natsUrl });
-    console.log('Connected to NATS');
+    eventBus = new EventBus();
+    await eventBus.connect(natsUrl);
+    console.log('Connected to EventBus');
   } catch (err) {
-    console.error('Failed to connect to NATS:', err);
+    console.error('Failed to connect to EventBus:', err);
     process.exit(1);
   }
 }
@@ -25,19 +27,35 @@ fastify.get('/health', async (request, reply) => {
     status: 'healthy', 
     service: 'ingest',
     timestamp: new Date().toISOString(),
-    nats: nc ? 'connected' : 'disconnected'
+    eventBus: eventBus ? 'connected' : 'disconnected'
   };
 });
 
 // HRV ingestion endpoint
 fastify.post('/ingest/hrv', async (request, reply) => {
   try {
-    // TODO: Add proper validation and event publishing
-    const data = request.body;
+    const data = request.body as any;
     
-    // Publish to NATS for processing
-    if (nc) {
-      await nc.publish('hrv.raw-received', JSON.stringify(data));
+    // Validate required fields
+    if (!data.userId || !data.date || !data.rmssd) {
+      reply.code(400).send({ error: 'Missing required fields: userId, date, rmssd' });
+      return;
+    }
+    
+    // Create typed HRV event
+    const hrvEvent: HRVRawReceivedEvent = {
+      payload: {
+        userId: data.userId,
+        date: data.date, // 'YYYY-MM-DD'
+        rMSSD: data.rmssd,
+        capturedAt: data.capturedAt || new Date().toISOString(),
+        raw: data.raw || {}
+      }
+    };
+    
+    // Publish typed event via EventBus
+    if (eventBus) {
+      await eventBus.publishHRVRawReceived(hrvEvent);
     }
     
     return { status: 'received', timestamp: new Date().toISOString() };
@@ -50,12 +68,13 @@ fastify.post('/ingest/hrv', async (request, reply) => {
 // Sleep ingestion endpoint
 fastify.post('/ingest/sleep', async (request, reply) => {
   try {
-    // TODO: Add proper validation and event publishing
-    const data = request.body;
+    // TODO: Add proper validation and event publishing for sleep data
+    const data = request.body as any;
     
-    // Publish to NATS for processing
-    if (nc) {
-      await nc.publish('sleep.raw-received', JSON.stringify(data));
+    // For now, keep raw NATS publishing for sleep (will be updated in future PR)
+    // This maintains compatibility while we focus on HRV typed events
+    if (eventBus && (eventBus as any).nc) {
+      await (eventBus as any).nc.publish('sleep.raw-received', JSON.stringify(data));
     }
     
     return { status: 'received', timestamp: new Date().toISOString() };
@@ -67,9 +86,9 @@ fastify.post('/ingest/sleep', async (request, reply) => {
 
 const start = async () => {
   try {
-    await connectNATS();
+    await connectEventBus();
     
-    const port = parseInt(process.env.PORT || '4107');
+    const port = parseInt(process.env.PORT || '4101');
     await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`Ingest service listening on port ${port}`);
   } catch (err) {
