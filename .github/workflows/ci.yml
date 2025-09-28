@@ -70,8 +70,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -194,8 +195,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -224,6 +226,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "🔨 Building shared packages before service tests..."
+          npm run build -w packages/contracts
           npm run build -w packages/event-bus
           npm run build -w packages/protocol-types
           npm run build -w packages/shared-types
@@ -372,8 +375,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Validate OpenAPI contracts
         run: |
           # ?? OpenAPI ??
@@ -433,8 +437,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -500,8 +505,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
@@ -655,8 +661,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Run security audit
         run: npm audit --audit-level=high
 
@@ -725,8 +732,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Run performance tests
         run: npx turbo run test:performance --filter="...[origin/main]" || echo "No performance tests found"
 
@@ -754,8 +762,9 @@ jobs:
             services/**/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Download test artifacts
         if: ${{ needs.test.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
@@ -803,8 +812,9 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Build frontend
         run: npm run build
 
@@ -859,8 +869,7 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies (npm ci)
-        run: npm ci
-
+        run: npm ci --no-audit --no-fund
       - name: Print Jest version
         run: npx jest --version
 
@@ -897,8 +906,9 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Build packages
         run: |
           npm run build -w packages/otel-preset
@@ -940,8 +950,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
 
+
+        run: npm ci --no-audit --no-fund
       - name: Validate normalized examples against JSON Schemas
         run: npm run validate:schemas
 

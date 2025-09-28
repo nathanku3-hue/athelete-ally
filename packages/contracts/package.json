@@ -3,10 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "events/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
   "exports": {
-    ".": "./events/index.ts",
-    "./events": "./events/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "import": "./dist/events/index.js"
+    },
+    "./events/schemas": {
+      "types": "./dist/events/schemas.d.ts",
+      "import": "./dist/events/schemas.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "events": ["dist/events/index.d.ts"],
+      "events/schemas": ["dist/events/schemas.d.ts"]
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

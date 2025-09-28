@@ -1,0 +1,523 @@
+From 17a6ed3fe42328da3f0c8e8b267cacc0e1256022 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sun, 28 Sep 2025 18:54:25 +0800
+Subject: [PATCH] chore(naming): rename service dirs to *-service/*-engine;
+ update compose paths and nats healthcheck
+
+- Switch ingest-service to node:20.18-slim for uniformity
+
+- Prisma services on node:20.18-slim; apt-get certs/openssl
+---
+ docker-compose.yml                            | 25 ++++++----
+ services/ingest-service/Dockerfile            | 37 +++++++++++++++
+ .../{ingest => ingest-service}/jest.config.js |  0
+ .../{ingest => ingest-service}/package.json   |  0
+ .../src/__tests__/ingest.test.ts              |  0
+ .../{ingest => ingest-service}/src/index.ts   |  0
+ .../{ingest => ingest-service}/tsconfig.json  |  0
+ services/ingest/Dockerfile                    | 43 -----------------
+ services/insights-engine/Dockerfile           | 41 ++++++++++++++++
+ .../jest.config.js                            |  0
+ .../package.json                              |  0
+ .../prisma/schema.prisma                      |  0
+ .../src/__tests__/insights.test.ts            |  0
+ .../src/index.ts                              |  0
+ .../tsconfig.json                             |  0
+ services/insights/Dockerfile                  | 47 -------------------
+ services/normalize-service/Dockerfile         | 41 ++++++++++++++++
+ .../jest.config.js                            |  0
+ .../package.json                              |  0
+ .../prisma/schema.prisma                      |  0
+ .../src/__tests__/normalize.test.ts           |  0
+ .../src/index.ts                              |  0
+ .../tsconfig.json                             |  0
+ services/normalize/Dockerfile                 | 47 -------------------
+ 24 files changed, 134 insertions(+), 147 deletions(-)
+ create mode 100644 services/ingest-service/Dockerfile
+ rename services/{ingest => ingest-service}/jest.config.js (100%)
+ rename services/{ingest => ingest-service}/package.json (100%)
+ rename services/{ingest => ingest-service}/src/__tests__/ingest.test.ts (100%)
+ rename services/{ingest => ingest-service}/src/index.ts (100%)
+ rename services/{ingest => ingest-service}/tsconfig.json (100%)
+ delete mode 100644 services/ingest/Dockerfile
+ create mode 100644 services/insights-engine/Dockerfile
+ rename services/{insights => insights-engine}/jest.config.js (100%)
+ rename services/{insights => insights-engine}/package.json (100%)
+ rename services/{insights => insights-engine}/prisma/schema.prisma (100%)
+ rename services/{insights => insights-engine}/src/__tests__/insights.test.ts (100%)
+ rename services/{insights => insights-engine}/src/index.ts (100%)
+ rename services/{insights => insights-engine}/tsconfig.json (100%)
+ delete mode 100644 services/insights/Dockerfile
+ create mode 100644 services/normalize-service/Dockerfile
+ rename services/{normalize => normalize-service}/jest.config.js (100%)
+ rename services/{normalize => normalize-service}/package.json (100%)
+ rename services/{normalize => normalize-service}/prisma/schema.prisma (100%)
+ rename services/{normalize => normalize-service}/src/__tests__/normalize.test.ts (100%)
+ rename services/{normalize => normalize-service}/src/index.ts (100%)
+ rename services/{normalize => normalize-service}/tsconfig.json (100%)
+ delete mode 100644 services/normalize/Dockerfile
+
+diff --git a/docker-compose.yml b/docker-compose.yml
+index f8895e5..d5fa6d5 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -21,6 +21,11 @@ services:
+ 
+   nats:
+     image: nats:2.10-alpine
++    healthcheck:
++      test: ["CMD-SHELL", "wget -q -O - http://localhost:8222/varz > /dev/null 2>&1 || exit 1"]
++      interval: 5s
++      timeout: 5s
++      retries: 30
+     container_name: athlete-ally-nats
+     command: ["-js", "-m", "8222"]
+     ports:
+@@ -30,7 +35,7 @@ services:
+   ingest:
+     build:
+       context: .
+-      dockerfile: services/ingest/Dockerfile
++      dockerfile: services/ingest-service/Dockerfile
+     command: npm run dev
+     environment:
+       NODE_ENV: development
+@@ -39,11 +44,11 @@ services:
+     ports:
+       - "4101:4101"
+     volumes:
+-      - ./services/ingest:/usr/src/app
++      - ./services/ingest-service:/usr/src/app
+       - /usr/src/app/node_modules
+     depends_on:
+       nats:
+-        condition: service_started
++        condition: service_healthy
+     healthcheck:
+       test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4101/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+       interval: 5s
+@@ -53,7 +58,7 @@ services:
+   normalize:
+     build:
+       context: .
+-      dockerfile: services/normalize/Dockerfile
++      dockerfile: services/normalize-service/Dockerfile
+     command: npm run dev
+     environment:
+       NODE_ENV: development
+@@ -63,13 +68,13 @@ services:
+     ports:
+       - "4102:4102"
+     volumes:
+-      - ./services/normalize:/usr/src/app
++      - ./services/normalize-service:/usr/src/app
+       - /usr/src/app/node_modules
+     depends_on:
+       postgres:
+         condition: service_healthy
+       nats:
+-        condition: service_started
++        condition: service_healthy
+     healthcheck:
+       test: ["CMD", "node", "-e", "http=require('http');http.get('http://localhost:4102/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+       interval: 5s
+@@ -79,7 +84,7 @@ services:
+   insights:
+     build:
+       context: .
+-      dockerfile: services/insights/Dockerfile
++      dockerfile: services/insights-engine/Dockerfile
+     command: npm run dev
+     environment:
+       NODE_ENV: development
+@@ -88,7 +93,7 @@ services:
+     ports:
+       - "4103:4103"
+     volumes:
+-      - ./services/insights:/usr/src/app
++      - ./services/insights-engine:/usr/src/app
+       - /usr/src/app/node_modules
+     depends_on:
+       postgres:
+@@ -120,7 +125,7 @@ services:
+       postgres:
+         condition: service_healthy
+       nats:
+-        condition: service_started
++        condition: service_healthy
+ 
+   redis:
+     profiles: ["planning"]
+@@ -167,4 +172,4 @@ services:
+       - prometheus
+ 
+ volumes:
+-  pgdata:
+\ No newline at end of file
++  pgdata:
+diff --git a/services/ingest-service/Dockerfile b/services/ingest-service/Dockerfile
+new file mode 100644
+index 0000000..94f3abb
+--- /dev/null
++++ b/services/ingest-service/Dockerfile
+@@ -0,0 +1,37 @@
++# --- STAGE 1: Builder ---
++FROM node:20.18-slim AS builder
++WORKDIR /app
++
++# Copy monorepo build context from root
++COPY package*.json ./
++COPY tsconfig.base.json ./
++COPY turbo.json ./
++COPY packages ./packages
++COPY services/ingest-service ./services/ingest-service
++
++# Install and build
++RUN npm ci
++RUN npx turbo run build --filter=ingest
++
++# --- STAGE 2: Runner ---
++FROM node:20.18-slim
++WORKDIR /usr/src/app
++
++# System certs/openssl for TLS
++RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
++
++# Copy built artifacts and dependencies
++COPY --from=builder /app/services/ingest-service/dist ./dist
++COPY --from=builder /app/package.json ./
++COPY --from=builder /app/package-lock.json ./
++COPY --from=builder /app/node_modules ./node_modules
++COPY --from=builder /app/packages ./packages
++
++# Non-root
++RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nodejs
++USER nodejs
++
++# Port
++EXPOSE 4101
++
++CMD ["node", "dist/index.js"]
+\ No newline at end of file
+diff --git a/services/ingest/jest.config.js b/services/ingest-service/jest.config.js
+similarity index 100%
+rename from services/ingest/jest.config.js
+rename to services/ingest-service/jest.config.js
+diff --git a/services/ingest/package.json b/services/ingest-service/package.json
+similarity index 100%
+rename from services/ingest/package.json
+rename to services/ingest-service/package.json
+diff --git a/services/ingest/src/__tests__/ingest.test.ts b/services/ingest-service/src/__tests__/ingest.test.ts
+similarity index 100%
+rename from services/ingest/src/__tests__/ingest.test.ts
+rename to services/ingest-service/src/__tests__/ingest.test.ts
+diff --git a/services/ingest/src/index.ts b/services/ingest-service/src/index.ts
+similarity index 100%
+rename from services/ingest/src/index.ts
+rename to services/ingest-service/src/index.ts
+diff --git a/services/ingest/tsconfig.json b/services/ingest-service/tsconfig.json
+similarity index 100%
+rename from services/ingest/tsconfig.json
+rename to services/ingest-service/tsconfig.json
+diff --git a/services/ingest/Dockerfile b/services/ingest/Dockerfile
+deleted file mode 100644
+index aead26f..0000000
+--- a/services/ingest/Dockerfile
++++ /dev/null
+@@ -1,43 +0,0 @@
+-# --- STAGE 1: Builder ---
+-FROM node:20.18-alpine AS builder
+-WORKDIR /app
+-
+-# 關鍵：從根上下文，拷貝所有構建所需的文件
+-COPY package*.json ./
+-COPY tsconfig.base.json ./
+-COPY turbo.json ./
+-# 拷貝所有需要被 link 的 workspace
+-COPY packages ./packages
+-COPY services/ingest ./services/ingest
+-
+-# 運行完整的 monorepo 安裝
+-RUN npm ci
+-
+-# 在完整的 monorepo 上下文中，只構建我們需要的那個服務
+-RUN npx turbo run build --filter=ingest
+-
+-# --- STAGE 2: Runner ---
+-FROM node:20.18-alpine
+-WORKDIR /usr/src/app
+-
+-# 安裝 OpenSSL 和必要的系統庫
+-RUN apk add --no-cache openssl ca-certificates
+-
+-# 從 builder 階段，拷貝編譯好的產物和完整的依賴
+-# 注意路徑是相對於 builder 內部的 /app 目錄
+-COPY --from=builder /app/services/ingest/dist ./dist
+-COPY --from=builder /app/package.json ./
+-COPY --from=builder /app/package-lock.json ./
+-COPY --from=builder /app/node_modules ./node_modules
+-COPY --from=builder /app/packages ./packages
+-
+-# 創建非 root 用戶
+-RUN addgroup --system --gid 1001 nodejs
+-RUN adduser --system --uid 1001 nodejs
+-USER nodejs
+-
+-# 暴露端口
+-EXPOSE 4101
+-
+-# 啟動服務器的命令
+-CMD ["node", "dist/index.js"]
+diff --git a/services/insights-engine/Dockerfile b/services/insights-engine/Dockerfile
+new file mode 100644
+index 0000000..94a12d5
+--- /dev/null
++++ b/services/insights-engine/Dockerfile
+@@ -0,0 +1,41 @@
++# --- STAGE 1: Builder ---
++FROM node:20.18-slim AS builder
++WORKDIR /app
++
++# Copy monorepo build context from root
++COPY package*.json ./
++COPY tsconfig.base.json ./
++COPY turbo.json ./
++COPY packages ./packages
++COPY services/insights-engine ./services/insights-engine
++
++# Install and generate Prisma client
++RUN npm ci
++RUN cd services/insights-engine && npx prisma generate
++
++# Build service
++RUN npx turbo run build --filter=insights
++
++# --- STAGE 2: Runner ---
++FROM node:20.18-slim
++WORKDIR /usr/src/app
++
++# System certs/openssl for TLS
++RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
++
++# Copy built artifacts and Prisma schema
++COPY --from=builder /app/services/insights-engine/dist ./dist
++COPY --from=builder /app/services/insights-engine/prisma ./prisma
++COPY --from=builder /app/package.json ./
++COPY --from=builder /app/package-lock.json ./
++COPY --from=builder /app/node_modules ./node_modules
++COPY --from=builder /app/packages ./packages
++
++# Non-root
++RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nodejs
++USER nodejs
++
++# Port
++EXPOSE 4103
++
++CMD ["node", "dist/index.js"]
+\ No newline at end of file
+diff --git a/services/insights/jest.config.js b/services/insights-engine/jest.config.js
+similarity index 100%
+rename from services/insights/jest.config.js
+rename to services/insights-engine/jest.config.js
+diff --git a/services/insights/package.json b/services/insights-engine/package.json
+similarity index 100%
+rename from services/insights/package.json
+rename to services/insights-engine/package.json
+diff --git a/services/insights/prisma/schema.prisma b/services/insights-engine/prisma/schema.prisma
+similarity index 100%
+rename from services/insights/prisma/schema.prisma
+rename to services/insights-engine/prisma/schema.prisma
+diff --git a/services/insights/src/__tests__/insights.test.ts b/services/insights-engine/src/__tests__/insights.test.ts
+similarity index 100%
+rename from services/insights/src/__tests__/insights.test.ts
+rename to services/insights-engine/src/__tests__/insights.test.ts
+diff --git a/services/insights/src/index.ts b/services/insights-engine/src/index.ts
+similarity index 100%
+rename from services/insights/src/index.ts
+rename to services/insights-engine/src/index.ts
+diff --git a/services/insights/tsconfig.json b/services/insights-engine/tsconfig.json
+similarity index 100%
+rename from services/insights/tsconfig.json
+rename to services/insights-engine/tsconfig.json
+diff --git a/services/insights/Dockerfile b/services/insights/Dockerfile
+deleted file mode 100644
+index c353703..0000000
+--- a/services/insights/Dockerfile
++++ /dev/null
+@@ -1,47 +0,0 @@
+-# --- STAGE 1: Builder ---
+-FROM node:20.18-slim AS builder
+-WORKDIR /app
+-
+-# 關鍵：從根上下文，拷貝所有構建所需的文件
+-COPY package*.json ./
+-COPY tsconfig.base.json ./
+-COPY turbo.json ./
+-# 拷貝所有需要被 link 的 workspace
+-COPY packages ./packages
+-COPY services/insights ./services/insights
+-
+-# 運行完整的 monorepo 安裝
+-RUN npm ci
+-
+-# Generate Prisma client
+-RUN cd services/insights && npx prisma generate
+-
+-# 在完整的 monorepo 上下文中，只構建我們需要的那個服務
+-RUN npx turbo run build --filter=insights
+-
+-# --- STAGE 2: Runner ---
+-FROM node:20.18-slim
+-WORKDIR /usr/src/app
+-
+-# 安裝 OpenSSL 和必要的系統庫
+-RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
+-
+-# 從 builder 階段，拷貝編譯好的產物和完整的依賴
+-# 注意路徑是相對於 builder 內部的 /app 目錄
+-COPY --from=builder /app/services/insights/dist ./dist
+-COPY --from=builder /app/services/insights/prisma ./prisma
+-COPY --from=builder /app/package.json ./
+-COPY --from=builder /app/package-lock.json ./
+-COPY --from=builder /app/node_modules ./node_modules
+-COPY --from=builder /app/packages ./packages
+-
+-# 創建非 root 用戶
+-RUN addgroup --system --gid 1001 nodejs
+-RUN adduser --system --uid 1001 nodejs
+-USER nodejs
+-
+-# 暴露端口
+-EXPOSE 4103
+-
+-# 啟動服務器的命令
+-CMD ["node", "dist/index.js"]
+diff --git a/services/normalize-service/Dockerfile b/services/normalize-service/Dockerfile
+new file mode 100644
+index 0000000..73da9c3
+--- /dev/null
++++ b/services/normalize-service/Dockerfile
+@@ -0,0 +1,41 @@
++# --- STAGE 1: Builder ---
++FROM node:20.18-slim AS builder
++WORKDIR /app
++
++# Copy monorepo build context from root
++COPY package*.json ./
++COPY tsconfig.base.json ./
++COPY turbo.json ./
++COPY packages ./packages
++COPY services/normalize-service ./services/normalize-service
++
++# Install and generate Prisma client
++RUN npm ci
++RUN cd services/normalize-service && npx prisma generate
++
++# Build service
++RUN npx turbo run build --filter=normalize
++
++# --- STAGE 2: Runner ---
++FROM node:20.18-slim
++WORKDIR /usr/src/app
++
++# System certs/openssl for TLS
++RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
++
++# Copy built artifacts and Prisma schema
++COPY --from=builder /app/services/normalize-service/dist ./dist
++COPY --from=builder /app/services/normalize-service/prisma ./prisma
++COPY --from=builder /app/package.json ./
++COPY --from=builder /app/package-lock.json ./
++COPY --from=builder /app/node_modules ./node_modules
++COPY --from=builder /app/packages ./packages
++
++# Non-root
++RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nodejs
++USER nodejs
++
++# Port
++EXPOSE 4102
++
++CMD ["node", "dist/index.js"]
+\ No newline at end of file
+diff --git a/services/normalize/jest.config.js b/services/normalize-service/jest.config.js
+similarity index 100%
+rename from services/normalize/jest.config.js
+rename to services/normalize-service/jest.config.js
+diff --git a/services/normalize/package.json b/services/normalize-service/package.json
+similarity index 100%
+rename from services/normalize/package.json
+rename to services/normalize-service/package.json
+diff --git a/services/normalize/prisma/schema.prisma b/services/normalize-service/prisma/schema.prisma
+similarity index 100%
+rename from services/normalize/prisma/schema.prisma
+rename to services/normalize-service/prisma/schema.prisma
+diff --git a/services/normalize/src/__tests__/normalize.test.ts b/services/normalize-service/src/__tests__/normalize.test.ts
+similarity index 100%
+rename from services/normalize/src/__tests__/normalize.test.ts
+rename to services/normalize-service/src/__tests__/normalize.test.ts
+diff --git a/services/normalize/src/index.ts b/services/normalize-service/src/index.ts
+similarity index 100%
+rename from services/normalize/src/index.ts
+rename to services/normalize-service/src/index.ts
+diff --git a/services/normalize/tsconfig.json b/services/normalize-service/tsconfig.json
+similarity index 100%
+rename from services/normalize/tsconfig.json
+rename to services/normalize-service/tsconfig.json
+diff --git a/services/normalize/Dockerfile b/services/normalize/Dockerfile
+deleted file mode 100644
+index 8ccca6b..0000000
+--- a/services/normalize/Dockerfile
++++ /dev/null
+@@ -1,47 +0,0 @@
+-# --- STAGE 1: Builder ---
+-FROM node:20.18-slim AS builder
+-WORKDIR /app
+-
+-# 關鍵：從根上下文，拷貝所有構建所需的文件
+-COPY package*.json ./
+-COPY tsconfig.base.json ./
+-COPY turbo.json ./
+-# 拷貝所有需要被 link 的 workspace
+-COPY packages ./packages
+-COPY services/normalize ./services/normalize
+-
+-# 運行完整的 monorepo 安裝
+-RUN npm ci
+-
+-# Generate Prisma client
+-RUN cd services/normalize && npx prisma generate
+-
+-# 在完整的 monorepo 上下文中，只構建我們需要的那個服務
+-RUN npx turbo run build --filter=normalize
+-
+-# --- STAGE 2: Runner ---
+-FROM node:20.18-slim
+-WORKDIR /usr/src/app
+-
+-# 安裝 OpenSSL 和必要的系統庫
+-RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
+-
+-# 從 builder 階段，拷貝編譯好的產物和完整的依賴
+-# 注意路徑是相對於 builder 內部的 /app 目錄
+-COPY --from=builder /app/services/normalize/dist ./dist
+-COPY --from=builder /app/services/normalize/prisma ./prisma
+-COPY --from=builder /app/package.json ./
+-COPY --from=builder /app/package-lock.json ./
+-COPY --from=builder /app/node_modules ./node_modules
+-COPY --from=builder /app/packages ./packages
+-
+-# 創建非 root 用戶
+-RUN addgroup --system --gid 1001 nodejs
+-RUN adduser --system --uid 1001 nodejs
+-USER nodejs
+-
+-# 暴露端口
+-EXPOSE 4102
+-
+-# 啟動服務器的命令
+-CMD ["node", "dist/index.js"]
+-- 
+2.50.0.windows.1
+

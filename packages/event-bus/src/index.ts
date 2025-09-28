@@ -391,3 +391,6 @@ export class EventBus {
 }
 
 export const eventBus = new EventBus();
+
+// Export validator for services that need direct schema validation
+export { eventValidator } from './validator.js';

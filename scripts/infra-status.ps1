@@ -12,7 +12,7 @@
 #   powershell -ExecutionPolicy Bypass -File ./scripts/infra-status.ps1
 
 Write-Host "?? Infrastructure Service Status:" -ForegroundColor Yellow
-docker compose -f ./preview.compose.yaml ps
+docker compose -f ./docker-compose/preview.yml ps
 
 Write-Host "`n?? Port Usage:" -ForegroundColor Yellow
 try {

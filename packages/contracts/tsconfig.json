@@ -13,7 +13,7 @@
     "outDir": "./dist",
     "rootDir": "./"
   },
-  "include": ["events/**/*", "openapi.yaml"],
+  "include": ["index.ts", "events/**/*", "openapi.yaml"],
   "exclude": ["node_modules", "dist", "__tests__"]
 }
 
