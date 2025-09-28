@@ -1,118 +1,58 @@
 {
-  "$defs": {
-    "metadata": {
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "version",
-        "domain",
-        "user_id",
-        "received_at",
-        "source"
-      ],
-      "properties": {
-        "domain": {
-          "type": "string"
-        },
-        "received_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "version": {
-          "type": "string",
-          "const": "v1"
-        },
-        "source": {
-          "additionalProperties": true,
-          "type": "object",
-          "required": [
-            "provider"
-          ],
-          "properties": {
-            "delivery_id": {
-              "type": "string"
-            },
-            "provider": {
-              "type": "string"
-            },
-            "event_id": {
-              "type": "string"
-            }
-          }
-        },
-        "user_id": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
-    }
-  },
-  "required": [
-    "version",
-    "domain",
-    "user_id",
-    "received_at",
-    "source",
-    "samples"
-  ],
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://athlete-ally.dev/schemas/normalized/steps.v1.json",
-  "title": "Normalized steps v1",
-  "additionalProperties": false,
+  "title": "Normalized Steps v1",
   "type": "object",
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "const": "v1" },
+        "domain": { "type": "string" },
+        "user_id": { "type": "string", "minLength": 1 },
+        "received_at": { "type": "string", "format": "date-time" },
+        "source": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "event_id": { "type": "string" },
+            "delivery_id": { "type": "string" }
+          },
+          "required": ["provider"],
+          "additionalProperties": true
+        }
+      },
+      "required": ["version", "domain", "user_id", "received_at", "source"],
+      "additionalProperties": false
+    }
+  },
   "properties": {
-    "version": {
-      "type": "string",
-      "const": "v1"
-    },
-    "user_id": {
-      "type": "string"
-    },
-    "received_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "source": {
-      "$ref": "#/$defs/metadata/properties/source"
-    },
+    "version": { "type": "string", "const": "v1" },
+    "domain": { "type": "string", "const": "steps" },
+    "user_id": { "type": "string" },
+    "received_at": { "type": "string", "format": "date-time" },
+    "source": { "$ref": "#/$defs/metadata/properties/source" },
     "samples": {
       "type": "array",
       "items": {
-        "additionalProperties": false,
         "type": "object",
-        "required": [
-          "timestamp",
-          "steps"
-        ],
         "properties": {
-          "window_sec": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "steps": {
-            "type": "integer",
-            "minimum": 0
-          }
-        }
+          "timestamp": { "type": "string", "format": "date-time" },
+          "steps": { "type": "integer", "minimum": 0 },
+          "window_sec": { "type": "integer", "minimum": 1 }
+        },
+        "required": ["timestamp", "steps"],
+        "additionalProperties": false
       }
-    },
-    "domain": {
-      "type": "string",
-      "const": "steps"
     },
     "summary": {
-      "additionalProperties": false,
       "type": "object",
       "properties": {
-        "total": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
+        "total": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
     }
-  }
+  },
+  "required": ["version", "domain", "user_id", "received_at", "source", "samples"],
+  "additionalProperties": false
 }
