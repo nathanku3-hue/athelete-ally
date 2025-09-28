@@ -9,6 +9,11 @@ module.exports = {
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.integration.test.ts'
   ],
+  // Stabilize: exclude heavy perf test from the default services run.
+  // It has its own targeted script/CI job to avoid Prisma/engine env coupling.
+  testPathIgnorePatterns: [
+    '.*planning-engine-performance\\.test\\.ts$'
+  ],
   // No global test skipping - use describe.skip/it.skip in individual test files
   // See services/planning-engine/JEST_CONFIG.md for details
   setupFilesAfterEnv: [
