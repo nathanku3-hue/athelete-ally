@@ -21,6 +21,9 @@ on:
         description: 'Reason for manual trigger'
         required: false
         default: 'Manual verification'
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual verification'
 
 jobs:
   sanity:
