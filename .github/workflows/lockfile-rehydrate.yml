@@ -9,7 +9,7 @@ permissions:
 jobs:
   rehydrate:
     runs-on: ubuntu-latest
-      steps:
+    steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}

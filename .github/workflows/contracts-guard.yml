@@ -17,7 +17,7 @@ jobs:
     needs: [sanity]
     if: github.event_name == 'pull_request'
     
-      steps:
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:

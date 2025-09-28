@@ -30,7 +30,7 @@ jobs:
         ports:
           - 5432:5432
 
-      steps:
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
