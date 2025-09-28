@@ -30,7 +30,7 @@ services:
       - PORT=4101
       - NATS_URL=nats://nats:4222
     volumes:
-      - ./services/ingest-service:/usr/src/app
+      - ../services/ingest-service:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - "4101:4101"
@@ -48,7 +48,7 @@ services:
       - DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_normalize
       - NATS_URL=nats://nats:4222
     volumes:
-      - ./services/normalize-service:/usr/src/app
+      - ../services/normalize-service:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - "4102:4102"
@@ -66,7 +66,7 @@ services:
       - PORT=4103
       - DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_insights
     volumes:
-      - ./services/insights-engine:/usr/src/app
+      - ../services/insights-engine:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - "4103:4103"
