@@ -67,12 +67,36 @@ export interface PlanGenerationFailedEvent {
   retryCount: number;
 }
 
+export interface HRVRawReceivedEvent {
+  payload: {
+    userId: string;
+    date: string; // 'YYYY-MM-DD'
+    rMSSD: number; // >= 0
+    capturedAt: string; // ISO datetime
+    raw?: Record<string, unknown>;
+  };
+}
+
+export interface HRVNormalizedStoredEvent {
+  record: {
+    userId: string;
+    date: string; // 'YYYY-MM-DD'
+    rMSSD: number;
+    lnRMSSD: number;
+    readinessScore: number; // 0..100
+    vendor: 'oura' | 'whoop' | 'unknown';
+    capturedAt: string; // ISO datetime
+  };
+}
+
 // Event topics
 export const EVENT_TOPICS = {
   ONBOARDING_COMPLETED: 'athlete-ally.onboarding.completed',
   PLAN_GENERATION_REQUESTED: 'athlete-ally.plans.generation-requested',
   PLAN_GENERATED: 'athlete-ally.plans.generated',
   PLAN_GENERATION_FAILED: 'athlete-ally.plans.generation-failed',
+  HRV_RAW_RECEIVED: 'athlete-ally.hrv.raw-received',
+  HRV_NORMALIZED_STORED: 'athlete-ally.hrv.normalized-stored',
 } as const;
 
 // Export schemas from dedicated file
