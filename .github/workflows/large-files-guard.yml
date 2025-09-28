@@ -11,7 +11,7 @@ jobs:
   large-files-check:
     name: Check for large tracked files
     runs-on: ubuntu-latest
-    steps:
+      steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:

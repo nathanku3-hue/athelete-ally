@@ -33,7 +33,7 @@ jobs:
       # CONTRACT: This output must remain stable and newline-separated
       # All 16+ caller workflows depend on this exact output name and format
       cache-dependency-path: ${{ steps.locks.outputs.paths || 'package-lock.json' }}
-    steps:
+      steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
         with:

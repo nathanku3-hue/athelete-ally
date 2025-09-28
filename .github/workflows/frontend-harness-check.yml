@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: sanity
-    steps:
+      steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
         with:
