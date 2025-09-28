@@ -1,0 +1,14 @@
+# Review-Only Patch: Engines Alignment (Node 20.18.x, npm >=10.0.0)
+
+Verification checklist:
+- After applying, run `npm ci` (root), `npm run test`, `npm run build`
+- Ensure CI runners use Node 20.18.0 (actions/setup-node)
+
+--- a/services\protocol-engine\package.json
++++ b/services\protocol-engine\package.json
+@@ engines @@
+-  node: >=18.0.0
+-  npm:  >=8.0.0
++  node: 20.18.x
++  npm:  >=10.0.0
+

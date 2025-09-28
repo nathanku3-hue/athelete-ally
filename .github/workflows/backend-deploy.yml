@@ -40,7 +40,7 @@ jobs:
       - name: Generate Prisma client
         run: |
           set -euo pipefail
-          echo "🔧 Generating Prisma client for planning-engine..."
+          echo "?? Generating Prisma client for planning-engine..."
           npm run db:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
       
       - name: Run tests (workspace)
@@ -63,11 +63,10 @@ jobs:
       
       - name: Build Docker image
         run: |
-          cd services/planning-engine
-          docker build -t athlete-ally/planning-engine:latest .
+          docker build -t athlete-ally/planning-engine:latest -f services/planning-engine/Dockerfile .
       
       - name: Deploy to production
         run: |
           echo "Deploying to production..."
-          # 这里添加实际的部署命令
+          # ???????????
 
