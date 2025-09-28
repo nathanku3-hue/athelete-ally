@@ -1,10 +1,10 @@
 /* @jest-environment node */
 // Jest globals are available without import
 import { EventBus } from '@athlete-ally/event-bus';
-import { EventProcessor } from '../events/processor.ts';
+import { EventProcessor } from '../events/processor';
 
 describe.skip('Message Reliability Tests', () => {
-  // TODO: 修复ESM Prisma mock问题 - 需要集成测试环境
+  // TODO: ??ESM Prisma mock?? - ????????
   // Issue: https://github.com/nathanku3-hue/athelete-ally/issues/ci-mock-fix
   let eventBus: EventBus;
   let eventProcessor: EventProcessor;
@@ -13,7 +13,7 @@ describe.skip('Message Reliability Tests', () => {
     eventBus = new EventBus();
     eventProcessor = new EventProcessor();
     
-    // 模拟连接
+    // ????
     jest.spyOn(eventBus, 'connect').mockResolvedValue(undefined);
     jest.spyOn(eventProcessor, 'connect').mockResolvedValue(undefined);
   });
@@ -43,7 +43,7 @@ describe.skip('Message Reliability Tests', () => {
         fetch: mockFetch
       });
 
-      // 模拟JetStream
+      // ??JetStream
       const mockJs = {
         pullSubscribe: mockPullSubscribe
       };
@@ -57,10 +57,10 @@ describe.skip('Message Reliability Tests', () => {
         return Promise.resolve();
       });
 
-      // 测试批量处理
+      // ??????
       await eventBus.subscribeToOnboardingCompleted(handler);
 
-      // 等待处理完成
+      // ??????
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(processedEvents).toHaveLength(10);
@@ -79,7 +79,7 @@ describe.skip('Message Reliability Tests', () => {
         },
         {
           data: new TextEncoder().encode(JSON.stringify({ 
-            eventId: 'invalid-event' // 缺少userId
+            eventId: 'invalid-event' // ??userId
           })),
           ack: jest.fn(),
           nak: jest.fn()
@@ -107,7 +107,7 @@ describe.skip('Message Reliability Tests', () => {
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // 验证ACK/NAK调用
+      // ??ACK/NAK??
       expect(mockMessages[0].ack).toHaveBeenCalled();
       expect(mockMessages[1].nak).toHaveBeenCalled();
     });
@@ -118,12 +118,12 @@ describe.skip('Message Reliability Tests', () => {
       const maxConcurrent = 2;
       const eventProcessor = new EventProcessor();
       
-      // 模拟长时间运行的处理函数
+      // ????????????
       const handler = jest.fn().mockImplementation(() => 
         new Promise(resolve => setTimeout(resolve, 100))
       );
 
-      // 启动多个并发任务
+      // ????????
       const promises = [];
       for (let i = 0; i < 5; i++) {
         const task = { 
@@ -142,7 +142,7 @@ describe.skip('Message Reliability Tests', () => {
 
       await Promise.allSettled(promises);
 
-      // 验证所有任务都被处理
+      // ??????????
       expect(handler).toHaveBeenCalledTimes(5);
     });
 
@@ -154,7 +154,7 @@ describe.skip('Message Reliability Tests', () => {
         new Promise(resolve => setTimeout(resolve, 50))
       );
 
-      // 启动多个任务
+      // ??????
       const promises = [];
       for (let i = 0; i < 3; i++) {
         const task = { 
@@ -173,7 +173,7 @@ describe.skip('Message Reliability Tests', () => {
 
       await Promise.allSettled(promises);
 
-      // 验证没有事件被跳过
+      // ?????????
       expect(handler).toHaveBeenCalledTimes(3);
     });
   });
@@ -203,7 +203,7 @@ describe.skip('Message Reliability Tests', () => {
 
   describe('Docker Container Health', () => {
     it('should have all required dependencies', () => {
-      // 检查必要的模块是否可用
+      // ???????????
       expect(() => require('nats')).not.toThrow();
       expect(() => require('ioredis')).not.toThrow();
       expect(() => require('pg')).not.toThrow();
@@ -212,7 +212,7 @@ describe.skip('Message Reliability Tests', () => {
     });
 
     it('should have proper environment configuration', () => {
-      // 检查环境变量配置
+      // ????????
       const requiredEnvVars = [
         'NODE_ENV',
         'PORT',
@@ -221,7 +221,7 @@ describe.skip('Message Reliability Tests', () => {
         'NATS_URL'
       ];
       
-      // 在测试环境中，这些变量可能未设置，但配置应该能够处理
+      // ??????????????????????????
       requiredEnvVars.forEach(envVar => {
         expect(process.env[envVar] !== undefined || envVar === 'NODE_ENV').toBe(true);
       });
