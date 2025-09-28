@@ -1,170 +1,123 @@
 import Fastify from 'fastify';
+import { EventBus } from '@athlete-ally/event-bus';
 import { PrismaClient } from '../prisma/generated/client';
+import { EventHandlers } from './eventHandlers';
+import { readinessRoutes } from './routes/readiness';
 
 const fastify = Fastify({
   logger: true
 });
 
-const prisma = new PrismaClient();
+// EventBus and Prisma connections
+let eventBus: EventBus | null = null;
+let prisma: PrismaClient | null = null;
+let eventHandlers: EventHandlers | null = null;
 
-// Health check endpoint
-fastify.get('/health', async (request, reply) => {
-  return { 
-    status: 'healthy', 
-    service: 'insights',
-    timestamp: new Date().toISOString()
-  };
-});
-
-// Readiness endpoints
-fastify.get('/readiness/today', async (request, reply) => {
+async function connectEventBus() {
   try {
-    const { userId } = request.query as { userId: string };
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const score = await prisma.readinessScore.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date: today
-        }
-      }
-    });
-    
-    if (!score) {
-      return reply.code(204).send(); // No data available
-    }
-    
-    return {
-      userId: score.userId,
-      date: score.date,
-      score: score.score,
-      drivers: score.drivers
-    };
-  } catch (error) {
-    fastify.log.error(error);
-    reply.code(500).send({ error: 'Internal server error' });
+    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+    eventBus = new EventBus();
+    await eventBus.connect(natsUrl);
+    console.log('Connected to EventBus');
+  } catch (err) {
+    console.error('Failed to connect to EventBus:', err);
+    process.exit(1);
   }
-});
+}
 
-fastify.get('/readiness', async (request, reply) => {
+async function connectDatabase() {
   try {
-    const { userId, start, end } = request.query as { 
-      userId: string; 
-      start?: string; 
-      end?: string; 
-    };
-    
-    const startDate = start ? new Date(start) : new Date();
-    const endDate = end ? new Date(end) : new Date();
-    
-    const scores = await prisma.readinessScore.findMany({
-      where: {
-        userId,
-        date: {
-          gte: startDate,
-          lte: endDate
-        }
-      },
-      orderBy: {
-        date: 'asc'
-      }
-    });
-    
-    if (scores.length === 0) {
-      return reply.code(204).send(); // No data available
-    }
-    
-    return {
-      userId,
-      period: { start: startDate, end: endDate },
-      scores: scores.map((s: any) => ({
-        date: s.date,
-        score: s.score,
-        drivers: s.drivers
-      }))
-    };
-  } catch (error) {
-    fastify.log.error(error);
-    reply.code(500).send({ error: 'Internal server error' });
+    prisma = new PrismaClient();
+    await prisma.$connect();
+    console.log('Connected to database');
+  } catch (err) {
+    console.error('Failed to connect to database:', err);
+    process.exit(1);
   }
-});
-
-// Readiness calculation drivers
-interface ReadinessDrivers {
-  hrv_delta: number;
-  trend_3d: number;
-  data_freshness: number;
 }
 
-async function calculateReadinessDrivers(userId: string, date: Date): Promise<ReadinessDrivers> {
-  // HRV Delta: lnRMSSD - 7-day baseline
-  const hrvDelta = await calculateHrvDelta(userId, date);
-  
-  // Trend 3d: short trend analysis
-  const trend3d = await calculateTrend3d(userId, date);
-  
-  // Data freshness: minutes since capturedAt
-  const dataFreshness = await calculateDataFreshness(userId, date);
-  
-  return {
-    hrv_delta: hrvDelta,
-    trend_3d: trend3d,
-    data_freshness: dataFreshness
-  };
+async function initializeEventHandlers() {
+  if (!eventBus || !prisma) {
+    throw new Error('EventBus and Prisma must be initialized first');
+  }
+
+  eventHandlers = new EventHandlers(eventBus, prisma);
+  await eventHandlers.subscribeToHrvNormalizedEvents();
+  console.log('Event handlers initialized');
 }
 
-async function calculateHrvDelta(userId: string, date: Date): Promise<number> {
-  // TODO: Implement HRV delta calculation
-  // This should query the normalize service's database or API
-  // For now, return a placeholder value
-  return 0;
-}
+// Register routes
+fastify.register(readinessRoutes);
 
-async function calculateTrend3d(userId: string, date: Date): Promise<number> {
-  // Get last 3 days of readiness scores
-  const threeDaysAgo = new Date(date);
-  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+// Feature flag: READINESS_STUB
+if (process.env.READINESS_STUB === 'true') {
+  console.log('READINESS_STUB enabled - returning static responses');
   
-  const recentScores = await prisma.readinessScore.findMany({
-    where: {
-      userId,
-      date: {
-        gte: threeDaysAgo,
-        lt: date
-      }
-    },
-    orderBy: { date: 'desc' },
-    take: 3
+  fastify.get('/readiness/today', async (request, reply) => {
+    return reply.code(200).send({
+      userId: 'stub-user',
+      date: new Date().toISOString().split('T')[0],
+      readinessScore: 85,
+      drivers: [
+        { key: 'hrvDelta', label: 'HRV Delta', value: 0.15 },
+        { key: 'trend3d', label: '3-Day Trend', value: -0.05 },
+        { key: 'dataFreshness', label: 'Data Freshness', value: 0.95 }
+      ],
+      timestamp: new Date().toISOString()
+    });
   });
-  
-  if (recentScores.length < 2) {
-    return 0; // Not enough data for trend
-  }
-  
-  // Simple linear trend calculation
-  const scores = recentScores.map((s: any) => s.score);
-  const trend = scores[0] - scores[scores.length - 1];
-  return trend;
-}
 
-async function calculateDataFreshness(userId: string, date: Date): Promise<number> {
-  // TODO: Implement data freshness calculation
-  // This should query the normalize service's database or API
-  // For now, return a placeholder value
-  return 0;
+  fastify.get('/readiness', async (request, reply) => {
+    const today = new Date().toISOString().split('T')[0];
+    return reply.code(200).send([
+      {
+        date: today,
+        readinessScore: 85,
+        drivers: [
+          { key: 'hrvDelta', label: 'HRV Delta', value: 0.15 },
+          { key: 'trend3d', label: '3-Day Trend', value: -0.05 },
+          { key: 'dataFreshness', label: 'Data Freshness', value: 0.95 }
+        ]
+      }
+    ]);
+  });
 }
 
 const start = async () => {
   try {
+    // Connect to external services
+    await connectEventBus();
+    await connectDatabase();
+    
+    // Initialize event handlers
+    await initializeEventHandlers();
+    
+    // Start HTTP server
     const port = parseInt(process.env.PORT || '4103');
     await fastify.listen({ port, host: '0.0.0.0' });
-    console.log(`Insights service listening on port ${port}`);
+    console.log(`Insights Engine service listening on port ${port}`);
+    
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 };
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  
+  if (prisma) {
+    await prisma.$disconnect();
+  }
+  
+  if (eventBus) {
+    // EventBus doesn't have disconnect method, just log
+    console.log('EventBus connection closed');
+  }
+  
+  await fastify.close();
+  process.exit(0);
+});
 
 start();

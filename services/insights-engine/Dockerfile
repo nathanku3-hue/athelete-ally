@@ -1,41 +1,65 @@
-# --- STAGE 1: Builder ---
-FROM node:20.18-slim AS builder
-WORKDIR /app
+# Multi-stage build for insights-engine service
+FROM node:20.18-slim AS base
 
-# Copy monorepo build context from root
-COPY package*.json ./
-COPY tsconfig.base.json ./
-COPY turbo.json ./
-COPY packages ./packages
-COPY services/insights-engine ./services/insights-engine
-
-# Install and generate Prisma client
-RUN npm ci
-RUN cd services/insights-engine && npx prisma generate
-
-# Build service
-RUN npx turbo run build --filter=insights
-
-# --- STAGE 2: Runner ---
-FROM node:20.18-slim
+# Install dependencies only when needed
+FROM base AS deps
 WORKDIR /usr/src/app
 
-# System certs/openssl for TLS
-RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
+# Copy package files
+COPY package*.json ./
+COPY services/insights-engine/package.json ./services/insights-engine/
+COPY packages/event-bus/package.json ./packages/event-bus/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/contracts/package.json ./packages/contracts/
 
-# Copy built artifacts and Prisma schema
-COPY --from=builder /app/services/insights-engine/dist ./dist
-COPY --from=builder /app/services/insights-engine/prisma ./prisma
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
+# Install dependencies
+RUN npm ci --only=production
 
-# Non-root
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nodejs
-USER nodejs
+# Build stage
+FROM base AS builder
+WORKDIR /usr/src/app
 
-# Port
+# Copy package files
+COPY package*.json ./
+COPY services/insights-engine/package.json ./services/insights-engine/
+COPY packages/event-bus/package.json ./packages/event-bus/
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/contracts/package.json ./packages/contracts/
+
+# Install all dependencies (including dev)
+RUN npm ci
+
+# Copy source code
+COPY services/insights-engine ./services/insights-engine
+COPY packages ./packages
+COPY tsconfig.base.json ./
+
+# Generate Prisma client
+WORKDIR /usr/src/app/services/insights-engine
+RUN npx prisma generate
+
+# Build the application
+RUN npm run build
+
+# Production stage
+FROM base AS runner
+WORKDIR /usr/src/app
+
+# Copy built application
+COPY --from=builder /usr/src/app/services/insights-engine/dist ./dist
+COPY --from=builder /usr/src/app/services/insights-engine/prisma ./prisma
+COPY --from=builder /usr/src/app/services/insights-engine/package.json ./
+
+# Copy node_modules
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY --from=deps /usr/src/app/services/insights-engine/node_modules ./node_modules
+
+# Expose port
 EXPOSE 4103
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4103/health || exit 1
+
+# Start the application
 CMD ["node", "dist/index.js"]

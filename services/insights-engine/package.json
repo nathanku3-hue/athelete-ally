@@ -1,7 +1,7 @@
 {
-  "name": "@athlete-ally/insights",
+  "name": "@athlete-ally/insights-engine",
   "version": "1.0.0",
-  "description": "Insights engine service for Athlete Ally",
+  "description": "Insights engine for Athlete Ally readiness calculations",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -18,6 +18,7 @@
   "dependencies": {
     "@athlete-ally/event-bus": "*",
     "@athlete-ally/shared-types": "*",
+    "@athlete-ally/contracts": "*",
     "@prisma/client": "^5.22.0",
     "prisma": "^5.22.0",
     "fastify": "^4.28.1",
