@@ -81,7 +81,7 @@ services:
       timeout: 5s
       retries: 30
 
-  insights:
+  insights-engine:
     build:
       context: .
       dockerfile: services/insights-engine/Dockerfile
