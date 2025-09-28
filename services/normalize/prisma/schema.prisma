@@ -1,0 +1,41 @@
+// Prisma schema for normalize service
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HrvData {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  rmssd     Float?
+  lnRmssd   Float?
+  capturedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("hrv_data")
+}
+
+model SleepData {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @db.Date
+  totalSleep  Int?     // minutes
+  deepSleep   Int?     // minutes
+  lightSleep  Int?     // minutes
+  remSleep    Int?     // minutes
+  debtMin     Int?     // rolling deficit with cap
+  capturedAt  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("sleep_data")
+}
