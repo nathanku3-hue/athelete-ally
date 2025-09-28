@@ -146,7 +146,6 @@ describe.skip('End-to-End Integration Tests', () => {
         season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 4,
-<<<<<<< HEAD
         equipment: [...equipment],
         purpose: 'general_fitness'
       };
