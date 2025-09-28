@@ -110,12 +110,52 @@ export const PlanGenerationFailedSchema = {
   }
 } as const;
 
+export const HRVRawReceivedSchema = {
+  type: 'object',
+  required: ['payload'],
+  properties: {
+    payload: {
+      type: 'object',
+      required: ['userId', 'date', 'rMSSD', 'capturedAt'],
+      properties: {
+        userId: { type: 'string', minLength: 1 },
+        date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+        rMSSD: { type: 'number', minimum: 0 },
+        capturedAt: { type: 'string', format: 'date-time' },
+        raw: { type: 'object' }
+      }
+    }
+  }
+} as const;
+
+export const HRVNormalizedStoredSchema = {
+  type: 'object',
+  required: ['record'],
+  properties: {
+    record: {
+      type: 'object',
+      required: ['userId', 'date', 'rMSSD', 'lnRMSSD', 'readinessScore', 'vendor', 'capturedAt'],
+      properties: {
+        userId: { type: 'string', minLength: 1 },
+        date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+        rMSSD: { type: 'number', minimum: 0 },
+        lnRMSSD: { type: 'number' },
+        readinessScore: { type: 'number', minimum: 0, maximum: 100 },
+        vendor: { type: 'string', enum: ['oura', 'whoop', 'unknown'] },
+        capturedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  }
+} as const;
+
 // Schema registry for easy access
 export const EventSchemas = {
   'onboarding_completed': OnboardingCompletedSchema,
   'plan_generation_requested': PlanGenerationRequestedSchema,
   'plan_generated': PlanGeneratedSchema,
-  'plan_generation_failed': PlanGenerationFailedSchema
+  'plan_generation_failed': PlanGenerationFailedSchema,
+  'hrv_raw_received': HRVRawReceivedSchema,
+  'hrv_normalized_stored': HRVNormalizedStoredSchema
 } as const;
 
 // Type for schema keys

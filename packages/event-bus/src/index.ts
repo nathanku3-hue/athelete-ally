@@ -1,5 +1,5 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
-import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
+import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator, ValidationResult } from './validator.js';
 import { config } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
@@ -156,6 +156,14 @@ export class EventBus {
 
   async publishPlanGenerationFailed(event: PlanGenerationFailedEvent) {
     await this.publishEvent('plan_generation_failed', event, EVENT_TOPICS.PLAN_GENERATION_FAILED);
+  }
+
+  async publishHRVRawReceived(event: HRVRawReceivedEvent) {
+    await this.publishEvent('hrv_raw_received', event, EVENT_TOPICS.HRV_RAW_RECEIVED);
+  }
+
+  async publishHRVNormalizedStored(event: HRVNormalizedStoredEvent) {
+    await this.publishEvent('hrv_normalized_stored', event, EVENT_TOPICS.HRV_NORMALIZED_STORED);
   }
 
   async subscribeToOnboardingCompleted(callback: (event: OnboardingCompletedEvent) => Promise<void>) {

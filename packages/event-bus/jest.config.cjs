@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   
   // 测试文件发现
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>'],
   testMatch: [
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.integration.test.ts',
@@ -19,7 +19,7 @@ module.exports = {
   ],
   
   // 模块解析配置
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@packages/(.*)$': '<rootDir>/../$1',
     '^@services/(.*)$': '<rootDir>/../../services/$1',
