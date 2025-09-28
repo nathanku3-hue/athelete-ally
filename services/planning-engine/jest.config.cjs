@@ -12,7 +12,8 @@ module.exports = {
   testPathIgnorePatterns: [
     // Skip problematic tests that require complex ESM mocking
     // See JEST_CONFIG.md for details
-    '/(message-reliability|reliability|performance/planning-engine-performance|integration/end-to-end)\\.test\\.ts$'
+    '/(message-reliability|reliability|performance/planning-engine-performance)\\.test\\.ts$'
+    // Note: integration/end-to-end.test.ts is now included for integration testing
   ],
   // Global mocks for planning-engine tests (load before modules)
   setupFiles: [

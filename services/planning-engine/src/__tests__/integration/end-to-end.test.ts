@@ -48,12 +48,12 @@ describe.skip('End-to-End Integration Tests', () => {
     // TODO: Implement LLM integration - https://github.com/nathanku3/athelete-ally/issues/LLM_INTEGRATION
     const request: TrainingPlanRequest = {
       userId: 'test-user-123',
-      proficiency: 'intermediate',
-      season: 'offseason',
+      proficiency: 'intermediate' as const,
+      season: 'offseason' as const,
       availabilityDays: 3,
       weeklyGoalDays: 4,
       equipment: ['bodyweight', 'dumbbells'],
-      purpose: 'general_fitness'
+      purpose: 'general_fitness' as const
     };
 
     const plan = await generateTrainingPlan(request);
@@ -116,11 +116,11 @@ describe.skip('End-to-End Integration Tests', () => {
       const request: TrainingPlanRequest = {
         userId: `test-user-${proficiency}`,
         proficiency,
-        season: 'offseason',
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 4,
         equipment: ['bodyweight'],
-        purpose: 'general_fitness'
+        purpose: 'general_fitness' as const
       };
 
       const plan = await generateTrainingPlan(request);
@@ -142,10 +142,11 @@ describe.skip('End-to-End Integration Tests', () => {
     for (const equipment of equipmentConfigs) {
       const request: TrainingPlanRequest = {
         userId: `test-user-${equipment.join('-')}`,
-        proficiency: 'intermediate',
-        season: 'offseason',
+        proficiency: 'intermediate' as const,
+        season: 'offseason' as const,
         availabilityDays: 3,
         weeklyGoalDays: 4,
+<<<<<<< HEAD
         equipment: [...equipment],
         purpose: 'general_fitness'
       };
