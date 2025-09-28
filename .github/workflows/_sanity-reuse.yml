@@ -14,10 +14,6 @@ on:
         type: string
         default: 'npm'
     outputs:
-      # CONTRACT: Reusable Sanity Workflow Output
-      # - Output name: outputs.cache-dependency-path
-      # - Content: newline-separated lockfile paths
-      # - Caller usage: setup-node cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path || 'package-lock.json' }}
       cache-dependency-path:
         description: 'Cache dependency path for npm (newline-separated list of package-lock.json files)'
         value: ${{ jobs.sanity-and-locks.outputs.cache-dependency-path }}

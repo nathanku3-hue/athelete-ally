@@ -63,7 +63,7 @@
     "config:test-integration": "npm run config:test",
     "config:validate-contract": "node scripts/validate-config-contract.js",
     "config:debug": "node scripts/debug-config-integration.js",
-    "env:validate": "npx tsx scripts/validate-env.ts",
+    "env:validate": "npx tsx scripts/validate-environment.ts",
     "env:check": "npm run env:validate",
     "dev:start": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
     "dev:start:unix": "bash scripts/start-dev.sh",
@@ -80,7 +80,9 @@
     "hooks:enable": "git config core.hooksPath .githooks",
     "e2e:pw": "playwright test",
     "e2e:pw:ci": "playwright test --project=chromium --reporter=dot",
-    "validate:schemas": "node scripts/validate-schemas.js"
+    "validate:schemas": "node scripts/validate-schemas.js",
+    "dev:compose": "docker compose up --build",
+    "dev:compose:obs": "docker compose --profile obs up --build"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

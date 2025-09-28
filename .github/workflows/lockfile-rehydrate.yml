@@ -1,0 +1,38 @@
+name: Lockfile Rehydrate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rehydrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - name: npm ci (try)
+        run: npm ci --no-audit --no-fund
+        continue-on-error: true
+      - name: npm install --workspaces (rehydrate if needed)
+        if: failure()
+        run: npm install --workspaces --no-audit --no-fund
+      - name: Validate with npm ci
+        run: npm ci --no-audit --no-fund
+      - name: Commit lockfile if changed
+        run: |
+          if ! git diff --quiet package-lock.json; then
+            git config user.name "gh-actions"
+            git config user.email "actions@github.com"
+            git add package-lock.json
+            git commit -m "chore(lockfile): rehydrate workspaces on Node 20.18.0 after service renames"
+            git push
+          fi
