@@ -51,6 +51,7 @@ module.exports = {
   moduleNameMapper: {
     // @athlete-ally packages (specific mappings first)
     '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
+    '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
     '^@athlete-ally/contracts/events/(.*)$': '<rootDir>/packages/contracts/events/$1',
     '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/$1',
