@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": "../../",
+    "baseUrl": "../..",
     "paths": {
       "@athlete-ally/contracts": ["packages/contracts"],
       "@athlete-ally/contracts/*": ["packages/contracts/*"],

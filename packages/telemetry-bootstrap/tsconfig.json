@@ -1,8 +1,8 @@
 {
   "extends": "../../config/typescript/tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": "../..",
     "outDir": "./dist",
-    "rootDir": "./src",
     "declaration": true,
     "composite": false,
     "module": "CommonJS",
@@ -11,7 +11,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "noEmit": false
   },
   "include": ["src/**/*"]
 }
