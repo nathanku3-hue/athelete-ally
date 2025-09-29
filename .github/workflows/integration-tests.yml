@@ -70,7 +70,11 @@ jobs:
 
         run: npm ci --no-audit --no-fund
       - name: Generate Prisma clients
-        run: ./scripts/generate-prisma-clients.sh
+        run: |
+          set -euo pipefail
+          # Use no-engine mode for integration tests (no DB runtime during generation)
+          export PRISMA_NO_ENGINE=1
+          bash ./scripts/ci/prisma-generate.sh
 
       - name: Setup test database
         run: |

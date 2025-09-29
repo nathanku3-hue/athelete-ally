@@ -40,7 +40,9 @@ jobs:
         run: |
           set -euo pipefail
           echo "?? Generating Prisma client for planning-engine..."
-          npm run db:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
+          # Use no-engine mode for build/deploy jobs
+          export PRISMA_NO_ENGINE=1
+          bash ./scripts/ci/prisma-generate.sh services/planning-engine
       
       - name: Run tests (workspace)
         run: npm run test -w services/planning-engine

@@ -33,13 +33,21 @@ run_prisma_generate() {
     # Check if we should skip engine download
     if [ "${PRISMA_NO_ENGINE:-}" = "1" ]; then
         echo -e "${YELLOW}  📦 Generating Prisma client without engine (CI-optimized)${NC}"
-        if npx prisma generate --no-engine; then
+        
+        # Try --no-engine first
+        if npx prisma generate --no-engine 2>/dev/null; then
             echo -e "${GREEN}  ✅ Generated Prisma client for $service_name (no-engine mode)${NC}"
             return 0
-        else
-            echo -e "${RED}  ❌ Failed to generate Prisma client for $service_name${NC}"
-            return 1
         fi
+        
+        # If --no-engine fails, check if client already exists
+        if [ -d "prisma/generated/client" ]; then
+            echo -e "${YELLOW}  ⚠️  Using existing Prisma client for $service_name (no-engine failed)${NC}"
+            return 0
+        fi
+        
+        echo -e "${RED}  ❌ Failed to generate Prisma client for $service_name${NC}"
+        return 1
     else
         echo -e "${GREEN}  📦 Generating Prisma client with engine (runtime mode)${NC}"
         
