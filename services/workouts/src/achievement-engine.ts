@@ -349,7 +349,7 @@ export class AchievementEngine {
       totalGoals,
       achievedGoals,
       activeGoals,
-      recordTypes: recordTypes.map(rt => ({
+      recordTypes: recordTypes.map((rt: any) => ({
         type: rt.recordType,
         count: rt._count.recordType,
       })),
@@ -373,7 +373,7 @@ export class AchievementEngine {
     });
 
     return {
-      records: records.map(r => ({
+      records: records.map((r: any) => ({
         type: 'record',
         id: r.id,
         exerciseName: r.exerciseName,
@@ -382,7 +382,7 @@ export class AchievementEngine {
         unit: r.unit,
         achievedAt: r.verifiedAt,
       })),
-      goals: goals.map(g => ({
+      goals: goals.map((g: any) => ({
         type: 'goal',
         id: g.id,
         exerciseName: g.exerciseName,

@@ -200,7 +200,7 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
     });
 
     // 格式化个人记录数据
-    const formattedRecords = personalRecords.map(record => ({
+    const formattedRecords = personalRecords.map((record: any) => ({
       id: record.id,
       exerciseName: record.exercise.name,
       category: record.exercise.category,
@@ -212,7 +212,7 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
     }));
 
     // 计算记录类型分布
-    const recordTypes = personalRecords.reduce((acc: any[], record) => {
+    const recordTypes = personalRecords.reduce((acc: any[], record: any) => {
       const category = record.exercise.category;
       const existing = acc.find(item => item.type === category);
       if (existing) {
@@ -256,13 +256,13 @@ server.post('/sessions', async (request, reply) => {
 
     // Ensure required properties are provided
     const sessionData = {
+      ...parsed.data,
       userId: parsed.data.userId || '',
       planId: parsed.data.planId || '',
       sessionName: parsed.data.sessionName || '',
       location: parsed.data.location || '',
       weather: parsed.data.weather || '',
       temperature: parsed.data.temperature || 0,
-      ...parsed.data
     };
     const session = await sessionManager.createSession(sessionData);
 
