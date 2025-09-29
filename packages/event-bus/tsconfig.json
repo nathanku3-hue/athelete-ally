@@ -1,17 +1,19 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../config/typescript/tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "baseUrl": "../../",
     "paths": {
-      "@athlete-ally/contracts": ["packages/contracts/src"]
+      "@athlete-ally/contracts": ["packages/contracts"],
+      "@athlete-ally/contracts/*": ["packages/contracts/*"],
+      "@athlete-ally/contracts/events": ["packages/contracts/events"],
+      "@athlete-ally/contracts/events/*": ["packages/contracts/events/*"]
     }
   },
-  "include": ["src/**/*", "../../packages/contracts/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }

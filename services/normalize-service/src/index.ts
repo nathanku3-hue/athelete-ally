@@ -5,6 +5,7 @@ import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 // Optional telemetry bootstrap (fallback to no-op if package unavailable)
+/* eslint-disable @typescript-eslint/no-require-imports */
 let bootstrapTelemetry: any, withExtractedContext: any;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -13,7 +14,9 @@ try {
   withExtractedContext = async (_headers: any, fn: any) => await fn();
   bootstrapTelemetry = (_opts: any) => ({ tracer: { startActiveSpan: async (_name: string, fn: any) => await fn({ setAttribute() {}, setStatus() {}, end() {}, recordException() {} }) } });
 }
-import { SpanStatusCode } from '@opentelemetry/api';
+/* eslint-enable @typescript-eslint/no-require-imports */
+import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
+import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
 import http from 'node:http';
 
 const prisma = new PrismaClient();
@@ -33,6 +36,36 @@ console.log('[normalize] node=%s telemetry.enabled=%s metrics.port=%s endpoint=%
 // Lightweight HTTP server for health/metrics
 const httpServer = Fastify({ logger: true });
 
+// Service-local Prometheus metrics
+const serviceRegistry = new Registry();
+collectDefaultMetrics({ register: serviceRegistry });
+
+const httpRequestsTotal = new Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method','route','status'],
+  registers: [serviceRegistry],
+});
+const httpRequestDurationSeconds = new Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request duration in seconds',
+  labelNames: ['method','route','status'],
+  buckets: [0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10],
+  registers: [serviceRegistry],
+});
+httpServer.addHook('onRequest', async (req) => { (req as any)._startTime = process.hrtime.bigint(); });
+httpServer.addHook('onResponse', async (req, reply) => {
+  try {
+    const start = (req as any)._startTime as bigint | undefined;
+    const route = (reply.request as any).routerPath || reply.request.url || 'unknown';
+    const labels = { method: req.method, route, status: String(reply.statusCode) } as const;
+    httpRequestsTotal.inc(labels);
+    if (start) {
+      const seconds = Number(process.hrtime.bigint() - start) / 1e9;
+      httpRequestDurationSeconds.observe(labels, seconds);
+    }
+  } catch {}
+});
 
 // EventBus connection
 let eventBus: EventBus | null = null;
@@ -46,24 +79,15 @@ httpServer.get('/health', async () => ({
   nats: nc ? 'connected' : 'disconnected'
 }));
 
-// Proxy /metrics to the Prometheus exporter
-httpServer.get('/metrics', async (_request, reply) => {
-  const port = parseInt(process.env.PROMETHEUS_PORT || '9464');
-  const endpoint = process.env.PROMETHEUS_ENDPOINT || '/metrics';
-  const opts = { host: '127.0.0.1', port, path: endpoint, method: 'GET', headers: { Accept: 'text/plain' } };
-  const chunks: Buffer[] = [];
-  const data = await new Promise<Buffer>((resolve, reject) => {
-    const req = http.request(opts, (res) => {
-      res.on('data', (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-    });
-    req.on('error', reject);
-    req.end();
-  }).catch((err) => {
-    httpServer.log.error({ err }, 'metrics exporter not available');
-    return Buffer.from('# metrics unavailable\n');
-  });
-  reply.type('text/plain').send(data);
+// Metrics endpoint (service + event-bus metrics)
+httpServer.get('/metrics', async (request, reply) => {
+  try {
+    reply.type('text/plain');
+    const merged = Registry.merge([globalRegistry, serviceRegistry]);
+    return await merged.metrics();
+  } catch {
+    reply.code(500).send('# metrics collection error');
+  }
 });
 
 async function connectNATS() {

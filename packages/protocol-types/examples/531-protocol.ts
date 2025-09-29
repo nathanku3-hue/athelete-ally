@@ -225,7 +225,8 @@ export const squatSession: BlockSession = {
       reps: '5/3/1', // 5 reps, 3 reps, 1 rep
       weight: '65%/75%/85%', // Percentage of training max
       rest: 300, // 5 minutes
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {
@@ -281,7 +282,8 @@ export const benchSession: BlockSession = {
       reps: '5/3/1',
       weight: '65%/75%/85%',
       rest: 300,
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {
@@ -337,7 +339,8 @@ export const deadliftSession: BlockSession = {
       reps: '5/3/1',
       weight: '65%/75%/85%',
       rest: 300,
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {
@@ -393,7 +396,8 @@ export const pressSession: BlockSession = {
       reps: '5/3/1',
       weight: '65%/75%/85%',
       rest: 300,
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {

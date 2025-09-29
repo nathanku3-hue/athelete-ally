@@ -242,15 +242,11 @@ export class RedisClient {
 
   // 扫描操作
   async scan(cursor: number, pattern?: string, count?: number): Promise<[string, string[]]> {
-    if (pattern && count) {
-      return await this.client.scan(cursor, 'MATCH', pattern, 'COUNT', count);
-    } else if (pattern) {
-      return await this.client.scan(cursor, 'MATCH', pattern);
-    } else if (count) {
-      return await this.client.scan(cursor, 'COUNT', count);
-    } else {
-      return await this.client.scan(cursor);
-    }
+    const args: (string | number)[] = [];
+    if (pattern) args.push('MATCH', pattern);
+    if (count) args.push('COUNT', count);
+    
+    return await this.client.scan(cursor, ...args as any);
   }
 
   // 关闭连接

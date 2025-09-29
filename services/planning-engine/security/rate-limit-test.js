@@ -121,7 +121,7 @@ const runRateLimitTest = async () => {
     console.log('   🕐 总耗时: ' + (result.totalTime / 1000).toFixed(2) + 's');
   }
   
-  console.log('\\n📊 速率限制测试结果:');
+  console.log('\n📊 速率限制测试结果:');
   console.log('='.repeat(50));
   
   const totalTests = results.length;
@@ -131,11 +131,11 @@ const runRateLimitTest = async () => {
   console.log('❌ 需要修复: ' + (totalTests - workingTests) + '/' + totalTests);
   
   if (workingTests === totalTests) {
-    console.log('\\n🎉 速率限制配置正常！');
+    console.log('\n🎉 速率限制配置正常！');
     console.log('✅ 所有测试通过');
     console.log('✅ 速率限制工作正常');
   } else {
-    console.log('\\n⚠️  速率限制需要修复');
+    console.log('\n⚠️  速率限制需要修复');
     console.log('🔧 需要检查配置');
   }
   

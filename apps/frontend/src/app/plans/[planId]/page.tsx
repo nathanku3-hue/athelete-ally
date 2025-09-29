@@ -157,7 +157,7 @@ export default function PlanPage() {
       if (!currentSession) return;
 
       const trainingSession = {
-        exercises: currentSession.exercises.map((ex: { id?: string; name: string; category: string; sets: number; reps: number; weight: number }) => ({
+        exercises: currentSession.exercises.map((ex: any) => ({
           id: ex.id || `mock-${ex.name.toLowerCase().replace(/\s+/g, '-')}`,
           name: ex.name,
           category: ex.category,
@@ -265,7 +265,7 @@ export default function PlanPage() {
               <p className="text-gray-400 mt-2">{planData.description}</p>
               <div className="flex items-center space-x-4 mt-4">
                 <span className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-sm">
-                  {planData.status?.toUpperCase() || 'UNKNOWN'}
+                  {planData.status?.toUpperCase()}
                 </span>
                 <span className="text-sm text-gray-400">Version {planData.version}</span>
               </div>
@@ -300,9 +300,9 @@ export default function PlanPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Training Weeks</h2>
             <div className="flex flex-wrap gap-2">
-            {planData.content.microcycles.map((week: { name: string; sessions: any[]; weekNumber?: number }, index: number) => (
+            {planData.content.microcycles.map((week: any, index: number) => (
               <button
-                key={week.weekNumber || index}
+                key={week.weekNumber}
                 onClick={() => setSelectedWeek(index)}
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                   selectedWeek === index
@@ -310,7 +310,7 @@ export default function PlanPage() {
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
-                Week {week.weekNumber || index + 1}: {week.name}
+                Week {week.weekNumber}: {week.name}
               </button>
               ))}
             </div>
@@ -391,14 +391,14 @@ export default function PlanPage() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-400">
-                {planData.content.microcycles.reduce((total: number, week: { sessions: any[] }) => total + week.sessions.length, 0)}
+                {planData.content.microcycles.reduce((total: number, week: any) => total + week.sessions.length, 0)}
               </div>
               <div className="text-gray-400">Training Sessions</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-400">
-                {Math.round(planData.content.microcycles.reduce((total: number, week: { sessions: { duration: number }[] }) => 
-                  total + week.sessions.reduce((sessionTotal: number, session: { duration: number }) => sessionTotal + session.duration, 0), 0
+                {Math.round(planData.content.microcycles.reduce((total: number, week: any) => 
+                  total + week.sessions.reduce((sessionTotal: number, session: any) => sessionTotal + session.duration, 0), 0
                 ) / 60)}
               </div>
               <div className="text-gray-400">Total Hours</div>
@@ -420,7 +420,7 @@ export default function PlanPage() {
                 disabled={!currentSessions[feedbackSessionIdx] || currentSessions[feedbackSessionIdx].exercises.length === 0}
               >
                 {currentSessions[feedbackSessionIdx] && currentSessions[feedbackSessionIdx].exercises.length > 0 ?
-                  currentSessions[feedbackSessionIdx].exercises.map((ex: { name: string }, idx: number) => (
+                  currentSessions[feedbackSessionIdx].exercises.map((ex: any, idx: number) => (
                     <option key={idx} value={idx}>{ex.name}</option>
                   )) : (
                     <option value={0}>No exercises available</option>
