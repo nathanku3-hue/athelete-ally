@@ -32,7 +32,7 @@ services:
       - "4222:4222"
       - "8222:8222"
 
-  ingest:
+  ingest-service:
     build:
       context: .
       dockerfile: services/ingest-service/Dockerfile
@@ -41,6 +41,8 @@ services:
       NODE_ENV: development
       PORT: 4101
       NATS_URL: nats://nats:4222
+      OURA_WEBHOOK_SECRET: 
+      OURA_IDEMPOTENCY_TTL_SECONDS: 
     ports:
       - "4101:4101"
     volumes:
@@ -55,7 +57,7 @@ services:
       timeout: 5s
       retries: 20
 
-  normalize:
+  normalize-service:
     build:
       context: .
       dockerfile: services/normalize-service/Dockerfile
@@ -81,7 +83,7 @@ services:
       timeout: 5s
       retries: 30
 
-  insights:
+  insights-engine:
     build:
       context: .
       dockerfile: services/insights-engine/Dockerfile
@@ -173,3 +175,4 @@ services:
 
 volumes:
   pgdata:
+

@@ -13,12 +13,13 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@athlete-ally/contracts": "*",
     "@athlete-ally/event-bus": "*",
     "@athlete-ally/shared-types": "*",
     "fastify": "^4.28.1",
-    "zod": "^3.25.76",
+    "fastify-raw-body": "^4.3.0",
     "nats": "^2.19.0",
-    "@athlete-ally/contracts": "*"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
