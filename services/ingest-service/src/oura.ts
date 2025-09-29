@@ -1,7 +1,7 @@
 // Oura webhook utilities and route registration
 // Minimal skeleton: verifies HMAC-SHA256 using raw body and TTL idempotency.
 
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import crypto from 'node:crypto';
 
 export function computeSignature(secret: string, payload: string): string {
@@ -73,7 +73,7 @@ export function registerOuraWebhookRoutes(app: FastifyInstance, options: Registe
     method: 'POST',
     url: '/webhooks/oura',
     config: { rawBody: true },
-    handler: async (request: FastifyRequest, reply) => {
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const secret = process.env.OURA_WEBHOOK_SECRET || '';
         if (!secret) {
@@ -81,7 +81,6 @@ export function registerOuraWebhookRoutes(app: FastifyInstance, options: Registe
           return reply.code(500).send({ error: 'Webhook not configured' });
         }
 
-        // @ts-expect-error added by fastify-raw-body
         const rawBody: string = (request as any).rawBody || '';
         const sigHeader = (request.headers['x-oura-signature'] || request.headers['x-oura-signature-sha256']) as any;
 

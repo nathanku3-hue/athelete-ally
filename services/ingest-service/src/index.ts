@@ -1,12 +1,29 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { registerOuraWebhookRoutes } from './oura';
 import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
 
+// Create Fastify instance
+const fastify: FastifyInstance = Fastify({
+  logger: true
+});
 
+// NATS connection for vendor publishes (Oura)
+let natsVendor: NatsConnection | null = null;
 
-// NATS connection for vendor publishes (Oura)\nlet natsVendor: NatsConnection | null = null;
+// Register Oura webhook route (HMAC verify + TTL idempotency)
+registerOuraWebhookRoutes(fastify, { publish: async (subject, data) => {
+  try {
+    if (!natsVendor) {
+      const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+      natsVendor = await connectNats({ servers: natsUrl });
+    }
+    await natsVendor.publish(subject, data);
+  } catch (e) {
+    fastify.log.error({ e }, 'Failed to publish Oura webhook to NATS');
+  }
+}});
 
 // EventBus connection
 let eventBus: EventBus | null = null;
@@ -24,7 +41,7 @@ async function connectEventBus() {
 }
 
 // Health check endpoint
-fastify.get('/health', async (request, reply) => {
+fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
   return { 
     status: 'healthy', 
     service: 'ingest',
@@ -34,7 +51,7 @@ fastify.get('/health', async (request, reply) => {
 });
 
 // HRV ingestion endpoint
-fastify.post('/ingest/hrv', async (request, reply) => {
+fastify.post('/ingest/hrv', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     const data = request.body as any;
     
@@ -68,7 +85,7 @@ fastify.post('/ingest/hrv', async (request, reply) => {
 });
 
 // Sleep ingestion endpoint
-fastify.post('/ingest/sleep', async (request, reply) => {
+fastify.post('/ingest/sleep', async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     // TODO: Add proper validation and event publishing for sleep data
     const data = request.body as any;
