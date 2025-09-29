@@ -153,12 +153,23 @@ async function connectNATS() {
       const subj = 'vendor.oura.webhook.received';
       const maxDeliver = parseInt(process.env.NORMALIZE_OURA_MAX_DELIVER || '5');
       const dlqSubject = process.env.NORMALIZE_DLQ_SUBJECT || 'dlq.vendor.oura.webhook';
+      const ackWaitMs = parseInt(process.env.NORMALIZE_OURA_ACK_WAIT_MS || '15000');
+      const backoffMs = process.env.NORMALIZE_OURA_BACKOFF_MS || '250,1000,5000';
+
+      // Create OTel counters for metrics
+      const messagesCounter = telemetry.meter.createCounter('normalize_messages_total', {
+        description: 'Total number of messages processed by normalize service',
+      });
+      const redeliveriesCounter = telemetry.meter.createCounter('normalize_redeliveries_total', {
+        description: 'Total number of message redeliveries',
+      });
 
       try {
         const stream = await jsm.streams.find(subj);
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
         console.warn('[normalize] Oura subject stream not found; ensure JetStream stream includes', subj);
+        console.warn('[normalize] Ensure a JetStream stream includes subject vendor.oura.webhook.received (e.g. STREAM=vendor.oura subjects=[vendor.oura.webhook.received])');
       }
 
       const opts = consumerOpts();
@@ -167,6 +178,7 @@ async function connectNATS() {
       opts.ackExplicit();
       opts.manualAck();
       opts.maxDeliver(maxDeliver);
+      opts.ackWait(ackWaitMs);
       const sub = await js.subscribe(subj, opts);
 
       (async () => {
@@ -177,10 +189,18 @@ async function connectNATS() {
               span.setAttribute('messaging.system', 'nats');
               span.setAttribute('messaging.destination', subj);
               span.setAttribute('messaging.operation', 'process');
+              
+              // Add JetStream metadata attributes
+              const info: any = (m as any).info || {};
+              if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
+              if (info.sequence) span.setAttribute('messaging.nats.sequence', info.sequence);
+              if (info.redelivered !== undefined) span.setAttribute('messaging.redelivery_count', info.redelivered);
+              
               try {
                 const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
                 if (!text || text[0] !== '{') {
                   console.warn('Oura webhook payload is not valid JSON');
+                  messagesCounter.add(1, { result: 'invalid_json', subject: subj });
                   m.ack();
                   span.setStatus({ code: SpanStatusCode.OK });
                   span.end();
@@ -188,23 +208,36 @@ async function connectNATS() {
                 }
                 const evt = JSON.parse(text);
                 console.log('[normalize] received Oura webhook event keys:', Object.keys(evt || {}));
+                messagesCounter.add(1, { result: 'processed', subject: subj });
                 m.ack();
                 span.setStatus({ code: SpanStatusCode.OK });
               } catch (err) {
                 try {
-                  const info: any = (m as any).info || {};
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
+                  
                   if (attempt >= maxDeliver) {
                     console.error('[normalize] maxDeliver reached, DLQ publish', { dlqSubject, attempt });
-                    await js.publish(dlqSubject, m.data, { headers: m.headers });
+                    
+                    // Enhanced DLQ headers with context
+                    const dlqHeaders = new Map(m.headers || []);
+                    dlqHeaders.set('x-dlq-reason', 'processing_failed');
+                    dlqHeaders.set('x-dlq-attempt', attempt.toString());
+                    dlqHeaders.set('x-dlq-durable', durableName);
+                    dlqHeaders.set('x-original-subject', subj);
+                    
+                    await js.publish(dlqSubject, m.data, { headers: dlqHeaders });
+                    messagesCounter.add(1, { result: 'dlq', subject: subj });
                     m.term();
                   } else {
                     console.warn('[normalize] processing failed, NAK for redelivery', { attempt, maxDeliver });
+                    redeliveriesCounter.add(1, { subject: subj });
+                    messagesCounter.add(1, { result: 'failed', subject: subj });
                     m.nak();
                   }
                 } catch (pubErr) {
                   console.error('DLQ handling error', pubErr);
+                  messagesCounter.add(1, { result: 'failed', subject: subj });
                   m.nak();
                 }
                 span.recordException(err as Error);
@@ -216,7 +249,7 @@ async function connectNATS() {
           });
         }
       })();
-      console.log('[normalize] durable JetStream subscription active:', durableName, subj);
+      console.log('[normalize] durable JetStream subscription active:', durableName, subj, 'ackWait:', ackWaitMs, 'backoff:', backoffMs);
     } catch (e) {
       console.error('Failed to initialize durable Oura consumer:', e);
     }
