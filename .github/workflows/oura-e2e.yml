@@ -1,0 +1,110 @@
+name: Oura E2E Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release/phase3-foundation
+
+jobs:
+  oura-e2e:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Start infrastructure services
+        run: |
+          docker-compose -f docker-compose.yml up -d postgres nats
+          sleep 10
+          
+      - name: Wait for services to be healthy
+        run: |
+          # Wait for PostgreSQL
+          timeout 60 bash -c 'until pg_isready -h localhost -p 55432 -U athlete; do sleep 2; done'
+          
+          # Wait for NATS
+          timeout 60 bash -c 'until nc -z localhost 4222; do sleep 2; done'
+          
+      - name: Start microservices
+        run: |
+          npm run dev:ingest &
+          npm run dev:normalize &
+          sleep 15
+          
+      - name: Wait for microservices health
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3001/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3002/health; do sleep 2; done'
+          
+      - name: Seed Oura token (optional)
+        if: ${{ secrets.OURA_ACCESS_TOKEN && secrets.TOKEN_ENCRYPTION_KEY }}
+        run: |
+          cd services/ingest-service
+          node scripts/seed-oura-token.cjs
+        env:
+          OURA_ACCESS_TOKEN: ${{ secrets.OURA_ACCESS_TOKEN }}
+          OURA_REFRESH_TOKEN: ${{ secrets.OURA_REFRESH_TOKEN }}
+          TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
+          DATABASE_URL_INGEST: ${{ secrets.DATABASE_URL_INGEST || 'postgresql://athlete:athlete@localhost:55432/athlete' }}
+          
+      - name: Simulate Oura webhook
+        if: ${{ secrets.OURA_WEBHOOK_SECRET }}
+        run: |
+          cd services/ingest-service
+          node scripts/send-oura-webhook.cjs
+        env:
+          OURA_WEBHOOK_SECRET: ${{ secrets.OURA_WEBHOOK_SECRET }}
+          INGEST_SERVICE_URL: http://localhost:3001
+          
+      - name: Send HRV ingest
+        run: |
+          cd services/ingest-service
+          node scripts/send-hrv-ingest.cjs
+        env:
+          INGEST_SERVICE_URL: http://localhost:3001
+          
+      - name: Assert normalized HRV record
+        run: |
+          cd services/normalize-service
+          node scripts/assert-normalized-hrv.cjs
+        env:
+          DATABASE_URL_NORMALIZE: ${{ secrets.DATABASE_URL_NORMALIZE || 'postgresql://athlete:athlete@localhost:55432/athlete_normalize' }}
+          
+      - name: Collect service logs
+        if: always()
+        run: |
+          mkdir -p artifacts/logs
+          docker-compose logs ingest-service > artifacts/logs/ingest-service.log 2>&1 || true
+          docker-compose logs normalize-service > artifacts/logs/normalize-service.log 2>&1 || true
+          
+      - name: Collect metrics
+        if: always()
+        run: |
+          mkdir -p artifacts/metrics
+          curl -s http://localhost:3001/metrics > artifacts/metrics/ingest-metrics.txt || true
+          curl -s http://localhost:3002/metrics > artifacts/metrics/normalize-metrics.txt || true
+          
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oura-e2e-artifacts
+          path: artifacts/
+          
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose down -v
+          pkill -f "npm run dev" || true

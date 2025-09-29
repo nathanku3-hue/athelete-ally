@@ -157,7 +157,7 @@ export default function PlanPage() {
       if (!currentSession) return;
 
       const trainingSession = {
-        exercises: currentSession.exercises.map(ex => ({
+        exercises: currentSession.exercises.map((ex: any) => ({
           id: ex.id || `mock-${ex.name.toLowerCase().replace(/\s+/g, '-')}`,
           name: ex.name,
           category: ex.category,
@@ -265,7 +265,7 @@ export default function PlanPage() {
               <p className="text-gray-400 mt-2">{planData.description}</p>
               <div className="flex items-center space-x-4 mt-4">
                 <span className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-sm">
-                  {planData.status.toUpperCase()}
+                  {planData.status?.toUpperCase()}
                 </span>
                 <span className="text-sm text-gray-400">Version {planData.version}</span>
               </div>
