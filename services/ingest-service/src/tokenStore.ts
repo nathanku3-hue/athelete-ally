@@ -28,7 +28,7 @@ export class PostgresTokenStore implements TokenStore {
   constructor(prismaClient?: any) { this.prisma = prismaClient; }
   private async ensurePrisma() {
     if (!this.prisma) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
       const { PrismaClient } = require('@prisma/client');
       this.prisma = new PrismaClient();
     }
