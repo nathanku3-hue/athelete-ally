@@ -171,6 +171,11 @@ docker compose -f docker-compose/preview.yml up -d
 - [Phase 3 计划](docs/PHASE_3_PLAN.md)
 - [Planning Engine 文档](services/planning-engine/README.md)
 
+## Developer Guides & Decisions
+
+- Prisma Engines Mirror (CI Reliability): docs/ci/prisma-engines-mirror.md
+- RFC: Monorepo Tooling Upgrade (Turbo-first, Nx evaluation): docs/rfcs/2025-09-monorepo-tooling-upgrade.md
+
 ## 开发指南
 
 ### 代码规范
