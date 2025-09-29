@@ -300,9 +300,9 @@ export default function PlanPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Training Weeks</h2>
             <div className="flex flex-wrap gap-2">
-            {planData.content.microcycles.map((week: { name: string; sessions: any[] }, index: number) => (
+            {planData.content.microcycles.map((week: { name: string; sessions: any[]; weekNumber?: number }, index: number) => (
               <button
-                key={week.weekNumber}
+                key={week.weekNumber || index}
                 onClick={() => setSelectedWeek(index)}
                 className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                   selectedWeek === index
@@ -310,7 +310,7 @@ export default function PlanPage() {
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
-                Week {week.weekNumber}: {week.name}
+                Week {week.weekNumber || index + 1}: {week.name}
               </button>
               ))}
             </div>
@@ -391,14 +391,14 @@ export default function PlanPage() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-400">
-                {planData.content.microcycles.reduce((total: number, week: any) => total + week.sessions.length, 0)}
+                {planData.content.microcycles.reduce((total: number, week: { sessions: any[] }) => total + week.sessions.length, 0)}
               </div>
               <div className="text-gray-400">Training Sessions</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-400">
-                {Math.round(planData.content.microcycles.reduce((total: number, week: any) => 
-                  total + week.sessions.reduce((sessionTotal: number, session: any) => sessionTotal + session.duration, 0), 0
+                {Math.round(planData.content.microcycles.reduce((total: number, week: { sessions: { duration: number }[] }) => 
+                  total + week.sessions.reduce((sessionTotal: number, session: { duration: number }) => sessionTotal + session.duration, 0), 0
                 ) / 60)}
               </div>
               <div className="text-gray-400">Total Hours</div>
@@ -420,7 +420,7 @@ export default function PlanPage() {
                 disabled={!currentSessions[feedbackSessionIdx] || currentSessions[feedbackSessionIdx].exercises.length === 0}
               >
                 {currentSessions[feedbackSessionIdx] && currentSessions[feedbackSessionIdx].exercises.length > 0 ?
-                  currentSessions[feedbackSessionIdx].exercises.map((ex: any, idx: number) => (
+                  currentSessions[feedbackSessionIdx].exercises.map((ex: { name: string }, idx: number) => (
                     <option key={idx} value={idx}>{ex.name}</option>
                   )) : (
                     <option value={0}>No exercises available</option>
