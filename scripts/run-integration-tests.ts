@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 
 /**
- * ????????
- * ???????????
+ * 集成测试运行器
+ * 自动化Docker环境测试
  */
 
 import { spawn, exec } from 'child_process';
@@ -19,7 +19,7 @@ interface TestResult {
 }
 
 /**
- * ??Docker????
+ * 检查Docker环境
  */
 async function checkDocker(): Promise<boolean> {
   try {
@@ -27,13 +27,13 @@ async function checkDocker(): Promise<boolean> {
     await execAsync('docker compose version');
     return true;
   } catch (error) {
-    console.error('? Docker ? Docker Compose ???????');
+    console.error('❌ Docker 或 Docker Compose 未安装');
     return false;
   }
 }
 
 /**
- * ?????????
+ * 检查端口占用
  */
 async function checkPort(port: number): Promise<boolean> {
   try {
@@ -45,13 +45,13 @@ async function checkPort(port: number): Promise<boolean> {
 }
 
 /**
- * ??Docker??
+ * 启动Docker环境
  */
 async function startDockerEnvironment(): Promise<TestResult> {
-  console.log('?? ??Docker??...');
+  console.log('🐳 正在启动Docker环境...');
   
   return new Promise((resolve) => {
-    const process = spawn('docker', ['compose', '-f', 'docker-compose/preview.yml', 'up', '--build', '-d'], {
+    const dockerProcess = spawn('docker', ['compose', '-f', 'docker-compose/preview.yml', 'up', '--build', '-d'], {
       stdio: 'pipe',
       shell: true,
     });
@@ -59,41 +59,41 @@ async function startDockerEnvironment(): Promise<TestResult> {
     let output = '';
     let error = '';
 
-    process.stdout?.on('data', (data) => {
+    dockerProcess.stdout?.on('data', (data: Buffer) => {
       const message = data.toString();
       output += message;
       console.log(message.trim());
     });
 
-    process.stderr?.on('data', (data) => {
+    dockerProcess.stderr?.on('data', (data: Buffer) => {
       const message = data.toString();
       error += message;
       console.error(message.trim());
     });
 
-    process.on('close', (code) => {
+    dockerProcess.on('close', (code: number) => {
       if (code === 0) {
-        console.log('? Docker??????');
+        console.log('✅ Docker环境启动成功');
         resolve({ success: true, output });
       } else {
-        console.error('? Docker??????');
+        console.error('❌ Docker环境启动失败');
         resolve({ success: false, output, error });
       }
     });
 
-    // ????
+    // 超时处理
     setTimeout(() => {
-      process.kill();
-      resolve({ success: false, output, error: '????' });
-    }, 120000); // 2????
+      dockerProcess.kill();
+      resolve({ success: false, output, error: '启动超时' });
+    }, 120000); // 2分钟超时
   });
 }
 
 /**
- * ??????
+ * 等待服务就绪
  */
 async function waitForServices(): Promise<boolean> {
-  console.log('? ??????...');
+  console.log('⏳ 等待服务就绪...');
   
   const services = [
     { name: 'Frontend', port: 3000, url: 'http://localhost:3000' },
@@ -101,10 +101,10 @@ async function waitForServices(): Promise<boolean> {
   ];
 
   for (const service of services) {
-    console.log(`?? ${service.name} ??...`);
+    console.log(`🔍 检查 ${service.name} 服务...`);
     
     let attempts = 0;
-    const maxAttempts = 30; // ????5??
+    const maxAttempts = 30; // 最多等待5分钟
     
     while (attempts < maxAttempts) {
       try {
@@ -114,19 +114,19 @@ async function waitForServices(): Promise<boolean> {
         });
         
         if (response.ok) {
-          console.log(`? ${service.name} ?????`);
+          console.log(`✅ ${service.name} 服务就绪`);
           break;
         }
       } catch (error) {
-        // ?????????
+        // 继续重试
       }
       
       attempts++;
       if (attempts < maxAttempts) {
-        console.log(`? ?? ${service.name} ????... (${attempts}/${maxAttempts})`);
-        await new Promise(resolve => setTimeout(resolve, 10000)); // ??10?
+        console.log(`⏳ 等待 ${service.name} 服务启动... (${attempts}/${maxAttempts})`);
+        await new Promise(resolve => setTimeout(resolve, 10000)); // 等待10秒
       } else {
-        console.error(`? ${service.name} ??????`);
+        console.error(`❌ ${service.name} 服务启动失败`);
         return false;
       }
     }
@@ -136,13 +136,13 @@ async function waitForServices(): Promise<boolean> {
 }
 
 /**
- * ??????
+ * 运行集成测试
  */
 async function runIntegrationTests(): Promise<TestResult> {
-  console.log('?? ??????...');
+  console.log('🧪 开始运行集成测试...');
   
   return new Promise((resolve) => {
-    const process = spawn('npm', ['run', 'test:integration'], {
+    const testProcess = spawn('npm', ['run', 'test:integration'], {
       stdio: 'pipe',
       shell: true,
       env: {
@@ -155,24 +155,24 @@ async function runIntegrationTests(): Promise<TestResult> {
     let output = '';
     let error = '';
 
-    process.stdout?.on('data', (data) => {
+    testProcess.stdout?.on('data', (data: Buffer) => {
       const message = data.toString();
       output += message;
       console.log(message.trim());
     });
 
-    process.stderr?.on('data', (data) => {
+    testProcess.stderr?.on('data', (data: Buffer) => {
       const message = data.toString();
       error += message;
       console.error(message.trim());
     });
 
-    process.on('close', (code) => {
+    testProcess.on('close', (code: number) => {
       if (code === 0) {
-        console.log('? ??????');
+        console.log('✅ 集成测试通过');
         resolve({ success: true, output });
       } else {
-        console.error('? ??????');
+        console.error('❌ 集成测试失败');
         resolve({ success: false, output, error });
       }
     });
@@ -180,85 +180,85 @@ async function runIntegrationTests(): Promise<TestResult> {
 }
 
 /**
- * ??Docker??
+ * 停止Docker环境
  */
 async function stopDockerEnvironment(): Promise<void> {
-  console.log('?? ??Docker??...');
+  console.log('🛑 正在停止Docker环境...');
   
   try {
     await execAsync('docker compose -f docker-compose/preview.yml down -v');
-    console.log('? Docker?????');
+    console.log('✅ Docker环境已停止');
   } catch (error) {
-    console.error('? ??Docker?????:', error);
+    console.error('❌ 停止Docker环境失败:', error);
   }
 }
 
 /**
- * ???
+ * 主函数
  */
 async function main() {
-  console.log('?? ????????\n');
+  console.log('🚀 开始集成测试流程\n');
   
   try {
-    // 1. ??Docker
-    console.log('1. ??Docker??...');
+    // 1. 检查Docker
+    console.log('1. 检查Docker环境...');
     if (!(await checkDocker())) {
       process.exit(1);
     }
-    console.log('? Docker??????\n');
+    console.log('✅ Docker环境检查通过\n');
 
-    // 2. ??Docker??
-    console.log('2. ??Docker??...');
+    // 2. 启动Docker环境
+    console.log('2. 启动Docker环境...');
     const startResult = await startDockerEnvironment();
     if (!startResult.success) {
-      console.error('? ????Docker??');
+      console.error('❌ 无法启动Docker环境');
       process.exit(1);
     }
-    console.log('? Docker??????\n');
+    console.log('✅ Docker环境启动成功\n');
 
-    // 3. ??????
-    console.log('3. ??????...');
+    // 3. 等待服务就绪
+    console.log('3. 等待服务就绪...');
     if (!(await waitForServices())) {
-      console.error('? ??????');
+      console.error('❌ 服务启动失败');
       await stopDockerEnvironment();
       process.exit(1);
     }
-    console.log('? ???????\n');
+    console.log('✅ 所有服务就绪\n');
 
-    // 4. ??????
-    console.log('4. ??????...');
+    // 4. 运行集成测试
+    console.log('4. 运行集成测试...');
     const testResult = await runIntegrationTests();
     if (!testResult.success) {
-      console.error('? ??????');
+      console.error('❌ 集成测试失败');
       await stopDockerEnvironment();
       process.exit(1);
     }
-    console.log('? ??????\n');
+    console.log('✅ 集成测试通过\n');
 
-    // 5. ????
-    console.log('5. ????...');
+    // 5. 清理环境
+    console.log('5. 清理环境...');
     await stopDockerEnvironment();
-    console.log('? ??????\n');
+    console.log('✅ 环境清理完成\n');
 
-    console.log('?? ?????????');
+    console.log('🎉 集成测试流程完成');
     process.exit(0);
 
   } catch (error) {
-    console.error('? ????????:', error);
+    console.error('❌ 测试流程异常:', error);
     await stopDockerEnvironment();
     process.exit(1);
   }
 }
 
-// ??????
+// 信号处理
 process.on('SIGINT', async () => {
-  console.log('\n?? ?????????????...');
+  console.log('\n🛑 收到中断信号，正在清理...');
   await stopDockerEnvironment();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-  console.log('\n?? ?????????????...');
+  console.log('\n🛑 收到终止信号，正在清理...');
   await stopDockerEnvironment();
   process.exit(0);
 });
@@ -266,4 +266,3 @@ process.on('SIGTERM', async () => {
 if (require.main === module) {
   main();
 }
-

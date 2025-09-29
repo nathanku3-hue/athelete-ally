@@ -246,7 +246,7 @@ export class RedisClient {
     if (pattern) args.push('MATCH', pattern);
     if (count) args.push('COUNT', count);
     
-    return await this.client.scan(cursor, ...args);
+    return await this.client.scan(cursor, ...args as any);
   }
 
   // 关闭连接

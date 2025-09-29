@@ -406,6 +406,7 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
 
     // Ensure required properties are provided
     const exerciseDataWithDefaults = {
+      ...parsed.data,
       exerciseName: parsed.data.exerciseName || '',
       exerciseId: parsed.data.exerciseId || '',
       category: parsed.data.category || '',
@@ -415,7 +416,6 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
       targetWeight: parsed.data.targetWeight || 0,
       targetDuration: parsed.data.targetDuration || 0,
       targetRest: parsed.data.targetRest || 0,
-      ...parsed.data
     };
     const exercise = await sessionManager.addExerciseToSession(id, userId, exerciseDataWithDefaults);
 
@@ -447,6 +447,7 @@ server.post('/exercises/:id/records', async (request, reply) => {
 
     // Ensure required properties are provided
     const recordDataWithDefaults = {
+      ...parsed.data,
       targetReps: parsed.data.targetReps || 0,
       targetWeight: parsed.data.targetWeight || 0,
       targetDuration: parsed.data.targetDuration || 0,
@@ -459,7 +460,6 @@ server.post('/exercises/:id/records', async (request, reply) => {
       form: parsed.data.form || 0,
       difficulty: parsed.data.difficulty || 0,
       notes: parsed.data.notes || '',
-      ...parsed.data
     };
     const record = await sessionManager.addRecordToExercise(id, userId, recordDataWithDefaults);
 
@@ -569,6 +569,7 @@ server.post('/records', async (request, reply) => {
 
     // Ensure required properties are provided
     const personalRecordData = {
+      ...parsed.data,
       value: parsed.data.value || 0,
       recordType: parsed.data.recordType || 'max_weight' as const,
       exerciseName: parsed.data.exerciseName || '',
@@ -578,7 +579,6 @@ server.post('/records', async (request, reply) => {
       notes: parsed.data.notes || '',
       unit: parsed.data.unit || '',
       sessionId: parsed.data.sessionId || '',
-      ...parsed.data
     };
     const record = await achievementEngine.createPersonalRecord(personalRecordData);
 

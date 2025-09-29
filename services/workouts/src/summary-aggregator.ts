@@ -48,7 +48,7 @@ export class SummaryAggregator {
     await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
 
     // 订阅计划生成请求事件，触发摘要更新
-    await eventBus.subscribeToPlanGenerationRequested(this.handlePlanGenerated.bind(this));
+    await eventBus.subscribeToPlanGenerationRequested(this.handlePlanGenerated.bind(this) as any);
 
     // 每小时运行一次全量更新
     this.intervalId = setInterval(() => {
@@ -91,7 +91,7 @@ export class SummaryAggregator {
       });
 
       // 并行更新所有用户的摘要数据
-      const updatePromises = users.map(user => this.updateUserSummary(user.id));
+      const updatePromises = users.map((user: any) => this.updateUserSummary(user.id));
       await Promise.all(updatePromises);
 
       console.log(`Updated summaries for ${users.length} users`);
@@ -130,7 +130,7 @@ export class SummaryAggregator {
       });
 
       // 计算训练指标
-      const completedWorkouts = workouts.filter(w => w.status === 'completed');
+      const completedWorkouts = workouts.filter((w: any) => w.status === 'completed');
       const totalVolume = this.calculateTotalVolume(completedWorkouts);
       const averageSessionDuration = this.calculateAverageDuration(completedWorkouts);
       const personalRecordsSet = this.countPersonalRecords(completedWorkouts);
