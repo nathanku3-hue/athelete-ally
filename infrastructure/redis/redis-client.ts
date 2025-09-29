@@ -223,12 +223,12 @@ export class RedisClient {
 
   // 信息获取
   async info(section?: string): Promise<string> {
-    return await this.client.info(section);
+    return await this.client.info(section || undefined);
   }
 
   // 内存使用情况
   async memoryUsage(key: string): Promise<number> {
-    return await this.client.memory('usage', key);
+    return await this.client.memory('USAGE', key);
   }
 
   // 键模式匹配
@@ -242,7 +242,7 @@ export class RedisClient {
     if (pattern) args.push('MATCH', pattern);
     if (count) args.push('COUNT', count);
     
-    return await this.client.scan(...args);
+    return await this.client.scan(cursor, ...args);
   }
 
   // 关闭连接
