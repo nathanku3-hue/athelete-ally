@@ -76,7 +76,9 @@ jobs:
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          bash ./scripts/generate-prisma-clients.sh
+          # Set Prisma mirror for better reliability
+          export PRISMA_ENGINES_MIRROR="https://cache.prisma.build"
+          bash ./scripts/generate-prisma-clients-retry.sh
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -201,7 +203,9 @@ jobs:
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          bash ./scripts/generate-prisma-clients.sh
+          # Set Prisma mirror for better reliability
+          export PRISMA_ENGINES_MIRROR="https://cache.prisma.build"
+          bash ./scripts/generate-prisma-clients-retry.sh
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -445,7 +449,9 @@ jobs:
           set -euo pipefail
           sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
           chmod +x scripts/generate-prisma-clients.sh
-          bash ./scripts/generate-prisma-clients.sh
+          # Set Prisma mirror for better reliability
+          export PRISMA_ENGINES_MIRROR="https://cache.prisma.build"
+          bash ./scripts/generate-prisma-clients-retry.sh
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -514,7 +520,9 @@ jobs:
           # Fix script permissions and execute
           sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
           chmod +x scripts/generate-prisma-clients.sh
-          bash ./scripts/generate-prisma-clients.sh
+          # Set Prisma mirror for better reliability
+          export PRISMA_ENGINES_MIRROR="https://cache.prisma.build"
+          bash ./scripts/generate-prisma-clients-retry.sh
       - name: Ensure test-results dir (pre-tests)
         run: mkdir -p test-results
 
