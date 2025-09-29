@@ -5,6 +5,7 @@ import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 // Optional telemetry bootstrap (fallback to no-op if package unavailable)
+/* eslint-disable @typescript-eslint/no-require-imports */
 let bootstrapTelemetry: any, withExtractedContext: any;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -13,6 +14,7 @@ try {
   withExtractedContext = async (_headers: any, fn: any) => await fn();
   bootstrapTelemetry = (_opts: any) => ({ tracer: { startActiveSpan: async (_name: string, fn: any) => await fn({ setAttribute() {}, setStatus() {}, end() {}, recordException() {} }) } });
 }
+/* eslint-enable @typescript-eslint/no-require-imports */
 import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
 import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
 import http from 'node:http';
