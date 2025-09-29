@@ -1,14 +1,20 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
+import { SpanStatusCode } from '@opentelemetry/api';
 // Optional telemetry bootstrap (fallback to no-op if package unavailable)
 /* eslint-disable @typescript-eslint/no-require-imports */
 interface TelemetryBootstrap {
   tracer: {
     startActiveSpan: (name: string, fn: (span: unknown) => Promise<void>) => Promise<void>;
+  };
+  meter: {
+    createCounter: (name: string, options: { description: string }) => {
+      add: (value: number, labels: Record<string, string>) => void;
+    };
   };
 }
 interface WithExtractedContext {
@@ -29,7 +35,10 @@ try {
         end() {}, 
         recordException() {} 
       }) 
-    } 
+    },
+    meter: {
+      createCounter: () => ({ add: () => {} })
+    }
   });
 }
 /* eslint-enable @typescript-eslint/no-require-imports */
@@ -70,17 +79,17 @@ const httpRequestDurationSeconds = new Histogram({
   buckets: [0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10],
   registers: [serviceRegistry],
 });
-interface RequestWithStartTime extends Fastify.FastifyRequest {
+interface RequestWithStartTime extends FastifyRequest {
   _startTime?: bigint;
 }
-interface RequestWithRouterPath extends Fastify.FastifyRequest {
-  routerPath?: string;
+interface RequestWithRouterPath extends FastifyRequest {
+  routerPath: string;
 }
 
 httpServer.addHook('onRequest', async (req: RequestWithStartTime) => { 
   req._startTime = process.hrtime.bigint(); 
 });
-httpServer.addHook('onResponse', async (req: RequestWithStartTime, reply: Fastify.FastifyReply) => {
+httpServer.addHook('onResponse', async (req: RequestWithStartTime, reply: FastifyReply) => {
   try {
     const start = req._startTime;
     const route = (reply.request as RequestWithRouterPath).routerPath || reply.request.url || 'unknown';
@@ -129,7 +138,7 @@ async function connectNATS() {
     console.log('Connected to EventBus');
     
     // Get NATS connection from EventBus for direct subscription
-    nc = (eventBus as { nc: unknown }).nc;
+    nc = (eventBus as any).nc;
     
     // Durable JetStream consumer for HRV raw data (JetStream)
     try {
@@ -156,12 +165,21 @@ async function connectNATS() {
       opts.ackExplicit();
       opts.manualAck();
       opts.filterSubject(EVENT_TOPICS.HRV_RAW_RECEIVED);
-      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<unknown>> }).subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
+      interface NATSMessage {
+        headers?: Map<string, string[]>;
+        data: Uint8Array | string;
+        info?: { redelivered?: number; numDelivered?: number };
+        ack: () => void;
+        nak: () => void;
+        term: () => void;
+      }
+      
+      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<NATSMessage>> }).subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
       (async () => {
-        for await (const m of sub as AsyncIterable<{ headers?: Map<string, string[]>; data: Uint8Array | string; info?: { redelivered?: number; numDelivered?: number } }>) {
+        for await (const m of sub) {
           const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
           await withExtractedContext(hdrs || {}, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
+            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: any) => {
               try {
                 const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
                 const eventData = JSON.parse(text);
@@ -171,7 +189,7 @@ async function connectNATS() {
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
                   if (attempt >= hrvMaxDeliver) {
-                    try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
+                    try { await (js as any).publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
                     m.term();
                   } else { m.nak(); }
                   span.setStatus({ code: 2, message: 'schema validation failed' });
@@ -186,12 +204,12 @@ async function connectNATS() {
                 const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                 const attempt = deliveries + 1;
                 if (attempt >= hrvMaxDeliver) {
-                  try { await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
-                  (m as { term(): void }).term();
-                } else { (m as { nak(): void }).nak(); }
-                (span as { recordException(err: unknown): void }).recordException(err);
-                (span as { setStatus(status: { code: number; message?: string }): void }).setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
-              } finally { (span as { end(): void }).end(); }
+                  try { await (js as any).publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
+                  m.term();
+                } else { m.nak(); }
+                span.recordException(err);
+                span.setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
+              } finally { span.end(); }
             });
           });
         }
@@ -221,7 +239,7 @@ async function connectNATS() {
       });
 
       try {
-        const stream = await jsm.streams.find(subj);
+        const stream = await (jsm as any).streams.find(subj);
         // eslint-disable-next-line no-console
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
@@ -238,13 +256,13 @@ async function connectNATS() {
       opts.manualAck();
       opts.maxDeliver(maxDeliver);
       opts.ackWait(ackWaitMs);
-      const sub = await js.subscribe(subj, opts);
+      const sub = await (js as any).subscribe(subj, opts);
 
       (async () => {
         for await (const m of sub) {
           const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
           await withExtractedContext(hdrs, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: { setAttribute: (key: string, value: string | number) => void; setStatus: (status: { code: number; message?: string }) => void; recordException: (err: unknown) => void; end: () => void }) => {
+            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: any) => {
               span.setAttribute('messaging.system', 'nats');
               span.setAttribute('messaging.destination', subj);
               span.setAttribute('messaging.operation', 'process');
@@ -288,21 +306,21 @@ async function connectNATS() {
                     dlqHeaders.set('x-dlq-durable', durableName);
                     dlqHeaders.set('x-original-subject', subj);
                     
-                    await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string> }) => Promise<void> }).publish(dlqSubject, m.data, { headers: dlqHeaders });
+                    await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string> }) => Promise<void> }).publish(dlqSubject, m.data, { headers: dlqHeaders as Map<string, string> });
                     messagesCounter.add(1, { result: 'dlq', subject: subj });
-                    (m as { term(): void }).term();
+                    m.term();
                   } else {
                     // eslint-disable-next-line no-console
                     console.warn('[normalize] processing failed, NAK for redelivery', { attempt, maxDeliver });
                     redeliveriesCounter.add(1, { subject: subj });
                     messagesCounter.add(1, { result: 'failed', subject: subj });
-                    (m as { nak(): void }).nak();
+                    m.nak();
                   }
                 } catch (pubErr) {
                   // eslint-disable-next-line no-console
                   console.error('DLQ handling error', pubErr);
                   messagesCounter.add(1, { result: 'failed', subject: subj });
-                  (m as { nak(): void }).nak();
+                  m.nak();
                 }
                 span.recordException(err as Error);
                 span.setStatus({ code: SpanStatusCode.ERROR });
@@ -358,7 +376,7 @@ async function processHrvData(data: { userId: string; date: string; rMSSD: numbe
       where: {
         userId_date: {
           userId: normalized.userId,
-          date: normalized.date
+          date: normalized.date.toISOString().split('T')[0]
         }
       },
       update: normalized,
@@ -374,7 +392,7 @@ async function processHrvData(data: { userId: string; date: string; rMSSD: numbe
         lnRMSSD: normalized.lnRmssd || 0,
         readinessScore: 0, // TODO: Calculate actual readiness score
         vendor: 'unknown', // TODO: Extract from raw data
-        capturedAt: data.capturedAt || new Date().toISOString()
+        capturedAt: typeof data.capturedAt === 'string' ? data.capturedAt : new Date().toISOString()
       }
     };
     
@@ -411,7 +429,7 @@ async function processSleepData(data: { userId: string; date: string; totalSleep
       where: {
         userId_date: {
           userId: normalized.userId,
-          date: normalized.date
+          date: normalized.date.toISOString().split('T')[0]
         }
       },
       update: normalized,
