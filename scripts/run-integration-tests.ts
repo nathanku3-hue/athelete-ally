@@ -5,7 +5,7 @@
  * ???????????
  */
 
-import { spawn, exec } from 'child_testProcess';
+import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
 import { join } from 'path';
@@ -146,7 +146,7 @@ async function runIntegrationTests(): Promise<TestResult> {
       stdio: 'pipe',
       shell: true,
       env: {
-        ...testProcess.env,
+        ...process.env,
         FRONTEND_URL: 'http://localhost:3000',
         GATEWAY_BFF_URL: 'http://localhost:4000',
       },
@@ -203,7 +203,7 @@ async function main() {
     // 1. ??Docker
     console.log('1. ??Docker??...');
     if (!(await checkDocker())) {
-      testProcess.exit(1);
+      process.exit(1);
     }
     console.log('? Docker??????\n');
 
@@ -212,7 +212,7 @@ async function main() {
     const startResult = await startDockerEnvironment();
     if (!startResult.success) {
       console.error('? ????Docker??');
-      testProcess.exit(1);
+      process.exit(1);
     }
     console.log('? Docker??????\n');
 
@@ -221,7 +221,7 @@ async function main() {
     if (!(await waitForServices())) {
       console.error('? ??????');
       await stopDockerEnvironment();
-      testProcess.exit(1);
+      process.exit(1);
     }
     console.log('? ???????\n');
 
@@ -231,7 +231,7 @@ async function main() {
     if (!testResult.success) {
       console.error('? ??????');
       await stopDockerEnvironment();
-      testProcess.exit(1);
+      process.exit(1);
     }
     console.log('? ??????\n');
 
@@ -241,12 +241,12 @@ async function main() {
     console.log('? ??????\n');
 
     console.log('?? ?????????');
-    testProcess.exit(0);
+    process.exit(0);
 
   } catch (error) {
     console.error('? ????????:', error);
     await stopDockerEnvironment();
-    testProcess.exit(1);
+    process.exit(1);
   }
 }
 
@@ -254,13 +254,13 @@ async function main() {
 testProcess.on('SIGINT', async () => {
   console.log('\n?? ?????????????...');
   await stopDockerEnvironment();
-  testProcess.exit(0);
+  process.exit(0);
 });
 
 testProcess.on('SIGTERM', async () => {
   console.log('\n?? ?????????????...');
   await stopDockerEnvironment();
-  testProcess.exit(0);
+  process.exit(0);
 });
 
 if (require.main === module) {
