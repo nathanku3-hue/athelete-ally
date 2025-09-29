@@ -3,7 +3,7 @@
     "target": "ES2020",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -27,8 +27,8 @@
       "@athlete-ally/*": ["./packages/*/src"],
       "@athlete-ally/event-bus": ["./packages/event-bus/src"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
-      "@athlete-ally/contracts": ["./packages/contracts/events"],
-      "@athlete-ally/contracts/*": ["./packages/contracts/events/*"],
+      "@athlete-ally/contracts": ["./packages/contracts/src"],
+      "@athlete-ally/contracts/*": ["./packages/contracts/src/*"],
       "@athlete-ally/shared": ["./packages/shared/src"],
       "@athlete-ally/shared/*": ["./packages/shared/src/*"],
       "@athlete-ally/shared/auth/jwt": ["./packages/shared/src/auth/jwt"],
@@ -36,6 +36,8 @@
       "@athlete-ally/shared-types/*": ["./packages/shared-types/src/*"],
       "@athlete-ally/protocol-types": ["./packages/protocol-types/src"],
       "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"],
+      "@athlete-ally/telemetry-bootstrap": ["./packages/telemetry-bootstrap/src"],
+      "@athlete-ally/telemetry-bootstrap/*": ["./packages/telemetry-bootstrap/src/*"],
       "@athlete-ally/services/*": ["./services/*/src"],
       "@athlete-ally/apps/*": ["./apps/*/src"]
     }
