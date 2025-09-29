@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { registerOuraWebhookRoutes } from './oura';
+import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
@@ -24,6 +25,9 @@ registerOuraWebhookRoutes(fastify, { publish: async (subject, data) => {
     fastify.log.error({ e }, 'Failed to publish Oura webhook to NATS');
   }
 }});
+
+// Register Oura OAuth flow if enabled
+try { registerOuraOAuthRoutes(fastify); } catch (err) { fastify.log.warn({ err }, 'Oura OAuth disabled or misconfigured'); }
 
 // EventBus connection
 let eventBus: EventBus | null = null;

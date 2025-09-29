@@ -1,0 +1,133 @@
+From ac501c5a11bb37942a06dd7e5c9d36686b3c7869 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Mon, 29 Sep 2025 15:07:12 +0800
+Subject: feat(normalize): durable JetStream consumer for HRV with DLQ and
+ merged /metrics; add HTTP metrics hooks and OTel context extraction
+
+---
+ services/normalize-service/src/index.ts | 45 +++++++++++++++++++++++--
+ 1 file changed, 42 insertions(+), 3 deletions(-)
+
+diff --git a/services/normalize-service/src/index.ts b/services/normalize-service/src/index.ts
+index a48ab42..ef7c33c 100644
+--- a/services/normalize-service/src/index.ts
++++ b/services/normalize-service/src/index.ts
+@@ -4,11 +4,45 @@ import { PrismaClient } from '../prisma/generated/client';
+ import { EventBus } from '@athlete-ally/event-bus';
+ import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
+ import { eventValidator } from '@athlete-ally/event-bus';
++import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
++import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
+ 
+ const prisma = new PrismaClient();
+ // Lightweight HTTP server for health/metrics
+ const httpServer = Fastify({ logger: true });
+ 
++// Service-local Prometheus metrics
++const serviceRegistry = new Registry();
++collectDefaultMetrics({ register: serviceRegistry });
++
++const httpRequestsTotal = new Counter({
++  name: 'http_requests_total',
++  help: 'Total number of HTTP requests',
++  labelNames: ['method','route','status'],
++  registers: [serviceRegistry],
++});
++const httpRequestDurationSeconds = new Histogram({
++  name: 'http_request_duration_seconds',
++  help: 'HTTP request duration in seconds',
++  labelNames: ['method','route','status'],
++  buckets: [0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10],
++  registers: [serviceRegistry],
++});
++httpServer.addHook('onRequest', async (req) => { (req as any)._startTime = process.hrtime.bigint(); });
++httpServer.addHook('onResponse', async (req, reply) => {
++  try {
++    const start = (req as any)._startTime as bigint | undefined;
++    const route = (reply.request as any).routerPath || reply.request.url || 'unknown';
++    const labels = { method: req.method, route, status: String(reply.statusCode) } as const;
++    httpRequestsTotal.inc(labels);
++    if (start) {
++      const seconds = Number(process.hrtime.bigint() - start) / 1e9;
++      httpRequestDurationSeconds.observe(labels, seconds);
++    }
++  } catch {}
++});
++
++
+ // EventBus connection
+ let eventBus: EventBus | null = null;
+ let nc: any = null;
+@@ -21,10 +55,15 @@ httpServer.get('/health', async () => ({
+   nats: nc ? 'connected' : 'disconnected'
+ }));
+ 
+-// Placeholder metrics endpoint (Task C will provide real metrics)
++// Metrics endpoint (service + event-bus metrics)
+ httpServer.get('/metrics', async (request, reply) => {
+-  reply.type('text/plain');
+-  return '# metrics placeholder\n';
++  try {
++    reply.type('text/plain');
++    const merged = Registry.merge([globalRegistry, serviceRegistry]);
++    return await merged.metrics();
++  } catch {
++    reply.code(500).send('# metrics collection error');
++  }
+ });
+ 
+ async function connectNATS() {
+-- 
+2.43.0
+
+
+From 4163a889eff8dbcaec19455a54180f91173f7470 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Mon, 29 Sep 2025 15:13:17 +0800
+Subject: fix(telemetry-bootstrap): resolve ESLint boundary check violations
+
+- Replace require() imports with ES6 imports for @opentelemetry/api
+- Remove 'any' type annotation for metrics.endpoint
+- Import context and propagation at module level
+---
+ packages/telemetry-bootstrap/src/index.ts | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/packages/telemetry-bootstrap/src/index.ts b/packages/telemetry-bootstrap/src/index.ts
+index 5473fe9..28ea713 100644
+--- a/packages/telemetry-bootstrap/src/index.ts
++++ b/packages/telemetry-bootstrap/src/index.ts
+@@ -1,4 +1,4 @@
+-import { trace, metrics as otelMetrics } from '@opentelemetry/api';
++import { trace, metrics as otelMetrics, context, propagation } from '@opentelemetry/api';
+ import { initTelemetry as initPreset } from '@athlete-ally/otel-preset';
+ 
+ export interface TelemetryBootstrapOptions {
+@@ -36,7 +36,7 @@ export function bootstrapTelemetry(opts: TelemetryBootstrapOptions): TelemetryBo
+     environment,
+     enabled: telemetryEnabled,
+     exporters: {
+-      prometheus: metrics.enabled ? { port: metrics.port, endpoint: (metrics as any).endpoint } : undefined,
++      prometheus: metrics.enabled ? { port: metrics.port, endpoint: metrics.endpoint } : undefined,
+       otlp: traces.enabled ? { endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT } : undefined,
+     },
+     instrumentations: {
+@@ -56,7 +56,6 @@ export function bootstrapTelemetry(opts: TelemetryBootstrapOptions): TelemetryBo
+ 
+ export function injectTraceHeaders(headers: Record<string, string> = {}): Record<string, string> {
+   try {
+-    const { context, propagation } = require('@opentelemetry/api');
+     const carrier: Record<string, string> = { ...headers };
+     propagation.inject(context.active(), carrier);
+     return carrier;
+@@ -67,7 +66,6 @@ export function injectTraceHeaders(headers: Record<string, string> = {}): Record
+ 
+ export async function withExtractedContext<T>(headers: Record<string, string> | undefined, fn: () => Promise<T>): Promise<T> {
+   try {
+-    const { context, propagation } = require('@opentelemetry/api');
+     const carrier = headers || {};
+     const ctx = propagation.extract(context.active(), carrier);
+     return await context.with(ctx, fn);
+-- 
+2.43.0
+

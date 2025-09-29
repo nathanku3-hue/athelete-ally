@@ -1,46 +1,37 @@
 import Fastify from 'fastify';
-import { connect } from 'nats';
+import { connect, consumerOpts } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
-import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
-import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
+// Optional telemetry bootstrap (fallback to no-op if package unavailable)
+let bootstrapTelemetry: any, withExtractedContext: any;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  ({ bootstrapTelemetry, withExtractedContext } = require('@athlete-ally/telemetry-bootstrap'));
+} catch {
+  withExtractedContext = async (_headers: any, fn: any) => await fn();
+  bootstrapTelemetry = (_opts: any) => ({ tracer: { startActiveSpan: async (_name: string, fn: any) => await fn({ setAttribute() {}, setStatus() {}, end() {}, recordException() {} }) } });
+}
+import { SpanStatusCode } from '@opentelemetry/api';
+import http from 'node:http';
 
 const prisma = new PrismaClient();
+// Bootstrap telemetry early (traces + Prometheus exporter)
+const telemetry = bootstrapTelemetry({
+  serviceName: 'normalize-service',
+  traces: { enabled: true },
+  metrics: { enabled: true, port: parseInt(process.env.PROMETHEUS_PORT || '9464'), endpoint: process.env.PROMETHEUS_ENDPOINT || '/metrics' },
+});
+
+console.log('[normalize] node=%s telemetry.enabled=%s metrics.port=%s endpoint=%s',
+  process.version,
+  (process.env.TELEMETRY_ENABLED === 'true') || true,
+  process.env.PROMETHEUS_PORT || '9464',
+  process.env.PROMETHEUS_ENDPOINT || '/metrics');
+
 // Lightweight HTTP server for health/metrics
 const httpServer = Fastify({ logger: true });
-
-// Service-local Prometheus metrics
-const serviceRegistry = new Registry();
-collectDefaultMetrics({ register: serviceRegistry });
-
-const httpRequestsTotal = new Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method','route','status'],
-  registers: [serviceRegistry],
-});
-const httpRequestDurationSeconds = new Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'HTTP request duration in seconds',
-  labelNames: ['method','route','status'],
-  buckets: [0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10],
-  registers: [serviceRegistry],
-});
-httpServer.addHook('onRequest', async (req) => { (req as any)._startTime = process.hrtime.bigint(); });
-httpServer.addHook('onResponse', async (req, reply) => {
-  try {
-    const start = (req as any)._startTime as bigint | undefined;
-    const route = (reply.request as any).routerPath || reply.request.url || 'unknown';
-    const labels = { method: req.method, route, status: String(reply.statusCode) } as const;
-    httpRequestsTotal.inc(labels);
-    if (start) {
-      const seconds = Number(process.hrtime.bigint() - start) / 1e9;
-      httpRequestDurationSeconds.observe(labels, seconds);
-    }
-  } catch {}
-});
 
 
 // EventBus connection
@@ -55,15 +46,24 @@ httpServer.get('/health', async () => ({
   nats: nc ? 'connected' : 'disconnected'
 }));
 
-// Metrics endpoint (service + event-bus metrics)
-httpServer.get('/metrics', async (request, reply) => {
-  try {
-    reply.type('text/plain');
-    const merged = Registry.merge([globalRegistry, serviceRegistry]);
-    return await merged.metrics();
-  } catch {
-    reply.code(500).send('# metrics collection error');
-  }
+// Proxy /metrics to the Prometheus exporter
+httpServer.get('/metrics', async (_request, reply) => {
+  const port = parseInt(process.env.PROMETHEUS_PORT || '9464');
+  const endpoint = process.env.PROMETHEUS_ENDPOINT || '/metrics';
+  const opts = { host: '127.0.0.1', port, path: endpoint, method: 'GET', headers: { Accept: 'text/plain' } };
+  const chunks: Buffer[] = [];
+  const data = await new Promise<Buffer>((resolve, reject) => {
+    const req = http.request(opts, (res) => {
+      res.on('data', (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+    req.on('error', reject);
+    req.end();
+  }).catch((err) => {
+    httpServer.log.error({ err }, 'metrics exporter not available');
+    return Buffer.from('# metrics unavailable\n');
+  });
+  reply.type('text/plain').send(data);
 });
 
 async function connectNATS() {
@@ -101,6 +101,82 @@ async function connectNATS() {
       }
     })();
     
+    // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
+    try {
+      const js = nc.jetstream();
+      const jsm = await nc.jetstreamManager();
+      const durableName = process.env.NORMALIZE_DURABLE_NAME || 'normalize-oura';
+      const subj = 'vendor.oura.webhook.received';
+      const maxDeliver = parseInt(process.env.NORMALIZE_OURA_MAX_DELIVER || '5');
+      const dlqSubject = process.env.NORMALIZE_DLQ_SUBJECT || 'dlq.vendor.oura.webhook';
+
+      try {
+        const stream = await jsm.streams.find(subj);
+        console.log('[normalize] Oura subject stream:', stream);
+      } catch {
+        console.warn('[normalize] Oura subject stream not found; ensure JetStream stream includes', subj);
+      }
+
+      const opts = consumerOpts();
+      opts.durable(durableName);
+      opts.deliverAll();
+      opts.ackExplicit();
+      opts.manualAck();
+      opts.maxDeliver(maxDeliver);
+      const sub = await js.subscribe(subj, opts);
+
+      (async () => {
+        for await (const m of sub) {
+          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: any) => {
+              span.setAttribute('messaging.system', 'nats');
+              span.setAttribute('messaging.destination', subj);
+              span.setAttribute('messaging.operation', 'process');
+              try {
+                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                if (!text || text[0] !== '{') {
+                  console.warn('Oura webhook payload is not valid JSON');
+                  m.ack();
+                  span.setStatus({ code: SpanStatusCode.OK });
+                  span.end();
+                  return;
+                }
+                const evt = JSON.parse(text);
+                console.log('[normalize] received Oura webhook event keys:', Object.keys(evt || {}));
+                m.ack();
+                span.setStatus({ code: SpanStatusCode.OK });
+              } catch (err) {
+                try {
+                  const info: any = (m as any).info || {};
+                  const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
+                  const attempt = deliveries + 1;
+                  if (attempt >= maxDeliver) {
+                    console.error('[normalize] maxDeliver reached, DLQ publish', { dlqSubject, attempt });
+                    await js.publish(dlqSubject, m.data, { headers: m.headers });
+                    m.term();
+                  } else {
+                    console.warn('[normalize] processing failed, NAK for redelivery', { attempt, maxDeliver });
+                    m.nak();
+                  }
+                } catch (pubErr) {
+                  console.error('DLQ handling error', pubErr);
+                  m.nak();
+                }
+                span.recordException(err as Error);
+                span.setStatus({ code: SpanStatusCode.ERROR });
+              } finally {
+                span.end();
+              }
+            });
+          });
+        }
+      })();
+      console.log('[normalize] durable JetStream subscription active:', durableName, subj);
+    } catch (e) {
+      console.error('Failed to initialize durable Oura consumer:', e);
+    }
+
     // Subscribe to Sleep raw data (keep raw for now)
     const sleepSub = nc.subscribe('sleep.raw-received');
     (async () => {
