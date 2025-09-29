@@ -37,7 +37,7 @@ function gatherTsconfigs(){
 
 const offenders = [];
 for (const file of gatherTsconfigs()){
-  const rel = path.relative(repoRoot, file).replace(/\/g,'/');
+  const rel = path.relative(repoRoot, file).split(path.sep).join('/');
   const json = readJson(file);
   if (!json){ offenders.push({file: rel, reason: 'invalid JSON'}); continue; }
   const ext = json.extends;
