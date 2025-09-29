@@ -142,7 +142,7 @@ async function runIntegrationTests(): Promise<TestResult> {
   console.log('?? ??????...');
   
   return new Promise((resolve) => {
-    const childProcess = spawn('npm', ['run', 'test:integration'], {
+    const process = spawn('npm', ['run', 'test:integration'], {
       stdio: 'pipe',
       shell: true,
       env: {
