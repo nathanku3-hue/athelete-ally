@@ -1,4 +1,4 @@
-import { trace, metrics as otelMetrics } from '@opentelemetry/api';
+import { trace, metrics as otelMetrics, context, propagation } from '@opentelemetry/api';
 import { initTelemetry as initPreset } from '@athlete-ally/otel-preset';
 
 export interface TelemetryBootstrapOptions {
@@ -36,7 +36,7 @@ export function bootstrapTelemetry(opts: TelemetryBootstrapOptions): TelemetryBo
     environment,
     enabled: telemetryEnabled,
     exporters: {
-      prometheus: metrics.enabled ? { port: metrics.port, endpoint: (metrics as any).endpoint } : undefined,
+      prometheus: metrics.enabled ? { port: metrics.port, endpoint: metrics.endpoint } : undefined,
       otlp: traces.enabled ? { endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT } : undefined,
     },
     instrumentations: {
@@ -56,7 +56,6 @@ export function bootstrapTelemetry(opts: TelemetryBootstrapOptions): TelemetryBo
 
 export function injectTraceHeaders(headers: Record<string, string> = {}): Record<string, string> {
   try {
-    const { context, propagation } = require('@opentelemetry/api');
     const carrier: Record<string, string> = { ...headers };
     propagation.inject(context.active(), carrier);
     return carrier;
@@ -67,7 +66,6 @@ export function injectTraceHeaders(headers: Record<string, string> = {}): Record
 
 export async function withExtractedContext<T>(headers: Record<string, string> | undefined, fn: () => Promise<T>): Promise<T> {
   try {
-    const { context, propagation } = require('@opentelemetry/api');
     const carrier = headers || {};
     const ctx = propagation.extract(context.active(), carrier);
     return await context.with(ctx, fn);
