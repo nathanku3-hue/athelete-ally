@@ -117,7 +117,7 @@ export class VaultClient {
       });
       console.log(`✅ 密钥引擎 ${path} 已启用`);
     } catch (error) {
-      if (error.response?.status === 400) {
+      if ((error as any).response?.status === 400) {
         console.log(`ℹ️ 密钥引擎 ${path} 已存在`);
       } else {
         console.error(`密钥引擎 ${path} 启用失败:`, error);
@@ -147,7 +147,7 @@ export class VaultClient {
       });
       return response.data.data;
     } catch (error) {
-      if (error.response?.status === 404) {
+      if ((error as any).response?.status === 404) {
         return null;
       }
       console.error(`密钥读取失败 ${path}:`, error);
@@ -191,7 +191,7 @@ export class VaultClient {
       });
       return response.data.data.keys || [];
     } catch (error) {
-      if (error.response?.status === 404) {
+      if ((error as any).response?.status === 404) {
         return [];
       }
       console.error(`密钥列表获取失败 ${path}:`, error);

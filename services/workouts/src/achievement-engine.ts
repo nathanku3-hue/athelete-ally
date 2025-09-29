@@ -53,7 +53,7 @@ export class AchievementEngine {
       if (!exercise.records.length) continue;
 
       // Check max weight record
-      const maxWeightRecord = exercise.records.reduce((max, record) => {
+      const maxWeightRecord = exercise.records.reduce((max: any, record: any) => {
         if (record.actualWeight && (!max || record.actualWeight > max.actualWeight)) {
           return record;
         }
@@ -88,7 +88,7 @@ export class AchievementEngine {
       }
 
       // Check max reps record
-      const maxRepsRecord = exercise.records.reduce((max, record) => {
+      const maxRepsRecord = exercise.records.reduce((max: any, record: any) => {
         if (record.actualReps && (!max || record.actualReps > max.actualReps)) {
           return record;
         }
@@ -349,7 +349,7 @@ export class AchievementEngine {
       totalGoals,
       achievedGoals,
       activeGoals,
-      recordTypes: recordTypes.map(rt => ({
+      recordTypes: recordTypes.map((rt: any) => ({
         type: rt.recordType,
         count: rt._count.recordType,
       })),
@@ -373,7 +373,7 @@ export class AchievementEngine {
     });
 
     return {
-      records: records.map(r => ({
+      records: records.map((r: any) => ({
         type: 'record',
         id: r.id,
         exerciseName: r.exerciseName,
@@ -382,7 +382,7 @@ export class AchievementEngine {
         unit: r.unit,
         achievedAt: r.verifiedAt,
       })),
-      goals: goals.map(g => ({
+      goals: goals.map((g: any) => ({
         type: 'goal',
         id: g.id,
         exerciseName: g.exerciseName,

@@ -22,7 +22,8 @@
     "nats": "^2.19.0",
     "prisma": "^5.22.0",
     "zod": "^3.25.76",
-    "@athlete-ally/contracts": "*"
+    "@athlete-ally/contracts": "*",
+    "@opentelemetry/api": "^1.9.0"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",

@@ -91,7 +91,7 @@ class PortChecker {
     this.printResults();
   }
 
-  private printResults(): void {
+  public printResults(): void {
     console.log('\n?? Port Check Results:');
     console.log('=' .repeat(50));
 

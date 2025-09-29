@@ -1,6 +1,6 @@
 // services/optimization/src/QueryOptimizationService.ts
 import { PrismaClient } from '@prisma/client';
-import { ProtocolCacheService } from '../cache/src/ProtocolCacheService';
+// import { ProtocolCacheService } from '../cache/src/ProtocolCacheService';
 
 export interface QueryMetrics {
   query: string;
@@ -23,11 +23,11 @@ export interface OptimizationRecommendation {
 
 export class QueryOptimizationService {
   private prisma: PrismaClient;
-  private cache: ProtocolCacheService;
+  private cache: any; // ProtocolCacheService;
   private queryMetrics: QueryMetrics[] = [];
   private readonly MAX_METRICS_HISTORY = 1000;
   
-  constructor(prisma: PrismaClient, cache: ProtocolCacheService) {
+  constructor(prisma: PrismaClient, cache: any) {
     this.prisma = prisma;
     this.cache = cache;
   }
@@ -404,15 +404,15 @@ export class QueryOptimizationService {
     
     // 添加过滤条件
     if (options.category) {
-      baseWhere.category = options.category;
+      (baseWhere as any).category = options.category;
     }
     
     if (options.difficulty) {
-      baseWhere.difficulty = options.difficulty;
+      (baseWhere as any).difficulty = options.difficulty;
     }
     
     if (options.isPublic !== undefined) {
-      baseWhere.isPublic = options.isPublic;
+      (baseWhere as any).isPublic = options.isPublic;
     }
     
     return baseWhere;
@@ -427,15 +427,15 @@ export class QueryOptimizationService {
     
     // 添加过滤条件
     if (options.category) {
-      baseWhere.category = options.category;
+      (baseWhere as any).category = options.category;
     }
     
     if (options.difficulty) {
-      baseWhere.difficulty = options.difficulty;
+      (baseWhere as any).difficulty = options.difficulty;
     }
     
     if (options.search) {
-      baseWhere.OR = [
+      (baseWhere as any).OR = [
         { name: { contains: options.search, mode: 'insensitive' } },
         { description: { contains: options.search, mode: 'insensitive' } }
       ];

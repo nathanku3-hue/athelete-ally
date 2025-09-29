@@ -3,6 +3,8 @@
   "compilerOptions": {
     "baseUrl": "../..",
     "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
     "strict": false
   },
   "include": [
@@ -12,6 +14,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "prisma/**"
   ]
 }

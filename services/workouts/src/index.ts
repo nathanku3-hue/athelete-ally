@@ -200,7 +200,7 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
     });
 
     // 格式化个人记录数据
-    const formattedRecords = personalRecords.map(record => ({
+    const formattedRecords = personalRecords.map((record: any) => ({
       id: record.id,
       exerciseName: record.exercise.name,
       category: record.exercise.category,
@@ -212,7 +212,7 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
     }));
 
     // 计算记录类型分布
-    const recordTypes = personalRecords.reduce((acc: any[], record) => {
+    const recordTypes = personalRecords.reduce((acc: any[], record: any) => {
       const category = record.exercise.category;
       const existing = acc.find(item => item.type === category);
       if (existing) {
@@ -256,13 +256,13 @@ server.post('/sessions', async (request, reply) => {
 
     // Ensure required properties are provided
     const sessionData = {
+      ...parsed.data,
       userId: parsed.data.userId || '',
       planId: parsed.data.planId || '',
       sessionName: parsed.data.sessionName || '',
       location: parsed.data.location || '',
       weather: parsed.data.weather || '',
       temperature: parsed.data.temperature || 0,
-      ...parsed.data
     };
     const session = await sessionManager.createSession(sessionData);
 
@@ -406,6 +406,7 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
 
     // Ensure required properties are provided
     const exerciseDataWithDefaults = {
+      ...parsed.data,
       exerciseName: parsed.data.exerciseName || '',
       exerciseId: parsed.data.exerciseId || '',
       category: parsed.data.category || '',
@@ -415,7 +416,6 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
       targetWeight: parsed.data.targetWeight || 0,
       targetDuration: parsed.data.targetDuration || 0,
       targetRest: parsed.data.targetRest || 0,
-      ...parsed.data
     };
     const exercise = await sessionManager.addExerciseToSession(id, userId, exerciseDataWithDefaults);
 
@@ -447,6 +447,7 @@ server.post('/exercises/:id/records', async (request, reply) => {
 
     // Ensure required properties are provided
     const recordDataWithDefaults = {
+      ...parsed.data,
       targetReps: parsed.data.targetReps || 0,
       targetWeight: parsed.data.targetWeight || 0,
       targetDuration: parsed.data.targetDuration || 0,
@@ -459,7 +460,6 @@ server.post('/exercises/:id/records', async (request, reply) => {
       form: parsed.data.form || 0,
       difficulty: parsed.data.difficulty || 0,
       notes: parsed.data.notes || '',
-      ...parsed.data
     };
     const record = await sessionManager.addRecordToExercise(id, userId, recordDataWithDefaults);
 
@@ -569,6 +569,7 @@ server.post('/records', async (request, reply) => {
 
     // Ensure required properties are provided
     const personalRecordData = {
+      ...parsed.data,
       value: parsed.data.value || 0,
       recordType: parsed.data.recordType || 'max_weight' as const,
       exerciseName: parsed.data.exerciseName || '',
@@ -578,7 +579,6 @@ server.post('/records', async (request, reply) => {
       notes: parsed.data.notes || '',
       unit: parsed.data.unit || '',
       sessionId: parsed.data.sessionId || '',
-      ...parsed.data
     };
     const record = await achievementEngine.createPersonalRecord(personalRecordData);
 

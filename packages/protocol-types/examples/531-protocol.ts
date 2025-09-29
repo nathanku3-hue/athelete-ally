@@ -32,6 +32,8 @@ export const protocol531: Protocol = {
   isActive: true,
   isPublic: true,
   createdBy: 'system',
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   overview: 'A simple, effective strength training program based on submaximal training with the main lifts: squat, bench press, deadlift, and overhead press.',
   principles: [
@@ -67,6 +69,8 @@ export const baseBuildingBlock: Block = {
   phase: 'base' as BlockPhase,
   intensity: 'moderate' as IntensityLevel,
   volume: 'high' as VolumeLevel,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   parameters: {
     intensityRange: { min: 0.65, max: 0.85 },
@@ -111,6 +115,8 @@ export const strengthBuildingBlock: Block = {
   phase: 'build' as BlockPhase,
   intensity: 'high' as IntensityLevel,
   volume: 'moderate' as VolumeLevel,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   parameters: {
     intensityRange: { min: 0.75, max: 0.95 },
@@ -155,6 +161,8 @@ export const peakBlock: Block = {
   phase: 'peak' as BlockPhase,
   intensity: 'very_high' as IntensityLevel,
   volume: 'low' as VolumeLevel,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   parameters: {
     intensityRange: { min: 0.85, max: 1.0 },
@@ -204,6 +212,8 @@ export const squatSession: BlockSession = {
   name: 'Squat Day',
   dayOfWeek: 1, // Monday
   order: 1,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   exercises: [
     {
@@ -215,7 +225,8 @@ export const squatSession: BlockSession = {
       reps: '5/3/1', // 5 reps, 3 reps, 1 rep
       weight: '65%/75%/85%', // Percentage of training max
       rest: 300, // 5 minutes
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {
@@ -258,6 +269,8 @@ export const benchSession: BlockSession = {
   name: 'Bench Press Day',
   dayOfWeek: 2, // Tuesday
   order: 2,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   exercises: [
     {
@@ -269,7 +282,8 @@ export const benchSession: BlockSession = {
       reps: '5/3/1',
       weight: '65%/75%/85%',
       rest: 300,
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {
@@ -312,6 +326,8 @@ export const deadliftSession: BlockSession = {
   name: 'Deadlift Day',
   dayOfWeek: 4, // Thursday
   order: 3,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   exercises: [
     {
@@ -323,7 +339,8 @@ export const deadliftSession: BlockSession = {
       reps: '5/3/1',
       weight: '65%/75%/85%',
       rest: 300,
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {
@@ -366,6 +383,8 @@ export const pressSession: BlockSession = {
   name: 'Overhead Press Day',
   dayOfWeek: 5, // Friday
   order: 4,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   
   exercises: [
     {
@@ -377,7 +396,8 @@ export const pressSession: BlockSession = {
       reps: '5/3/1',
       weight: '65%/75%/85%',
       rest: 300,
-      order: 1,
+      createdAt: new Date(),
+  updatedAt: new Date(),
       notes: 'Main lift - focus on technique'
     },
     {

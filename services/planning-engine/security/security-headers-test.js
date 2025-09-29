@@ -51,8 +51,7 @@ const testSecurityHeaders = async (url) => {
 };
 
 const runSecurityHeadersTest = async () => {
-  console.log('🧪 开始安全头测试...
-');
+  console.log('🧪 开始安全头测试...');
   
   const endpoints = [
     'http://localhost:4102/health',
@@ -84,8 +83,7 @@ const runSecurityHeadersTest = async () => {
   const successful = results.filter(r => r.success);
   const failed = results.filter(r => !r.success);
   
-  console.log('
-📊 安全头测试结果:');
+  console.log('\n📊 安全头测试结果:');
   console.log('='.repeat(50));
   console.log('✅ 成功: ' + successful.length + '/' + results.length + ' (' + (successful.length/results.length*100).toFixed(1) + '%)');
   console.log('❌ 失败: ' + failed.length + '/' + results.length);
@@ -96,8 +94,7 @@ const runSecurityHeadersTest = async () => {
   }
   
   if (failed.length > 0) {
-    console.log('
-❌ 失败的端点:');
+    console.log('\n❌ 失败的端点:');
     failed.forEach(f => {
       console.log('   - ' + f.endpoint + ': ' + f.status + ' (' + f.duration + 'ms)');
     });
