@@ -6,8 +6,12 @@
   },
   "include": [
     "src/**/*.ts",
+<<<<<<< HEAD
     "src/**/*.tsx",
     "src/**/*.d.ts"
+=======
+    "src/**/*.tsx"
+>>>>>>> origin/main
   ],
   "exclude": [
     "node_modules",

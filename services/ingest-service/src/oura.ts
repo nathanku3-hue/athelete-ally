@@ -2,22 +2,19 @@
 // Minimal skeleton: verifies HMAC-SHA256 using raw body and TTL idempotency.
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-
-
 import { context, SpanStatusCode } from '@opentelemetry/api';
 import { tracer } from './telemetry';
-
-import * as nodeCrypto from 'node:crypto';
+import crypto from 'node:crypto';
 
 export function computeSignature(secret: string, payload: string): string {
-  return nodeCrypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
+  return crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
 }
 
 function safeEqual(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
   if (bufA.length !== bufB.length) return false;
-  return nodeCrypto.timingSafeEqual(bufA, bufB);
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
 export function verifySignature(opts: { secret: string; rawBody: string; headerSignature?: string | string[] | undefined }): boolean {
@@ -107,6 +104,7 @@ export function registerOuraWebhookRoutes(app: FastifyInstance, options: Registe
         }
         seen.add(idemKey);
 
+        // Publish raw payload to NATS subject for downstream normalization (optional)
         if (options.publish) {
           const subject = 'vendor.oura.webhook.received';
           const pubSpan = tracer.startSpan('nats.publish', { attributes: { subject } }, context.active());
@@ -125,6 +123,8 @@ export function registerOuraWebhookRoutes(app: FastifyInstance, options: Registe
         span.setStatus({ code: SpanStatusCode.ERROR, message: (err as Error)?.message });
         request.log.error({ err }, 'Oura webhook handler error');
         return reply.code(500).send({ error: 'Internal Server Error' });
+      } finally {
+        span.end();
       }
     }
   });
