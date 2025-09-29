@@ -53,7 +53,7 @@ export class AchievementEngine {
       if (!exercise.records.length) continue;
 
       // Check max weight record
-      const maxWeightRecord = exercise.records.reduce((max, record) => {
+      const maxWeightRecord = exercise.records.reduce((max: any, record: any) => {
         if (record.actualWeight && (!max || record.actualWeight > max.actualWeight)) {
           return record;
         }
@@ -88,7 +88,7 @@ export class AchievementEngine {
       }
 
       // Check max reps record
-      const maxRepsRecord = exercise.records.reduce((max, record) => {
+      const maxRepsRecord = exercise.records.reduce((max: any, record: any) => {
         if (record.actualReps && (!max || record.actualReps > max.actualReps)) {
           return record;
         }
