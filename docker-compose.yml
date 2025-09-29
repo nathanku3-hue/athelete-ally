@@ -170,6 +170,25 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
-
-volumes:
+  adaptive-engine:
+    profiles: ["adaptive"]
+    build:
+      context: .
+      dockerfile: services/adaptive-engine/Dockerfile
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4104
+      INSIGHTS_URL: http://insights-engine:4103
+      ADAPTATION_STUB: "true"
+      READINESS_ADAPTATION: "false"
+    ports:
+      - "4104:4104"
+    volumes:
+      - ./services/adaptive-engine:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      insights-engine:
+        condition: service_healthyvolumes:
   pgdata:
+
