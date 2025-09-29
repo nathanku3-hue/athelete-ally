@@ -21,7 +21,7 @@ try {
   ({ bootstrapTelemetry, withExtractedContext } = require('@athlete-ally/telemetry-bootstrap'));
 } catch {
   withExtractedContext = async (_headers: Record<string, string>, fn: () => Promise<void>) => await fn();
-  bootstrapTelemetry = (_opts: unknown) => ({ 
+  bootstrapTelemetry = () => ({ 
     tracer: { 
       startActiveSpan: async (_name: string, fn: (span: unknown) => Promise<void>) => await fn({ 
         setAttribute() {}, 
@@ -222,9 +222,12 @@ async function connectNATS() {
 
       try {
         const stream = await jsm.streams.find(subj);
+        // eslint-disable-next-line no-console
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
+        // eslint-disable-next-line no-console
         console.warn('[normalize] Oura subject stream not found; ensure JetStream stream includes', subj);
+        // eslint-disable-next-line no-console
         console.warn('[normalize] Ensure a JetStream stream includes subject vendor.oura.webhook.received (e.g. STREAM=vendor.oura subjects=[vendor.oura.webhook.received])');
       }
 
