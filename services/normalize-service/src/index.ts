@@ -4,10 +4,44 @@ import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
+import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
+import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
 
 const prisma = new PrismaClient();
 // Lightweight HTTP server for health/metrics
 const httpServer = Fastify({ logger: true });
+
+// Service-local Prometheus metrics
+const serviceRegistry = new Registry();
+collectDefaultMetrics({ register: serviceRegistry });
+
+const httpRequestsTotal = new Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method','route','status'],
+  registers: [serviceRegistry],
+});
+const httpRequestDurationSeconds = new Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request duration in seconds',
+  labelNames: ['method','route','status'],
+  buckets: [0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10],
+  registers: [serviceRegistry],
+});
+httpServer.addHook('onRequest', async (req) => { (req as any)._startTime = process.hrtime.bigint(); });
+httpServer.addHook('onResponse', async (req, reply) => {
+  try {
+    const start = (req as any)._startTime as bigint | undefined;
+    const route = (reply.request as any).routerPath || reply.request.url || 'unknown';
+    const labels = { method: req.method, route, status: String(reply.statusCode) } as const;
+    httpRequestsTotal.inc(labels);
+    if (start) {
+      const seconds = Number(process.hrtime.bigint() - start) / 1e9;
+      httpRequestDurationSeconds.observe(labels, seconds);
+    }
+  } catch {}
+});
+
 
 // EventBus connection
 let eventBus: EventBus | null = null;
@@ -21,10 +55,15 @@ httpServer.get('/health', async () => ({
   nats: nc ? 'connected' : 'disconnected'
 }));
 
-// Placeholder metrics endpoint (Task C will provide real metrics)
+// Metrics endpoint (service + event-bus metrics)
 httpServer.get('/metrics', async (request, reply) => {
-  reply.type('text/plain');
-  return '# metrics placeholder\n';
+  try {
+    reply.type('text/plain');
+    const merged = Registry.merge([globalRegistry, serviceRegistry]);
+    return await merged.metrics();
+  } catch {
+    reply.code(500).send('# metrics collection error');
+  }
 });
 
 async function connectNATS() {
