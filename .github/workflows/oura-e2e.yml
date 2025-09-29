@@ -1,0 +1,119 @@
+name: Oura E2E (non-blocking)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release/phase3-foundation
+
+jobs:
+  oura-e2e:
+    name: Oura End-to-End (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 25
+    env:
+      NODE_VERSION: 20.18.0
+      # Defaults; can be overridden by repo/org secrets
+      INGEST_BASE_URL: http://localhost:4101
+      NORMALIZE_BASE_URL: http://localhost:4102
+      DATABASE_URL_NORMALIZE: ${{ secrets.DATABASE_URL_NORMALIZE || 'postgresql://athlete:athlete@localhost:55432/athlete_normalize' }}
+      DATABASE_URL_INGEST: ${{ secrets.DATABASE_URL_INGEST || 'postgresql://athlete:athlete@localhost:55432/athlete' }}
+      OURA_WEBHOOK_SECRET: ${{ secrets.OURA_WEBHOOK_SECRET }}
+      TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
+      OURA_ACCESS_TOKEN: ${{ secrets.OURA_ACCESS_TOKEN }}
+      OURA_REFRESH_TOKEN: ${{ secrets.OURA_REFRESH_TOKEN }}
+      E2E_USER: e2e-user-oura
+      E2E_DATE: 2024-01-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install deps (root)
+        run: npm ci --no-audit --no-fund
+
+      - name: Docker info
+        run: |
+          docker version
+          docker compose version || true
+
+      - name: Boot infra (postgres, nats)
+        run: |
+          docker compose -f docker-compose.yml up -d postgres nats
+          for i in {1..60}; do
+            if nc -z 127.0.0.1 55432; then echo 'postgres up'; break; fi; sleep 2; done
+            nc -z 127.0.0.1 55432 || (echo 'postgres not ready' && docker compose ps && exit 1)
+          for i in {1..60}; do
+            if nc -z 127.0.0.1 4222; then echo 'nats up'; break; fi; sleep 2; done
+            nc -z 127.0.0.1 4222 || (echo 'nats not ready' && docker compose ps && exit 1)
+
+      - name: Boot services (normalize, ingest)
+        run: |
+          docker compose -f docker-compose.yml up -d normalize ingest
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' $INGEST_BASE_URL/health || true);
+            test "$code" = "200" && echo 'ingest healthy' && break; sleep 2; done
+          curl -sSf $INGEST_BASE_URL/health || (docker compose logs ingest && exit 1)
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' $NORMALIZE_BASE_URL/health || true);
+            test "$code" = "200" && echo 'normalize healthy' && break; sleep 2; done
+          curl -sSf $NORMALIZE_BASE_URL/health || (docker compose logs normalize && exit 1)
+
+      - name: Seed Oura tokens (optional)
+        if: env.OURA_ACCESS_TOKEN != '' && env.OURA_REFRESH_TOKEN != ''
+        working-directory: services/ingest-service
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL_INGEST }}
+        run: |
+          npx prisma generate
+          node ./scripts/seed-oura-token.cjs
+
+      - name: Simulate provider webhook (non-fatal)
+        continue-on-error: true
+        working-directory: services/ingest-service
+        env:
+          OURA_WEBHOOK_SECRET: ${{ env.OURA_WEBHOOK_SECRET }}
+          INGEST_BASE_URL: ${{ env.INGEST_BASE_URL }}
+          E2E_USER: ${{ env.E2E_USER }}
+          E2E_DATE: ${{ env.E2E_DATE }}
+        run: node ./scripts/send-oura-webhook.cjs || true
+
+      - name: Simulate HRV ingest (deterministic path)
+        working-directory: services/ingest-service
+        env:
+          INGEST_BASE_URL: ${{ env.INGEST_BASE_URL }}
+          E2E_USER: ${{ env.E2E_USER }}
+          E2E_DATE: ${{ env.E2E_DATE }}
+        run: node ./scripts/send-hrv-ingest.cjs
+
+      - name: Assert normalized HRV in Postgres
+        working-directory: services/normalize-service
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL_NORMALIZE }}
+          E2E_USER: ${{ env.E2E_USER }}
+          E2E_DATE: ${{ env.E2E_DATE }}
+        run: |
+          npx prisma generate
+          node ./scripts/assert-normalized-hrv.cjs
+
+      - name: Dump logs (always)
+        if: always()
+        run: |
+          docker compose logs --no-color > compose-logs.txt || true
+          curl -s $NORMALIZE_BASE_URL/metrics > normalize-metrics.txt || true
+          curl -s $INGEST_BASE_URL/metrics > ingest-metrics.txt || true
+          tar czf artifacts.tgz compose-logs.txt normalize-metrics.txt ingest-metrics.txt || true
+
+      - name: Upload artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oura-e2e-artifacts
+          path: artifacts.tgz
+

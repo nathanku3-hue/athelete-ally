@@ -157,7 +157,7 @@ export default function PlanPage() {
       if (!currentSession) return;
 
       const trainingSession = {
-        exercises: currentSession.exercises.map((ex: any) => ({
+        exercises: currentSession.exercises.map((ex: { id?: string; name: string; category: string; sets: number; reps: number; weight: number }) => ({
           id: ex.id || `mock-${ex.name.toLowerCase().replace(/\s+/g, '-')}`,
           name: ex.name,
           category: ex.category,
@@ -265,7 +265,7 @@ export default function PlanPage() {
               <p className="text-gray-400 mt-2">{planData.description}</p>
               <div className="flex items-center space-x-4 mt-4">
                 <span className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-sm">
-                  {planData.status?.toUpperCase()}
+                  {planData.status?.toUpperCase() || 'UNKNOWN'}
                 </span>
                 <span className="text-sm text-gray-400">Version {planData.version}</span>
               </div>
@@ -300,7 +300,7 @@ export default function PlanPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Training Weeks</h2>
             <div className="flex flex-wrap gap-2">
-            {planData.content.microcycles.map((week: any, index: number) => (
+            {planData.content.microcycles.map((week: { name: string; sessions: any[] }, index: number) => (
               <button
                 key={week.weekNumber}
                 onClick={() => setSelectedWeek(index)}
