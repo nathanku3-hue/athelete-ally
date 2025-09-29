@@ -1,0 +1,190 @@
+diff --git a/AUTONOMOUS_TODO.md b/AUTONOMOUS_TODO.md
+new file mode 100644
+index 0000000..8173f46
+--- /dev/null
++++ b/AUTONOMOUS_TODO.md
+@@ -0,0 +1,9 @@
++# AUTONOMOUS_TODO
++
++- 優先級: P0
++- 任務描述: Phase 1 (PR #24) — Create reusable packages/telemetry-bootstrap for OTel SDK + Prometheus
++- 依賴項: main is green; no code owners required
++- 狀態: [ ] In Progress
++- 嘗試次數: 1
++- 補丁文件: (pending)
++- 產出與筆記: Initialize package with bootstrapTelemetry() wrapping @athlete-ally/otel-preset; include NATS trace header helpers.
+diff --git a/packages/telemetry-bootstrap/README.md b/packages/telemetry-bootstrap/README.md
+new file mode 100644
+index 0000000..2188233
+--- /dev/null
++++ b/packages/telemetry-bootstrap/README.md
+@@ -0,0 +1,22 @@
++@athlete-ally/telemetry-bootstrap
++
++Minimal, reusable bootstrap for OpenTelemetry traces and Prometheus metrics.
++
++- Single function: bootstrapTelemetry({...})
++- Sensible defaults via env vars; zero PII policy
++- Compatible with all Node services (Fastify/Express/etc.)
++
++Quick start (TypeScript)
++
++import { bootstrapTelemetry } from '@athlete-ally/telemetry-bootstrap';
++const telemetry = bootstrapTelemetry({ serviceName: 'ingest-service', traces: { enabled: true }, metrics: { enabled: true, port: 9464, endpoint: '/metrics' } });
++const tracer = telemetry.tracer; // safe no-op if disabled
++
++Env variables
++- TELEMETRY_ENABLED=true|false (default false)
++- OTEL_TRACES_EXPORTER=otlp|none (future: jaeger)
++- OTEL_METRICS_EXPORTER=prometheus|none (uses embedded HTTP server)
++- PROMETHEUS_PORT (default 9464)
++- PROMETHEUS_ENDPOINT (default /metrics)
++
++Note: This wrapper currently leverages the internal package @athlete-ally/otel-preset. Metrics use the OpenTelemetry Prometheus exporter with its own small HTTP server. If you need the /metrics route on your app server, mount a proxy route in your service in Phase 2.
+diff --git a/packages/telemetry-bootstrap/package.json b/packages/telemetry-bootstrap/package.json
+new file mode 100644
+index 0000000..f20307d
+--- /dev/null
++++ b/packages/telemetry-bootstrap/package.json
+@@ -0,0 +1,35 @@
++{
++  "name": "@athlete-ally/telemetry-bootstrap",
++  "version": "0.1.0",
++  "description": "Shared bootstrap for OpenTelemetry traces and Prometheus metrics for Athlete Ally services.",
++  "license": "MIT",
++  "private": true,
++  "main": "./dist/index.js",
++  "types": "./dist/index.d.ts",
++  "exports": {
++    ".": {
++      "types": "./dist/index.d.ts",
++      "require": "./dist/index.js",
++      "import": "./dist/index.js"
++    }
++  },
++  "scripts": {
++    "build": "tsc -p tsconfig.json",
++    "clean": "rm -rf dist",
++    "type-check": "tsc -p tsconfig.json --noEmit"
++  },
++  "dependencies": {
++    "@athlete-ally/otel-preset": "*"
++  },
++  "peerDependencies": {
++    "@opentelemetry/api": "^1.7.0"
++  },
++  "devDependencies": {
++    "@types/node": "^20.0.0",
++    "typescript": "^5.0.0"
++  },
++  "files": [
++    "dist/**/*",
++    "README.md"
++  ]
++}
+diff --git a/packages/telemetry-bootstrap/src/index.ts b/packages/telemetry-bootstrap/src/index.ts
+new file mode 100644
+index 0000000..5473fe9
+--- /dev/null
++++ b/packages/telemetry-bootstrap/src/index.ts
+@@ -0,0 +1,77 @@
++import { trace, metrics as otelMetrics } from '@opentelemetry/api';
++import { initTelemetry as initPreset } from '@athlete-ally/otel-preset';
++
++export interface TelemetryBootstrapOptions {
++  serviceName: string;
++  version?: string;
++  environment?: string;
++  traces?: { enabled?: boolean };
++  metrics?: { enabled?: boolean; port?: number; endpoint?: string };
++}
++
++export interface TelemetryBootstrapInstance {
++  tracer: ReturnType<typeof trace.getTracer>;
++  meter: ReturnType<typeof otelMetrics.getMeter>;
++  shutdown: () => Promise<void>;
++}
++
++export function bootstrapTelemetry(opts: TelemetryBootstrapOptions): TelemetryBootstrapInstance {
++  const {
++    serviceName,
++    version = process.env.SERVICE_VERSION || '0.0.0',
++    environment = process.env.NODE_ENV || 'development',
++    traces = { enabled: process.env.OTEL_TRACES_EXPORTER !== 'none' },
++    metrics = { enabled: process.env.OTEL_METRICS_EXPORTER === 'prometheus', port: parseInt(process.env.PROMETHEUS_PORT || '9464'), endpoint: process.env.PROMETHEUS_ENDPOINT || '/metrics' },
++  } = opts;
++
++  const telemetryEnabled = process.env.TELEMETRY_ENABLED === 'true' || !!traces.enabled || !!metrics.enabled;
++
++  if (metrics.enabled) process.env.OTEL_EXPORTER = 'prometheus';
++  else if (traces.enabled) process.env.OTEL_EXPORTER = 'otlp';
++  else process.env.OTEL_EXPORTER = 'none';
++
++  const instance = initPreset({
++    serviceName,
++    version,
++    environment,
++    enabled: telemetryEnabled,
++    exporters: {
++      prometheus: metrics.enabled ? { port: metrics.port, endpoint: (metrics as any).endpoint } : undefined,
++      otlp: traces.enabled ? { endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT } : undefined,
++    },
++    instrumentations: {
++      http: true,
++      express: true,
++      fastify: true,
++      fs: false,
++    },
++  });
++
++  return {
++    tracer: instance.tracer,
++    meter: instance.meter,
++    shutdown: instance.shutdown,
++  };
++}
++
++export function injectTraceHeaders(headers: Record<string, string> = {}): Record<string, string> {
++  try {
++    const { context, propagation } = require('@opentelemetry/api');
++    const carrier: Record<string, string> = { ...headers };
++    propagation.inject(context.active(), carrier);
++    return carrier;
++  } catch {
++    return headers;
++  }
++}
++
++export async function withExtractedContext<T>(headers: Record<string, string> | undefined, fn: () => Promise<T>): Promise<T> {
++  try {
++    const { context, propagation } = require('@opentelemetry/api');
++    const carrier = headers || {};
++    const ctx = propagation.extract(context.active(), carrier);
++    return await context.with(ctx, fn);
++  } catch {
++    return await fn();
++  }
++}
+diff --git a/packages/telemetry-bootstrap/tsconfig.json b/packages/telemetry-bootstrap/tsconfig.json
+new file mode 100644
+index 0000000..d3c10f6
+--- /dev/null
++++ b/packages/telemetry-bootstrap/tsconfig.json
+@@ -0,0 +1,17 @@
++{
++  "extends": "../../config/typescript/tsconfig.base.json",
++  "compilerOptions": {
++    "outDir": "./dist",
++    "rootDir": "./src",
++    "declaration": true,
++    "composite": false,
++    "module": "CommonJS",
++    "target": "ES2020",
++    "moduleResolution": "Node",
++    "skipLibCheck": true,
++    "resolveJsonModule": true,
++    "esModuleInterop": true,
++    "strict": true
++  },
++  "include": ["src/**/*"]
++}
