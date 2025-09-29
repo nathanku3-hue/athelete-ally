@@ -86,9 +86,8 @@ jobs:
             # Set up test database URL with unique DB name
             export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/test_db_${{ github.run_id }}"
             
-            # Generate Prisma client (no-engine mode for migration guard)
-            export PRISMA_NO_ENGINE=1
-            bash ../../scripts/ci/prisma-generate.sh .
+            # Generate Prisma client for migration guard
+            bash "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" .
             
             # Test migration up (non-destructive)
             echo "Testing migration up for $schema_dir..."

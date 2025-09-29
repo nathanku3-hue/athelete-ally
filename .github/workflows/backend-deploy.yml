@@ -40,9 +40,10 @@ jobs:
         run: |
           set -euo pipefail
           echo "?? Generating Prisma client for planning-engine..."
-          # Use no-engine mode for build/deploy jobs
-          export PRISMA_NO_ENGINE=1
-          bash ./scripts/ci/prisma-generate.sh services/planning-engine
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" services/planning-engine
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
       
       - name: Run tests (workspace)
         run: npm run test -w services/planning-engine

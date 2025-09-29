@@ -73,12 +73,23 @@ jobs:
 
 
         run: npm ci --no-audit --no-fund
+      - name: Cache Prisma engines
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-prisma-
+
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          # Use no-engine mode for type-check/lint/build jobs
-          export PRISMA_NO_ENGINE=1
-          bash ./scripts/ci/prisma-generate.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            dir=$(dirname "$schema")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -203,9 +214,13 @@ jobs:
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          # Use no-engine mode for unit tests (no DB runtime)
-          export PRISMA_NO_ENGINE=1
-          bash ./scripts/ci/prisma-generate.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            dir=$(dirname "$schema")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -447,9 +462,13 @@ jobs:
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          # Use no-engine mode for build jobs
-          export PRISMA_NO_ENGINE=1
-          bash ./scripts/ci/prisma-generate.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            dir=$(dirname "$schema")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -515,9 +534,13 @@ jobs:
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
-          # Use no-engine mode for test-mandatory (no DB runtime)
-          export PRISMA_NO_ENGINE=1
-          bash ./scripts/ci/prisma-generate.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            dir=$(dirname "$schema")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
       - name: Ensure test-results dir (pre-tests)
         run: mkdir -p test-results
 

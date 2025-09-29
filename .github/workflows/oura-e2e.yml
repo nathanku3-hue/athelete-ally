@@ -31,11 +31,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
+      - name: Cache Prisma engines
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-prisma-
+
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
-          # Use full engine for E2E runtime jobs
-          bash ./scripts/ci/prisma-generate.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            dir=$(dirname "$schema")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
         
       - name: Start infrastructure services
         run: |

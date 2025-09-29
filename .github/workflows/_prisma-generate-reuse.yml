@@ -27,7 +27,11 @@ jobs:
         run: |
           set -euo pipefail
           echo "🔧 Generating Prisma clients for all services..."
-          # Use no-engine mode for reusable workflow (no DB runtime)
-          export PRISMA_NO_ENGINE=1
-          bash ./scripts/ci/prisma-generate.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            dir=$(dirname "$schema")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+          done
           echo "✅ All Prisma clients generated"
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}

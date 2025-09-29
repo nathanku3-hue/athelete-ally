@@ -30,61 +30,39 @@ run_prisma_generate() {
     # Change to target directory
     cd "$target_dir"
     
-    # Check if we should skip engine download
-    if [ "${PRISMA_NO_ENGINE:-}" = "1" ]; then
-        echo -e "${YELLOW}  📦 Generating Prisma client without engine (CI-optimized)${NC}"
-        
-        # Try --no-engine first
-        if npx prisma generate --no-engine 2>/dev/null; then
-            echo -e "${GREEN}  ✅ Generated Prisma client for $service_name (no-engine mode)${NC}"
-            return 0
-        fi
-        
-        # If --no-engine fails, check if client already exists
-        if [ -d "prisma/generated/client" ]; then
-            echo -e "${YELLOW}  ⚠️  Using existing Prisma client for $service_name (no-engine failed)${NC}"
-            return 0
-        fi
-        
-        echo -e "${RED}  ❌ Failed to generate Prisma client for $service_name${NC}"
-        return 1
-    else
-        echo -e "${GREEN}  📦 Generating Prisma client with engine (runtime mode)${NC}"
-        
-        # Set Prisma mirror if available
-        if [ -n "${PRISMA_ENGINES_MIRROR:-}" ]; then
-            echo "  🌐 Using Prisma mirror: ${PRISMA_ENGINES_MIRROR}"
-            export PRISMA_ENGINES_MIRROR="${PRISMA_ENGINES_MIRROR}"
-        fi
-        
-        # Retry logic for engine download
-        local attempt=1
-        local max_attempts=3
-        local base_delay=5
-        
-        while [ $attempt -le $max_attempts ]; do
-            echo "  🔄 Attempt $attempt/$max_attempts for $service_name..."
-            
-            if [ $attempt -gt 1 ]; then
-                local delay=$((base_delay * (2 ** (attempt - 2))))
-                echo "  ⏳ Waiting ${delay}s before retry..."
-                sleep $delay
-            fi
-            
-            if npx prisma generate; then
-                echo -e "${GREEN}  ✅ Generated Prisma client for $service_name (with engine)${NC}"
-                return 0
-            else
-                echo "  ❌ Attempt $attempt failed for $service_name"
-                if [ $attempt -eq $max_attempts ]; then
-                    echo -e "${RED}  🚨 All attempts failed for $service_name${NC}"
-                    return 1
-                fi
-            fi
-            
-            attempt=$((attempt + 1))
-        done
+    # Set Prisma mirror if available
+    if [ -n "${PRISMA_ENGINES_MIRROR:-}" ]; then
+        echo "  🌐 Using Prisma mirror: ${PRISMA_ENGINES_MIRROR}"
+        export PRISMA_ENGINES_MIRROR="${PRISMA_ENGINES_MIRROR}"
     fi
+    
+    # Retry logic for Prisma generation
+    local attempt=1
+    local max_attempts=3
+    local base_delay=5
+    
+    while [ $attempt -le $max_attempts ]; do
+        echo "  🔄 Attempt $attempt/$max_attempts for $service_name..."
+        
+        if [ $attempt -gt 1 ]; then
+            local delay=$((base_delay * (2 ** (attempt - 2))))
+            echo "  ⏳ Waiting ${delay}s before retry..."
+            sleep $delay
+        fi
+        
+        if npx prisma generate; then
+            echo -e "${GREEN}  ✅ Generated Prisma client for $service_name${NC}"
+            return 0
+        else
+            echo "  ❌ Attempt $attempt failed for $service_name"
+            if [ $attempt -eq $max_attempts ]; then
+                echo -e "${RED}  🚨 All attempts failed for $service_name${NC}"
+                return 1
+            fi
+        fi
+        
+        attempt=$((attempt + 1))
+    done
 }
 
 # Main execution logic
