@@ -1,7 +1,0 @@
-{
-  "zod": {
-    "wanted": "3.25.76",
-    "latest": "4.1.11",
-    "dependent": "shared-types"
-  }
-}
