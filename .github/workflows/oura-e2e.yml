@@ -70,8 +70,8 @@ jobs:
           
       - name: Wait for microservices health
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:3001/health; do sleep 2; done'
-          timeout 60 bash -c 'until curl -f http://localhost:3002/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:4101/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:4102/health; do sleep 2; done'
           
       - name: Seed Oura token (optional)
         if: ${{ env.OURA_ACCESS_TOKEN != '' && env.OURA_REFRESH_TOKEN != '' && env.TOKEN_ENCRYPTION_KEY != '' }}
@@ -86,14 +86,14 @@ jobs:
           cd services/ingest-service
           node scripts/send-oura-webhook.cjs
         env:
-          INGEST_SERVICE_URL: http://localhost:3001
+          INGEST_SERVICE_URL: http://localhost:4101
           
       - name: Send HRV ingest
         run: |
           cd services/ingest-service
           node scripts/send-hrv-ingest.cjs
         env:
-          INGEST_SERVICE_URL: http://localhost:3001
+          INGEST_SERVICE_URL: http://localhost:4101
           
       - name: Assert normalized HRV record
         run: |
@@ -112,8 +112,8 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts/metrics
-          curl -s http://localhost:3001/metrics > artifacts/metrics/ingest-metrics.txt || true
-          curl -s http://localhost:3002/metrics > artifacts/metrics/normalize-metrics.txt || true
+          curl -s http://localhost:4101/metrics > artifacts/metrics/ingest-metrics.txt || true
+          curl -s http://localhost:4102/metrics > artifacts/metrics/normalize-metrics.txt || true
           
       - name: Upload artifacts
         if: always()
