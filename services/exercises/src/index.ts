@@ -69,7 +69,7 @@ server.get('/exercises/:id', async (request, reply) => {
 
     // Calculate average rating
     const avgRating = exercise.userRatings.length > 0
-      ? exercise.userRatings.reduce((sum, r) => sum + r.rating, 0) / exercise.userRatings.length
+      ? exercise.userRatings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / exercise.userRatings.length
       : 0;
 
     const responseTime = (Date.now() - startTime) / 1000;
@@ -176,9 +176,9 @@ server.get('/exercises', async (request, reply) => {
     ]);
 
     // Calculate average ratings
-    const exercisesWithRatings = exercises.map(exercise => {
+    const exercisesWithRatings = exercises.map((exercise: any) => {
       const avgRating = exercise.userRatings.length > 0
-        ? exercise.userRatings.reduce((sum, r) => sum + r.rating, 0) / exercise.userRatings.length
+        ? exercise.userRatings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / exercise.userRatings.length
         : 0;
 
       return {

@@ -191,7 +191,7 @@ export class RedisCacheService implements CacheService {
   }> {
     try {
       const [memory, info, keys] = await Promise.all([
-        this.redis.memory('USAGE'),
+        this.redis.memory('STATS'),
         this.redis.info('memory'),
         this.redis.dbsize()
       ]);

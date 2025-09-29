@@ -91,7 +91,7 @@ class PortChecker {
     this.printResults();
   }
 
-  private printResults(): void {
+  public printResults(): void {
     console.log('\n?? Port Check Results:');
     console.log('=' .repeat(50));
 
@@ -150,7 +150,7 @@ async function main() {
       await checker.checkPort(port, service);
     }
     
-    checker.printResults();
+    (checker as any).printResults();
   } else {
     // ??????
     await checker.checkAllPorts();
