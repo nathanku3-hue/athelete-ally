@@ -76,6 +76,9 @@
       ],
       "@athlete-ally/apps/*": [
         "./apps/*/src"
+      ],
+      "@athlete-ally/otel-preset": [
+        "./packages/otel-preset"
       ]
     }
   },
