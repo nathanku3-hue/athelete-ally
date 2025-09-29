@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Prisma Generation Wrapper for CI
-# Toggles between engine and no-engine based on PRISMA_NO_ENGINE environment variable
-# Supports directory arguments to run from specific service directories
+# Prisma Client Generation Wrapper
+# Accepts either service root or prisma directory and normalizes the path
+# Supports retry logic and Prisma mirror configuration
 
 set -euo pipefail
 
@@ -16,19 +16,26 @@ echo "🔧 Prisma Client Generation Wrapper"
 
 # Function to run prisma generate in a specific directory
 run_prisma_generate() {
-    local target_dir="$1"
-    local service_name="$2"
+    local target="$1"
+    local service_name=""
     
-    echo "📦 Processing $service_name in $target_dir..."
-    
-    # Check if schema exists
-    if [ ! -f "$target_dir/prisma/schema.prisma" ]; then
-        echo -e "${RED}❌ No Prisma schema found in $target_dir/prisma/schema.prisma${NC}"
+    # Normalize the path - accept either service root or prisma directory
+    local srv=""
+    if [ -f "$target/prisma/schema.prisma" ]; then
+        srv="$target"
+        service_name=$(basename "$target")
+    elif [ -f "$target/schema.prisma" ]; then
+        srv="$(dirname "$target")"
+        service_name=$(basename "$srv")
+    else
+        echo -e "${RED}❌ No prisma/schema.prisma found under '$target' or its parent${NC}" >&2
         return 1
     fi
     
-    # Change to target directory
-    cd "$target_dir"
+    echo "📦 Processing $service_name in $srv..."
+    
+    # Change to service directory
+    cd "$srv"
     
     # Set Prisma mirror if available
     if [ -n "${PRISMA_ENGINES_MIRROR:-}" ]; then
@@ -39,13 +46,13 @@ run_prisma_generate() {
     # Retry logic for Prisma generation
     local attempt=1
     local max_attempts=3
-    local base_delay=5
+    local base_delay=2
     
     while [ $attempt -le $max_attempts ]; do
         echo "  🔄 Attempt $attempt/$max_attempts for $service_name..."
         
         if [ $attempt -gt 1 ]; then
-            local delay=$((base_delay * (2 ** (attempt - 2))))
+            local delay=$((base_delay * (attempt - 1)))
             echo "  ⏳ Waiting ${delay}s before retry..."
             sleep $delay
         fi
@@ -75,7 +82,7 @@ if [ $# -eq 0 ]; then
         if [ -f "$schema" ]; then
             service_dir=$(dirname "$(dirname "$schema")")
             service_name=$(basename "$service_dir")
-            run_prisma_generate "$service_dir" "$service_name" || overall_status=1
+            run_prisma_generate "$service_dir" || overall_status=1
         fi
     done
     
@@ -91,8 +98,7 @@ else
     overall_status=0
     for target_dir in "$@"; do
         if [ -d "$target_dir" ]; then
-            service_name=$(basename "$target_dir")
-            run_prisma_generate "$target_dir" "$service_name" || overall_status=1
+            run_prisma_generate "$target_dir" || overall_status=1
         else
             echo -e "${RED}❌ Directory $target_dir does not exist${NC}"
             overall_status=1

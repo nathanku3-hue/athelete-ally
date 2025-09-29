@@ -29,8 +29,8 @@ jobs:
           echo "🔧 Generating Prisma clients for all services..."
           chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
           for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
-            dir=$(dirname "$schema")
-            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$dir"
+            service_dir=$(dirname "$(dirname "$schema")")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
           done
           echo "✅ All Prisma clients generated"
         env:
