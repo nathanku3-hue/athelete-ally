@@ -59,13 +59,13 @@ async function startDockerEnvironment(): Promise<TestResult> {
     let output = '';
     let error = '';
 
-    testProcess.stdout?.on('data', (data: any) => {
+    testProcess.stdout?.on('data', (data: Buffer) => {
       const message = data.toString();
       output += message;
       console.log(message.trim());
     });
 
-    testProcess.stderr?.on('data', (data: any) => {
+    testProcess.stderr?.on('data', (data: Buffer) => {
       const message = data.toString();
       error += message;
       console.error(message.trim());
@@ -155,13 +155,13 @@ async function runIntegrationTests(): Promise<TestResult> {
     let output = '';
     let error = '';
 
-    testProcess.stdout?.on('data', (data: any) => {
+    testProcess.stdout?.on('data', (data: Buffer) => {
       const message = data.toString();
       output += message;
       console.log(message.trim());
     });
 
-    testProcess.stderr?.on('data', (data: any) => {
+    testProcess.stderr?.on('data', (data: Buffer) => {
       const message = data.toString();
       error += message;
       console.error(message.trim());

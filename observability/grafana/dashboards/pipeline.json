@@ -1,0 +1,48 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Normalize Messages (by result)",
+      "targets": [
+        { "expr": "sum by (result) (normalize_messages_total)" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Normalize Redeliveries",
+      "targets": [
+        { "expr": "sum(normalize_redeliveries_total)" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest Requests (by status)",
+      "targets": [
+        { "expr": "sum by (status) (http_requests_total{service=\"ingest\"})" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Normalize /metrics scrape status",
+      "targets": [
+        { "expr": "up{job=\"normalize-service\"}" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    }
+  ],
+  "schemaVersion": 38,
+  "tags": ["pipeline"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "title": "Pipeline Baseline",
+  "version": 1
+}
+
