@@ -189,6 +189,9 @@ services:
       - /usr/src/app/node_modules
     depends_on:
       insights-engine:
-        condition: service_healthyvolumes:
+        condition: service_healthy
+
+volumes:
   pgdata:
+
 
