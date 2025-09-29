@@ -131,3 +131,6 @@ export * from './schemas/enhanced-plan';
 export * from './schemas/feedback';
 export * from './schemas/api';
 export * from './schemas/hrv';
+
+export * from './schemas/adaptive';
+

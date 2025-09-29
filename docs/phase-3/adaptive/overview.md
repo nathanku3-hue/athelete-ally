@@ -5,7 +5,7 @@
 - Endpoints:
   - GET `/health` ? basic liveness
   - GET `/metrics` ? placeholder metrics (Prometheus-ready in future PR)
-  - GET `/adaptive/today?userId=` ? returns `AdaptiveSuggestion`
+  - GET `/adaptive/today?userId=` ? returns `AdaptiveSuggestion` (stub or readiness-driven)
 
 Flags:
 - `ADAPTATION_STUB` (default true): return static `AdaptiveSuggestion` for UI unblock.
@@ -16,10 +16,9 @@ Flags:
   - >80 ? `increase`
 
 Resilience:
-- `5xx` upstream ? 204 No Content
-- timeout (INSIGHTS_TIMEOUT_MS) ? 204 No Content
-- `404` upstream ? propagate 404
+- 5xx upstream ? 204 No Content
+- Timeout (INSIGHTS_TIMEOUT_MS) ? 204 No Content
+- 404 upstream ? propagate 404
 
 Types:
 - `packages/shared-types/src/schemas/adaptive.ts` exports `AdaptiveSuggestionSchema` and `AdaptiveAdjustment`
-

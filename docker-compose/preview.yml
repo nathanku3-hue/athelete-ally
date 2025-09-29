@@ -72,6 +72,23 @@ services:
       - "4103:4103"
     depends_on:
       - postgres
-
-volumes:
+  adaptive-engine:
+    profiles: ["adaptive"]
+    build:
+      context: ..
+      dockerfile: services/adaptive-engine/Dockerfile
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - PORT=4104
+      - INSIGHTS_URL=http://insights-engine:4103
+      - ADAPTATION_STUB=true
+      - READINESS_ADAPTATION=false
+    volumes:
+      - ../services/adaptive-engine:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "4104:4104"
+    depends_on:
+      - insights-enginevolumes:
   pgdata:
