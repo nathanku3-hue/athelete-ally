@@ -51,7 +51,7 @@ jobs:
         
       - name: Start infrastructure services
         run: |
-          docker-compose -f docker-compose.yml up -d postgres nats
+          docker compose -f docker-compose.yml up -d postgres nats
           sleep 10
           
       - name: Wait for services to be healthy
@@ -105,8 +105,8 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts/logs
-          docker-compose logs ingest-service > artifacts/logs/ingest-service.log 2>&1 || true
-          docker-compose logs normalize-service > artifacts/logs/normalize-service.log 2>&1 || true
+          docker compose logs ingest-service > artifacts/logs/ingest-service.log 2>&1 || true
+          docker compose logs normalize-service > artifacts/logs/normalize-service.log 2>&1 || true
           
       - name: Collect metrics
         if: always()
@@ -125,5 +125,5 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker-compose down -v
+          docker compose down -v
           pkill -f "npm run dev" || true
