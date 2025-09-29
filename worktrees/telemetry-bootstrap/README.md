@@ -1,0 +1,195 @@
+# Athlete Ally
+
+## 概述
+Athlete Ally 是一个AI驱动的运动训练平台，提供个性化的训练计划生成、优化和管理服务。
+
+## 项目结构
+
+```
+athlete-ally/
+├── apps/                    # 前端应用
+│   └── gateway-bff/        # API网关
+├── services/               # 后端服务
+│   ├── planning-engine/    # 训练计划引擎
+│   ├── profile-onboarding/ # 用户档案
+│   ├── exercises/          # 运动数据库
+│   └── fatigue/            # 疲劳管理
+├── packages/               # 共享包
+│   ├── shared/            # 共享工具
+│   ├── contracts/         # API合约
+│   └── protocol-types/    # 协议类型
+├── monitoring/             # 监控配置
+├── docs/                   # 项目文档
+└── infrastructure/         # 基础设施
+```
+
+## 快速启动
+
+### 环境要求
+- Node.js 20.18.0 LTS
+- npm 10.9.3
+- Docker & Docker Compose
+
+### Docker Compose 配置
+- **本地开发**: 使用 [`docker-compose/preview.yml`](docker-compose/preview.yml) 进行端口绑定，支持环境变量端口重映射
+- **CI环境**: 使用 [`docker-compose/ci-standalone.yml`](docker-compose/ci-standalone.yml) 进行完全隔离，无端口绑定
+- **未来计划**: 将迁移到Docker Compose profiles方案（local vs ci）
+
+### 环境变量
+- `POSTGRES_PORT`: PostgreSQL端口（默认5432）
+- `REDIS_PORT`: Redis端口（默认6379）
+- `NATS_PORT`: NATS端口（默认4222）
+
+### CI/CD 工作流程
+- **V3 Test**: 验证核心功能，使用独立CI Compose
+- **Deploy**: 生产环境部署，Node 20 + npm ci
+- **Action Lint**: 工作流程质量检查，阻止@master使用
+- 工作流目录一览: `.github/workflows/`（查看 `deploy.yml`, `v3-test-first.yml`, `backend-deploy.yml`）
+
+### 测试框架
+
+#### Jest配置
+- 使用Jest 29.7.0作为唯一测试框架
+- jsdom环境用于前端组件测试
+- Node环境用于后端服务测试
+- 导入Jest API：`import { describe, it, expect, jest } from '@jest/globals'`
+
+#### 运行测试
+```bash
+# 所有测试
+npm run test
+
+# 特定服务
+npm run test -- services/planning-engine/
+
+# 前端测试
+npm run test -- apps/frontend/tests/
+```
+
+#### ESLint规则
+- 禁止在测试文件中导入vitest
+- 使用@jest/globals替代全局类型
+
+#### 统一别名策略
+- tsconfig.base.json作为路径解析的唯一来源
+- Jest moduleNameMapper从tsconfig.base.json派生
+
+### Git Hooks（开发者体验）
+- 仓库已提供自定义Git Hooks目录：`.githooks/`（本仓库`core.hooksPath = .githooks`）
+- 启用命令：`npm run hooks:enable`
+- 本地启用（如未启用）：
+  - `npm run hooks:enable`
+  - 或手动：`git config core.hooksPath .githooks`
+- 预提交（pre-commit）会阻止将构建产物（如 `.next/`、`dist/`、`coverage/` 等）提交到仓库。
+
+### 重要说明
+- 不要提交 `.env*` 文件到版本控制
+- CI环境使用独立网络，无主机端口绑定
+- 本地开发可以通过环境变量重映射端口
+- 所有Docker Compose操作使用项目级隔离
+
+### 开发环境
+```bash
+# 安装依赖
+npm install
+
+# 检查端口可用性
+npm run check-ports
+
+# 启动基础设施服务
+npm run infra:up
+
+# 启动开发环境
+npm run dev
+
+# 停止基础设施服务
+npm run infra:down
+```
+
+### 基础设施管理
+```bash
+# 启动基础设施服务 (PostgreSQL, Redis, NATS)
+npm run infra:up
+
+# 停止基础设施服务
+npm run infra:down
+
+# 检查端口可用性
+npm run check-ports 5432 6379 4222
+
+# 清理基础设施服务 (仅开发环境，会删除所有数据)
+npm run infra:clean
+```
+
+### 环境变量配置
+复制 `env.example` 为 `.env` 并配置关键变量：
+- `POSTGRES_PORT`: PostgreSQL端口（默认5432）
+- `REDIS_PORT`: Redis端口（默认6379）
+- `NATS_PORT`: NATS端口（默认4222）
+- `SNYK_TOKEN`: Snyk安全扫描令牌（可选）
+
+### 生产部署
+```bash
+# 构建所有服务
+npm run build:all
+
+# 启动生产环境
+docker compose -f docker-compose/preview.yml up -d
+```
+
+## 核心功能
+
+- **训练计划生成**: AI驱动的个性化训练计划
+- **用户档案管理**: 完整的用户信息和偏好设置
+- **运动数据库**: 丰富的运动动作库
+- **疲劳管理**: 智能的疲劳监测和恢复建议
+- **日志监控**: 完整的ELK Stack日志管理
+- **安全防护**: 企业级安全配置
+
+## 技术栈
+
+- **前端**: Next.js, React, TypeScript, Tailwind CSS
+- **后端**: Node.js, Express, TypeScript
+- **数据库**: PostgreSQL, Redis
+- **消息队列**: NATS
+- **监控**: ELK Stack, Prometheus, Grafana
+- **容器化**: Docker, Docker Compose
+
+## 访问地址
+
+- **前端应用**: http://localhost:3000
+- **API网关**: http://localhost:3001
+- **Planning Engine**: http://localhost:4102
+- **Kibana**: http://localhost:5601
+- **Elasticsearch**: http://localhost:9200
+
+## 文档
+
+- [文档索引 (Docs Index)](docs/README.md)
+- [用户指南](docs/USER_GUIDE.md)
+- [技术文档](docs/TECHNICAL_DOCS.md)
+- [Phase 3 计划](docs/PHASE_3_PLAN.md)
+- [Planning Engine 文档](services/planning-engine/README.md)
+
+## 开发指南
+
+### 代码规范
+- 使用 TypeScript
+- 遵循 ESLint 配置
+- 编写单元测试
+- 提交前运行 `npm run lint`
+
+### 数据库迁移
+```bash
+# 生成Prisma客户端
+npx turbo run db:generate
+
+# 运行数据库迁移
+npx turbo run db:migrate
+```
+
+## 许可证
+
+MIT License
+# Test trigger
+# Trigger lockfile rehydrate

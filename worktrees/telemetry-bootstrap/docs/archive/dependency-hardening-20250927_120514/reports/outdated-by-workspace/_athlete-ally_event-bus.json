@@ -1,0 +1,17 @@
+{
+  "ajv-formats": {
+    "wanted": "2.1.1",
+    "latest": "3.0.1",
+    "dependent": "event-bus"
+  },
+  "nats": {
+    "wanted": "2.29.3",
+    "latest": "2.29.3",
+    "dependent": "event-bus"
+  },
+  "prom-client": {
+    "wanted": "15.1.3",
+    "latest": "15.1.3",
+    "dependent": "event-bus"
+  }
+}

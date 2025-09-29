@@ -1,0 +1,26 @@
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/planning-engine/*.log
+  fields:
+    service: planning-engine
+    environment: production
+  fields_under_root: true
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/monitoring/*.log
+  fields:
+    service: monitoring
+    environment: production
+  fields_under_root: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded

@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: athlete-ally contracts
+  version: 0.1.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: health check
+      responses:
+        '200':
+          description: ok
+  /v1/onboarding:
+    post:
+      summary: submit onboarding profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingPayload'
+      responses:
+        '202':
+          description: accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAccepted'
+  /v1/plans/generate:
+    post:
+      summary: trigger plan generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanGenerateRequest'
+      responses:
+        '202':
+          description: accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAccepted'
+components:
+  schemas:
+    OnboardingPayload:
+      type: object
+      properties:
+        userId:
+          type: string
+        purpose:
+          type: string
+        proficiency:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        season:
+          type: string
+          enum: [offseason, preseason, inseason]
+        availabilityDays:
+          type: integer
+          minimum: 1
+          maximum: 7
+        weeklyGoalDays:
+          type: integer
+          minimum: 1
+          maximum: 7
+          description: 'User preferred weekly training goal days'
+        equipment:
+          type: array
+          items:
+            type: string
+        fixedSchedules:
+          type: array
+          items:
+            type: object
+            properties:
+              day:
+                type: string
+              start:
+                type: string
+              end:
+                type: string
+    PlanGenerateRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        seedPlanId:
+          type: string
+      required: [userId]
+    JobAccepted:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued]

@@ -1,0 +1,46 @@
+name: Alpha Smoke Tests
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Production"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Override BFF base URL (e.g., https://alpha.example.com:4000)'
+        required: false
+        default: ''
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Run Alpha smoke script
+        id: smoke
+        env:
+          SMOKE_BASE_URL: ${{ inputs.base_url || secrets.ALPHA_BFF_BASE_URL }}
+          JWT_SECRET: ${{ secrets.ALPHA_JWT_SECRET }}
+          SMOKE_TIMEOUT_MS: '120000'
+          SMOKE_POLL_INTERVAL_MS: '1500'
+        run: |
+          echo "Base URL: ${SMOKE_BASE_URL}"
+          node scripts/smoke-alpha.js | tee smoke.log
+
+      - name: Upload smoke logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-smoke-logs-${{ github.run_id }}
+          path: smoke.log
+

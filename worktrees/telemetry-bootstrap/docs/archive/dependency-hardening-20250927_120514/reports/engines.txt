@@ -1,0 +1,1087 @@
+Root engines: node=, npm=
+Runtime: node=v22.19.0, npm=11.5.2
+E:\vibe\athlete-ally-original\package.json: node=20.18.x npm=>=10.0.0
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\package.json: node=20.18.x npm=>=10.0.0
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\@img\colour\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\@img\sharp-win32-x64\package.json: node=^18.17.0 || ^20.3.0 || >=21.0.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\@opentelemetry\api\package.json: node=>=8.0.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\ansi-styles\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\chalk\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\color-convert\package.json: node=>=7.0.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\css-what\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\detect-libc\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\domhandler\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\entities\package.json: node=>=0.12 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\has-flag\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\nanoid\package.json: node=^10 || ^12 || ^13.7 || ^14 || >=15.0.1 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\next\package.json: node=^18.18.0 || ^19.8.0 || >= 20.0.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\next\dist\compiled\react-refresh\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\next\node_modules\postcss\package.json: node=^10 || ^12 || >=14 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\postcss\package.json: node=^10 || ^12 || >=14 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\react\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\semver\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\sharp\package.json: node=^18.17.0 || ^20.3.0 || >=21.0.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\source-map\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\source-map-js\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\styled-jsx\package.json: node=>= 12.0.0 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\supports-color\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\apps\frontend\.next\standalone\node_modules\typescript\package.json: node=>=14.17 npm=
+E:\vibe\athlete-ally-original\apps\gateway-bff\node_modules\node-fetch\package.json: node=^12.20.0 || ^14.13.1 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@alloc\quick-lru\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\@asamuzakjp\css-color\node_modules\lru-cache\package.json: node=20 || >=22 npm=
+E:\vibe\athlete-ally-original\node_modules\@asamuzakjp\dom-selector\node_modules\lru-cache\package.json: node=20 || >=22 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\code-frame\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\compat-data\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\core\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\core\node_modules\json5\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\generator\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-compilation-targets\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-globals\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-module-imports\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-module-transforms\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-plugin-utils\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-string-parser\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-validator-identifier\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helper-validator-option\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\helpers\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\parser\package.json: node=>=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\plugin-syntax-class-static-block\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\plugin-syntax-import-attributes\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\plugin-syntax-jsx\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\plugin-syntax-private-property-in-object\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\plugin-syntax-top-level-await\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\plugin-syntax-typescript\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\runtime\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\template\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\traverse\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@babel\types\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@cspotcode\source-map-support\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\@csstools\color-helpers\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@csstools\css-calc\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@csstools\css-color-parser\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@csstools\css-parser-algorithms\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@csstools\css-syntax-patches-for-csstree\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@csstools\css-tokenizer\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@dependents\detective-less\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@esbuild\linux-x64\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@esbuild\win32-x64\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@eslint\eslintrc\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@eslint\js\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@eslint-community\eslint-utils\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@eslint-community\regexpp\package.json: node=^12.0.0 || ^14.0.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@fastify\accept-negotiator\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@fastify\static\node_modules\glob\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\@fastify\static\node_modules\minimatch\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\@google-cloud\firestore\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@google-cloud\paginator\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@google-cloud\projectify\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@google-cloud\promisify\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@google-cloud\storage\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@grpc\grpc-js\package.json: node=>=12.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@grpc\proto-loader\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\@hapi\cryptiles\package.json: node=>=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@hapi\teamwork\package.json: node=>=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@humanwhocodes\config-array\package.json: node=>=10.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@humanwhocodes\module-importer\package.json: node=>=12.22 npm=
+E:\vibe\athlete-ally-original\node_modules\@img\colour\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@img\sharp-linux-x64\package.json: node=^18.17.0 || ^20.3.0 || >=21.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@img\sharp-linuxmusl-x64\package.json: node=^18.17.0 || ^20.3.0 || >=21.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@img\sharp-win32-x64\package.json: node=^18.17.0 || ^20.3.0 || >=21.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@isaacs\cliui\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\@isaacs\cliui\node_modules\ansi-regex\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\@isaacs\cliui\node_modules\strip-ansi\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\load-nyc-config\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\load-nyc-config\node_modules\find-up\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\load-nyc-config\node_modules\locate-path\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\load-nyc-config\node_modules\p-limit\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\load-nyc-config\node_modules\p-locate\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\load-nyc-config\node_modules\resolve-from\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@istanbuljs\schema\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\console\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\core\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\create-cache-key-function\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\create-cache-key-function\node_modules\@jest\schemas\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\create-cache-key-function\node_modules\@jest\types\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\diff-sequences\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\environment\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\expect\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\expect-utils\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\fake-timers\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\get-type\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\globals\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\pattern\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\pattern\node_modules\jest-regex-util\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\reporters\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\reporters\node_modules\glob\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\schemas\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\source-map\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\test-result\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\test-sequencer\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\transform\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jest\types\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@jridgewell\resolve-uri\package.json: node=>=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@lukeed\ms\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\@next\swc-linux-x64-gnu\package.json: node=>= 10 npm=
+E:\vibe\athlete-ally-original\node_modules\@next\swc-linux-x64-musl\package.json: node=>= 10 npm=
+E:\vibe\athlete-ally-original\node_modules\@next\swc-win32-x64-msvc\package.json: node=>= 10 npm=
+E:\vibe\athlete-ally-original\node_modules\@noble\hashes\package.json: node=^14.21.3 || >=16 npm=
+E:\vibe\athlete-ally-original\node_modules\@nodelib\fs.scandir\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\@nodelib\fs.stat\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\@nodelib\fs.walk\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\@nolyfill\is-core-module\package.json: node=>=12.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\api\package.json: node=>=8.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\api-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\context-async-hooks\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\exporter-trace-otlp-grpc\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\exporter-trace-otlp-http\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\exporter-trace-otlp-proto\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\exporter-zipkin\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\otlp-exporter-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\otlp-grpc-exporter-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\otlp-proto-exporter-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\otlp-transformer\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\propagator-b3\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\propagator-jaeger\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\sdk-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\sdk-metrics\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\sdk-node\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\sdk-trace-node\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\auto-instrumentations-node\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\context-async-hooks\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-jaeger\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-prometheus\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-prometheus\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-prometheus\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-prometheus\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-grpc\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-grpc\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-grpc\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-grpc\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-grpc\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-http\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-http\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-http\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-http\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-http\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-proto\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-proto\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-proto\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-proto\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-trace-otlp-proto\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-zipkin\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-zipkin\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-zipkin\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-zipkin\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\exporter-zipkin\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-amqplib\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-aws-lambda\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-aws-sdk\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-bunyan\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-cassandra-driver\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-connect\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-cucumber\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-dataloader\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-dns\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-express\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-fastify\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-fs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-generic-pool\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-graphql\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-grpc\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-grpc\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-hapi\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-http\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-http\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-http\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-ioredis\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-knex\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-koa\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-lru-memoizer\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-memcached\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-mongodb\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-mongoose\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-mysql\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-mysql2\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-nestjs-core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-net\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-pg\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-pino\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-redis\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-redis-4\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-restify\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-router\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-socket.io\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-tedious\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\instrumentation-winston\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-exporter-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-exporter-base\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-exporter-base\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-grpc-exporter-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-grpc-exporter-base\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-grpc-exporter-base\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-proto-exporter-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-proto-exporter-base\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-proto-exporter-base\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-transformer\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-transformer\node_modules\@opentelemetry\api-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-transformer\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-transformer\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-transformer\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\otlp-transformer\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagation-utils\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-aws-xray\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-b3\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-b3\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-b3\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-jaeger\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-jaeger\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\propagator-jaeger\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\redis-common\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\resource-detector-alibaba-cloud\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\resource-detector-aws\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\resource-detector-container\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\resource-detector-gcp\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-logs\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-logs\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-logs\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-metrics\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-metrics\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-metrics\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-metrics\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\node_modules\@opentelemetry\api-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\node_modules\@opentelemetry\instrumentation\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-node\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-trace-node\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-trace-node\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-trace-node\node_modules\@opentelemetry\resources\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-trace-node\node_modules\@opentelemetry\sdk-trace-base\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sdk-trace-node\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@opentelemetry\sql-common\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@pkgjs\parseargs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@playwright\test\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@prisma\client\package.json: node=>=16.13 npm=
+E:\vibe\athlete-ally-original\node_modules\@redis\client\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@redis\client\dist\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\@swc\core-linux-x64-gnu\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\@swc\core-linux-x64-musl\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\@swc\core-win32-x64-msvc\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\@testing-library\dom\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@testing-library\dom\node_modules\ansi-styles\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\@testing-library\dom\node_modules\pretty-format\package.json: node=^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@testing-library\jest-dom\package.json: node=>=14 npm=>=6
+E:\vibe\athlete-ally-original\node_modules\@testing-library\react\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@testing-library\user-event\package.json: node=>=12 npm=>=6
+E:\vibe\athlete-ally-original\node_modules\@tootallnate\once\package.json: node=>= 10 npm=
+E:\vibe\athlete-ally-original\node_modules\@ts-graphviz\adapter\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@ts-graphviz\ast\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@ts-graphviz\common\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@ts-graphviz\core\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\@types\request\node_modules\form-data\package.json: node=>= 0.12 npm=
+E:\vibe\athlete-ally-original\node_modules\@types\request\node_modules\mime-db\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\@types\request\node_modules\mime-types\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\eslint-plugin\node_modules\ignore\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\parser\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\project-service\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\scope-manager\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\tsconfig-utils\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\type-utils\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\types\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\typescript-estree\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\typescript-estree\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\utils\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\visitor-keys\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\@typescript-eslint\visitor-keys\node_modules\eslint-visitor-keys\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\abort-controller\package.json: node=>=6.5 npm=
+E:\vibe\athlete-ally-original\node_modules\accepts\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\acorn\package.json: node=>=0.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\acorn-loose\package.json: node=>=0.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\acorn-walk\package.json: node=>=0.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\agent-base\package.json: node=>= 14 npm=
+E:\vibe\athlete-ally-original\node_modules\agentkeepalive\package.json: node=>= 8.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ansi-escapes\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\ansi-escapes\node_modules\type-fest\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\ansi-regex\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\ansi-styles\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\anymatch\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\anymatch\node_modules\picomatch\package.json: node=>=8.6 npm=
+E:\vibe\athlete-ally-original\node_modules\aria-hidden\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\aria-query\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array-buffer-byte-length\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array-includes\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array.prototype.findlast\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array.prototype.findlastindex\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array.prototype.flat\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array.prototype.flatmap\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\array.prototype.tosorted\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\arraybuffer.prototype.slice\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\arrify\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\ast-module-types\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\async-function\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\atomic-sleep\package.json: node=>=8.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\autoprefixer\package.json: node=^10 || ^12 || >=14 npm=
+E:\vibe\athlete-ally-original\node_modules\available-typed-arrays\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\axe-core\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\axobject-query\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\babel-jest\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\babel-plugin-istanbul\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\babel-plugin-istanbul\node_modules\istanbul-lib-instrument\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\babel-plugin-jest-hoist\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\babel-preset-jest\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\bignumber.js\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\binary-extensions\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\body-parser\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\braces\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\browserslist\package.json: node=^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7 npm=
+E:\vibe\athlete-ally-original\node_modules\bs-logger\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\bufrw\package.json: node=>= 0.10.x npm=
+E:\vibe\athlete-ally-original\node_modules\bull\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\bytes\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\call-bind\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\call-bind-apply-helpers\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\call-bound\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\callsites\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\camelcase\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\camelcase-css\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\chalk\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\char-regex\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\chokidar\package.json: node=>= 8.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\chokidar\node_modules\glob-parent\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\ci-info\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\cli-cursor\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\cli-spinners\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\cliui\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\cliui\node_modules\string-width\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\cliui\node_modules\wrap-ansi\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\clone\package.json: node=>=0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\clsx\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\cluster-key-slot\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\co\package.json: node=>= 0.12.0 npm=
+E:\vibe\athlete-ally-original\node_modules\color-convert\package.json: node=>=7.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\combined-stream\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\commander\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\content-disposition\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\content-type\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\cookie\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\cookie-signature\package.json: node=>=6.6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\cors\package.json: node=>= 0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\create-jest\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\cron-parser\package.json: node=>=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\cross-spawn\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\css-tree\package.json: node=^10 || ^12.20.0 || ^14.13.0 || >=15.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\css-what\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\cssesc\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\cssstyle\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\data-urls\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\data-urls\node_modules\tr46\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\data-urls\node_modules\webidl-conversions\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\data-urls\node_modules\whatwg-url\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\data-view-buffer\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\data-view-byte-length\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\data-view-byte-offset\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\dateformat\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\deep-extend\package.json: node=>=4.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\deepmerge\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\define-data-property\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\define-properties\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\delayed-stream\package.json: node=>=0.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\denque\package.json: node=>=0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\depd\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\dependency-cruiser\package.json: node=^20.12||^22||>=24 npm=
+E:\vibe\athlete-ally-original\node_modules\dependency-cruiser\node_modules\commander\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\dependency-cruiser\node_modules\ignore\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\node_modules\dependency-cruiser\node_modules\json5\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\dependency-tree\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\dependency-tree\node_modules\commander\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\dequal\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\detect-libc\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\detect-newline\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-amd\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-cjs\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-es6\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-postcss\package.json: node=^14.0.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-sass\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-scss\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-stylus\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-typescript\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\detective-vue2\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\diff\package.json: node=>=0.3.1 npm=
+E:\vibe\athlete-ally-original\node_modules\diff-sequences\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\doctrine\package.json: node=>=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\domexception\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\domexception\node_modules\webidl-conversions\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\domhandler\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\node_modules\dotenv\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\dunder-proto\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\emittery\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\encodeurl\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\engine.io-client\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\engine.io-parser\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\enhanced-resolve\package.json: node=>=10.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\entities\package.json: node=>=0.12 npm=
+E:\vibe\athlete-ally-original\node_modules\es-abstract\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-define-property\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-errors\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-iterator-helpers\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-object-atoms\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-set-tostringtag\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-shim-unscopables\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\es-to-primitive\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\esbuild\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\escalade\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\escape-string-regexp\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\escodegen\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint\node_modules\@eslint\eslintrc\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint\node_modules\espree\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint\node_modules\globals\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-import-resolver-typescript\package.json: node=^14.18.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-module-utils\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-boundaries\package.json: node=>=18.18 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-boundaries\node_modules\eslint-module-utils\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-import\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-import\node_modules\doctrine\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-jsx-a11y\package.json: node=>=4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-react\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-react\node_modules\doctrine\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-plugin-react-hooks\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-scope\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\eslint-visitor-keys\package.json: node=^12.22.0 || ^14.17.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\espree\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\espree\node_modules\eslint-visitor-keys\package.json: node=^18.18.0 || ^20.9.0 || >=21.1.0 npm=
+E:\vibe\athlete-ally-original\node_modules\esprima\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\esquery\package.json: node=>=0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\esrecurse\package.json: node=>=4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\estraverse\package.json: node=>=4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\esutils\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\etag\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\event-target-shim\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\execa\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\exit\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\expect\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\express\package.json: node=>= 18 npm=
+E:\vibe\athlete-ally-original\node_modules\express\node_modules\content-disposition\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\express-rate-limit\package.json: node=>= 16 npm=
+E:\vibe\athlete-ally-original\node_modules\farmhash-modern\package.json: node=>=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\fast-glob\package.json: node=>=8.6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\fast-glob\node_modules\glob-parent\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\fast-redact\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\faye-websocket\package.json: node=>=0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\fdir\package.json: node=>=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\file-entry-cache\package.json: node=^10.12.0 || >=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\filing-cabinet\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\filing-cabinet\node_modules\commander\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\filing-cabinet\node_modules\json5\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\filing-cabinet\node_modules\tsconfig-paths\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\fill-range\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\finalhandler\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\find-my-way\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\find-up\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\firebase-admin\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\flat-cache\package.json: node=^10.12.0 || >=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\follow-redirects\package.json: node=>=4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\for-each\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\foreground-child\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\form-data\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\form-data\node_modules\mime-db\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\form-data\node_modules\mime-types\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\formdata-node\package.json: node=>= 12.20 npm=
+E:\vibe\athlete-ally-original\node_modules\forwarded\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\fraction.js\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\fresh\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\function.prototype.name\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\gaxios\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\gcp-metadata\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\generic-pool\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\node_modules\gensync\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\get-amd-module-type\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\get-caller-file\package.json: node=6.* || 8.* || >= 10.* npm=
+E:\vibe\athlete-ally-original\node_modules\get-intrinsic\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\get-nonce\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\get-package-type\package.json: node=>=8.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\get-port\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\get-proto\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\get-stream\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\get-symbol-description\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\glob\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\node_modules\glob\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\node_modules\glob-parent\package.json: node=>=10.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\global-directory\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\globals\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\globalthis\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\gonzales-pe\package.json: node=>=0.6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\google-auth-library\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\google-gax\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\google-gax\node_modules\@grpc\proto-loader\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\google-logging-utils\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\gopd\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\gtoken\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\handlebars\package.json: node=>=0.4.7 npm=
+E:\vibe\athlete-ally-original\node_modules\has-bigints\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\has-flag\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\has-proto\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\has-symbols\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\has-tostringtag\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\hasown\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\helmet\package.json: node=>=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\hexer\package.json: node=>= 0.10.x npm=
+E:\vibe\athlete-ally-original\node_modules\html-encoding-sniffer\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\http-errors\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\http-errors\node_modules\statuses\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\http-proxy-agent\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\http-proxy-agent\node_modules\agent-base\package.json: node=>= 6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\https-proxy-agent\package.json: node=>= 14 npm=
+E:\vibe\athlete-ally-original\node_modules\human-signals\package.json: node=>=10.17.0 npm=
+E:\vibe\athlete-ally-original\node_modules\iconv-lite\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ignore\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\node_modules\import-fresh\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\import-local\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\imurmurhash\package.json: node=>=0.8.19 npm=
+E:\vibe\athlete-ally-original\node_modules\indent-string\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\ini\package.json: node=^14.17.0 || ^16.13.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\internal-slot\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\interpret\package.json: node=>=10.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ioredis\package.json: node=>=12.22.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ipaddr.js\package.json: node=>= 0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\is-array-buffer\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-async-function\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-bigint\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-binary-path\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\is-boolean-object\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-callable\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-core-module\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-data-view\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-date-object\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-extglob\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\is-finalizationregistry\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-fullwidth-code-point\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\is-generator-fn\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\is-generator-function\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-glob\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\is-installed-globally\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\is-installed-globally\node_modules\is-path-inside\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\is-interactive\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\is-map\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-negative-zero\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-number\package.json: node=>=0.12.0 npm=
+E:\vibe\athlete-ally-original\node_modules\is-number-object\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-obj\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\is-path-inside\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\is-regex\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-regexp\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\is-set\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-shared-array-buffer\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-stream\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\is-string\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-symbol\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-typed-array\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-unicode-supported\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\is-url-superb\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\is-weakmap\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-weakref\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\is-weakset\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\istanbul-lib-coverage\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\istanbul-lib-instrument\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\istanbul-lib-report\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\istanbul-lib-source-maps\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\istanbul-reports\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\iterator.prototype\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\jackspeak\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\jaeger-client\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\jest\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-changed-files\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-circus\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-cli\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-config\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-config\node_modules\glob\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\jest-diff\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-docblock\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-each\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\agent-base\package.json: node=>= 6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\cssstyle\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\data-urls\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\html-encoding-sniffer\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\https-proxy-agent\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\jsdom\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\tough-cookie\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\tr46\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\w3c-xmlserializer\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\webidl-conversions\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\whatwg-encoding\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\whatwg-mimetype\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\whatwg-url\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-jsdom\node_modules\xml-name-validator\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-environment-node\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-get-type\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-haste-map\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-junit\package.json: node=>=10.12.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-leak-detector\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-matcher-utils\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-message-util\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-mock\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-pnp-resolver\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-regex-util\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-resolve\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-resolve-dependencies\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-runner\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-runtime\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-runtime\node_modules\glob\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\jest-runtime\node_modules\strip-bom\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-snapshot\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-util\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-util\node_modules\picomatch\package.json: node=>=8.6 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-validate\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-validate\node_modules\camelcase\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-watcher\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-worker\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jest-worker\node_modules\supports-color\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\joycon\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\jsdom\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\jsdom\node_modules\http-proxy-agent\package.json: node=>= 14 npm=
+E:\vibe\athlete-ally-original\node_modules\jsdom\node_modules\tr46\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\jsdom\node_modules\webidl-conversions\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\jsdom\node_modules\whatwg-url\package.json: node=>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\jsdom\node_modules\ws\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jsesc\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\json-schema-resolver\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\jsonwebtoken\package.json: node=>=12 npm=>=6
+E:\vibe\athlete-ally-original\node_modules\jsx-ast-utils\package.json: node=>=4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\jwks-rsa\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\kleur\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\language-tags\package.json: node=>=0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\leven\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\levn\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\lilconfig\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\locate-path\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\log-symbols\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\lru-memoizer\node_modules\lru-cache\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\luxon\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\madge\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\madge\node_modules\commander\package.json: node=>= 10 npm=
+E:\vibe\athlete-ally-original\node_modules\make-dir\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\math-intrinsics\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\media-typer\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\memoize\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\merge-descriptors\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\merge2\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\methods\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\micromatch\package.json: node=>=8.6 npm=
+E:\vibe\athlete-ally-original\node_modules\micromatch\node_modules\picomatch\package.json: node=>=8.6 npm=
+E:\vibe\athlete-ally-original\node_modules\mime\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\mime-db\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\mime-types\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\mimic-fn\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\mimic-function\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\min-indent\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\minimatch\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\minipass\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\node_modules\mkdirp\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\module-definition\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\module-lookup-amd\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\module-lookup-amd\node_modules\commander\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\module-lookup-amd\node_modules\glob\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\nanoid\package.json: node=^10 || ^12 || ^13.7 || ^14 || >=15.0.1 npm=
+E:\vibe\athlete-ally-original\node_modules\napi-postinstall\package.json: node=^12.20.0 || ^14.18.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\nats\package.json: node=>= 14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\negotiator\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\next\package.json: node=^18.18.0 || ^19.8.0 || >= 20.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\next\dist\compiled\@babel\runtime\package.json: node=>=6.9.0 npm=
+E:\vibe\athlete-ally-original\node_modules\next\dist\compiled\react-refresh\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\next\node_modules\postcss\package.json: node=^10 || ^12 || >=14 npm=
+E:\vibe\athlete-ally-original\node_modules\nkeys.js\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\node-cron\package.json: node=>=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\node-domexception\package.json: node=>=10.5.0 npm=
+E:\vibe\athlete-ally-original\node_modules\node-fetch\package.json: node=4.x || >=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\node-forge\package.json: node=>= 6.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\node-source-walk\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\nodemailer\package.json: node=>=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\normalize-path\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\normalize-range\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\npm-run-path\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\object-assign\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\object-hash\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\object-inspect\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\object-keys\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\object.assign\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\object.entries\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\object.fromentries\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\object.groupby\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\object.values\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\on-exit-leak-free\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\on-finished\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\onetime\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\opentracing\package.json: node=>=0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\optionator\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ora\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\own-keys\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\p-limit\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\p-locate\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\p-try\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\parent-module\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\parse-json\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\parse-ms\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\parse5\node_modules\entities\package.json: node=>=0.12 npm=
+E:\vibe\athlete-ally-original\node_modules\parseurl\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\path-exists\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\path-is-absolute\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\path-key\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\path-scurry\package.json: node=>=16 || 14 >=14.18 npm=
+E:\vibe\athlete-ally-original\node_modules\pg\package.json: node=>= 16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\pg-int8\package.json: node=>=4.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\pg-types\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\picomatch\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\pify\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\pino-pretty\node_modules\strip-json-comments\package.json: node=>=14.16 npm=
+E:\vibe\athlete-ally-original\node_modules\pirates\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\pkg-dir\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\pkg-dir\node_modules\find-up\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\pkg-dir\node_modules\locate-path\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\pkg-dir\node_modules\p-limit\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\pkg-dir\node_modules\p-locate\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\playwright\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\playwright-core\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\pluralize\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\possible-typed-array-names\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss\package.json: node=^10 || ^12 || >=14 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss-import\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss-js\package.json: node=^12 || ^14 || >= 16 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss-load-config\package.json: node=>= 14 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss-nested\package.json: node=>=12.0 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss-selector-parser\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\postcss-values-parser\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\postgres-array\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\postgres-bytea\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\postgres-date\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\postgres-interval\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\precinct\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\precinct\node_modules\commander\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\prelude-ls\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\pretty-format\package.json: node=^14.15.0 || ^16.10.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\pretty-format\node_modules\ansi-styles\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\pretty-ms\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\prisma\package.json: node=>=16.13 npm=
+E:\vibe\athlete-ally-original\node_modules\prisma\prisma-client\package.json: node=>=16.13 npm=
+E:\vibe\athlete-ally-original\node_modules\process\package.json: node=>= 0.6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\prom-client\package.json: node=^16 || ^18 || >=20 npm=
+E:\vibe\athlete-ally-original\node_modules\prompts\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\proto3-json-serializer\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\protobufjs\package.json: node=>=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\proxy-addr\package.json: node=>= 0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\punycode\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\qs\package.json: node=>=0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\range-parser\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\raw-body\package.json: node=>= 0.10 npm=
+E:\vibe\athlete-ally-original\node_modules\raw-body\node_modules\iconv-lite\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\rc\node_modules\strip-json-comments\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\react\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\react-remove-scroll\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\react-remove-scroll-bar\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\react-style-singleton\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\readable-stream\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\readdirp\package.json: node=>=8.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\readdirp\node_modules\picomatch\package.json: node=>=8.6 npm=
+E:\vibe\athlete-ally-original\node_modules\real-require\package.json: node=>= 12.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\rechoir\package.json: node=>= 10.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\redent\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\redis-errors\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\redis-parser\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\reflect.getprototypeof\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\regexp.prototype.flags\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\require-directory\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\require-from-string\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\require-in-the-middle\package.json: node=>=8.6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\requirejs\package.json: node=>=0.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\requirejs-config-file\package.json: node=>=10.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\resolve\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\resolve-cwd\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\resolve-cwd\node_modules\resolve-from\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\resolve-dependency-path\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\resolve-from\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\resolve.exports\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\restore-cursor\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\ret\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\retry\package.json: node=>= 4 npm=
+E:\vibe\athlete-ally-original\node_modules\retry-request\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\reusify\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\rimraf\node_modules\glob\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\router\package.json: node=>= 18 npm=
+E:\vibe\athlete-ally-original\node_modules\safe-array-concat\package.json: node=>=0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\safe-push-apply\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\safe-regex-test\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\safe-stable-stringify\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\sass-lookup\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\sass-lookup\node_modules\commander\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\saxes\package.json: node=>=v12.22.7 npm=
+E:\vibe\athlete-ally-original\node_modules\semver\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\send\package.json: node=>= 18 npm=
+E:\vibe\athlete-ally-original\node_modules\serve-static\package.json: node=>= 18 npm=
+E:\vibe\athlete-ally-original\node_modules\set-function-length\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\set-function-name\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\set-proto\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\sharp\package.json: node=^18.17.0 || ^20.3.0 || >=21.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\shebang-command\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\shebang-regex\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\side-channel\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\side-channel-list\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\side-channel-map\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\side-channel-weakmap\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\signal-exit\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\slash\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\socket.io-client\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\socket.io-client\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\socket.io-parser\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\socket.io-parser\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\source-map\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\source-map-js\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\split2\package.json: node=>= 10.x npm=
+E:\vibe\athlete-ally-original\node_modules\stack-utils\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\stack-utils\node_modules\escape-string-regexp\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\statuses\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\stop-iteration-iterator\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\string-length\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\string-width\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\string-width\node_modules\ansi-regex\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\string-width\node_modules\strip-ansi\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\string-width-cjs\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\string.prototype.includes\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\string.prototype.matchall\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\string.prototype.trim\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\string.prototype.trimend\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\string.prototype.trimstart\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\stringify-object\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\strip-ansi\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\strip-ansi-cjs\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\strip-bom\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\strip-final-newline\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\strip-indent\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\strip-json-comments\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\styled-jsx\package.json: node=>= 12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\stylus-lookup\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\stylus-lookup\node_modules\commander\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\sucrase\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\node_modules\superagent\package.json: node=>=6.4.0 <13 || >=14 npm=
+E:\vibe\athlete-ally-original\node_modules\superagent\node_modules\mime\package.json: node=>=4.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\supertest\package.json: node=>=6.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\supports-color\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\supports-preserve-symlinks-flag\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\tailwindcss\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\tapable\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\teeny-request\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\node_modules\teeny-request\node_modules\agent-base\package.json: node=>= 6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\teeny-request\node_modules\https-proxy-agent\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\test-exclude\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\test-exclude\node_modules\glob\package.json: node=* npm=
+E:\vibe\athlete-ally-original\node_modules\thenify-all\package.json: node=>=0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\thriftrw\package.json: node=>= 0.10.x npm=
+E:\vibe\athlete-ally-original\node_modules\thriftrw\node_modules\long\package.json: node=>=0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\tinyglobby\package.json: node=>=12.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\to-regex-range\package.json: node=>=8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\toad-cache\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\toidentifier\package.json: node=>=0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\tough-cookie\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\node_modules\ts-api-utils\package.json: node=>=18.12 npm=
+E:\vibe\athlete-ally-original\node_modules\ts-graphviz\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\ts-jest\package.json: node=^14.15.0 || ^16.10.0 || ^18.0.0 || >=20.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ts-jest\node_modules\json5\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\ts-jest\node_modules\type-fest\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\node_modules\tsconfig-paths-webpack-plugin\package.json: node=>=10.13.0 npm=
+E:\vibe\athlete-ally-original\node_modules\tsconfig-paths-webpack-plugin\node_modules\json5\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\tsconfig-paths-webpack-plugin\node_modules\tsconfig-paths\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\tsx\package.json: node=>=18.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\twilio\package.json: node=>=14.0 npm=
+E:\vibe\athlete-ally-original\node_modules\twilio\node_modules\agent-base\package.json: node=>= 6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\twilio\node_modules\https-proxy-agent\package.json: node=>= 6 npm=
+E:\vibe\athlete-ally-original\node_modules\type-check\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\type-detect\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\node_modules\type-fest\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\type-is\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\node_modules\typed-array-buffer\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\typed-array-byte-length\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\typed-array-byte-offset\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\typed-array-length\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\typescript\package.json: node=>=14.17 npm=
+E:\vibe\athlete-ally-original\node_modules\uglify-js\package.json: node=>=0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\unbox-primitive\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\universalify\package.json: node=>= 4.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\unpipe\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\use-callback-ref\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\use-sidecar\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\v8-to-istanbul\package.json: node=>=10.12.0 npm=
+E:\vibe\athlete-ally-original\node_modules\vary\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\node_modules\w3c-xmlserializer\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\walkdir\package.json: node=>=6.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\watskeburt\package.json: node=^18||>=20 npm=
+E:\vibe\athlete-ally-original\node_modules\web-streams-polyfill\package.json: node=>= 14 npm=
+E:\vibe\athlete-ally-original\node_modules\websocket-driver\package.json: node=>=0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\websocket-extensions\package.json: node=>=0.8.0 npm=
+E:\vibe\athlete-ally-original\node_modules\whatwg-encoding\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\whatwg-mimetype\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\which\package.json: node=>= 8 npm=
+E:\vibe\athlete-ally-original\node_modules\which-boxed-primitive\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\which-builtin-type\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\which-collection\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\which-typed-array\package.json: node=>= 0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\word-wrap\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\node_modules\wrap-ansi\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\wrap-ansi\node_modules\ansi-regex\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\wrap-ansi\node_modules\ansi-styles\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\wrap-ansi\node_modules\strip-ansi\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\wrap-ansi-cjs\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\wrap-ansi-cjs\node_modules\string-width\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\write-file-atomic\package.json: node=^12.13.0 || ^14.15.0 || >=16.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\ws\package.json: node=>=10.0.0 npm=
+E:\vibe\athlete-ally-original\node_modules\xml-name-validator\package.json: node=>=18 npm=
+E:\vibe\athlete-ally-original\node_modules\xmlbuilder\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\node_modules\xmlhttprequest-ssl\package.json: node=>=0.4.0 npm=
+E:\vibe\athlete-ally-original\node_modules\xtend\package.json: node=>=0.4 npm=
+E:\vibe\athlete-ally-original\node_modules\y18n\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\yaml\package.json: node=>= 14.6 npm=
+E:\vibe\athlete-ally-original\node_modules\yargs\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\yargs\node_modules\string-width\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\node_modules\yargs-parser\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\node_modules\yn\package.json: node=>=6 npm=
+E:\vibe\athlete-ally-original\node_modules\yocto-queue\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\node_modules\zustand\package.json: node=>=12.20.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\parser\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\scope-manager\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\type-utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\types\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\typescript-estree\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\@typescript-eslint\visitor-keys\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\packages\contracts\node_modules\ts-api-utils\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\parser\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\scope-manager\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\type-utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\types\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\typescript-estree\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\@typescript-eslint\visitor-keys\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\dotenv\package.json: node=>=12 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\services\adaptive-engine\node_modules\ts-api-utils\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@swc\core\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@swc\jest\package.json: node= npm=>= 7.0.0
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\parser\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\scope-manager\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\type-utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\types\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\typescript-estree\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\@typescript-eslint\visitor-keys\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\services\analytics\node_modules\ts-api-utils\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\api-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\instrumentation\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\instrumentation-fs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\instrumentation-fs\node_modules\@opentelemetry\instrumentation\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\instrumentation-http\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@swc\core\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\services\exercises\node_modules\@swc\jest\package.json: node= npm=>= 7.0.0
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@jest\expect-utils\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@jest\schemas\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@jest\types\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\api-logs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\core\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\instrumentation\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\instrumentation-fs\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\instrumentation-fs\node_modules\@opentelemetry\instrumentation\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\instrumentation-http\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@opentelemetry\semantic-conventions\package.json: node=>=14 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@swc\core\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\@swc\jest\package.json: node= npm=>= 7.0.0
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\ansi-styles\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\ci-info\package.json: node=>=8 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\expect\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\jest-diff\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\jest-matcher-utils\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\jest-message-util\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\jest-mock\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\jest-util\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\fatigue\node_modules\pretty-format\package.json: node=^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@swc\core\package.json: node=>=10 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@swc\jest\package.json: node= npm=>= 7.0.0
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\parser\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\scope-manager\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\type-utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\types\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\typescript-estree\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\@typescript-eslint\visitor-keys\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\services\job-scheduler\node_modules\ts-api-utils\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\parser\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\scope-manager\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\type-utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\types\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\typescript-estree\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\@typescript-eslint\visitor-keys\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\services\notification-service\node_modules\ts-api-utils\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\services\planning-engine\node_modules\formidable\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\services\planning-engine\node_modules\mime\package.json: node=>=4.0.0 npm=
+E:\vibe\athlete-ally-original\services\planning-engine\node_modules\superagent\package.json: node=>=14.18.0 npm=
+E:\vibe\athlete-ally-original\services\planning-engine\node_modules\supertest\package.json: node=>=14.18.0 npm=
+E:\vibe\athlete-ally-original\services\profile-onboarding\node_modules\formidable\package.json: node=>=14.0.0 npm=
+E:\vibe\athlete-ally-original\services\profile-onboarding\node_modules\mime\package.json: node=>=4.0.0 npm=
+E:\vibe\athlete-ally-original\services\profile-onboarding\node_modules\superagent\package.json: node=>=14.18.0 npm=
+E:\vibe\athlete-ally-original\services\profile-onboarding\node_modules\supertest\package.json: node=>=14.18.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\package.json: node=>=18.0.0 npm=>=8.0.0
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\eslint-plugin\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\eslint-plugin\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\parser\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\parser\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\scope-manager\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\type-utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\type-utils\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\types\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\typescript-estree\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\typescript-estree\node_modules\debug\package.json: node=>=6.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\utils\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\@typescript-eslint\visitor-keys\package.json: node=^16.0.0 || >=18.0.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\accepts\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\body-parser\package.json: node=>= 0.8 npm=1.2.8000 || >= 1.4.16
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\cookie\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\express\package.json: node=>= 0.10.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\finalhandler\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\fresh\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\iconv-lite\package.json: node=>=0.10.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\media-typer\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\mime\package.json: node=>=4 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\mime-db\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\mime-types\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\minimatch\package.json: node=>=16 || 14 >=14.17 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\negotiator\package.json: node=>= 0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\qs\package.json: node=>=0.6 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\raw-body\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\send\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\send\node_modules\encodeurl\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\serve-static\package.json: node=>= 0.8.0 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\statuses\package.json: node=>= 0.8 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\ts-api-utils\package.json: node=>=16 npm=
+E:\vibe\athlete-ally-original\services\protocol-engine\node_modules\type-is\package.json: node=>= 0.6 npm=

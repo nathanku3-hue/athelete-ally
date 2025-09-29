@@ -2,6 +2,14 @@ name: Lockfile Rehydrate
 
 on:
   workflow_dispatch:
+<<<<<<< HEAD
+=======
+    inputs:
+      reason:
+        description: 'Reason for rehydrate'
+        required: false
+        default: 'Service dir renames workspace rehydrate'
+>>>>>>> origin/main
 
 permissions:
   contents: write
@@ -10,15 +18,27 @@ jobs:
   rehydrate:
     runs-on: ubuntu-latest
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
+=======
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js 20.18.0
+        uses: actions/setup-node@v4
+>>>>>>> origin/main
         with:
           node-version: '20.18.0'
           cache: 'npm'
           cache-dependency-path: package-lock.json
+<<<<<<< HEAD
       - name: npm ci (try)
         run: npm ci --no-audit --no-fund
         continue-on-error: true
@@ -27,6 +47,20 @@ jobs:
         run: npm install --workspaces --no-audit --no-fund
       - name: Validate with npm ci
         run: npm ci --no-audit --no-fund
+=======
+
+      - name: npm ci (try authoritative)
+        run: npm ci --no-audit --no-fund
+        continue-on-error: true
+
+      - name: npm install --workspaces (rehydrate on failure)
+        if: failure()
+        run: npm install --workspaces --no-audit --no-fund
+
+      - name: Validate with npm ci
+        run: npm ci --no-audit --no-fund
+
+>>>>>>> origin/main
       - name: Commit lockfile if changed
         run: |
           if ! git diff --quiet package-lock.json; then
@@ -35,4 +69,20 @@ jobs:
             git add package-lock.json
             git commit -m "chore(lockfile): rehydrate workspaces on Node 20.18.0 after service renames"
             git push
+<<<<<<< HEAD
           fi
+=======
+          else
+            echo "No lockfile changes detected"
+          fi
+
+      - name: Upload npm logs (best effort)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lockfile-rehydrate-logs
+          if-no-files-found: ignore
+          path: |
+            npm-debug.log
+            **/npm-debug.log
+>>>>>>> origin/main

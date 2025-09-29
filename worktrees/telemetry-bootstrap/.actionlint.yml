@@ -1,0 +1,28 @@
+self-hosted-runner:
+  labels: []
+  name: ""
+
+runner-label:
+  allow: []
+  deny: ["@master", "@main"]
+
+matrix:
+  allow-empty: false
+  max-dimensions: 16
+  max-rows: 256
+
+shell-name:
+  disallow: []
+  prefer: "bash"
+
+workflow-call:
+  inputs: []
+  outputs:
+    - "cache-dependency-path"
+  secrets: []
+
+# Disable specific checks that cause false positives
+ignore:
+  - "config_file"     # Allow config_file input parameter
+  - "workflow-call"   # Allow local reusable workflow calls
+  - "expression"      # Allow needs.outputs expressions
