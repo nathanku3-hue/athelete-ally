@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020"],
+    "lib": [
+      "ES2020"
+    ],
     "module": "ESNext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -18,26 +20,69 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./apps/frontend/src/*"],
-      "@components/*": ["./apps/frontend/src/components/*"],
-      "@contexts/*": ["./apps/frontend/src/contexts/*"],
-      "@lib/*": ["./apps/frontend/src/lib/*"],
-      "@hooks/*": ["./apps/frontend/src/hooks/*"],
-      "@athlete-ally/*": ["./packages/*/src"],
-      "@athlete-ally/event-bus": ["./packages/event-bus/src"],
-      "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
-      "@athlete-ally/contracts": ["./packages/contracts/events"],
-      "@athlete-ally/contracts/*": ["./packages/contracts/events/*"],
-      "@athlete-ally/shared": ["./packages/shared/src"],
-      "@athlete-ally/shared/*": ["./packages/shared/src/*"],
-      "@athlete-ally/shared/auth/jwt": ["./packages/shared/src/auth/jwt"],
-      "@athlete-ally/shared-types": ["./packages/shared-types/src"],
-      "@athlete-ally/shared-types/*": ["./packages/shared-types/src/*"],
-      "@athlete-ally/protocol-types": ["./packages/protocol-types/src"],
-      "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"],
-      "@athlete-ally/services/*": ["./services/*/src"],
-      "@athlete-ally/apps/*": ["./apps/*/src"]
+      "@/*": [
+        "./apps/frontend/src/*"
+      ],
+      "@components/*": [
+        "./apps/frontend/src/components/*"
+      ],
+      "@contexts/*": [
+        "./apps/frontend/src/contexts/*"
+      ],
+      "@lib/*": [
+        "./apps/frontend/src/lib/*"
+      ],
+      "@hooks/*": [
+        "./apps/frontend/src/hooks/*"
+      ],
+      "@athlete-ally/*": [
+        "./packages/*/src"
+      ],
+      "@athlete-ally/event-bus": [
+        "./packages/event-bus/src"
+      ],
+      "@athlete-ally/event-bus/*": [
+        "./packages/event-bus/src/*"
+      ],
+      "@athlete-ally/contracts": [
+        "./packages/contracts"
+      ],
+      "@athlete-ally/contracts/*": [
+        "./packages/contracts/*"
+      ],
+      "@athlete-ally/shared": [
+        "./packages/shared/src"
+      ],
+      "@athlete-ally/shared/*": [
+        "./packages/shared/src/*"
+      ],
+      "@athlete-ally/shared/auth/jwt": [
+        "./packages/shared/src/auth/jwt"
+      ],
+      "@athlete-ally/shared-types": [
+        "./packages/shared-types/src"
+      ],
+      "@athlete-ally/shared-types/*": [
+        "./packages/shared-types/src/*"
+      ],
+      "@athlete-ally/protocol-types": [
+        "./packages/protocol-types/src"
+      ],
+      "@athlete-ally/protocol-types/*": [
+        "./packages/protocol-types/src/*"
+      ],
+      "@athlete-ally/services/*": [
+        "./services/*/src"
+      ],
+      "@athlete-ally/apps/*": [
+        "./apps/*/src"
+      ]
     }
   },
-  "exclude": ["node_modules", "dist", "build", ".next"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next"
+  ]
 }
