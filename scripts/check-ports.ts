@@ -14,8 +14,10 @@
  *   npx tsx scripts/check-ports.ts 5432   # ????
  */
 
+/* eslint-disable no-console */
+
 import { createServer } from 'net';
-import { SERVICE_PORTS, getMicroservicePorts, getFrontendPorts, getInfrastructurePorts } from '../packages/shared/src/config/ports.js';
+import { SERVICE_PORTS, getMicroservicePorts, getFrontendPorts, getInfrastructurePorts } from '@athlete-ally/shared/config/ports';
 
 interface PortCheckResult {
   port: number;
@@ -150,7 +152,8 @@ async function main() {
       await checker.checkPort(port, service);
     }
     
-    checker.printResults();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (checker as any).printResults();
   } else {
     // ??????
     await checker.checkAllPorts();
