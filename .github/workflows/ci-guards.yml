@@ -1,0 +1,22 @@
+name: CI Guards
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - release/**
+
+jobs:
+  tsconfig-drift-guard:
+    name: Tsconfig Drift Guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.0
+      - name: Check tsconfig drift
+        run: node scripts/ci/check-tsconfig-drift.cjs
+
