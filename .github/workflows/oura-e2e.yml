@@ -64,8 +64,8 @@ jobs:
           
       - name: Start microservices
         run: |
-          npm run dev:ingest &
-          npm run dev:normalize &
+          cd services/ingest-service && PORT=4101 NATS_URL=nats://localhost:4222 npm run dev &
+          cd services/normalize-service && PORT=4102 NATS_URL=nats://localhost:4222 DATABASE_URL=postgresql://athlete:athlete@localhost:55432/athlete_normalize npm run dev &
           sleep 15
           
       - name: Wait for microservices health
