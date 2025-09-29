@@ -157,7 +157,7 @@ export default function PlanPage() {
       if (!currentSession) return;
 
       const trainingSession = {
-        exercises: currentSession.exercises.map(ex => ({
+        exercises: currentSession.exercises.map((ex: any) => ({
           id: ex.id || `mock-${ex.name.toLowerCase().replace(/\s+/g, '-')}`,
           name: ex.name,
           category: ex.category,
@@ -265,7 +265,7 @@ export default function PlanPage() {
               <p className="text-gray-400 mt-2">{planData.description}</p>
               <div className="flex items-center space-x-4 mt-4">
                 <span className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-sm">
-                  {planData.status.toUpperCase()}
+                  {planData.status?.toUpperCase()}
                 </span>
                 <span className="text-sm text-gray-400">Version {planData.version}</span>
               </div>
@@ -300,7 +300,7 @@ export default function PlanPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Training Weeks</h2>
             <div className="flex flex-wrap gap-2">
-            {planData.content.microcycles.map((week, index) => (
+            {planData.content.microcycles.map((week: any, index: number) => (
               <button
                 key={week.weekNumber}
                 onClick={() => setSelectedWeek(index)}
@@ -331,7 +331,7 @@ export default function PlanPage() {
 
             {/* Sessions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {currentSessions.map((session, sessionIndex) => (
+              {currentSessions.map((session: any, sessionIndex: number) => (
                 <div key={sessionIndex} className="bg-gray-800 rounded-lg p-6">
                   <div className="flex justify-between items-start mb-4">
                     <h4 className="text-lg font-semibold">{session.name}</h4>
@@ -344,7 +344,7 @@ export default function PlanPage() {
                     </p>
                     
                     <div className="space-y-2">
-                      {session.exercises.map((exercise, exerciseIndex) => (
+                      {session.exercises.map((exercise: any, exerciseIndex: number) => (
                         <div key={exerciseIndex} className="bg-gray-700 rounded p-3 hover:bg-gray-600 transition-colors">
                           <button
                             onClick={() => handleExerciseClick(exercise.name)}
@@ -391,14 +391,14 @@ export default function PlanPage() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-400">
-                {planData.content.microcycles.reduce((total, week) => total + week.sessions.length, 0)}
+                {planData.content.microcycles.reduce((total: number, week: any) => total + week.sessions.length, 0)}
               </div>
               <div className="text-gray-400">Training Sessions</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-400">
-                {Math.round(planData.content.microcycles.reduce((total, week) => 
-                  total + week.sessions.reduce((sessionTotal, session) => sessionTotal + session.duration, 0), 0
+                {Math.round(planData.content.microcycles.reduce((total: number, week: any) => 
+                  total + week.sessions.reduce((sessionTotal: number, session: any) => sessionTotal + session.duration, 0), 0
                 ) / 60)}
               </div>
               <div className="text-gray-400">Total Hours</div>
@@ -420,7 +420,7 @@ export default function PlanPage() {
                 disabled={!currentSessions[feedbackSessionIdx] || currentSessions[feedbackSessionIdx].exercises.length === 0}
               >
                 {currentSessions[feedbackSessionIdx] && currentSessions[feedbackSessionIdx].exercises.length > 0 ?
-                  currentSessions[feedbackSessionIdx].exercises.map((ex, idx) => (
+                  currentSessions[feedbackSessionIdx].exercises.map((ex: any, idx: number) => (
                     <option key={idx} value={idx}>{ex.name}</option>
                   )) : (
                     <option value={0}>No exercises available</option>

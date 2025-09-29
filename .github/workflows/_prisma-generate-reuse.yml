@@ -25,19 +25,13 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Generate Prisma clients
         run: |
+          set -euo pipefail
           echo "🔧 Generating Prisma clients for all services..."
-          # Generate for planning-engine specifically
-          if [ -f "services/planning-engine/prisma/schema.prisma" ]; then
-            echo "Generating Prisma client for planning-engine..."
-            npm run db:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
-          fi
-          # Generate for other services
-          for service in services/*/; do
-            if [ -f "$service/prisma/schema.prisma" ] && [ "$service" != "services/planning-engine/" ]; then
-              echo "Generating Prisma client for $(basename "$service")..."
-              cd "$service"
-              npx prisma generate
-              cd - > /dev/null
-            fi
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            service_dir=$(dirname "$(dirname "$schema")")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
           done
           echo "✅ All Prisma clients generated"
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}

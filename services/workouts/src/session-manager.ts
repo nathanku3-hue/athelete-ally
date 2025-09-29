@@ -348,11 +348,11 @@ export class WorkoutSessionManager {
 
     const records = exercise.records;
     const actualSets = records.length;
-    const actualReps = records.reduce((sum, record) => sum + record.actualReps, 0);
-    const actualWeight = records.length > 0 ? records.reduce((sum, record) => sum + (record.actualWeight || 0), 0) / records.length : null;
+    const actualReps = records.reduce((sum: number, record: any) => sum + record.actualReps, 0);
+    const actualWeight = records.length > 0 ? records.reduce((sum: number, record: any) => sum + (record.actualWeight || 0), 0) / records.length : null;
     const totalVolume = actualWeight ? actualWeight * actualReps : null;
-    const rpeValues = records.filter(r => r.rpe).map(r => r.rpe!);
-    const averageRPE = rpeValues.length > 0 ? rpeValues.reduce((sum, rpe) => sum + rpe, 0) / rpeValues.length : null;
+    const rpeValues = records.filter((r: any) => r.rpe).map((r: any) => r.rpe!);
+    const averageRPE = rpeValues.length > 0 ? rpeValues.reduce((sum: number, rpe: any) => sum + rpe, 0) / rpeValues.length : null;
     const maxRPE = rpeValues.length > 0 ? Math.max(...rpeValues) : null;
     const minRPE = rpeValues.length > 0 ? Math.min(...rpeValues) : null;
     const isCompleted = actualSets >= exercise.targetSets;

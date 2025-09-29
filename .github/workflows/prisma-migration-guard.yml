@@ -77,22 +77,24 @@ jobs:
           # Find all Prisma schemas
           PRISMA_SCHEMAS=$(find . -name "schema.prisma" -not -path "./node_modules/*")
           
+          # Make script executable
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          
           for schema in $PRISMA_SCHEMAS; do
             echo "Testing schema: $schema"
             schema_dir=$(dirname "$schema")
-            
-            cd "$schema_dir"
+            service_dir=$(dirname "$schema_dir")
             
             # Set up test database URL with unique DB name
             export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/test_db_${{ github.run_id }}"
             
-            # Generate Prisma client
-            npx prisma generate
+            # Generate Prisma client for migration guard using absolute paths
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
             
             # Test migration up (non-destructive)
             echo "Testing migration up for $schema_dir..."
+            cd "$schema_dir"
             npx prisma migrate dev --name test_migration --create-only || echo "No new migrations to create"
-            
             cd - > /dev/null
           done
           

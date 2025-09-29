@@ -31,7 +31,6 @@ export class RedisCacheService implements CacheService {
   
   constructor(redisUrl: string) {
     this.redis = new Redis(redisUrl, {
-      retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
       keepAlive: 30000,
@@ -192,7 +191,7 @@ export class RedisCacheService implements CacheService {
   }> {
     try {
       const [memory, info, keys] = await Promise.all([
-        this.redis.memory('usage'),
+        this.redis.memory('STATS'),
         this.redis.info('memory'),
         this.redis.dbsize()
       ]);

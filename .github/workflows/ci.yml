@@ -73,10 +73,23 @@ jobs:
 
 
         run: npm ci --no-audit --no-fund
+      - name: Cache Prisma engines
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-prisma-
+
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          bash ./scripts/generate-prisma-clients.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            service_dir=$(dirname "$(dirname "$schema")")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -201,7 +214,13 @@ jobs:
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          bash ./scripts/generate-prisma-clients.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            service_dir=$(dirname "$(dirname "$schema")")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -443,9 +462,13 @@ jobs:
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
-          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
-          chmod +x scripts/generate-prisma-clients.sh
-          bash ./scripts/generate-prisma-clients.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            service_dir=$(dirname "$(dirname "$schema")")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
 
       - name: Verify Prisma clients (per service)
         run: |
@@ -511,10 +534,13 @@ jobs:
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
-          # Fix script permissions and execute
-          sed -i 's/\r$//' scripts/generate-prisma-clients.sh || true
-          chmod +x scripts/generate-prisma-clients.sh
-          bash ./scripts/generate-prisma-clients.sh
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          for schema in $(git ls-files 'services/**/prisma/schema.prisma'); do
+            service_dir=$(dirname "$(dirname "$schema")")
+            "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" "$service_dir"
+          done
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
       - name: Ensure test-results dir (pre-tests)
         run: mkdir -p test-results
 

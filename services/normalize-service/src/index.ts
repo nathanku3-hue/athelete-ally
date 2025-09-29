@@ -1,13 +1,38 @@
 import Fastify from 'fastify';
-import { connect } from 'nats';
+import { connect, consumerOpts } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
+// Optional telemetry bootstrap (fallback to no-op if package unavailable)
+/* eslint-disable @typescript-eslint/no-require-imports */
+let bootstrapTelemetry: any, withExtractedContext: any;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  ({ bootstrapTelemetry, withExtractedContext } = require('@athlete-ally/telemetry-bootstrap'));
+} catch {
+  withExtractedContext = async (_headers: any, fn: any) => await fn();
+  bootstrapTelemetry = (_opts: any) => ({ tracer: { startActiveSpan: async (_name: string, fn: any) => await fn({ setAttribute() {}, setStatus() {}, end() {}, recordException() {} }) } });
+}
+/* eslint-enable @typescript-eslint/no-require-imports */
 import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
 import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
+import http from 'node:http';
 
 const prisma = new PrismaClient();
+// Bootstrap telemetry early (traces + Prometheus exporter)
+const telemetry = bootstrapTelemetry({
+  serviceName: 'normalize-service',
+  traces: { enabled: true },
+  metrics: { enabled: true, port: parseInt(process.env.PROMETHEUS_PORT || '9464'), endpoint: process.env.PROMETHEUS_ENDPOINT || '/metrics' },
+});
+
+console.log('[normalize] node=%s telemetry.enabled=%s metrics.port=%s endpoint=%s',
+  process.version,
+  (process.env.TELEMETRY_ENABLED === 'true') || true,
+  process.env.PROMETHEUS_PORT || '9464',
+  process.env.PROMETHEUS_ENDPOINT || '/metrics');
+
 // Lightweight HTTP server for health/metrics
 const httpServer = Fastify({ logger: true });
 
@@ -40,10 +65,9 @@ httpServer.addHook('onResponse', async (req, reply) => {
       httpRequestDurationSeconds.observe(labels, seconds);
     }
   } catch {}
-});
-
-
-// EventBus connection
+  });
+  
+  // EventBus connection
 let eventBus: EventBus | null = null;
 let nc: any = null;
 
@@ -78,29 +102,182 @@ async function connectNATS() {
     // Get NATS connection from EventBus for direct subscription
     nc = (eventBus as any).nc;
     
-    // Subscribe to HRV raw data using typed topics and schema validation
-    const hrvSub = nc.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED);
-    (async () => {
-      for await (const msg of hrvSub) {
-        try {
-          const eventData = JSON.parse(msg.data.toString());
-          
-          // Schema validation using event-bus validator
-          const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
-          if (!validation.valid) {
-            console.error('HRV event validation failed:', validation.errors);
-            // TODO: Send to DLQ
-            continue;
-          }
-          
-          await processHrvData(eventData.payload);
-        } catch (error) {
-          console.error('Error processing HRV data:', error);
-          // TODO: Send to DLQ
+    // Durable JetStream consumer for HRV raw data (JetStream)
+    try {
+      const js = nc.jetstream();
+      const jsm = await nc.jetstreamManager();
+      const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-consumer';
+      const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
+      const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'athlete-ally.dlq.normalize.hrv_raw_received';
+      try {
+        await jsm.consumers.add('ATHLETE_ALLY_EVENTS', {
+          durable_name: hrvDurable,
+          filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
+          ack_policy: 1, // Explicit
+          deliver_policy: 0, // All
+          max_deliver: hrvMaxDeliver,
+          ack_wait: 60_000_000_000
+        } as any);
+      } catch {}
+      const opts = consumerOpts();
+      opts.durable(hrvDurable);
+      opts.deliverAll();
+      opts.ackExplicit();
+      opts.manualAck();
+      opts.filterSubject(EVENT_TOPICS.HRV_RAW_RECEIVED);
+      const sub = await js.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
+      (async () => {
+        for await (const m of sub) {
+          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: any) => {
+              try {
+                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                const eventData = JSON.parse(text);
+                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
+                if (!validation.valid) {
+                  const info: any = (m as any).info || {};
+                  const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
+                  const attempt = deliveries + 1;
+                  if (attempt >= hrvMaxDeliver) {
+                    try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
+                    m.term();
+                  } else { m.nak(); }
+                  span.setStatus({ code: 2, message: 'schema validation failed' });
+                  span.end();
+                  return;
+                }
+                await processHrvData(eventData.payload);
+                m.ack();
+                span.setStatus({ code: 1 });
+              } catch (err: any) {
+                const info: any = (m as any).info || {};
+                const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
+                const attempt = deliveries + 1;
+                if (attempt >= hrvMaxDeliver) {
+                  try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
+                  m.term();
+                } else { m.nak(); }
+                span.recordException(err);
+                span.setStatus({ code: 2, message: err?.message });
+              } finally { span.end(); }
+            });
+          });
         }
+      })();
+    } catch (e) {
+      console.error('Failed to initialize durable HRV consumer:', e);
+    }
+
+    // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
+    try {
+      const js = nc.jetstream();
+      const jsm = await nc.jetstreamManager();
+      const durableName = process.env.NORMALIZE_DURABLE_NAME || 'normalize-oura';
+      const subj = 'vendor.oura.webhook.received';
+      const maxDeliver = parseInt(process.env.NORMALIZE_OURA_MAX_DELIVER || '5');
+      const dlqSubject = process.env.NORMALIZE_DLQ_SUBJECT || 'dlq.vendor.oura.webhook';
+      const ackWaitMs = parseInt(process.env.NORMALIZE_OURA_ACK_WAIT_MS || '15000');
+      const backoffMs = process.env.NORMALIZE_OURA_BACKOFF_MS || '250,1000,5000';
+
+      // Create OTel counters for metrics
+      const messagesCounter = telemetry.meter.createCounter('normalize_messages_total', {
+        description: 'Total number of messages processed by normalize service',
+      });
+      const redeliveriesCounter = telemetry.meter.createCounter('normalize_redeliveries_total', {
+        description: 'Total number of message redeliveries',
+      });
+
+      try {
+        const stream = await jsm.streams.find(subj);
+        console.log('[normalize] Oura subject stream:', stream);
+      } catch {
+        console.warn('[normalize] Oura subject stream not found; ensure JetStream stream includes', subj);
+        console.warn('[normalize] Ensure a JetStream stream includes subject vendor.oura.webhook.received (e.g. STREAM=vendor.oura subjects=[vendor.oura.webhook.received])');
       }
-    })();
-    
+
+      const opts = consumerOpts();
+      opts.durable(durableName);
+      opts.deliverAll();
+      opts.ackExplicit();
+      opts.manualAck();
+      opts.maxDeliver(maxDeliver);
+      opts.ackWait(ackWaitMs);
+      const sub = await js.subscribe(subj, opts);
+
+      (async () => {
+        for await (const m of sub) {
+          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: any) => {
+              span.setAttribute('messaging.system', 'nats');
+              span.setAttribute('messaging.destination', subj);
+              span.setAttribute('messaging.operation', 'process');
+              
+              // Add JetStream metadata attributes
+              const info: any = (m as any).info || {};
+              if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
+              if (info.sequence) span.setAttribute('messaging.nats.sequence', info.sequence);
+              if (info.redelivered !== undefined) span.setAttribute('messaging.redelivery_count', info.redelivered);
+              
+              try {
+                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                if (!text || text[0] !== '{') {
+                  console.warn('Oura webhook payload is not valid JSON');
+                  messagesCounter.add(1, { result: 'invalid_json', subject: subj });
+                  m.ack();
+                  span.setStatus({ code: SpanStatusCode.OK });
+                  span.end();
+                  return;
+                }
+                const evt = JSON.parse(text);
+                console.log('[normalize] received Oura webhook event keys:', Object.keys(evt || {}));
+                messagesCounter.add(1, { result: 'processed', subject: subj });
+                m.ack();
+                span.setStatus({ code: SpanStatusCode.OK });
+              } catch (err) {
+                try {
+                  const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
+                  const attempt = deliveries + 1;
+                  
+                  if (attempt >= maxDeliver) {
+                    console.error('[normalize] maxDeliver reached, DLQ publish', { dlqSubject, attempt });
+                    
+                    // Enhanced DLQ headers with context
+                    const dlqHeaders = new Map(m.headers || []);
+                    dlqHeaders.set('x-dlq-reason', 'processing_failed');
+                    dlqHeaders.set('x-dlq-attempt', attempt.toString());
+                    dlqHeaders.set('x-dlq-durable', durableName);
+                    dlqHeaders.set('x-original-subject', subj);
+                    
+                    await js.publish(dlqSubject, m.data, { headers: dlqHeaders });
+                    messagesCounter.add(1, { result: 'dlq', subject: subj });
+                    m.term();
+                  } else {
+                    console.warn('[normalize] processing failed, NAK for redelivery', { attempt, maxDeliver });
+                    redeliveriesCounter.add(1, { subject: subj });
+                    messagesCounter.add(1, { result: 'failed', subject: subj });
+                    m.nak();
+                  }
+                } catch (pubErr) {
+                  console.error('DLQ handling error', pubErr);
+                  messagesCounter.add(1, { result: 'failed', subject: subj });
+                  m.nak();
+                }
+                span.recordException(err as Error);
+                span.setStatus({ code: SpanStatusCode.ERROR });
+              } finally {
+                span.end();
+              }
+            });
+          });
+        }
+      })();
+      console.log('[normalize] durable JetStream subscription active:', durableName, subj, 'ackWait:', ackWaitMs, 'backoff:', backoffMs);
+    } catch (e) {
+      console.error('Failed to initialize durable Oura consumer:', e);
+    }
+
     // Subscribe to Sleep raw data (keep raw for now)
     const sleepSub = nc.subscribe('sleep.raw-received');
     (async () => {

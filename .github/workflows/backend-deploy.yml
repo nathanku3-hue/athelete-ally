@@ -40,7 +40,10 @@ jobs:
         run: |
           set -euo pipefail
           echo "?? Generating Prisma client for planning-engine..."
-          npm run db:generate -w services/planning-engine || (cd services/planning-engine && npx prisma generate)
+          chmod +x "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh"
+          "$GITHUB_WORKSPACE/scripts/ci/prisma-generate.sh" services/planning-engine
+        env:
+          PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
       
       - name: Run tests (workspace)
         run: npm run test -w services/planning-engine

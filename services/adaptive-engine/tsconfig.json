@@ -2,7 +2,9 @@
   "extends": "../../config/typescript/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "../..",
-    "noEmit": true
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
   },
   "include": [
     "src/**/*.ts",
@@ -11,6 +13,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "prisma/**"
   ]
 }
