@@ -78,29 +78,73 @@ async function connectNATS() {
     // Get NATS connection from EventBus for direct subscription
     nc = (eventBus as any).nc;
     
-    // Subscribe to HRV raw data using typed topics and schema validation
-    const hrvSub = nc.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED);
-    (async () => {
-      for await (const msg of hrvSub) {
-        try {
-          const eventData = JSON.parse(msg.data.toString());
-          
-          // Schema validation using event-bus validator
-          const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
-          if (!validation.valid) {
-            console.error('HRV event validation failed:', validation.errors);
-            // TODO: Send to DLQ
-            continue;
-          }
-          
-          await processHrvData(eventData.payload);
-        } catch (error) {
-          console.error('Error processing HRV data:', error);
-          // TODO: Send to DLQ
+    // Durable JetStream consumer for HRV raw data (JetStream)
+    try {
+      const js = nc.jetstream();
+      const jsm = await nc.jetstreamManager();
+      const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-consumer';
+      const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
+      const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'athlete-ally.dlq.normalize.hrv_raw_received';
+      try {
+        await jsm.consumers.add('ATHLETE_ALLY_EVENTS', {
+          durable_name: hrvDurable,
+          filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
+          ack_policy: 1, // Explicit
+          deliver_policy: 0, // All
+          max_deliver: hrvMaxDeliver,
+          ack_wait: 60_000_000_000
+        } as any);
+      } catch {}
+      const opts = consumerOpts();
+      opts.durable(hrvDurable);
+      opts.deliverAll();
+      opts.ackExplicit();
+      opts.manualAck();
+      opts.filterSubject(EVENT_TOPICS.HRV_RAW_RECEIVED);
+      const sub = await js.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
+      (async () => {
+        for await (const m of sub) {
+          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: any) => {
+              try {
+                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                const eventData = JSON.parse(text);
+                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
+                if (!validation.valid) {
+                  const info: any = (m as any).info || {};
+                  const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
+                  const attempt = deliveries + 1;
+                  if (attempt >= hrvMaxDeliver) {
+                    try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
+                    m.term();
+                  } else { m.nak(); }
+                  span.setStatus({ code: 2, message: 'schema validation failed' });
+                  span.end();
+                  return;
+                }
+                await processHrvData(eventData.payload);
+                m.ack();
+                span.setStatus({ code: 1 });
+              } catch (err: any) {
+                const info: any = (m as any).info || {};
+                const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
+                const attempt = deliveries + 1;
+                if (attempt >= hrvMaxDeliver) {
+                  try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
+                  m.term();
+                } else { m.nak(); }
+                span.recordException(err);
+                span.setStatus({ code: 2, message: err?.message });
+              } finally { span.end(); }
+            });
+          });
         }
-      }
-    })();
-    
+      })();
+    } catch (e) {
+      console.error('Failed to initialize durable HRV consumer:', e);
+    }
+
     // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
     try {
       const js = nc.jetstream();
