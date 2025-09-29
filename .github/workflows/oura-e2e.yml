@@ -10,6 +10,13 @@ jobs:
   oura-e2e:
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      DATABASE_URL_NORMALIZE: ${{ secrets.DATABASE_URL_NORMALIZE }}
+      DATABASE_URL_INGEST: ${{ secrets.DATABASE_URL_INGEST }}
+      OURA_ACCESS_TOKEN: ${{ secrets.OURA_ACCESS_TOKEN }}
+      OURA_REFRESH_TOKEN: ${{ secrets.OURA_REFRESH_TOKEN }}
+      OURA_WEBHOOK_SECRET: ${{ secrets.OURA_WEBHOOK_SECRET }}
+      TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
     
     steps:
       - name: Checkout code
@@ -49,23 +56,18 @@ jobs:
           timeout 60 bash -c 'until curl -f http://localhost:3002/health; do sleep 2; done'
           
       - name: Seed Oura token (optional)
-        if: ${{ secrets.OURA_ACCESS_TOKEN && secrets.TOKEN_ENCRYPTION_KEY }}
+        if: ${{ env.OURA_ACCESS_TOKEN != '' && env.OURA_REFRESH_TOKEN != '' && env.TOKEN_ENCRYPTION_KEY != '' }}
         run: |
           cd services/ingest-service
+          export DATABASE_URL_INGEST="${DATABASE_URL_INGEST:-postgresql://athlete:athlete@localhost:55432/athlete}"
           node scripts/seed-oura-token.cjs
-        env:
-          OURA_ACCESS_TOKEN: ${{ secrets.OURA_ACCESS_TOKEN }}
-          OURA_REFRESH_TOKEN: ${{ secrets.OURA_REFRESH_TOKEN }}
-          TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
-          DATABASE_URL_INGEST: ${{ secrets.DATABASE_URL_INGEST || 'postgresql://athlete:athlete@localhost:55432/athlete' }}
           
       - name: Simulate Oura webhook
-        if: ${{ secrets.OURA_WEBHOOK_SECRET }}
+        if: ${{ env.OURA_WEBHOOK_SECRET != '' }}
         run: |
           cd services/ingest-service
           node scripts/send-oura-webhook.cjs
         env:
-          OURA_WEBHOOK_SECRET: ${{ secrets.OURA_WEBHOOK_SECRET }}
           INGEST_SERVICE_URL: http://localhost:3001
           
       - name: Send HRV ingest
@@ -78,9 +80,8 @@ jobs:
       - name: Assert normalized HRV record
         run: |
           cd services/normalize-service
+          export DATABASE_URL_NORMALIZE="${DATABASE_URL_NORMALIZE:-postgresql://athlete:athlete@localhost:55432/athlete_normalize}"
           node scripts/assert-normalized-hrv.cjs
-        env:
-          DATABASE_URL_NORMALIZE: ${{ secrets.DATABASE_URL_NORMALIZE || 'postgresql://athlete:athlete@localhost:55432/athlete_normalize' }}
           
       - name: Collect service logs
         if: always()
