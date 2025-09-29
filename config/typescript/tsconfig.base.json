@@ -29,6 +29,8 @@
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
       "@athlete-ally/contracts": ["./packages/contracts"],
       "@athlete-ally/contracts/*": ["./packages/contracts/*"],
+      "@athlete-ally/contracts/events": ["./packages/contracts/events"],
+      "@athlete-ally/contracts/events/*": ["./packages/contracts/events/*"],
       "@athlete-ally/shared": ["./packages/shared/src"],
       "@athlete-ally/shared/*": ["./packages/shared/src/*"],
       "@athlete-ally/shared/auth/jwt": ["./packages/shared/src/auth/jwt"],
