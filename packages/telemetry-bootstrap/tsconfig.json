@@ -12,12 +12,8 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "strict": true,
-    "baseUrl": "../..",
-    "paths": {
-      "@athlete-ally/otel-preset": [
-        "packages/otel-preset/dist/index.d.ts"
-      ]
-    }
+    "baseUrl": ".",
+    "paths": {}
   },
   "include": [
     "src/**/*"
