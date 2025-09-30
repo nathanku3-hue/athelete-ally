@@ -137,19 +137,18 @@ async function connectNATS() {
     // eslint-disable-next-line no-console
     console.log('Connected to EventBus');
     
-    // Get NATS connection from EventBus for direct subscription
-    // TODO: Add typed getter to EventBus instead of accessing private .nc
-    nc = (eventBus as unknown as { nc: unknown }).nc;
+    // Get NATS connection and JetStream from EventBus for direct subscription
+    nc = eventBus.getNatsConnection();
+    const js = eventBus.getJetStream();
+    const jsm = eventBus.getJetStreamManager();
     
     // Durable JetStream consumer for HRV raw data (JetStream)
     try {
-      const js = (nc as { jetstream(): unknown }).jetstream();
-      const jsm = await (nc as { jetstreamManager(): Promise<unknown> }).jetstreamManager();
       const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-consumer';
       const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
       const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'athlete-ally.dlq.normalize.hrv_raw_received';
       try {
-        await (jsm as { consumers: { add: (stream: string, config: unknown) => Promise<void> } }).consumers.add('ATHLETE_ALLY_EVENTS', {
+        await jsm.consumers.add('ATHLETE_ALLY_EVENTS', {
           durable_name: hrvDurable,
           filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
           ack_policy: 1, // Explicit
@@ -175,7 +174,7 @@ async function connectNATS() {
         term: () => void;
       }
       
-      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<unknown>> }).subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
+      const sub = await js.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
       (async () => {
         for await (const m of sub) {
           const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number }; ack: () => void; nak: () => void; term: () => void };
@@ -192,7 +191,7 @@ async function connectNATS() {
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
                   if (attempt >= hrvMaxDeliver) {
-                    try { await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                    try { await js.publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
                     msg.term();
                   } else { msg.nak(); }
                   spanObj.setStatus({ code: 2, message: 'schema validation failed' });
@@ -207,7 +206,7 @@ async function connectNATS() {
                 const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                 const attempt = deliveries + 1;
                 if (attempt >= hrvMaxDeliver) {
-                  try { await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                  try { await js.publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
                   msg.term();
                 } else { msg.nak(); }
                 spanObj.recordException(err);
@@ -242,7 +241,7 @@ async function connectNATS() {
       });
 
       try {
-        const stream = await (jsm as { streams: { find: (subject: string) => Promise<unknown> } }).streams.find(subj);
+        const stream = await jsm.streams.find(subj);
         // eslint-disable-next-line no-console
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
@@ -259,7 +258,7 @@ async function connectNATS() {
       opts.manualAck();
       opts.maxDeliver(maxDeliver);
       opts.ackWait(ackWaitMs);
-      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<unknown>> }).subscribe(subj, opts);
+      const sub = await js.subscribe(subj, opts);
 
       (async () => {
         for await (const m of sub) {
@@ -316,7 +315,7 @@ async function connectNATS() {
                     dlqHeaders.set('x-dlq-durable', [durableName]);
                     dlqHeaders.set('x-original-subject', [subj]);
                     
-                    await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(dlqSubject, msg.data, { headers: dlqHeaders });
+                    await js.publish(dlqSubject, msg.data, { headers: dlqHeaders });
                     messagesCounter.add(1, { result: 'dlq', subject: subj });
                     msg.term();
                   } else {

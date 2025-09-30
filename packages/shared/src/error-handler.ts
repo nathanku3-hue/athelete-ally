@@ -11,6 +11,7 @@
 
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ZodError } from 'zod';
+import '@athlete-ally/shared/fastify-augment';
 
 // 错误类型枚举
 export enum ErrorType {

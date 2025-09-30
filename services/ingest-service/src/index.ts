@@ -4,11 +4,20 @@ import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
+import '@athlete-ally/shared/fastify-augment';
+import { register, collectDefaultMetrics } from 'prom-client';
 
 // Create Fastify instance
 const fastify: FastifyInstance = Fastify({
   logger: true
 });
+
+// 确保默认指标只注册一次
+let defaultMetricsRegistered = false;
+if (!defaultMetricsRegistered) {
+  collectDefaultMetrics({ register });
+  defaultMetricsRegistered = true;
+}
 
 // NATS connection for vendor publishes (Oura)
 let natsVendor: NatsConnection | null = null;
@@ -54,6 +63,12 @@ fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
   };
 });
 
+// Metrics endpoint
+fastify.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
+  reply.type(register.contentType);
+  return register.metrics();
+});
+
 // HRV ingestion endpoint
 const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -97,8 +112,13 @@ const sleepHandler = async (request: FastifyRequest, reply: FastifyReply) => {
     
     // For now, keep raw NATS publishing for sleep (will be updated in future PR)
     // This maintains compatibility while we focus on HRV typed events
-    if (eventBus && (eventBus as any).nc) {
-      await (eventBus as any).nc.publish('sleep.raw-received', JSON.stringify(data));
+    if (eventBus) {
+      try {
+        const nc = eventBus.getNatsConnection();
+        await nc.publish('sleep.raw-received', new TextEncoder().encode(JSON.stringify(data)));
+      } catch (err) {
+        fastify.log.warn({ err }, 'EventBus not connected, skipping sleep publish');
+      }
     }
     
     return { status: 'received', timestamp: new Date().toISOString() };

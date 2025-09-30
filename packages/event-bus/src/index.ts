@@ -388,6 +388,22 @@ export class EventBus {
   getValidatorStatus() {
     return eventValidator.getCacheStatus();
   }
+
+  // 类型化的 getter 方法 - 在连接后使用
+  getNatsConnection(): NatsConnection {
+    if (!this.nc) throw new Error('EventBus not connected');
+    return this.nc;
+  }
+
+  getJetStream(): JetStreamClient {
+    if (!this.js) throw new Error('EventBus not connected');
+    return this.js;
+  }
+
+  getJetStreamManager(): JetStreamManager {
+    if (!this.jsm) throw new Error('EventBus not connected');
+    return this.jsm;
+  }
 }
 
 export const eventBus = new EventBus();
