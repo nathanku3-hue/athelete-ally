@@ -1,9 +1,9 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { JWTManager, SecurityContextManager } from './jwt.js';
 import '@athlete-ally/shared/fastify-augment';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { JWTManager, SecurityContextManager } from './jwt.js';
 
 // 身份验证中间件
-export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
+export async function authMiddleware(request: any, reply: any) {
   try {
     // 跳过预检请求和健康检查端点
     if (request.method === 'OPTIONS') return;
@@ -34,8 +34,8 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
 }
 
 // 所有权检查中间件
-export function ownershipCheckMiddleware(resourceUserIdExtractor: (request: FastifyRequest) => string) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+export function ownershipCheckMiddleware(resourceUserIdExtractor: (request: any) => string) {
+  return async (request: any, reply: any) => {
     try {
       const requestId = request.requestId;
       if (!requestId) {
@@ -65,7 +65,7 @@ export function ownershipCheckMiddleware(resourceUserIdExtractor: (request: Fast
 
 // 角色检查中间件
 export function roleCheckMiddleware(requiredRoles: string[]) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: any, reply: any) => {
     try {
       const user = request.user;
       
@@ -86,7 +86,7 @@ export function roleCheckMiddleware(requiredRoles: string[]) {
 }
 
 // 清理中间件 - 在请求结束时清理安全上下文
-export async function cleanupMiddleware(request: FastifyRequest, reply: FastifyReply) {
+export async function cleanupMiddleware(request: any, reply: any) {
   const requestId = request.requestId;
   if (requestId) {
     SecurityContextManager.clearContext(requestId);

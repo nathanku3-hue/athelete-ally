@@ -9,9 +9,9 @@
  * - 错误分类和响应
  */
 
-import { FastifyRequest, FastifyReply } from 'fastify';
-import { ZodError } from 'zod';
 import '@athlete-ally/shared/fastify-augment';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { ZodError } from 'zod';
 
 // 错误类型枚举
 export enum ErrorType {
@@ -251,7 +251,7 @@ export class ErrorLogger {
 
 // Fastify 错误处理中间件
 export function createErrorHandler() {
-  return async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
+  return async (error: Error, request: any, reply: any) => {
     let standardError: StandardError;
     
     // 处理 Zod 验证错误
@@ -339,7 +339,7 @@ export class ErrorMonitor {
 
 // 增强的错误处理中间件
 export function createEnhancedErrorHandler() {
-  return async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
+  return async (error: Error, request: any, reply: any) => {
     let standardError: StandardError;
     
     // 处理 Zod 验证错误
