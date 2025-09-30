@@ -8,7 +8,9 @@
     ".": "./src/index.ts",
     "./config": "./src/config/index.ts",
     "./config/ports": "./src/config/ports.ts",
-    "./logger": "./src/logger.ts"
+    "./logger": "./src/logger.ts",
+    "./metrics": "./src/metrics.ts",
+    "./fastify-augment": "./src/fastify-augment.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -17,12 +19,12 @@
     "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
   },
   "dependencies": {
-    "fastify": "^4.28.1",
     "jsonwebtoken": "^9.0.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.5",
+    "fastify": "^4.28.1",
     "typescript": "^5.9.2"
   }
 }

@@ -141,16 +141,16 @@ export class EventBus {
         console.log(`Stream ${stream.name} created successfully`);
       } catch (error) {
         // Stream might already exist, try to update if subjects differ
-        if (error.message.includes('already in use with a different configuration')) {
+        if ((((error as any)?.message) || '').includes('already in use')) {
           try {
             console.log(`Updating stream ${stream.name} with new subjects...`);
-            await this.jsm.streams.update(stream);
+            await this.jsm.streams.update(stream.name, stream as any);
             console.log(`Stream ${stream.name} updated successfully`);
           } catch (updateError) {
-            console.log(`Failed to update stream ${stream.name}:`, updateError.message);
+            console.log(`Failed to update stream ${stream.name}:`, (updateError as any)?.message || String(updateError));
           }
         } else {
-          console.log(`Stream ${stream.name} might already exist:`, error.message);
+          console.log(`Stream ${stream.name} might already exist:`, (error as any)?.message || String(error));
         }
       }
     }
@@ -424,3 +424,6 @@ export const eventBus = new EventBus();
 
 // Export validator for services that need direct schema validation
 export { eventValidator } from './validator.js';
+
+
+
