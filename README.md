@@ -176,6 +176,9 @@ docker compose -f docker-compose/preview.yml up -d
 - Prisma Engines Mirror (CI Reliability): docs/ci/prisma-engines-mirror.md
 - RFC: Monorepo Tooling Upgrade (Turbo-first, Nx evaluation): docs/rfcs/2025-09-monorepo-tooling-upgrade.md
 
+- API Prefix Standardization: All service REST endpoints must be exposed under the versioned prefix `/api/v1`. Legacy non‑prefixed endpoints may remain temporarily for back‑compat and will be removed in a future release. New endpoints should be added only under `/api/v1`.
+- Strict ESLint (changed files): CI runs a strict ESLint config on only the files changed in a PR (e.g., `@typescript-eslint/no-explicit-any` is error). Repo‑wide lint remains at warn for legacy code. To run locally: `bash scripts/ci/eslint-strict-changed.sh`.
+
 ## 开发指南
 
 ### 代码规范
