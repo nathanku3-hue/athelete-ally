@@ -1,6 +1,22 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { JWTManager, SecurityContextManager } from './jwt.js';
 
+// 扩展FastifyRequest接口
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: { userId?: string; [k: string]: unknown };
+    requestId?: string;
+    rawBody?: string;
+  }
+
+  interface FastifyReply {
+    status(code: number): FastifyReply;
+    code(code: number): FastifyReply;
+    send(payload?: any): FastifyReply;
+    redirect(url: string): FastifyReply;
+  }
+}
+
 // 身份验证中间件
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -21,8 +37,8 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     SecurityContextManager.setContext(requestId, user);
     
     // 将用户信息附加到请求对象
-    (request as any).user = user;
-    (request as any).requestId = requestId;
+    request.user = user;
+    request.requestId = requestId;
 
   } catch (error) {
     reply.code(401).send({
@@ -36,7 +52,14 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
 export function ownershipCheckMiddleware(resourceUserIdExtractor: (request: FastifyRequest) => string) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const requestId = (request as any).requestId;
+      const requestId = request.requestId;
+      if (!requestId) {
+        reply.code(401).send({
+          error: 'unauthorized',
+          message: 'Request ID not found'
+        });
+        return;
+      }
       const resourceUserId = resourceUserIdExtractor(request);
       
       if (!SecurityContextManager.verifyOwnership(requestId, resourceUserId)) {
@@ -59,9 +82,9 @@ export function ownershipCheckMiddleware(resourceUserIdExtractor: (request: Fast
 export function roleCheckMiddleware(requiredRoles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const user = (request as any).user;
+      const user = request.user;
       
-      if (!user || !requiredRoles.includes(user.role)) {
+      if (!user || !('role' in user) || !requiredRoles.includes(user.role as string)) {
         reply.code(403).send({
           error: 'forbidden',
           message: `Access denied: Required roles: ${requiredRoles.join(', ')}`
@@ -79,7 +102,7 @@ export function roleCheckMiddleware(requiredRoles: string[]) {
 
 // 清理中间件 - 在请求结束时清理安全上下文
 export async function cleanupMiddleware(request: FastifyRequest, reply: FastifyReply) {
-  const requestId = (request as any).requestId;
+  const requestId = request.requestId;
   if (requestId) {
     SecurityContextManager.clearContext(requestId);
   }

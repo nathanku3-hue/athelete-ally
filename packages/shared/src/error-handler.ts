@@ -12,6 +12,22 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ZodError } from 'zod';
 
+// 扩展FastifyRequest接口
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: { userId?: string; [k: string]: unknown };
+    requestId?: string;
+    rawBody?: string;
+  }
+
+  interface FastifyReply {
+    status(code: number): FastifyReply;
+    code(code: number): FastifyReply;
+    send(payload?: any): FastifyReply;
+    redirect(url: string): FastifyReply;
+  }
+}
+
 // 错误类型枚举
 export enum ErrorType {
   VALIDATION_ERROR = 'VALIDATION_ERROR',

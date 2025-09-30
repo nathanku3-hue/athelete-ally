@@ -116,6 +116,9 @@ jobs:
       - name: Lint check
         run: npx turbo run lint
 
+      - name: Strict ESLint (changed files only)
+        run: bash ./scripts/ci/eslint-strict-changed.sh
+
       - name: Generate ESLint Boundaries Report
         continue-on-error: true
         run: |
@@ -981,4 +984,3 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validate normalized examples against JSON Schemas
         run: npm run validate:schemas
-

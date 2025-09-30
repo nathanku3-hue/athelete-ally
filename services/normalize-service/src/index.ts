@@ -1,23 +1,48 @@
-import Fastify from 'fastify';
-import { connect, consumerOpts } from 'nats';
+import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
+import { consumerOpts } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
+import { SpanStatusCode } from '@opentelemetry/api';
 // Optional telemetry bootstrap (fallback to no-op if package unavailable)
 /* eslint-disable @typescript-eslint/no-require-imports */
-let bootstrapTelemetry: any, withExtractedContext: any;
+interface TelemetryBootstrap {
+  tracer: {
+    startActiveSpan: (name: string, fn: (span: unknown) => Promise<void>) => Promise<void>;
+  };
+  meter: {
+    createCounter: (name: string, options: { description: string }) => {
+      add: (value: number, labels: Record<string, string>) => void;
+    };
+  };
+}
+interface WithExtractedContext {
+  (headers: Record<string, string>, fn: () => Promise<void>): Promise<void>;
+}
+let bootstrapTelemetry: (opts: unknown) => TelemetryBootstrap;
+let withExtractedContext: WithExtractedContext;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   ({ bootstrapTelemetry, withExtractedContext } = require('@athlete-ally/telemetry-bootstrap'));
 } catch {
-  withExtractedContext = async (_headers: any, fn: any) => await fn();
-  bootstrapTelemetry = (_opts: any) => ({ tracer: { startActiveSpan: async (_name: string, fn: any) => await fn({ setAttribute() {}, setStatus() {}, end() {}, recordException() {} }) } });
+  withExtractedContext = async (_headers: Record<string, string>, fn: () => Promise<void>) => await fn();
+  bootstrapTelemetry = () => ({ 
+    tracer: { 
+      startActiveSpan: async (_name: string, fn: (span: unknown) => Promise<void>) => await fn({ 
+        setAttribute() {}, 
+        setStatus() {}, 
+        end() {}, 
+        recordException() {} 
+      }) 
+    },
+    meter: {
+      createCounter: () => ({ add: () => {} })
+    }
+  });
 }
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
-import { context, propagation, trace, SpanStatusCode } from '@opentelemetry/api';
-import http from 'node:http';
 
 const prisma = new PrismaClient();
 // Bootstrap telemetry early (traces + Prometheus exporter)
@@ -27,6 +52,7 @@ const telemetry = bootstrapTelemetry({
   metrics: { enabled: true, port: parseInt(process.env.PROMETHEUS_PORT || '9464'), endpoint: process.env.PROMETHEUS_ENDPOINT || '/metrics' },
 });
 
+// eslint-disable-next-line no-console
 console.log('[normalize] node=%s telemetry.enabled=%s metrics.port=%s endpoint=%s',
   process.version,
   (process.env.TELEMETRY_ENABLED === 'true') || true,
@@ -53,23 +79,34 @@ const httpRequestDurationSeconds = new Histogram({
   buckets: [0.005,0.01,0.025,0.05,0.1,0.25,0.5,1,2.5,5,10],
   registers: [serviceRegistry],
 });
-httpServer.addHook('onRequest', async (req) => { (req as any)._startTime = process.hrtime.bigint(); });
-httpServer.addHook('onResponse', async (req, reply) => {
+interface RequestWithStartTime extends FastifyRequest {
+  _startTime?: bigint;
+}
+interface RequestWithRouterPath extends FastifyRequest {
+  routerPath: string;
+}
+
+httpServer.addHook('onRequest', async (req: RequestWithStartTime) => { 
+  req._startTime = process.hrtime.bigint(); 
+});
+httpServer.addHook('onResponse', async (req: RequestWithStartTime, reply: FastifyReply) => {
   try {
-    const start = (req as any)._startTime as bigint | undefined;
-    const route = (reply.request as any).routerPath || reply.request.url || 'unknown';
+    const start = req._startTime;
+    const route = (reply.request as RequestWithRouterPath).routerPath || reply.request.url || 'unknown';
     const labels = { method: req.method, route, status: String(reply.statusCode) } as const;
     httpRequestsTotal.inc(labels);
     if (start) {
       const seconds = Number(process.hrtime.bigint() - start) / 1e9;
       httpRequestDurationSeconds.observe(labels, seconds);
     }
-  } catch {}
+  } catch {
+    // Ignore errors in metrics collection
+  }
 });
-
+  
 // EventBus connection
 let eventBus: EventBus | null = null;
-let nc: any = null;
+let nc: unknown = null;
 
 httpServer.get('/health', async () => ({
   status: 'healthy',
@@ -97,15 +134,16 @@ async function connectNATS() {
     // Initialize EventBus
     eventBus = new EventBus();
     await eventBus.connect(natsUrl);
+    // eslint-disable-next-line no-console
     console.log('Connected to EventBus');
     
-    // Get NATS connection from EventBus for direct subscription
-    nc = (eventBus as any).nc;
+    // Get NATS connection and JetStream from EventBus for direct subscription
+    nc = eventBus.getNatsConnection();
+    const js = eventBus.getJetStream();
+    const jsm = eventBus.getJetStreamManager();
     
     // Durable JetStream consumer for HRV raw data (JetStream)
     try {
-      const js = nc.jetstream();
-      const jsm = await nc.jetstreamManager();
       const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-consumer';
       const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
       const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'athlete-ally.dlq.normalize.hrv_raw_received';
@@ -117,62 +155,76 @@ async function connectNATS() {
           deliver_policy: 0, // All
           max_deliver: hrvMaxDeliver,
           ack_wait: 60_000_000_000
-        } as any);
-      } catch {}
+        });
+      } catch {
+        // Consumer might already exist
+      }
       const opts = consumerOpts();
       opts.durable(hrvDurable);
       opts.deliverAll();
       opts.ackExplicit();
       opts.manualAck();
       opts.filterSubject(EVENT_TOPICS.HRV_RAW_RECEIVED);
+      interface NATSMessage {
+        headers?: Map<string, string[]>;
+        data: Uint8Array | string;
+        info?: { redelivered?: number; numDelivered?: number };
+        ack: () => void;
+        nak: () => void;
+        term: () => void;
+      }
+      
       const sub = await js.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
       (async () => {
         for await (const m of sub) {
-          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
-          await withExtractedContext(hdrs, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: any) => {
+          const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number }; ack: () => void; nak: () => void; term: () => void };
+          const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs || {}, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
+              const spanObj = span as { setStatus: (status: { code: number; message?: string }) => void; end: () => void; recordException: (err: unknown) => void };
               try {
-                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
                 const eventData = JSON.parse(text);
                 const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
                 if (!validation.valid) {
-                  const info: any = (m as any).info || {};
+                  const info = msg.info || {};
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
                   if (attempt >= hrvMaxDeliver) {
-                    try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
-                    m.term();
-                  } else { m.nak(); }
-                  span.setStatus({ code: 2, message: 'schema validation failed' });
-                  span.end();
+                    try { await js.publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                    msg.term();
+                  } else { msg.nak(); }
+                  spanObj.setStatus({ code: 2, message: 'schema validation failed' });
+                  spanObj.end();
                   return;
                 }
                 await processHrvData(eventData.payload);
-                m.ack();
-                span.setStatus({ code: 1 });
-              } catch (err: any) {
-                const info: any = (m as any).info || {};
+                msg.ack();
+                spanObj.setStatus({ code: 1 });
+              } catch (err: unknown) {
+                const info = msg.info || {};
                 const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                 const attempt = deliveries + 1;
                 if (attempt >= hrvMaxDeliver) {
-                  try { await js.publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
-                  m.term();
-                } else { m.nak(); }
-                span.recordException(err);
-                span.setStatus({ code: 2, message: err?.message });
-              } finally { span.end(); }
+                  try { await js.publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                  msg.term();
+                } else { msg.nak(); }
+                spanObj.recordException(err);
+                spanObj.setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
+              } finally { spanObj.end(); }
             });
           });
         }
       })();
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error('Failed to initialize durable HRV consumer:', e);
     }
 
     // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
     try {
-      const js = nc.jetstream();
-      const jsm = await nc.jetstreamManager();
+      const js = (nc as { jetstream(): unknown }).jetstream();
+      const jsm = await (nc as { jetstreamManager(): Promise<unknown> }).jetstreamManager();
       const durableName = process.env.NORMALIZE_DURABLE_NAME || 'normalize-oura';
       const subj = 'vendor.oura.webhook.received';
       const maxDeliver = parseInt(process.env.NORMALIZE_OURA_MAX_DELIVER || '5');
@@ -190,9 +242,12 @@ async function connectNATS() {
 
       try {
         const stream = await jsm.streams.find(subj);
+        // eslint-disable-next-line no-console
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
+        // eslint-disable-next-line no-console
         console.warn('[normalize] Oura subject stream not found; ensure JetStream stream includes', subj);
+        // eslint-disable-next-line no-console
         console.warn('[normalize] Ensure a JetStream stream includes subject vendor.oura.webhook.received (e.g. STREAM=vendor.oura subjects=[vendor.oura.webhook.received])');
       }
 
@@ -207,85 +262,100 @@ async function connectNATS() {
 
       (async () => {
         for await (const m of sub) {
-          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
-          await withExtractedContext(hdrs, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: any) => {
-              span.setAttribute('messaging.system', 'nats');
-              span.setAttribute('messaging.destination', subj);
-              span.setAttribute('messaging.operation', 'process');
+          const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number; stream?: string; sequence?: number }; ack: () => void; nak: () => void; term: () => void };
+          const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs || {}, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: unknown) => {
+              const spanObj = span as { setAttribute: (key: string, value: string | number) => void; setStatus: (status: { code: number; message?: string }) => void; recordException: (err: unknown) => void; end: () => void };
+              spanObj.setAttribute('messaging.system', 'nats');
+              spanObj.setAttribute('messaging.destination', subj);
+              spanObj.setAttribute('messaging.operation', 'process');
               
               // Add JetStream metadata attributes
-              const info: any = (m as any).info || {};
-              if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
-              if (info.sequence) span.setAttribute('messaging.nats.sequence', info.sequence);
-              if (info.redelivered !== undefined) span.setAttribute('messaging.redelivery_count', info.redelivered);
+              const info = msg.info || {};
+              if (info.stream) spanObj.setAttribute('messaging.nats.stream', info.stream);
+              if (info.sequence) spanObj.setAttribute('messaging.nats.sequence', info.sequence);
+              if (info.redelivered !== undefined) spanObj.setAttribute('messaging.redelivery_count', info.redelivered);
               
               try {
-                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
                 if (!text || text[0] !== '{') {
+                  // eslint-disable-next-line no-console
                   console.warn('Oura webhook payload is not valid JSON');
                   messagesCounter.add(1, { result: 'invalid_json', subject: subj });
-                  m.ack();
-                  span.setStatus({ code: SpanStatusCode.OK });
-                  span.end();
+                  msg.ack();
+                  spanObj.setStatus({ code: SpanStatusCode.OK });
+                  spanObj.end();
                   return;
                 }
                 const evt = JSON.parse(text);
+                // eslint-disable-next-line no-console
                 console.log('[normalize] received Oura webhook event keys:', Object.keys(evt || {}));
                 messagesCounter.add(1, { result: 'processed', subject: subj });
-                m.ack();
-                span.setStatus({ code: SpanStatusCode.OK });
+                msg.ack();
+                spanObj.setStatus({ code: SpanStatusCode.OK });
               } catch (err) {
                 try {
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
                   
                   if (attempt >= maxDeliver) {
+                    // eslint-disable-next-line no-console
                     console.error('[normalize] maxDeliver reached, DLQ publish', { dlqSubject, attempt });
                     
                     // Enhanced DLQ headers with context
-                    const dlqHeaders = new Map(m.headers || []);
-                    dlqHeaders.set('x-dlq-reason', 'processing_failed');
-                    dlqHeaders.set('x-dlq-attempt', attempt.toString());
-                    dlqHeaders.set('x-dlq-durable', durableName);
-                    dlqHeaders.set('x-original-subject', subj);
+                    const dlqHeaders = new Map<string, string[]>();
+                    if (msg.headers) {
+                      for (const [k, v] of msg.headers) {
+                        dlqHeaders.set(k, v);
+                      }
+                    }
+                    dlqHeaders.set('x-dlq-reason', ['processing_failed']);
+                    dlqHeaders.set('x-dlq-attempt', [attempt.toString()]);
+                    dlqHeaders.set('x-dlq-durable', [durableName]);
+                    dlqHeaders.set('x-original-subject', [subj]);
                     
-                    await js.publish(dlqSubject, m.data, { headers: dlqHeaders });
+                    await js.publish(dlqSubject, msg.data, { headers: dlqHeaders });
                     messagesCounter.add(1, { result: 'dlq', subject: subj });
-                    m.term();
+                    msg.term();
                   } else {
+                    // eslint-disable-next-line no-console
                     console.warn('[normalize] processing failed, NAK for redelivery', { attempt, maxDeliver });
                     redeliveriesCounter.add(1, { subject: subj });
                     messagesCounter.add(1, { result: 'failed', subject: subj });
-                    m.nak();
+                    msg.nak();
                   }
                 } catch (pubErr) {
+                  // eslint-disable-next-line no-console
                   console.error('DLQ handling error', pubErr);
                   messagesCounter.add(1, { result: 'failed', subject: subj });
-                  m.nak();
+                  msg.nak();
                 }
-                span.recordException(err as Error);
-                span.setStatus({ code: SpanStatusCode.ERROR });
+                spanObj.recordException(err as Error);
+                spanObj.setStatus({ code: SpanStatusCode.ERROR });
               } finally {
-                span.end();
+                spanObj.end();
               }
             });
           });
         }
       })();
+      // eslint-disable-next-line no-console
       console.log('[normalize] durable JetStream subscription active:', durableName, subj, 'ackWait:', ackWaitMs, 'backoff:', backoffMs);
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error('Failed to initialize durable Oura consumer:', e);
     }
 
     // Subscribe to Sleep raw data (keep raw for now)
-    const sleepSub = nc.subscribe('sleep.raw-received');
+    const sleepSub = (nc as { subscribe: (subject: string) => AsyncIterable<{ data: Uint8Array | string }> }).subscribe('sleep.raw-received');
     (async () => {
       for await (const msg of sleepSub) {
         try {
           const data = JSON.parse(msg.data.toString());
           await processSleepData(data);
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Error processing Sleep data:', error);
           // TODO: Send to DLQ
         }
@@ -293,12 +363,13 @@ async function connectNATS() {
     })();
     
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error('Failed to connect to NATS:', err);
     process.exit(1);
   }
 }
 
-async function processHrvData(data: any) {
+async function processHrvData(data: { userId: string; date: string; rMSSD: number; capturedAt?: string | number }) {
   try {
     // Normalize HRV data
     const normalized = {
@@ -314,7 +385,7 @@ async function processHrvData(data: any) {
       where: {
         userId_date: {
           userId: normalized.userId,
-          date: normalized.date
+          date: normalized.date.toISOString().split('T')[0]
         }
       },
       update: normalized,
@@ -330,7 +401,7 @@ async function processHrvData(data: any) {
         lnRMSSD: normalized.lnRmssd || 0,
         readinessScore: 0, // TODO: Calculate actual readiness score
         vendor: 'unknown', // TODO: Extract from raw data
-        capturedAt: data.capturedAt || new Date().toISOString()
+        capturedAt: typeof data.capturedAt === 'string' ? data.capturedAt : new Date().toISOString()
       }
     };
     
@@ -339,14 +410,16 @@ async function processHrvData(data: any) {
       await eventBus.publishHRVNormalizedStored(normalizedEvent);
     }
     
+    // eslint-disable-next-line no-console
     console.log('HRV data normalized and stored:', normalized.userId, normalized.date);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error normalizing HRV data:', error);
     throw error;
   }
 }
 
-async function processSleepData(data: any) {
+async function processSleepData(data: { userId: string; date: string; totalSleep: number; deepSleep: number; lightSleep: number; remSleep: number; debtMin?: number; capturedAt?: string | number }) {
   try {
     // Normalize Sleep data
     const normalized = {
@@ -365,7 +438,7 @@ async function processSleepData(data: any) {
       where: {
         userId_date: {
           userId: normalized.userId,
-          date: normalized.date
+          date: normalized.date.toISOString().split('T')[0]
         }
       },
       update: normalized,
@@ -374,11 +447,13 @@ async function processSleepData(data: any) {
     
     // Publish normalized event (keep raw NATS for sleep for now)
     if (nc) {
-      await nc.publish('sleep.normalized-stored', JSON.stringify(normalized));
+      await (nc as { publish: (subject: string, data: string) => Promise<void> }).publish('sleep.normalized-stored', JSON.stringify(normalized));
     }
     
+    // eslint-disable-next-line no-console
     console.log('Sleep data normalized and stored:', normalized.userId, normalized.date);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error normalizing Sleep data:', error);
     throw error;
   }
@@ -389,8 +464,10 @@ const start = async () => {
     await connectNATS();
     const port = parseInt(process.env.PORT || '4102');
     await httpServer.listen({ port, host: '0.0.0.0' });
+    // eslint-disable-next-line no-console
     console.log('Normalize service listening on port ' + port);
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error('Failed to start normalize service:', err);
     process.exit(1);
   }

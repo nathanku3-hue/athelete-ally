@@ -50,32 +50,35 @@ function sendHttpRequest(url, payload) {
 }
 
 async function sendHrvIngest() {
-  const ingestServiceUrl = process.env.INGEST_SERVICE_URL || 'http://localhost:3001';
+  const ingestServiceUrl = process.env.INGEST_SERVICE_URL || 'http://localhost:4101';
 
   console.log('Sending HRV ingest data...');
 
   // Deterministic HRV data for E2E testing
   const hrvData = {
     userId: 'e2e-test-user',
-    timestamp: '2024-01-15T08:00:00Z',
-    provider: 'oura',
-    dataType: 'hrv',
-    metrics: {
-      rmssd: 45.2,
-      sdnn: 52.8,
-      pnn50: 12.5,
-      lf: 1250.5,
-      hf: 890.3,
-      lfHfRatio: 1.4,
-      restingHr: 58,
-      averageHr: 72,
-      maxHr: 165
-    },
-    metadata: {
-      deviceId: 'oura-ring-e2e-test',
-      firmwareVersion: '2.8.0',
-      batteryLevel: 85,
-      dataQuality: 'good'
+    date: '2024-01-15',  // API expects 'date' in YYYY-MM-DD format
+    rmssd: 45.2,         // API expects 'rmssd' at top level
+    capturedAt: '2024-01-15T08:00:00Z',
+    raw: {
+      provider: 'oura',
+      dataType: 'hrv',
+      metrics: {
+        sdnn: 52.8,
+        pnn50: 12.5,
+        lf: 1250.5,
+        hf: 890.3,
+        lfHfRatio: 1.4,
+        restingHr: 58,
+        averageHr: 72,
+        maxHr: 165
+      },
+      metadata: {
+        deviceId: 'oura-ring-e2e-test',
+        firmwareVersion: '2.8.0',
+        batteryLevel: 85,
+        dataQuality: 'good'
+      }
     }
   };
 

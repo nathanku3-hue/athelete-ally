@@ -4,11 +4,20 @@ import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
+import '@athlete-ally/shared/fastify-augment';
+import { register, collectDefaultMetrics } from 'prom-client';
 
 // Create Fastify instance
 const fastify: FastifyInstance = Fastify({
   logger: true
 });
+
+// 确保默认指标只注册一次
+let defaultMetricsRegistered = false;
+if (!defaultMetricsRegistered) {
+  collectDefaultMetrics({ register });
+  defaultMetricsRegistered = true;
+}
 
 // NATS connection for vendor publishes (Oura)
 let natsVendor: NatsConnection | null = null;
@@ -54,8 +63,14 @@ fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
   };
 });
 
+// Metrics endpoint
+fastify.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
+  reply.type(register.contentType);
+  return register.metrics();
+});
+
 // HRV ingestion endpoint
-fastify.post('/ingest/hrv', async (request: FastifyRequest, reply: FastifyReply) => {
+const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     const data = request.body as any;
     
@@ -78,26 +93,40 @@ fastify.post('/ingest/hrv', async (request: FastifyRequest, reply: FastifyReply)
     
     // Publish typed event via EventBus
     if (eventBus) {
-      await eventBus.publishHRVRawReceived(hrvEvent);
+      try {
+        await eventBus.publishHRVRawReceived(hrvEvent);
+        fastify.log.info('HRV event published successfully');
+      } catch (publishError) {
+        fastify.log.error({ error: publishError }, 'Failed to publish HRV event');
+        // Don't fail the request if EventBus is down, just log the error
+      }
+    } else {
+      fastify.log.warn('EventBus not connected, HRV event not published');
     }
     
     return { status: 'received', timestamp: new Date().toISOString() };
   } catch (error) {
-    fastify.log.error(error);
+    fastify.log.error({ error }, 'HRV ingestion failed');
     reply.code(500).send({ error: 'Internal server error' });
   }
-});
+};
+
 
 // Sleep ingestion endpoint
-fastify.post('/ingest/sleep', async (request: FastifyRequest, reply: FastifyReply) => {
+const sleepHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     // TODO: Add proper validation and event publishing for sleep data
     const data = request.body as any;
     
     // For now, keep raw NATS publishing for sleep (will be updated in future PR)
     // This maintains compatibility while we focus on HRV typed events
-    if (eventBus && (eventBus as any).nc) {
-      await (eventBus as any).nc.publish('sleep.raw-received', JSON.stringify(data));
+    if (eventBus) {
+      try {
+        const nc = eventBus.getNatsConnection();
+        await nc.publish('sleep.raw-received', new TextEncoder().encode(JSON.stringify(data)));
+      } catch (err) {
+        fastify.log.warn({ err }, 'EventBus not connected, skipping sleep publish');
+      }
     }
     
     return { status: 'received', timestamp: new Date().toISOString() };
@@ -105,7 +134,15 @@ fastify.post('/ingest/sleep', async (request: FastifyRequest, reply: FastifyRepl
     fastify.log.error(error);
     reply.code(500).send({ error: 'Internal server error' });
   }
-});
+};
+
+// Register routes with both old and new API paths
+fastify.post('/ingest/hrv', hrvHandler);
+fastify.post('/ingest/sleep', sleepHandler);
+fastify.register(async function (fastify) {
+  fastify.post('/ingest/hrv', hrvHandler);
+  fastify.post('/ingest/sleep', sleepHandler);
+}, { prefix: '/api/v1' });
 
 const start = async () => {
   try {

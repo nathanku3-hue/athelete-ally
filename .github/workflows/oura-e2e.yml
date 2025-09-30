@@ -51,7 +51,7 @@ jobs:
         
       - name: Start infrastructure services
         run: |
-          docker-compose -f docker-compose.yml up -d postgres nats
+          docker compose -f docker-compose.yml up -d postgres nats
           sleep 10
           
       - name: Wait for services to be healthy
@@ -64,14 +64,14 @@ jobs:
           
       - name: Start microservices
         run: |
-          npm run dev:ingest &
-          npm run dev:normalize &
+          cd services/ingest-service && PORT=4101 NATS_URL=nats://localhost:4222 npm run dev &
+          cd services/normalize-service && PORT=4102 NATS_URL=nats://localhost:4222 DATABASE_URL=postgresql://athlete:athlete@localhost:55432/athlete_normalize npm run dev &
           sleep 15
           
       - name: Wait for microservices health
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:3001/health; do sleep 2; done'
-          timeout 60 bash -c 'until curl -f http://localhost:3002/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:4101/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:4102/health; do sleep 2; done'
           
       - name: Seed Oura token (optional)
         if: ${{ env.OURA_ACCESS_TOKEN != '' && env.OURA_REFRESH_TOKEN != '' && env.TOKEN_ENCRYPTION_KEY != '' }}
@@ -86,14 +86,14 @@ jobs:
           cd services/ingest-service
           node scripts/send-oura-webhook.cjs
         env:
-          INGEST_SERVICE_URL: http://localhost:3001
+          INGEST_SERVICE_URL: http://localhost:4101
           
       - name: Send HRV ingest
         run: |
           cd services/ingest-service
           node scripts/send-hrv-ingest.cjs
         env:
-          INGEST_SERVICE_URL: http://localhost:3001
+          INGEST_SERVICE_URL: http://localhost:4101
           
       - name: Assert normalized HRV record
         run: |
@@ -105,15 +105,15 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts/logs
-          docker-compose logs ingest-service > artifacts/logs/ingest-service.log 2>&1 || true
-          docker-compose logs normalize-service > artifacts/logs/normalize-service.log 2>&1 || true
+          docker compose logs ingest-service > artifacts/logs/ingest-service.log 2>&1 || true
+          docker compose logs normalize-service > artifacts/logs/normalize-service.log 2>&1 || true
           
       - name: Collect metrics
         if: always()
         run: |
           mkdir -p artifacts/metrics
-          curl -s http://localhost:3001/metrics > artifacts/metrics/ingest-metrics.txt || true
-          curl -s http://localhost:3002/metrics > artifacts/metrics/normalize-metrics.txt || true
+          curl -s http://localhost:4101/metrics > artifacts/metrics/ingest-metrics.txt || true
+          curl -s http://localhost:4102/metrics > artifacts/metrics/normalize-metrics.txt || true
           
       - name: Upload artifacts
         if: always()
@@ -125,5 +125,5 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker-compose down -v
+          docker compose down -v
           pkill -f "npm run dev" || true
