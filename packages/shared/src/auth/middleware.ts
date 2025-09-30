@@ -1,5 +1,4 @@
-import '@athlete-ally/shared/fastify-augment';
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyRequest, FastifyReply } from '../fastify-augment.js';
 import { JWTManager, SecurityContextManager } from './jwt.js';
 
 // 身份验证中间件

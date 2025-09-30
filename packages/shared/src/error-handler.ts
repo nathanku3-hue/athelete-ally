@@ -9,8 +9,7 @@
  * - 错误分类和响应
  */
 
-import '@athlete-ally/shared/fastify-augment';
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyRequest, FastifyReply } from './fastify-augment.js';
 import { ZodError } from 'zod';
 
 // 错误类型枚举

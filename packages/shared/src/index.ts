@@ -21,3 +21,9 @@ export * from './security/secure-id.js';
 
 // 错误处理
 export * from './error-handler.js';
+
+// Metrics
+export * from './metrics.js';
+
+// Fastify type augmentation
+export * from './fastify-augment.js';
