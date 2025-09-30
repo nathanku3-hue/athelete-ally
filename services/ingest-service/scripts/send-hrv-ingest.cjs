@@ -50,7 +50,7 @@ function sendHttpRequest(url, payload) {
 }
 
 async function sendHrvIngest() {
-  const ingestServiceUrl = process.env.INGEST_SERVICE_URL || 'http://localhost:3001';
+  const ingestServiceUrl = process.env.INGEST_SERVICE_URL || 'http://localhost:4101';
 
   console.log('Sending HRV ingest data...');
 

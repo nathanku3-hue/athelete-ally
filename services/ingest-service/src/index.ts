@@ -93,12 +93,20 @@ const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
     
     // Publish typed event via EventBus
     if (eventBus) {
-      await eventBus.publishHRVRawReceived(hrvEvent);
+      try {
+        await eventBus.publishHRVRawReceived(hrvEvent);
+        fastify.log.info('HRV event published successfully');
+      } catch (publishError) {
+        fastify.log.error({ error: publishError }, 'Failed to publish HRV event');
+        // Don't fail the request if EventBus is down, just log the error
+      }
+    } else {
+      fastify.log.warn('EventBus not connected, HRV event not published');
     }
     
     return { status: 'received', timestamp: new Date().toISOString() };
   } catch (error) {
-    fastify.log.error(error);
+    fastify.log.error({ error }, 'HRV ingestion failed');
     reply.code(500).send({ error: 'Internal server error' });
   }
 };

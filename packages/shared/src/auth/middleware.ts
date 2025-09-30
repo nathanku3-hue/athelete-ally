@@ -1,6 +1,21 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { JWTManager, SecurityContextManager } from './jwt.js';
-import '@athlete-ally/shared/fastify-augment';
+
+// 扩展FastifyRequest接口
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: { userId?: string; [k: string]: unknown };
+    requestId?: string;
+    rawBody?: string;
+  }
+
+  interface FastifyReply {
+    status(code: number): FastifyReply;
+    code(code: number): FastifyReply;
+    send(payload?: any): FastifyReply;
+    redirect(url: string): FastifyReply;
+  }
+}
 
 // 身份验证中间件
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
