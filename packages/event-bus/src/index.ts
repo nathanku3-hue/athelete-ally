@@ -173,7 +173,7 @@ export class EventBus {
       durable: 'planning-engine-onboarding-sub',
       batch: 10,
       expires: 1000
-    });
+    } as any);
 
     const topic = 'onboarding_completed';
 
