@@ -1,23 +1,33 @@
-import Fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import Fastify from 'fastify';
+// Temporary any types to resolve Fastify type system drift
+type FastifyInstance = any;
+type FastifyRequest = any;
+type FastifyReply = any;
 import { registerOuraWebhookRoutes } from './oura';
 import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
 import '@athlete-ally/shared/fastify-augment';
-import { register, collectDefaultMetrics } from 'prom-client';
+import { z } from 'zod';
+import { getMetricsRegistry } from '@athlete-ally/shared';
+
+// HRV payload validation schema
+const HRVPayloadSchema = z.object({
+  userId: z.string().min(1),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  rmssd: z.number().positive('RMSSD must be a positive number'),
+  capturedAt: z.string().optional(),
+  raw: z.record(z.unknown()).optional()
+});
 
 // Create Fastify instance
-const fastify: FastifyInstance = Fastify({
+const fastify: FastifyInstance = (Fastify as any)({
   logger: true
 });
 
-// 确保默认指标只注册一次
-let defaultMetricsRegistered = false;
-if (!defaultMetricsRegistered) {
-  collectDefaultMetrics({ register });
-  defaultMetricsRegistered = true;
-}
+// Get shared metrics registry (ensures default metrics registered only once)
+const register = getMetricsRegistry();
 
 // NATS connection for vendor publishes (Oura)
 let natsVendor: NatsConnection | null = null;
@@ -72,16 +82,22 @@ fastify.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => 
 // HRV ingestion endpoint
 const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
-    const data = request.body as any;
+    // Validate payload with Zod schema
+    const validationResult = HRVPayloadSchema.safeParse(request.body);
     
-    // Validate required fields
-    if (!data.userId || !data.date || !data.rmssd) {
-      reply.code(400).send({ error: 'Missing required fields: userId, date, rmssd' });
+    if (!validationResult.success) {
+      reply.code(400).send({ 
+        error: 'Invalid payload', 
+        details: validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+      });
       return;
     }
     
+    const data = validationResult.data;
+    
     // Create typed HRV event
     const hrvEvent: HRVRawReceivedEvent = {
+      eventId: `hrv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       payload: {
         userId: data.userId,
         date: data.date, // 'YYYY-MM-DD'
@@ -131,7 +147,7 @@ const sleepHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 // Register routes with both old and new API paths
 fastify.post('/ingest/hrv', hrvHandler);
 fastify.post('/ingest/sleep', sleepHandler);
-fastify.register(async function (fastify) {
+fastify.register(async function (fastify: any) {
   fastify.post('/ingest/hrv', hrvHandler);
   fastify.post('/ingest/sleep', sleepHandler);
 }, { prefix: '/api/v1' });

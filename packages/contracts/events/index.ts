@@ -68,6 +68,7 @@ export interface PlanGenerationFailedEvent {
 }
 
 export interface HRVRawReceivedEvent {
+  eventId: string;
   payload: {
     userId: string;
     date: string; // 'YYYY-MM-DD'

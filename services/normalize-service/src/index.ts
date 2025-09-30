@@ -42,7 +42,8 @@ try {
   });
 }
 /* eslint-enable @typescript-eslint/no-require-imports */
-import { Counter, Histogram, Registry, collectDefaultMetrics, register as globalRegistry } from 'prom-client';
+import { Counter, Histogram } from 'prom-client';
+import { getMetricsRegistry } from '@athlete-ally/shared';
 
 const prisma = new PrismaClient();
 // Bootstrap telemetry early (traces + Prometheus exporter)
@@ -62,9 +63,8 @@ console.log('[normalize] node=%s telemetry.enabled=%s metrics.port=%s endpoint=%
 // Lightweight HTTP server for health/metrics
 const httpServer = Fastify({ logger: true });
 
-// Service-local Prometheus metrics
-const serviceRegistry = new Registry();
-collectDefaultMetrics({ register: serviceRegistry });
+// Use shared metrics registry (ensures default metrics registered only once)
+const serviceRegistry = getMetricsRegistry();
 
 const httpRequestsTotal = new Counter({
   name: 'http_requests_total',
@@ -120,8 +120,7 @@ httpServer.get('/health', async () => ({
 httpServer.get('/metrics', async (request, reply) => {
   try {
     reply.type('text/plain');
-    const merged = Registry.merge([globalRegistry, serviceRegistry]);
-    return await merged.metrics();
+    return await serviceRegistry.metrics();
   } catch {
     reply.code(500).send('# metrics collection error');
   }
@@ -151,8 +150,8 @@ async function connectNATS() {
         await jsm.consumers.add('ATHLETE_ALLY_EVENTS', {
           durable_name: hrvDurable,
           filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
-          ack_policy: 1, // Explicit
-          deliver_policy: 0, // All
+          ack_policy: 'explicit' as any, // Explicit
+          deliver_policy: 'all' as any, // All
           max_deliver: hrvMaxDeliver,
           ack_wait: 60_000_000_000
         });
@@ -174,10 +173,10 @@ async function connectNATS() {
         term: () => void;
       }
       
-      const sub = await js.subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
+      const sub = await js.pullSubscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
       (async () => {
         for await (const m of sub) {
-          const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number }; ack: () => void; nak: () => void; term: () => void };
+          const msg = m as any; // NATS message type
           const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
           await withExtractedContext(hdrs || {}, async () => {
             await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
@@ -185,13 +184,13 @@ async function connectNATS() {
               try {
                 const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
                 const eventData = JSON.parse(text);
-                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
+                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
                 if (!validation.valid) {
                   const info = msg.info || {};
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
                   if (attempt >= hrvMaxDeliver) {
-                    try { await js.publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                    try { await js.publish(hrvDlq, msg.data as any, { headers: msg.headers }); } catch {}
                     msg.term();
                   } else { msg.nak(); }
                   spanObj.setStatus({ code: 2, message: 'schema validation failed' });
@@ -206,7 +205,7 @@ async function connectNATS() {
                 const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                 const attempt = deliveries + 1;
                 if (attempt >= hrvMaxDeliver) {
-                  try { await js.publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                  try { await js.publish(hrvDlq, msg.data as any, { headers: msg.headers }); } catch {}
                   msg.term();
                 } else { msg.nak(); }
                 spanObj.recordException(err);
@@ -223,8 +222,8 @@ async function connectNATS() {
 
     // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
     try {
-      const js = (nc as { jetstream(): unknown }).jetstream();
-      const jsm = await (nc as { jetstreamManager(): Promise<unknown> }).jetstreamManager();
+      const js = eventBus.getJetStream();
+      const jsm = eventBus.getJetStreamManager();
       const durableName = process.env.NORMALIZE_DURABLE_NAME || 'normalize-oura';
       const subj = 'vendor.oura.webhook.received';
       const maxDeliver = parseInt(process.env.NORMALIZE_OURA_MAX_DELIVER || '5');
@@ -241,7 +240,7 @@ async function connectNATS() {
       });
 
       try {
-        const stream = await jsm.streams.find(subj);
+        const stream = await (jsm as any).streams.find(subj);
         // eslint-disable-next-line no-console
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
@@ -258,7 +257,7 @@ async function connectNATS() {
       opts.manualAck();
       opts.maxDeliver(maxDeliver);
       opts.ackWait(ackWaitMs);
-      const sub = await js.subscribe(subj, opts);
+      const sub = await js.pullSubscribe(subj, opts);
 
       (async () => {
         for await (const m of sub) {
@@ -315,7 +314,7 @@ async function connectNATS() {
                     dlqHeaders.set('x-dlq-durable', [durableName]);
                     dlqHeaders.set('x-original-subject', [subj]);
                     
-                    await js.publish(dlqSubject, msg.data, { headers: dlqHeaders });
+                    await (js as any).publish(dlqSubject, msg.data, { headers: dlqHeaders });
                     messagesCounter.add(1, { result: 'dlq', subject: subj });
                     msg.term();
                   } else {

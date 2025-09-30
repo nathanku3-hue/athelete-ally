@@ -85,6 +85,7 @@ export class EventBus {
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
       
       const data = JSON.stringify(event);
+      console.log(`Publishing to subject: ${natsTopic}`);
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
       const duration = (Date.now() - startTime) / 1000;
@@ -111,12 +112,14 @@ export class EventBus {
   }
 
   async connect(url: string = 'nats://localhost:4222') {
+    console.log(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
     
     // Create streams if they don't exist
     await this.ensureStreams();
+    console.log('Connected to EventBus');
   }
 
   private async ensureStreams() {
@@ -125,7 +128,7 @@ export class EventBus {
     const streams = [
       {
         name: 'ATHLETE_ALLY_EVENTS',
-        subjects: ['athlete-ally.*'],
+        subjects: ['athlete-ally.>', 'vendor.oura.>', 'sleep.*'],
         retention: 'limits' as any,
         max_age: 24 * 60 * 60 * 1000 * 1000 * 1000, // 24 hours in nanoseconds
         max_msgs: 1000000,
@@ -135,9 +138,20 @@ export class EventBus {
     for (const stream of streams) {
       try {
         await this.jsm.streams.add(stream);
+        console.log(`Stream ${stream.name} created successfully`);
       } catch (error) {
-        // Stream might already exist
-        console.log(`Stream ${stream.name} might already exist`);
+        // Stream might already exist, try to update if subjects differ
+        if (error.message.includes('already in use with a different configuration')) {
+          try {
+            console.log(`Updating stream ${stream.name} with new subjects...`);
+            await this.jsm.streams.update(stream);
+            console.log(`Stream ${stream.name} updated successfully`);
+          } catch (updateError) {
+            console.log(`Failed to update stream ${stream.name}:`, updateError.message);
+          }
+        } else {
+          console.log(`Stream ${stream.name} might already exist:`, error.message);
+        }
       }
     }
   }
