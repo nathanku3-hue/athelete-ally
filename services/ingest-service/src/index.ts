@@ -86,10 +86,11 @@ const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
     fastify.log.error(error);
     reply.code(500).send({ error: 'Internal server error' });
   }
-});
+};
+
 
 // Sleep ingestion endpoint
-fastify.post('/ingest/sleep', async (request: FastifyRequest, reply: FastifyReply) => {
+const sleepHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     // TODO: Add proper validation and event publishing for sleep data
     const data = request.body as any;
@@ -109,8 +110,10 @@ fastify.post('/ingest/sleep', async (request: FastifyRequest, reply: FastifyRepl
 
 // Register routes with both old and new API paths
 fastify.post('/ingest/hrv', hrvHandler);
+fastify.post('/ingest/sleep', sleepHandler);
 fastify.register(async function (fastify) {
   fastify.post('/ingest/hrv', hrvHandler);
+  fastify.post('/ingest/sleep', sleepHandler);
 }, { prefix: '/api/v1' });
 
 const start = async () => {
