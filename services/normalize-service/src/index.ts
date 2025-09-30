@@ -1,5 +1,5 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
-import { consumerOpts } from 'nats';
+import { consumerOpts, JsMsg } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
@@ -164,31 +164,22 @@ async function connectNATS() {
       opts.ackExplicit();
       opts.manualAck();
       opts.filterSubject(EVENT_TOPICS.HRV_RAW_RECEIVED);
-      interface NATSMessage {
-        headers?: Map<string, string[]>;
-        data: Uint8Array | string;
-        info?: { redelivered?: number; numDelivered?: number };
-        ack: () => void;
-        nak: () => void;
-        term: () => void;
-      }
-      
+            
       const sub = await js.pullSubscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
       (async () => {
         for await (const m of sub) {
-          const msg = m as any; // NATS message type
-          const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          const msg = m as JsMsg;
+          const hdrs = (() => { if (!msg.headers) return undefined as Record<string,string> | undefined; const out: Record<string,string> = {}; for (const [k, vals] of (msg.headers as unknown as Iterable<[string, string[]]>)) { out[k] = Array.isArray(vals) && vals.length ? vals[0] : ''; } return out; })();
           await withExtractedContext(hdrs || {}, async () => {
             await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
               const spanObj = span as { setStatus: (status: { code: number; message?: string }) => void; end: () => void; recordException: (err: unknown) => void };
               try {
-                const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
+                const text = msg.string();
                 const eventData = JSON.parse(text);
                 const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
                 if (!validation.valid) {
-                  const info = msg.info || {};
-                  const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
-                  const attempt = deliveries + 1;
+                  const deliveries = (msg.info && typeof msg.info.deliveryCount === 'number') ? msg.info.deliveryCount : (msg.redelivered ? 2 : 1);
+                  const attempt = deliveries;
                   if (attempt >= hrvMaxDeliver) {
                     try { await js.publish(hrvDlq, msg.data as any, { headers: msg.headers }); } catch {}
                     msg.term();
@@ -201,9 +192,8 @@ async function connectNATS() {
                 msg.ack();
                 spanObj.setStatus({ code: 1 });
               } catch (err: unknown) {
-                const info = msg.info || {};
-                const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
-                const attempt = deliveries + 1;
+                const deliveries = (msg.info && typeof msg.info.deliveryCount === 'number') ? msg.info.deliveryCount : (msg.redelivered ? 2 : 1);
+                  const attempt = deliveries;
                 if (attempt >= hrvMaxDeliver) {
                   try { await js.publish(hrvDlq, msg.data as any, { headers: msg.headers }); } catch {}
                   msg.term();
@@ -261,8 +251,8 @@ async function connectNATS() {
 
       (async () => {
         for await (const m of sub) {
-          const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number; stream?: string; sequence?: number }; ack: () => void; nak: () => void; term: () => void };
-          const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          const msg = m as JsMsg;
+          const hdrs = (() => { if (!msg.headers) return undefined as Record<string,string> | undefined; const out: Record<string,string> = {}; for (const [k, vals] of (msg.headers as unknown as Iterable<[string, string[]]>)) { out[k] = Array.isArray(vals) && vals.length ? vals[0] : ''; } return out; })();
           await withExtractedContext(hdrs || {}, async () => {
             await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: unknown) => {
               const spanObj = span as { setAttribute: (key: string, value: string | number) => void; setStatus: (status: { code: number; message?: string }) => void; recordException: (err: unknown) => void; end: () => void };
@@ -271,13 +261,14 @@ async function connectNATS() {
               spanObj.setAttribute('messaging.operation', 'process');
               
               // Add JetStream metadata attributes
-              const info = msg.info || {};
+              const info = msg.info;
               if (info.stream) spanObj.setAttribute('messaging.nats.stream', info.stream);
-              if (info.sequence) spanObj.setAttribute('messaging.nats.sequence', info.sequence);
-              if (info.redelivered !== undefined) spanObj.setAttribute('messaging.redelivery_count', info.redelivered);
+              if (typeof info.streamSequence === 'number') spanObj.setAttribute('messaging.nats.stream_sequence', info.streamSequence);
+              if (typeof info.deliverySequence === 'number') spanObj.setAttribute('messaging.nats.delivery_sequence', info.deliverySequence);
+              if (typeof info.deliveryCount === 'number') spanObj.setAttribute('messaging.redelivery_count', Math.max(0, info.deliveryCount - 1));
               
               try {
-                const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
+                const text = msg.string();
                 if (!text || text[0] !== '{') {
                   // eslint-disable-next-line no-console
                   console.warn('Oura webhook payload is not valid JSON');
@@ -295,8 +286,7 @@ async function connectNATS() {
                 spanObj.setStatus({ code: SpanStatusCode.OK });
               } catch (err) {
                 try {
-                  const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
-                  const attempt = deliveries + 1;
+                  const attempt = (msg.info && typeof msg.info.deliveryCount === 'number') ? msg.info.deliveryCount : (msg.redelivered ? 2 : 1);
                   
                   if (attempt >= maxDeliver) {
                     // eslint-disable-next-line no-console
@@ -473,3 +463,7 @@ const start = async () => {
 };
 
 start();
+
+
+
+
