@@ -55,7 +55,7 @@ fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
 });
 
 // HRV ingestion endpoint
-fastify.post('/ingest/hrv', async (request: FastifyRequest, reply: FastifyReply) => {
+const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     const data = request.body as any;
     
@@ -105,7 +105,13 @@ fastify.post('/ingest/sleep', async (request: FastifyRequest, reply: FastifyRepl
     fastify.log.error(error);
     reply.code(500).send({ error: 'Internal server error' });
   }
-});
+};
+
+// Register routes with both old and new API paths
+fastify.post('/ingest/hrv', hrvHandler);
+fastify.register(async function (fastify) {
+  fastify.post('/ingest/hrv', hrvHandler);
+}, { prefix: '/api/v1' });
 
 const start = async () => {
   try {

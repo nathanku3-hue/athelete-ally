@@ -138,7 +138,8 @@ async function connectNATS() {
     console.log('Connected to EventBus');
     
     // Get NATS connection from EventBus for direct subscription
-    nc = (eventBus as any).nc;
+    // TODO: Add typed getter to EventBus instead of accessing private .nc
+    nc = (eventBus as unknown as { nc: unknown }).nc;
     
     // Durable JetStream consumer for HRV raw data (JetStream)
     try {
@@ -174,42 +175,44 @@ async function connectNATS() {
         term: () => void;
       }
       
-      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<NATSMessage>> }).subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
+      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<unknown>> }).subscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
       (async () => {
         for await (const m of sub) {
-          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number }; ack: () => void; nak: () => void; term: () => void };
+          const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
           await withExtractedContext(hdrs || {}, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: any) => {
+            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
+              const spanObj = span as { setStatus: (status: { code: number; message?: string }) => void; end: () => void; recordException: (err: unknown) => void };
               try {
-                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
                 const eventData = JSON.parse(text);
                 const validation = await eventValidator.validateEvent('hrv_raw_received', eventData);
                 if (!validation.valid) {
-                  const info = m.info || {};
+                  const info = msg.info || {};
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                   const attempt = deliveries + 1;
                   if (attempt >= hrvMaxDeliver) {
-                    try { await (js as any).publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
-                    m.term();
-                  } else { m.nak(); }
-                  span.setStatus({ code: 2, message: 'schema validation failed' });
-                  span.end();
+                    try { await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                    msg.term();
+                  } else { msg.nak(); }
+                  spanObj.setStatus({ code: 2, message: 'schema validation failed' });
+                  spanObj.end();
                   return;
                 }
                 await processHrvData(eventData.payload);
-                m.ack();
-                span.setStatus({ code: 1 });
+                msg.ack();
+                spanObj.setStatus({ code: 1 });
               } catch (err: unknown) {
-                const info = m.info || {};
+                const info = msg.info || {};
                 const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
                 const attempt = deliveries + 1;
                 if (attempt >= hrvMaxDeliver) {
-                  try { await (js as any).publish(hrvDlq, m.data, { headers: m.headers }); } catch {}
-                  m.term();
-                } else { m.nak(); }
-                span.recordException(err);
-                span.setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
-              } finally { span.end(); }
+                  try { await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(hrvDlq, msg.data, { headers: msg.headers }); } catch {}
+                  msg.term();
+                } else { msg.nak(); }
+                spanObj.recordException(err);
+                spanObj.setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
+              } finally { spanObj.end(); }
             });
           });
         }
@@ -239,7 +242,7 @@ async function connectNATS() {
       });
 
       try {
-        const stream = await (jsm as any).streams.find(subj);
+        const stream = await (jsm as { streams: { find: (subject: string) => Promise<unknown> } }).streams.find(subj);
         // eslint-disable-next-line no-console
         console.log('[normalize] Oura subject stream:', stream);
       } catch {
@@ -256,40 +259,42 @@ async function connectNATS() {
       opts.manualAck();
       opts.maxDeliver(maxDeliver);
       opts.ackWait(ackWaitMs);
-      const sub = await (js as any).subscribe(subj, opts);
+      const sub = await (js as { subscribe: (subject: string, opts: unknown) => Promise<AsyncIterable<unknown>> }).subscribe(subj, opts);
 
       (async () => {
         for await (const m of sub) {
-          const hdrs = m.headers ? Object.fromEntries([...m.headers].map(([k, v]) => [k, v[0]])) : undefined;
-          await withExtractedContext(hdrs, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: any) => {
-              span.setAttribute('messaging.system', 'nats');
-              span.setAttribute('messaging.destination', subj);
-              span.setAttribute('messaging.operation', 'process');
+          const msg = m as { headers?: Map<string, string[]>; data: unknown; info?: { redelivered?: number; numDelivered?: number; stream?: string; sequence?: number }; ack: () => void; nak: () => void; term: () => void };
+          const hdrs = msg.headers ? Object.fromEntries([...msg.headers].map(([k, v]) => [k, v[0]])) : undefined;
+          await withExtractedContext(hdrs || {}, async () => {
+            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: unknown) => {
+              const spanObj = span as { setAttribute: (key: string, value: string | number) => void; setStatus: (status: { code: number; message?: string }) => void; recordException: (err: unknown) => void; end: () => void };
+              spanObj.setAttribute('messaging.system', 'nats');
+              spanObj.setAttribute('messaging.destination', subj);
+              spanObj.setAttribute('messaging.operation', 'process');
               
               // Add JetStream metadata attributes
-              const info = m.info || {};
-              if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
-              if (info.sequence) span.setAttribute('messaging.nats.sequence', info.sequence);
-              if (info.redelivered !== undefined) span.setAttribute('messaging.redelivery_count', info.redelivered);
+              const info = msg.info || {};
+              if (info.stream) spanObj.setAttribute('messaging.nats.stream', info.stream);
+              if (info.sequence) spanObj.setAttribute('messaging.nats.sequence', info.sequence);
+              if (info.redelivered !== undefined) spanObj.setAttribute('messaging.redelivery_count', info.redelivered);
               
               try {
-                const text = m.data instanceof Uint8Array ? Buffer.from(m.data).toString('utf8') : String(m.data);
+                const text = msg.data instanceof Uint8Array ? Buffer.from(msg.data).toString('utf8') : String(msg.data);
                 if (!text || text[0] !== '{') {
                   // eslint-disable-next-line no-console
                   console.warn('Oura webhook payload is not valid JSON');
                   messagesCounter.add(1, { result: 'invalid_json', subject: subj });
-                  m.ack();
-                  span.setStatus({ code: SpanStatusCode.OK });
-                  span.end();
+                  msg.ack();
+                  spanObj.setStatus({ code: SpanStatusCode.OK });
+                  spanObj.end();
                   return;
                 }
                 const evt = JSON.parse(text);
                 // eslint-disable-next-line no-console
                 console.log('[normalize] received Oura webhook event keys:', Object.keys(evt || {}));
                 messagesCounter.add(1, { result: 'processed', subject: subj });
-                m.ack();
-                span.setStatus({ code: SpanStatusCode.OK });
+                msg.ack();
+                spanObj.setStatus({ code: SpanStatusCode.OK });
               } catch (err) {
                 try {
                   const deliveries = typeof info.redelivered === 'number' ? info.redelivered : (typeof info.numDelivered === 'number' ? info.numDelivered - 1 : 0);
@@ -300,32 +305,37 @@ async function connectNATS() {
                     console.error('[normalize] maxDeliver reached, DLQ publish', { dlqSubject, attempt });
                     
                     // Enhanced DLQ headers with context
-                    const dlqHeaders = new Map(m.headers || []);
-                    dlqHeaders.set('x-dlq-reason', 'processing_failed');
-                    dlqHeaders.set('x-dlq-attempt', attempt.toString());
-                    dlqHeaders.set('x-dlq-durable', durableName);
-                    dlqHeaders.set('x-original-subject', subj);
+                    const dlqHeaders = new Map<string, string[]>();
+                    if (msg.headers) {
+                      for (const [k, v] of msg.headers) {
+                        dlqHeaders.set(k, v);
+                      }
+                    }
+                    dlqHeaders.set('x-dlq-reason', ['processing_failed']);
+                    dlqHeaders.set('x-dlq-attempt', [attempt.toString()]);
+                    dlqHeaders.set('x-dlq-durable', [durableName]);
+                    dlqHeaders.set('x-original-subject', [subj]);
                     
-                    await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string> }) => Promise<void> }).publish(dlqSubject, m.data, { headers: dlqHeaders as Map<string, string> });
+                    await (js as { publish: (subject: string, data: unknown, opts?: { headers?: Map<string, string[]> }) => Promise<void> }).publish(dlqSubject, msg.data, { headers: dlqHeaders });
                     messagesCounter.add(1, { result: 'dlq', subject: subj });
-                    m.term();
+                    msg.term();
                   } else {
                     // eslint-disable-next-line no-console
                     console.warn('[normalize] processing failed, NAK for redelivery', { attempt, maxDeliver });
                     redeliveriesCounter.add(1, { subject: subj });
                     messagesCounter.add(1, { result: 'failed', subject: subj });
-                    m.nak();
+                    msg.nak();
                   }
                 } catch (pubErr) {
                   // eslint-disable-next-line no-console
                   console.error('DLQ handling error', pubErr);
                   messagesCounter.add(1, { result: 'failed', subject: subj });
-                  m.nak();
+                  msg.nak();
                 }
-                span.recordException(err as Error);
-                span.setStatus({ code: SpanStatusCode.ERROR });
+                spanObj.recordException(err as Error);
+                spanObj.setStatus({ code: SpanStatusCode.ERROR });
               } finally {
-                span.end();
+                spanObj.end();
               }
             });
           });
