@@ -173,7 +173,7 @@ export class EventBus {
       durable: 'planning-engine-onboarding-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    });
 
     const topic = 'onboarding_completed';
 
@@ -181,8 +181,15 @@ export class EventBus {
     (async () => {
       while (true) {
         try {
-          // 批量拉取消息
-          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
+          // 使用 pull() 方法请求消息
+          psub.pull({ batch: 10, expires: 1000 });
+          
+          // 等待消息
+          const messages = [];
+          for await (const msg of psub) {
+            messages.push(msg);
+            if (messages.length >= 10) break;
+          }
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -292,8 +299,15 @@ export class EventBus {
     (async () => {
       while (true) {
         try {
-          // 批量拉取消息
-          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
+          // 使用 pull() 方法请求消息
+          psub.pull({ batch: 10, expires: 1000 });
+          
+          // 等待消息
+          const messages = [];
+          for await (const msg of psub) {
+            messages.push(msg);
+            if (messages.length >= 10) break;
+          }
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
