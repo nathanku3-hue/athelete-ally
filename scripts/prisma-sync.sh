@@ -37,3 +37,4 @@ else
 fi
 
 echo "✅ Database schema synchronized successfully for $SERVICE_DIR"
+
