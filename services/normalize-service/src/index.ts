@@ -1,7 +1,7 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
-import { EventBus } from '@athlete-ally/event-bus';
+import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 import { SpanStatusCode } from '@opentelemetry/api';
@@ -97,9 +97,11 @@ async function connectNATS() {
         description: 'Total number of HRV messages processed by normalize service',
       });
 
-      // Stream binding order: AA_CORE_HOT first, then ATHLETE_ALLY_EVENTS
-      const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
+      // Stream binding order: Use event-bus config to determine candidates
+      const streamCandidates = getStreamCandidates();
       let actualStreamName = '';
+
+      console.log(`[normalize] Stream candidates: [${streamCandidates.join(', ')}]`);
 
       // Consumer creation strategy:
       // - Default: Create consumers if FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false'
@@ -120,6 +122,7 @@ async function connectNATS() {
             });
             httpServer.log.info(`[normalize] HRV consumer created on ${streamName}: ${hrvDurable}`);
             actualStreamName = streamName;
+            console.log(`[normalize] Using stream: ${actualStreamName}`);
             break; // Successfully created on this stream
           } catch (e) {
             // Consumer might already exist or stream not available
@@ -128,6 +131,7 @@ async function connectNATS() {
             if (error.message.includes('consumer already exists')) {
               // Consumer already exists, try to bind to it
               actualStreamName = streamName;
+              console.log(`[normalize] Using stream: ${actualStreamName} (existing consumer)`);
               httpServer.log.info(`[normalize] Consumer ${hrvDurable} already exists on ${streamName}, will bind to existing consumer.`);
               break;
             }
@@ -140,6 +144,7 @@ async function connectNATS() {
             // Try to get consumer info to verify it exists
             await jsm.consumers.info(streamName, hrvDurable);
             actualStreamName = streamName;
+            console.log(`[normalize] Using stream: ${actualStreamName} (found existing consumer)`);
             httpServer.log.info(`[normalize] Found existing HRV consumer on ${streamName}: ${hrvDurable}`);
             break;
           } catch (e) {

@@ -1,7 +1,7 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator, ValidationResult } from './validator.js';
-import { config, nanos, getStreamConfigs, AppStreamConfig } from './config.js';
+import { config, nanos, getStreamConfigs, AppStreamConfig, getStreamMode, getStreamCandidates } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
 
 // Event Bus 指标
@@ -219,14 +219,22 @@ export class EventBus {
     }
   }
 
-  async connect(url: string = 'nats://localhost:4223') {
+  async connect(url: string = 'nats://localhost:4223', options?: { manageStreams?: boolean }) {
     console.log(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
-    
-    // Create streams if they don't exist
-    await this.ensureStreams();
+
+    // Create streams if they don't exist (unless explicitly disabled)
+    const manageStreams = options?.manageStreams ?? (process.env.FEATURE_SERVICE_MANAGES_STREAMS !== 'false');
+
+    if (manageStreams) {
+      console.log('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
+      await this.ensureStreams();
+    } else {
+      console.log('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
+    }
+
     console.log('Connected to EventBus');
   }
 
@@ -554,6 +562,9 @@ export const eventBus = new EventBus();
 
 // Export validator for services that need direct schema validation
 export { eventValidator } from './validator.js';
+
+// Export stream configuration utilities
+export { getStreamMode, getStreamCandidates } from './config.js';
 
 
 
