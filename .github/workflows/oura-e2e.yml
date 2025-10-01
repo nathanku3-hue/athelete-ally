@@ -130,8 +130,8 @@ jobs:
           
       - name: Start services, probe, and assert
         run: |
-          set -Eeuo pipefail
-          trap 'kill 0' EXIT
+          set -Eeo pipefail
+          trap 'pkill -f "npm run dev" || true; exit' EXIT
 
           # Start services
           (cd services/ingest-service && PORT=4101 NATS_URL=$NATS_URL npm run dev &)
