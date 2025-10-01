@@ -166,7 +166,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: oura-e2e-artifacts-${{ github.job }}-${{ matrix.event_stream_mode }}-${{ github.run_id }}
+          name: oura-e2e-artifacts-${{ matrix.event_stream_mode }}-${{ matrix.stream_core_name }}-${{ github.run_number }}
           path: artifacts/
           if-no-files-found: ignore
           retention-days: 7
