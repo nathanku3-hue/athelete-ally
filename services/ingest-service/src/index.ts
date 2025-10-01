@@ -55,11 +55,14 @@ async function connectEventBus() {
   try {
     const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
     const streamMode = getStreamMode();
+    const manageStreams = process.env.FEATURE_SERVICE_MANAGES_STREAMS === 'true';
+
     console.log(`[ingest-service] Starting with stream mode: ${streamMode}`);
     console.log(`[ingest-service] NATS_URL: ${natsUrl}`);
-    
+    console.log(`[ingest-service] manageStreams: ${manageStreams}`);
+
     eventBus = new EventBus();
-    await eventBus.connect(natsUrl);
+    await eventBus.connect(natsUrl, { manageStreams });
     console.log('Connected to EventBus');
   } catch (err) {
     console.error('Failed to connect to EventBus:', err);
