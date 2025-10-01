@@ -1,6 +1,6 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../prisma/generated/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
