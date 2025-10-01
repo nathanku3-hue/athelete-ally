@@ -1,7 +1,7 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator, ValidationResult } from './validator.js';
-import { config } from './config.js';
+import { config, nanos, getStreamConfigs, AppStreamConfig } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
 
 // Event Bus 指标
@@ -55,6 +55,114 @@ Object.values(eventBusMetrics).forEach(metric => {
   register.registerMetric(metric);
 });
 
+/** Compare arrays ignoring order */
+function sameSet(a: string[], b: string[]): boolean {
+  const A = new Set(a);
+  const B = new Set(b);
+  if (A.size !== B.size) return false;
+  for (const x of A) if (!B.has(x)) return false;
+  return true;
+}
+
+/** Determine if stream needs update (subjects/retention/replicas/etc.) */
+export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): boolean {
+  const ex = existing.config;
+  const d = desired;
+
+  const subjectsChanged = !sameSet(ex.subjects ?? [], d.subjects);
+  const ageChanged = Number(ex.max_age ?? 0) !== nanos(d.maxAgeMs);
+  const replChanged = Number(ex.num_replicas ?? 1) !== d.replicas;
+  const storageChanged = (ex.storage ?? "file") !== (d.storage ?? "file");
+  const discardChanged = (ex.discard ?? "old") !== (d.discard ?? "old");
+  const dupeChanged = Number(ex.duplicate_window ?? 0) !== nanos(d.duplicateWindowMs ?? 120_000);
+  const compChanged = Boolean(ex.compression) !== Boolean(d.compression);
+
+  return subjectsChanged || ageChanged || replChanged || storageChanged ||
+         discardChanged || dupeChanged || compChanged;
+}
+
+/** Ensure stream exists with desired config (update-if-different) */
+export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void> {
+  // Build strict config with only supported fields
+  const desired = {
+    name: cfg.name,
+    subjects: cfg.subjects,
+    retention: "limits",
+    max_age: nanos(cfg.maxAgeMs),
+    storage: cfg.storage ?? "file",
+    discard: cfg.discard ?? "old",
+    duplicate_window: nanos(cfg.duplicateWindowMs ?? 120_000),
+    replicas: cfg.replicas,
+  };
+
+  try {
+    const info = await jsm.streams.info(cfg.name);
+
+    if (streamNeedsUpdate(info, cfg)) {
+      console.log(`[event-bus] Updating stream: ${cfg.name}`);
+      await jsm.streams.update(cfg.name, desired);
+      console.log(`[event-bus] Stream updated: ${cfg.name}`);
+    } else {
+      console.log(`[event-bus] Stream up-to-date: ${cfg.name}`);
+    }
+  } catch (err: any) {
+    if (String(err?.message || "").includes("stream not found") ||
+        String(err?.message || "").includes("not found")) {
+      console.log(`[event-bus] Creating stream: ${cfg.name}`);
+      
+      // Try creating with full config first
+      try {
+        await jsm.streams.add(desired);
+        console.log(`[event-bus] Stream created: ${cfg.name}`);
+        return;
+      } catch (createErr: any) {
+        // Handle invalid JSON error (err_code 10025) with fallback retries
+        if (createErr?.api_error?.err_code === 10025) {
+          console.log(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
+          
+          // Retry 1: Remove duplicate_window (older servers don't support it)
+          const fallback1 = { ...desired };
+          delete (fallback1 as any).duplicate_window;
+          try {
+            await jsm.streams.add(fallback1);
+            console.log(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
+            return;
+          } catch (fallback1Err: any) {
+            if (fallback1Err?.api_error?.err_code === 10025) {
+              // Retry 2: Remove discard (last resort)
+              const fallback2 = { ...fallback1 };
+              delete (fallback2 as any).discard;
+              try {
+                await jsm.streams.add(fallback2);
+                console.log(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
+                return;
+              } catch (fallback2Err: any) {
+                console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
+                throw fallback2Err;
+              }
+            } else {
+              throw fallback1Err;
+            }
+          }
+        } else {
+          throw createErr;
+        }
+      }
+    } else {
+      console.error(`[event-bus] Failed to ensure stream ${cfg.name}:`, err);
+      throw err;
+    }
+  }
+}
+
+/** Ensure all configured streams exist */
+export async function ensureAllStreams(jsm: any): Promise<void> {
+  const configs = getStreamConfigs();
+  for (const cfg of configs) {
+    await ensureStream(jsm, cfg);
+  }
+}
+
 export class EventBus {
   private nc: NatsConnection | null = null;
   private js: JetStreamClient | null = null;
@@ -85,6 +193,7 @@ export class EventBus {
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
       
       const data = JSON.stringify(event);
+      console.log(`Publishing to subject: ${natsTopic}`);
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
       const duration = (Date.now() - startTime) / 1000;
@@ -110,36 +219,22 @@ export class EventBus {
     }
   }
 
-  async connect(url: string = 'nats://localhost:4222') {
+  async connect(url: string = 'nats://localhost:4223') {
+    console.log(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
     
     // Create streams if they don't exist
     await this.ensureStreams();
+    console.log('Connected to EventBus');
   }
 
   private async ensureStreams() {
     if (!this.jsm) throw new Error('JetStreamManager not initialized');
 
-    const streams = [
-      {
-        name: 'ATHLETE_ALLY_EVENTS',
-        subjects: ['athlete-ally.*'],
-        retention: 'limits' as any,
-        max_age: 24 * 60 * 60 * 1000 * 1000 * 1000, // 24 hours in nanoseconds
-        max_msgs: 1000000,
-      }
-    ];
-
-    for (const stream of streams) {
-      try {
-        await this.jsm.streams.add(stream);
-      } catch (error) {
-        // Stream might already exist
-        console.log(`Stream ${stream.name} might already exist`);
-      }
-    }
+    // Use new multi-stream-aware function
+    await ensureAllStreams(this.jsm);
   }
 
   async publishOnboardingCompleted(event: OnboardingCompletedEvent) {
@@ -388,9 +483,77 @@ export class EventBus {
   getValidatorStatus() {
     return eventValidator.getCacheStatus();
   }
+
+  // 类型化的 getter 方法 - 在连接后使用
+  getNatsConnection(): NatsConnection {
+    if (!this.nc) throw new Error('EventBus not connected');
+    return this.nc;
+  }
+
+  getJetStream(): JetStreamClient {
+    if (!this.js) throw new Error('EventBus not connected');
+    return this.js;
+  }
+
+  /**
+   * Ensure a JetStream consumer exists with the desired configuration
+   * @param streamName - The stream name
+   * @param consumerConfig - Consumer configuration
+   * @returns Promise<void>
+   */
+  async ensureConsumer(streamName: string, consumerConfig: {
+    durable_name: string;
+    filter_subject: string;
+    ack_policy: 'explicit' | 'none' | 'all';
+    deliver_policy: 'all' | 'last' | 'new' | 'by_start_sequence' | 'by_start_time' | 'last_per_subject';
+    max_deliver: number;
+    ack_wait: number;
+    max_ack_pending: number;
+  }): Promise<void> {
+    if (!this.jsm) throw new Error('JetStream manager not initialized');
+
+    try {
+      // Try to get existing consumer info
+      const existingConsumer = await this.jsm.consumers.info(streamName, consumerConfig.durable_name);
+      
+      // Check if configuration needs updating
+      const needsUpdate = 
+        existingConsumer.config.filter_subject !== consumerConfig.filter_subject ||
+        existingConsumer.config.ack_policy !== consumerConfig.ack_policy ||
+        existingConsumer.config.deliver_policy !== consumerConfig.deliver_policy ||
+        existingConsumer.config.max_deliver !== consumerConfig.max_deliver ||
+        existingConsumer.config.ack_wait !== consumerConfig.ack_wait ||
+        existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
+
+      if (needsUpdate) {
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
+        await this.jsm.consumers.add(streamName, consumerConfig as any);
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
+      } else {
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
+      }
+    } catch (error: any) {
+      if (error.code === '404' || error.message?.includes('not found')) {
+        // Consumer doesn't exist, create it
+        console.log(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
+        await this.jsm.consumers.add(streamName, consumerConfig as any);
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  getJetStreamManager(): JetStreamManager {
+    if (!this.jsm) throw new Error('EventBus not connected');
+    return this.jsm;
+  }
 }
 
 export const eventBus = new EventBus();
 
 // Export validator for services that need direct schema validation
 export { eventValidator } from './validator.js';
+
+
+

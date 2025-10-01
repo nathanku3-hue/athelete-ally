@@ -11,7 +11,7 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../prisma/generated/client';
 import { Redis } from 'ioredis';
 import { NatsConnection } from 'nats';
 

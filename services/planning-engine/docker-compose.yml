@@ -32,7 +32,7 @@ services:
   nats:
     image: nats:2.9-alpine
     ports:
-      - "4222:4222"
+      - "4223:4222"
     command: ["--jetstream", "--store_dir", "/data"]
     volumes:
       - nats_data:/data
@@ -52,7 +52,7 @@ services:
       - NODE_ENV=production
       - PLANNING_DATABASE_URL=postgresql://postgres:password@postgres:5432/planning_engine
       - REDIS_URL=redis://redis:6379
-      - NATS_URL=nats://nats:4222
+      - NATS_URL=nats://nats:4223
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       postgres:

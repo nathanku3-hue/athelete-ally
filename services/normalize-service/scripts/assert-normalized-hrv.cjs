@@ -24,19 +24,16 @@ async function assertNormalizedHrv() {
     const query = `
       SELECT 
         id,
-        user_id,
-        timestamp,
-        provider,
-        data_type,
-        metrics,
-        metadata,
-        created_at,
-        updated_at
-      FROM normalized_data 
-      WHERE user_id = $1 
-        AND data_type = 'hrv'
-        AND provider = 'oura'
-      ORDER BY created_at DESC 
+        "userId",
+        date,
+        rmssd,
+        "lnRmssd",
+        "capturedAt",
+        "createdAt",
+        "updatedAt"
+      FROM hrv_data 
+      WHERE "userId" = $1 
+      ORDER BY "createdAt" DESC 
       LIMIT 1
     `;
 
@@ -52,66 +49,45 @@ async function assertNormalizedHrv() {
     console.log('✅ Found normalized HRV record:', record.id);
 
     // Assert required fields exist
-    const requiredFields = ['user_id', 'timestamp', 'provider', 'data_type', 'metrics'];
+    const requiredFields = ['userId', 'date', 'rmssd', 'capturedAt'];
     for (const field of requiredFields) {
-      if (!record[field]) {
+      if (record[field] === null || record[field] === undefined) {
         console.error(`❌ Missing required field: ${field}`);
         process.exit(1);
       }
     }
 
     // Assert field values are sane
-    if (record.user_id !== userId) {
-      console.error(`❌ Invalid user_id: expected ${userId}, got ${record.user_id}`);
+    if (record.userId !== userId) {
+      console.error(`❌ Invalid userId: expected ${userId}, got ${record.userId}`);
       process.exit(1);
     }
 
-    if (record.provider !== 'oura') {
-      console.error(`❌ Invalid provider: expected 'oura', got '${record.provider}'`);
+    // Assert RMSSD is a positive number
+    if (typeof record.rmssd !== 'number' || record.rmssd <= 0) {
+      console.error(`❌ Invalid rmssd: ${record.rmssd}`);
       process.exit(1);
     }
 
-    if (record.data_type !== 'hrv') {
-      console.error(`❌ Invalid data_type: expected 'hrv', got '${record.data_type}'`);
-      process.exit(1);
-    }
-
-    // Assert metrics structure
-    const metrics = record.metrics;
-    if (typeof metrics !== 'object' || metrics === null) {
-      console.error('❌ Metrics should be an object');
-      process.exit(1);
-    }
-
-    const expectedMetrics = ['rmssd', 'sdnn', 'pnn50', 'lf', 'hf', 'lfHfRatio'];
-    for (const metric of expectedMetrics) {
-      if (typeof metrics[metric] !== 'number' || metrics[metric] <= 0) {
-        console.error(`❌ Invalid metric ${metric}: ${metrics[metric]}`);
-        process.exit(1);
-      }
-    }
-
-    // Assert timestamp is recent (within last hour)
-    const recordTime = new Date(record.timestamp);
+    // Assert capturedAt is recent (within last hour)
+    const recordTime = new Date(record.capturedAt);
     const now = new Date();
     const timeDiff = now - recordTime;
     const oneHour = 60 * 60 * 1000;
 
     if (timeDiff > oneHour) {
-      console.error(`❌ Record timestamp is too old: ${record.timestamp}`);
+      console.error(`❌ Record capturedAt is too old: ${record.capturedAt}`);
       process.exit(1);
     }
 
     console.log('✅ All assertions passed!');
     console.log('📊 Record details:');
     console.log(`   - ID: ${record.id}`);
-    console.log(`   - User: ${record.user_id}`);
-    console.log(`   - Provider: ${record.provider}`);
-    console.log(`   - Type: ${record.data_type}`);
-    console.log(`   - Timestamp: ${record.timestamp}`);
-    console.log(`   - RMSSD: ${metrics.rmssd}`);
-    console.log(`   - SDNN: ${metrics.sdnn}`);
-    console.log(`   - LF/HF Ratio: ${metrics.lfHfRatio}`);
+    console.log(`   - User: ${record.userId}`);
+    console.log(`   - Date: ${record.date}`);
+    console.log(`   - RMSSD: ${record.rmssd}`);
+    console.log(`   - LN RMSSD: ${record.lnRmssd}`);
+    console.log(`   - Captured At: ${record.capturedAt}`);
 
   } catch (error) {
     console.error('Error asserting normalized HRV record:', error);

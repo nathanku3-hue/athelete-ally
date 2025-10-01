@@ -5,7 +5,7 @@ import { registerOuraOAuthRoutes } from '../oura_oauth';
 const OLD_ENV = process.env;
 
 describe('Oura OAuth flow (feature-flagged)', () => {
-  let app: ReturnType<typeof Fastify>;
+  let app: any;
 
   beforeAll(() => {
     process.env = { ...OLD_ENV };
@@ -14,7 +14,7 @@ describe('Oura OAuth flow (feature-flagged)', () => {
     process.env.OURA_CLIENT_SECRET = 'secret';
     process.env.OURA_REDIRECT_URI = 'http://localhost:4101/auth/oura/callback';
     process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
-    app = Fastify();
+    app = (Fastify as any)();
     registerOuraOAuthRoutes(app);
   });
 

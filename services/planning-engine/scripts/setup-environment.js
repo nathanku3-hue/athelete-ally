@@ -27,7 +27,7 @@ const envConfigs = {
     OPENAI_API_KEY: 'your_openai_api_key_here',
     
     // NATS配置
-    NATS_URL: 'nats://localhost:4222',
+    NATS_URL: 'nats://localhost:4223',
     
     // 缓存配置
     PLAN_CACHE_TTL_SECONDS: '3600',
@@ -72,7 +72,7 @@ const envConfigs = {
     OPENAI_API_KEY: '${OPENAI_API_KEY}',
     
     // NATS配置
-    NATS_URL: 'nats://nats:4222',
+    NATS_URL: 'nats://nats:4223',
     
     // 缓存配置
     PLAN_CACHE_TTL_SECONDS: '3600',
@@ -136,7 +136,7 @@ REDIS_URL=redis://localhost:6379
 OPENAI_API_KEY=your_openai_api_key_here
 
 # NATS配置
-NATS_URL=nats://localhost:4222
+NATS_URL=nats://localhost:4223
 
 # 缓存配置
 PLAN_CACHE_TTL_SECONDS=3600
@@ -209,7 +209,7 @@ services:
   nats:
     image: nats:2.9-alpine
     ports:
-      - "4222:4222"
+      - "4223:4222"
     command: ["--jetstream", "--store_dir", "/data"]
     volumes:
       - nats_data:/data
@@ -229,7 +229,7 @@ services:
       - NODE_ENV=production
       - PLANNING_DATABASE_URL=postgresql://postgres:password@postgres:5432/planning_engine
       - REDIS_URL=redis://redis:6379
-      - NATS_URL=nats://nats:4222
+      - NATS_URL=nats://nats:4223
       - OPENAI_API_KEY=\${OPENAI_API_KEY}
     depends_on:
       postgres:

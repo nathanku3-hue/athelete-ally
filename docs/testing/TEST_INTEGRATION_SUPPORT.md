@@ -389,7 +389,7 @@ export function setupTestEnvironment() {
   process.env.REDIS_URL = 'redis://localhost:6379/1';
   
   // 设置NATS URL
-  process.env.NATS_URL = 'nats://localhost:4222';
+  process.env.NATS_URL = 'nats://localhost:4223';
 }
 ```
 

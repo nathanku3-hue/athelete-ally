@@ -17,7 +17,7 @@ PLANNING_DATABASE_URL=postgresql://postgres:\${DB_PASSWORD}@\${DB_HOST}:5432/pla
 REDIS_URL=redis://\${REDIS_HOST}:6379
 
 # NATS Configuration
-NATS_URL=nats://\${NATS_HOST}:4222
+NATS_URL=nats://\${NATS_HOST}:4223
 
 # OpenAI Configuration
 OPENAI_API_KEY=\${OPENAI_API_KEY}

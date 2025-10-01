@@ -167,53 +167,42 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
       },
     });
 
-    // 查询个人记录
-    const personalRecords = await prisma.workoutRecord.findMany({
+    // Query personal records using PersonalRecord model (not WorkoutRecord)
+    // PersonalRecord model contains: exerciseName, recordType, value, unit, etc.
+    // This is separate from WorkoutRecord which tracks workout sessions
+    const personalRecords = await prisma.personalRecord.findMany({
       where: {
-        session: {
-          userId: userId,
-          startedAt: {
-            gte: startDate,
-          },
-        },
-        isPersonalRecord: true,
-      },
-      include: {
-        exercise: {
-          select: {
-            name: true,
-            category: true,
-          },
-        },
-        session: {
-          select: {
-            startedAt: true,
-          },
+        userId: userId,
+        createdAt: {
+          gte: startDate,
         },
       },
       orderBy: {
-        session: {
-          startedAt: 'desc',
-        },
+        createdAt: 'desc',
       },
       take: 20,
     });
 
-    // 格式化个人记录数据
+    // Format personal records for API response
+    // Map PersonalRecord fields to expected API structure
     const formattedRecords = personalRecords.map((record: any) => ({
       id: record.id,
-      exerciseName: record.exercise.name,
-      category: record.exercise.category,
-      weight: record.weight,
-      reps: record.reps,
+      exerciseName: record.exerciseName,
+      category: record.exerciseName, // Use exerciseName as category since PersonalRecord doesn't have category field
+      recordType: record.recordType,
+      value: record.value,
+      unit: record.unit,
+      sessionId: record.sessionId,
       setNumber: record.setNumber,
       notes: record.notes,
-      date: record.session.startedAt,
+      date: record.createdAt,
+      isVerified: record.isVerified,
     }));
 
-    // 计算记录类型分布
+    // Calculate record type distribution for analytics
+    // Group records by exercise name to show workout variety
     const recordTypes = personalRecords.reduce((acc: any[], record: any) => {
-      const category = record.exercise.category;
+      const category = record.exerciseName; // Use exerciseName since PersonalRecord doesn't have exercise.category
       const existing = acc.find(item => item.type === category);
       if (existing) {
         existing.count++;

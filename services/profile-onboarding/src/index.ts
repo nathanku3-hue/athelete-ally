@@ -35,7 +35,7 @@ server.addHook('onReady', async () => {
     process.exit(1);
   }
   try {
-    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
+    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4223');
     server.log.info('connected to event bus');
   } catch (e) {
     server.log.error({ err: e }, 'failed to connect event bus');

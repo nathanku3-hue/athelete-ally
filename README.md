@@ -176,6 +176,19 @@ docker compose -f docker-compose/preview.yml up -d
 - Prisma Engines Mirror (CI Reliability): docs/ci/prisma-engines-mirror.md
 - RFC: Monorepo Tooling Upgrade (Turbo-first, Nx evaluation): docs/rfcs/2025-09-monorepo-tooling-upgrade.md
 
+### Phase 2: Multi-Stream NATS Migration
+
+**Full Runbook**: [docs/PHASE2_RUNBOOK.md](docs/PHASE2_RUNBOOK.md)
+
+**Environment Variables**:
+- `EVENT_STREAM_MODE`: Controls stream topology (`single` = ATHLETE_ALLY_EVENTS, `multi` = 3-stream architecture)
+- `AA_STREAM_CANDIDATES`: Comma-separated stream names for consumer binding fallback (e.g., `AA_CORE_HOT,ATHLETE_ALLY_EVENTS`)
+- `HRV_DURABLE`: Durable consumer name for HRV processing (default: `normalize-hrv-durable`)
+
+**Dead Letter Queue**: Failed messages route to `dlq.normalize.hrv.raw-received.*` subjects on `AA_DLQ` stream.
+
+**Metrics Labels**: All counters include `{stream, durable, subject, result}` for observability during migration.
+
 ## 开发指南
 
 ### 代码规范

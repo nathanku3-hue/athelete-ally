@@ -4,6 +4,7 @@ import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
 describe('Ingest Service', () => {
   it('should validate HRV event structure', () => {
     const validEvent: HRVRawReceivedEvent = {
+      eventId: 'test-event-id-1',
       payload: {
         userId: 'test-user',
         date: '2024-01-15',
@@ -20,6 +21,7 @@ describe('Ingest Service', () => {
 
   it('should handle optional raw field', () => {
     const eventWithRaw: HRVRawReceivedEvent = {
+      eventId: 'test-event-id-2',
       payload: {
         userId: 'test-user',
         date: '2024-01-15',

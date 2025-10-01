@@ -18,6 +18,8 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "scripts/**",
+      "**/prisma/generated/**",
     ],
   },
   // Frontend-specific configuration
@@ -105,7 +107,7 @@ const eslintConfig = [
       // Import boundaries - prevent deep internal module imports; prefer package entry points
       // Allow: @athlete-ally packages, Next.js aliases, dotenv, relative imports
       "import/no-internal-modules": ["warn", { 
-        allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config"] 
+        allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client"] 
       }],
 
       // monorepo layer direction: apps -> services -> packages

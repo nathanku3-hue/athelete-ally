@@ -66,7 +66,7 @@ services:
     image: nats:2.10-alpine
     container_name: nats
     ports:
-      - "4222:4222"  # NATS client port
+      - "4223:4222"  # NATS client port
       - "8222:8222"  # NATS monitoring port
     command: ["--jetstream", "--store_dir", "/data"]
     volumes:

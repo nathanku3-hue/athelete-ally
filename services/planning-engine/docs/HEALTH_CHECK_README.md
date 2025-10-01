@@ -160,7 +160,7 @@ REDIS_URL=redis://localhost:6379
 OPENAI_API_KEY=your_openai_api_key
 
 # NATS配置
-NATS_URL=nats://localhost:4222
+NATS_URL=nats://localhost:4223
 
 # 缓存配置
 PLAN_CACHE_TTL_SECONDS=3600

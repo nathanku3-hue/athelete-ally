@@ -45,7 +45,7 @@ export class SummaryAggregator {
     console.log('Starting SummaryAggregator...');
 
     // 连接到事件总线
-    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
+    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4223');
 
     // 订阅计划生成请求事件，触发摘要更新
     await eventBus.subscribeToPlanGenerationRequested(this.handlePlanGenerated.bind(this) as any);
@@ -80,18 +80,17 @@ export class SummaryAggregator {
     console.log('Running full summary update...');
     
     try {
-      // 获取所有活跃用户
-      const users = await prisma.user.findMany({
-        where: {
-          isOnboardingComplete: true,
-        },
+      // Get all active users from UserSummary model (not User model)
+      // UserSummary contains aggregated user data and is the correct model for this operation
+      const users = await prisma.userSummary.findMany({
         select: {
-          id: true,
+          userId: true,
         },
+        distinct: ['userId'],
       });
 
-      // 并行更新所有用户的摘要数据
-      const updatePromises = users.map((user: any) => this.updateUserSummary(user.id));
+      // Update all user summaries in parallel for better performance
+      const updatePromises = users.map((user: any) => this.updateUserSummary(user.userId));
       await Promise.all(updatePromises);
 
       console.log(`Updated summaries for ${users.length} users`);
