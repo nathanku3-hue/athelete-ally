@@ -8,7 +8,7 @@
 const http = require('http');
 const https = require('https');
 
-const BASE_URL = process.env.SMOKE_BASE_URL || process.env.E2E_API_BASE_URL || 'http://localhost:4000';
+const BASE_URL = process.env.SMOKE_BASE_URL || process.env.E2E_API_BASE_URL || 'http://localhost:4101';
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT_MS || '90000', 10);
 const POLL_INTERVAL_MS = parseInt(process.env.SMOKE_POLL_INTERVAL_MS || '1500', 10);
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-jwt-secret';
@@ -74,9 +74,9 @@ async function main() {
   console.log('Smoke | User ID :', USER_ID);
 
   // 1) Health
-  const health = await fetchJson(`${BASE_URL}/api/health`);
-  if (health.status !== 200) throw new Error(`BFF health failed: ${health.status}`);
-  console.log('OK   | BFF health');
+  const health = await fetchJson(`${BASE_URL}/health`);
+  if (health.status !== 200) throw new Error(`Service health failed: ${health.status}`);
+  console.log('OK   | Service health');
 
   // 2) Onboarding submit
   const onboardingPayload = {
