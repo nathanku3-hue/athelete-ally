@@ -122,7 +122,7 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
           
           // Retry 1: Remove duplicate_window (older servers don't support it)
           const fallback1 = { ...desired };
-          delete fallback1.duplicate_window;
+          delete (fallback1 as any).duplicate_window;
           try {
             await jsm.streams.add(fallback1);
             console.log(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
@@ -131,7 +131,7 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
             if (fallback1Err?.api_error?.err_code === 10025) {
               // Retry 2: Remove discard (last resort)
               const fallback2 = { ...fallback1 };
-              delete fallback2.discard;
+              delete (fallback2 as any).discard;
               try {
                 await jsm.streams.add(fallback2);
                 console.log(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
@@ -224,10 +224,6 @@ export class EventBus {
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
-    
-    // Log server version for debugging
-    const serverInfo = await this.nc.info();
-    console.log(`[event-bus] Connected to NATS server version: ${serverInfo.version}`);
     
     // Create streams if they don't exist
     await this.ensureStreams();
