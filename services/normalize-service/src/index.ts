@@ -1,6 +1,6 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
-import { consumerOpts, JsMsg, StringCodec, JetStreamPullSubscription } from 'nats';
-import { PrismaClient } from '../prisma/generated/client';
+import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
+import { PrismaClient } from '@prisma/client';
 import { EventBus } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
@@ -19,9 +19,9 @@ interface TelemetryTracer {
 }
 
 interface TelemetryMeter {
-  createCounter: (name: string, options: { description: string }) => {
-    add: (value: number, labels: Record<string, string>) => void;
-  };
+    createCounter: (name: string, options: { description: string }) => {
+      add: (value: number, labels: Record<string, string>) => void;
+    };
 }
 
 interface TelemetryBootstrap {
@@ -54,7 +54,6 @@ try {
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 const prisma = new PrismaClient();
-const sc = StringCodec();
 const BATCH_SIZE = 10;
 const EXPIRES_MS = 5000;
 const IDLE_BACKOFF_MS = 50;
@@ -80,8 +79,8 @@ async function connectNATS() {
     // Initialize EventBus
     eventBus = new EventBus();
     await eventBus.connect(natsUrl);
-    console.log('Connected to EventBus');
-
+    httpServer.log.info('Connected to EventBus');
+    
     nc = eventBus.getNatsConnection();
     const js = eventBus.getJetStream();
     const jsm = eventBus.getJetStreamManager();
@@ -108,9 +107,9 @@ async function connectNATS() {
           ack_wait: hrvAckWaitMs * 1_000_000, // Convert ms to ns
           max_ack_pending: 1000 // High capacity to avoid blocking
         });
-        console.log(`[normalize] HRV consumer created: ${hrvDurable}`);
+        httpServer.log.info(`[normalize] HRV consumer created: ${hrvDurable}`);
       } catch {
-        console.log(`[normalize] HRV consumer might already exist: ${hrvDurable}`);
+        httpServer.log.info(`[normalize] HRV consumer might already exist: ${hrvDurable}`);
       }
 
       // Bind to existing durable consumer
@@ -122,7 +121,7 @@ async function connectNATS() {
       opts.ackWait(hrvAckWaitMs);
 
       const sub = await js.pullSubscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts) as JetStreamPullSubscription;
-      console.log(`[normalize] HRV durable pull consumer bound: ${hrvDurable}, subject: ${EVENT_TOPICS.HRV_RAW_RECEIVED}, ackWait: ${hrvAckWaitMs}ms, maxDeliver: ${hrvMaxDeliver}`);
+        httpServer.log.info(`[normalize] HRV durable pull consumer bound: ${hrvDurable}, subject: ${EVENT_TOPICS.HRV_RAW_RECEIVED}, ackWait: ${hrvAckWaitMs}ms, maxDeliver: ${hrvMaxDeliver}`);
 
       // Message handler function
       async function handleHrvMessage(m: JsMsg) {
@@ -134,7 +133,7 @@ async function connectNATS() {
           subject: m.subject,
         };
         
-        console.log(`[normalize] Processing HRV message:`, meta);
+        httpServer.log.info(`[normalize] Processing HRV message: ${JSON.stringify(meta)}`);
         
         // Extract headers safely
         const hdrs = m.headers ? Object.fromEntries(
@@ -155,22 +154,22 @@ async function connectNATS() {
 
             try {
               const text = m.string();
-              console.log(`[normalize] HRV message text:`, text);
-              const eventData = JSON.parse(text);
-              console.log(`[normalize] HRV event data:`, { ...eventData, userId: 'present' }); // PII protection
+              httpServer.log.debug(`[normalize] HRV message text: ${text}`);
+                const eventData = JSON.parse(text);
+              httpServer.log.info(`[normalize] HRV event data: ${JSON.stringify({ ...eventData, userId: 'present' })}`); // PII protection
 
               // Validate event schema
-              const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
-              if (!validation.valid) {
-                console.log(`[normalize] HRV validation failed:`, validation.errors);
+                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
+                if (!validation.valid) {
+                httpServer.log.warn(`[normalize] HRV validation failed: ${JSON.stringify(validation.errors)}`);
                 hrvMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
 
                 // Schema validation failure is non-retryable - send to DLQ
                 try {
                   await js.publish(`${hrvDlq}.schema-invalid`, m.data as any, { headers: m.headers });
-                  console.log(`[normalize] Sent schema-invalid message to DLQ: ${hrvDlq}.schema-invalid`);
+                  httpServer.log.info(`[normalize] Sent schema-invalid message to DLQ: ${hrvDlq}.schema-invalid`);
                 } catch (dlqErr) {
-                  console.error(`[normalize] Failed to publish to DLQ:`, dlqErr);
+                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
                 m.term(); // Terminate - non-retryable
                 span.setStatus({ code: SpanStatusCode.ERROR, message: 'schema validation failed' });
@@ -178,13 +177,13 @@ async function connectNATS() {
                 return;
               }
 
-              console.log(`[normalize] HRV validation passed, processing data...`);
-              await processHrvData(eventData.payload);
-              console.log(`[normalize] HRV data processed successfully`);
+              httpServer.log.info(`[normalize] HRV validation passed, processing data...`);
+                await processHrvData(eventData.payload);
+              httpServer.log.info(`[normalize] HRV data processed successfully`);
               m.ack();
               hrvMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
               span.setStatus({ code: SpanStatusCode.OK });
-            } catch (err: unknown) {
+              } catch (err: unknown) {
               const deliveries = info?.deliveryCount || 1;
               const attempt = deliveries;
 
@@ -198,25 +197,25 @@ async function connectNATS() {
                        errMsg.includes('ENOTFOUND');
               };
 
-              if (attempt >= hrvMaxDeliver) {
-                console.error('[normalize] maxDeliver reached, sending to DLQ', { dlqSubject: hrvDlq, attempt });
+                if (attempt >= hrvMaxDeliver) {
+                httpServer.log.error(`[normalize] maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, attempt })}`);
                 try {
                   await js.publish(`${hrvDlq}.max-deliver`, m.data as any, { headers: m.headers });
                 } catch (dlqErr) {
-                  console.error('[normalize] Failed to publish to DLQ:', dlqErr);
+                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
                 m.term();
                 hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
               } else if (isRetryable(err)) {
-                console.warn('[normalize] Retryable error, NAK with delay', { attempt, maxDeliver: hrvMaxDeliver, error: err instanceof Error ? err.message : String(err) });
+                httpServer.log.warn(`[normalize] Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver: hrvMaxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
                 m.nak(5000); // 5s delay for retry
                 hrvMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
               } else {
-                console.error('[normalize] Non-retryable error, sending to DLQ', { dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) });
+                httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) })}`);
                 try {
                   await js.publish(`${hrvDlq}.non-retryable`, m.data as any, { headers: m.headers });
                 } catch (dlqErr) {
-                  console.error('[normalize] Failed to publish to DLQ:', dlqErr);
+                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
                 m.term();
                 hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
@@ -232,11 +231,11 @@ async function connectNATS() {
 
       // Pull consumer loop - using stable pull+iterator pattern
       (async () => {
-        console.log(`[normalize] Starting HRV message processing loop...`);
+        httpServer.log.info(`[normalize] Starting HRV message processing loop...`);
         try {
           while (running) {
             try {
-              await (sub.pull as Function).call(sub, { batch: BATCH_SIZE, expires: EXPIRES_MS });
+              await sub.pull({ batch: BATCH_SIZE, expires: EXPIRES_MS });
 
               let processed = 0;
               const deadline = Date.now() + EXPIRES_MS + 100;
@@ -251,11 +250,11 @@ async function connectNATS() {
               }
               
               if (processed === 0) {
-                console.log(`[normalize] No messages pulled, waiting...`);
+                httpServer.log.info(`[normalize] No messages pulled, waiting...`);
               }
             } catch (err: unknown) {
               if (!running) break;
-              console.error('[normalize] Pull/process error:', err);
+              httpServer.log.error(`[normalize] Pull/process error: ${JSON.stringify(err)}`);
               await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
@@ -263,15 +262,15 @@ async function connectNATS() {
           }
         } catch (err) {
           if (!running) {
-            console.log('[normalize] HRV consumer loop stopped due to shutdown');
+            httpServer.log.info('[normalize] HRV consumer loop stopped due to shutdown');
           } else {
-            console.error('[normalize] HRV consumer loop error:', err);
+            httpServer.log.error(`[normalize] HRV consumer loop error: ${JSON.stringify(err)}`);
           }
         }
-        console.log('[normalize] HRV message processing loop exited');
+        httpServer.log.info('[normalize] HRV message processing loop exited');
       })();
     } catch (e) {
-      console.error('Failed to initialize durable HRV consumer:', e);
+      httpServer.log.error(`Failed to initialize durable HRV consumer: ${JSON.stringify(e)}`);
       throw e;
     }
 
@@ -295,9 +294,9 @@ async function connectNATS() {
 
       try {
         const stream = await (jsm as any).streams.find(subj);
-        console.log('[normalize] Oura subject stream:', stream);
+        httpServer.log.info(`[normalize] Oura subject stream: ${JSON.stringify(stream)}`);
       } catch {
-        console.warn('[normalize] Oura subject stream not found; ensure JetStream stream includes', subj);
+        httpServer.log.warn(`[normalize] Oura subject stream not found; ensure JetStream stream includes ${subj}`);
       }
 
       const opts = consumerOpts();
@@ -332,7 +331,7 @@ async function connectNATS() {
               try {
                 const text = msg.string();
                 if (!text || text[0] !== '{') {
-                  console.warn('Oura webhook payload is not valid JSON');
+                  httpServer.log.warn('Oura webhook payload is not valid JSON');
                   messagesCounter.add(1, { result: 'schema_invalid', subject: subj });
                   msg.term();
                   span.setStatus({ code: SpanStatusCode.ERROR, message: 'Oura webhook payload is not valid JSON' });
@@ -340,18 +339,18 @@ async function connectNATS() {
                   return;
                 }
                 const eventData = JSON.parse(text);
-                console.log('Oura webhook event:', eventData);
+                httpServer.log.info(`Oura webhook event: ${JSON.stringify(eventData)}`);
 
                 // Validate event schema
                 const validation = await eventValidator.validateEvent('vendor_oura_webhook_received', eventData as any);
                 if (!validation.valid) {
-                  console.warn('Oura webhook validation failed:', validation.errors);
+                  httpServer.log.warn(`Oura webhook validation failed: ${JSON.stringify(validation.errors)}`);
                   messagesCounter.add(1, { result: 'schema_invalid', subject: subj });
                   // Schema validation failure is non-retryable - send to DLQ
                   try {
                     await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
                   } catch (dlqErr) {
-                    console.error('Failed to publish to DLQ:', dlqErr);
+                    httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                   }
                   msg.term();
                   span.setStatus({ code: SpanStatusCode.ERROR, message: 'Oura webhook validation failed' });
@@ -377,26 +376,26 @@ async function connectNATS() {
                          errMsg.includes('Connection') ||
                          errMsg.includes('ENOTFOUND');
                 };
-
-                if (attempt >= maxDeliver) {
-                  console.error('maxDeliver reached, sending to DLQ', { dlqSubject, attempt });
+                  
+                  if (attempt >= maxDeliver) {
+                  httpServer.log.error(`maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject, attempt })}`);
                   try {
                     await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
                   } catch (dlqErr) {
-                    console.error('Failed to publish to DLQ:', dlqErr);
+                    httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                   }
                   msg.term();
-                  messagesCounter.add(1, { result: 'dlq', subject: subj });
+                    messagesCounter.add(1, { result: 'dlq', subject: subj });
                 } else if (isRetryable(err)) {
-                  console.warn('Retryable error, NAK with delay', { attempt, maxDeliver, error: err instanceof Error ? err.message : String(err) });
+                  httpServer.log.warn(`Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
                   msg.nak(5000); // 5s delay for retry
                   messagesCounter.add(1, { result: 'retry', subject: subj });
-                } else {
-                  console.error('Non-retryable error, sending to DLQ', { dlqSubject, error: err instanceof Error ? err.message : String(err) });
+                  } else {
+                  httpServer.log.error(`Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject, error: err instanceof Error ? err.message : String(err) })}`);
                   try {
                     await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
                   } catch (dlqErr) {
-                    console.error('Failed to publish to DLQ:', dlqErr);
+                    httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                   }
                   msg.term();
                   messagesCounter.add(1, { result: 'dlq', subject: subj });
@@ -411,11 +410,11 @@ async function connectNATS() {
         }
       })();
     } catch (e) {
-      console.error('Failed to initialize durable Oura consumer:', e);
+      httpServer.log.error(`Failed to initialize durable Oura consumer: ${JSON.stringify(e)}`);
       throw e;
     }
   } catch (err) {
-    console.error('Failed to connect to NATS:', err);
+    httpServer.log.error(`Failed to connect to NATS: ${JSON.stringify(err)}`);
     throw err;
   }
 }
@@ -430,9 +429,9 @@ async function processHrvData(payload: any) {
 
     // Calculate lnRmssd
     const lnRmssd = Math.log(rmssd);
-    
+
     // Upsert HRV data
-    await prisma.hrvData.upsert({
+    const row = await prisma.hrvData.upsert({
       where: {
         userId_date: {
           userId,
@@ -458,21 +457,21 @@ async function processHrvData(payload: any) {
 
     // Publish normalized event
     const normalizedEvent: HRVNormalizedStoredEvent = {
-      eventId: `hrv-normalized-${userId}-${date}-${Date.now()}`,
-      eventType: 'hrv_normalized_stored',
-      timestamp: new Date().toISOString(),
-      payload: {
-        userId,
-        date,
-        rmssd,
-        lnRmssd
+      record: {
+        userId: row.userId,
+        date: typeof row.date === 'string' ? row.date : row.date.toISOString().split('T')[0],
+        rMSSD: row.rmssd,
+        lnRMSSD: row.lnRmssd,
+        readinessScore: 0,
+        vendor: 'oura',
+        capturedAt: row.capturedAt.toISOString()
       }
     };
 
-    await eventBus.publishHrvNormalizedStored(normalizedEvent);
-    console.log(`[normalize] HRV data upserted and event published for date ${date}`);
+    await eventBus.publishHRVNormalizedStored(normalizedEvent);
+    httpServer.log.info(`[normalize] HRV data upserted and event published for date ${date}`);
   } catch (error) {
-    console.error('[normalize] Error processing HRV data:', error);
+    httpServer.log.error(`[normalize] Error processing HRV data: ${JSON.stringify(error)}`);
     throw error;
   }
 }
@@ -517,48 +516,48 @@ async function start() {
     
     const port = parseInt(process.env.PORT || '4112');
     await httpServer.listen({ port, host: '0.0.0.0' });
-    console.log(`Normalize service listening on port ${port}`);
+    httpServer.log.info(`Normalize service listening on port ${port}`);
   } catch (error) {
-    console.error('Failed to start normalize service:', error);
+    httpServer.log.error(`Failed to start normalize service: ${JSON.stringify(error)}`);
     process.exit(1);
   }
 }
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
-  console.log('Received SIGINT, shutting down gracefully...');
+  httpServer.log.info('Received SIGINT, shutting down gracefully...');
   running = false;
   
   try {
     await httpServer.close();
     if (nc) await nc.close();
     await prisma.$disconnect();
-    console.log('Shutdown complete');
+    httpServer.log.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
-    console.error('Error during shutdown:', error);
+    httpServer.log.error(`Error during shutdown: ${JSON.stringify(error)}`);
     process.exit(1);
   }
 });
 
 process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM, shutting down gracefully...');
+  httpServer.log.info('Received SIGTERM, shutting down gracefully...');
   running = false;
   
   try {
     await httpServer.close();
     if (nc) await nc.close();
     await prisma.$disconnect();
-    console.log('Shutdown complete');
+    httpServer.log.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
-    console.error('Error during shutdown:', error);
+    httpServer.log.error(`Error during shutdown: ${JSON.stringify(error)}`);
     process.exit(1);
   }
 });
 
 // Start the service
 start().catch((error) => {
-  console.error('Failed to start service:', error);
+  httpServer.log.error('Failed to start service:', error);
   process.exit(1);
 });
