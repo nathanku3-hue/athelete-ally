@@ -1,7 +1,7 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
-import { EventBus } from '@athlete-ally/event-bus';
+import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 import { SpanStatusCode } from '@opentelemetry/api';
@@ -97,9 +97,11 @@ async function connectNATS() {
         description: 'Total number of HRV messages processed by normalize service',
       });
 
-      // Stream binding order: AA_CORE_HOT first, then ATHLETE_ALLY_EVENTS
-      const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
+      // Stream binding order: Use getStreamCandidates() for mode-aware stream selection
+      const streamCandidates = getStreamCandidates();
       let actualStreamName = '';
+
+      console.log(`[normalize-service] Stream candidates: ${streamCandidates.join(', ')}`);
 
       // Consumer creation strategy:
       // - Default: Create consumers if FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false'
@@ -459,16 +461,20 @@ async function connectNATS() {
   }
 }
 
-async function processHrvData(payload: { userId: string; date: string; rmssd: number }) {
+async function processHrvData(payload: { userId: string; date: string; rMSSD?: number; rmssd?: number; lnRMSSD?: number; lnRmssd?: number }) {
   try {
-    const { userId, date, rmssd } = payload;
-    
+    const { userId, date } = payload;
+
+    // Contract compatibility: support both rMSSD (contract standard) and rmssd (legacy)
+    const rmssd = payload.rMSSD ?? payload.rmssd;
+    const lnRmssd = payload.lnRMSSD ?? payload.lnRmssd ?? (typeof rmssd === 'number' ? Math.log(rmssd) : null);
+
     if (!userId || !date || typeof rmssd !== 'number') {
       throw new Error('Invalid HRV payload: missing required fields');
     }
 
-    // Calculate lnRmssd
-    const lnRmssd = Math.log(rmssd);
+    // Calculate lnRmssd if not provided
+    const calculatedLnRmssd = lnRmssd ?? Math.log(rmssd);
 
     // Upsert HRV data
     const row = await prisma.hrvData.upsert({
@@ -480,7 +486,7 @@ async function processHrvData(payload: { userId: string; date: string; rmssd: nu
       },
       update: {
         rmssd,
-        lnRmssd,
+        lnRmssd: calculatedLnRmssd,
         capturedAt: new Date(),
         updatedAt: new Date()
       },
@@ -488,7 +494,7 @@ async function processHrvData(payload: { userId: string; date: string; rmssd: nu
         userId,
         date: new Date(date),
         rmssd,
-        lnRmssd,
+        lnRmssd: calculatedLnRmssd,
         capturedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date()
