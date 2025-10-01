@@ -66,7 +66,7 @@ const telemetry = bootstrapTelemetry({
 });
 
 let eventBus: EventBus;
-let nc: any; // NatsConnection
+let nc: any; // NatsConnection - keeping any for now as it's from EventBus
 let running = true; // Global flag for graceful shutdown
 
 // Lightweight HTTP server for health/metrics
@@ -97,24 +97,53 @@ async function connectNATS() {
         description: 'Total number of HRV messages processed by normalize service',
       });
 
-      try {
-        await jsm.consumers.add('ATHLETE_ALLY_EVENTS', {
+      // Stream binding order: AA_CORE_HOT first, then ATHLETE_ALLY_EVENTS
+      const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
+      let actualStreamName = '';
+
+      // Only create consumers if explicitly enabled
+      if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS === 'true') {
+        for (const streamName of streamCandidates) {
+          try {
+            await jsm.consumers.add(streamName, {
           durable_name: hrvDurable,
           filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
-          ack_policy: 'explicit' as any,
-          deliver_policy: 'all' as any,
+              ack_policy: 'explicit' as any,
+              deliver_policy: 'all' as any,
           max_deliver: hrvMaxDeliver,
-          ack_wait: hrvAckWaitMs * 1_000_000, // Convert ms to ns
-          max_ack_pending: 1000 // High capacity to avoid blocking
-        });
-        httpServer.log.info(`[normalize] HRV consumer created: ${hrvDurable}`);
-      } catch {
-        httpServer.log.info(`[normalize] HRV consumer might already exist: ${hrvDurable}`);
+              ack_wait: hrvAckWaitMs * 1_000_000, // Convert ms to ns
+              max_ack_pending: 1000 // High capacity to avoid blocking
+            });
+            httpServer.log.info(`[normalize] HRV consumer created on ${streamName}: ${hrvDurable}`);
+            actualStreamName = streamName;
+            break; // Successfully created on this stream
+          } catch (e) {
+            // Consumer might already exist or stream not available
+            httpServer.log.info(`[normalize] Attempted to create HRV consumer on ${streamName}: ${hrvDurable}. Error: ${(e as Error).message}. Trying next candidate.`);
+          }
+        }
+      } else {
+        // Default: try to bind to existing consumers
+        for (const streamName of streamCandidates) {
+          try {
+            // Try to get consumer info to verify it exists
+            await jsm.consumers.info(streamName, hrvDurable);
+            actualStreamName = streamName;
+            httpServer.log.info(`[normalize] Found existing HRV consumer on ${streamName}: ${hrvDurable}`);
+            break;
+          } catch (e) {
+            httpServer.log.info(`[normalize] Consumer ${hrvDurable} not found on ${streamName}. Trying next candidate.`);
+          }
+        }
+      }
+
+      if (!actualStreamName) {
+        throw new Error('Failed to find HRV consumer on any available stream. Ensure EventBus has created the consumer or set FEATURE_SERVICE_MANAGES_CONSUMERS=true.');
       }
 
       // Bind to existing durable consumer
       const opts = consumerOpts();
-      opts.bind('ATHLETE_ALLY_EVENTS', hrvDurable);
+      opts.bind(actualStreamName, hrvDurable);
       opts.ackExplicit();
       opts.manualAck();
       opts.maxDeliver(hrvMaxDeliver);
@@ -162,7 +191,7 @@ async function connectNATS() {
                 const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
                 if (!validation.valid) {
                 httpServer.log.warn(`[normalize] HRV validation failed: ${JSON.stringify(validation.errors)}`);
-                hrvMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
+                hrvMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
 
                 // Schema validation failure is non-retryable - send to DLQ
                 try {
@@ -181,7 +210,7 @@ async function connectNATS() {
                 await processHrvData(eventData.payload);
               httpServer.log.info(`[normalize] HRV data processed successfully`);
               m.ack();
-              hrvMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
+                    hrvMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               span.setStatus({ code: SpanStatusCode.OK });
               } catch (err: unknown) {
               const deliveries = info?.deliveryCount || 1;
@@ -205,11 +234,11 @@ async function connectNATS() {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
                 m.term();
-                hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
+                hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               } else if (isRetryable(err)) {
                 httpServer.log.warn(`[normalize] Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver: hrvMaxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
                 m.nak(5000); // 5s delay for retry
-                hrvMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
+                hrvMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               } else {
                 httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) })}`);
                 try {
@@ -218,7 +247,7 @@ async function connectNATS() {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
                 m.term();
-                hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: m.info?.stream || 'unknown', durable: hrvDurable });
+                hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               }
               span.recordException(err);
               span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -419,7 +448,7 @@ async function connectNATS() {
   }
 }
 
-async function processHrvData(payload: any) {
+async function processHrvData(payload: { userId: string; date: string; rmssd: number }) {
   try {
     const { userId, date, rmssd } = payload;
     
@@ -468,7 +497,7 @@ async function processHrvData(payload: any) {
       }
     };
 
-    await eventBus.publishHRVNormalizedStored(normalizedEvent);
+      await eventBus.publishHRVNormalizedStored(normalizedEvent);
     httpServer.log.info(`[normalize] HRV data upserted and event published for date ${date}`);
   } catch (error) {
     httpServer.log.error(`[normalize] Error processing HRV data: ${JSON.stringify(error)}`);

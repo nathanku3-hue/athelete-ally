@@ -457,6 +457,55 @@ export class EventBus {
     return this.js;
   }
 
+  /**
+   * Ensure a JetStream consumer exists with the desired configuration
+   * @param streamName - The stream name
+   * @param consumerConfig - Consumer configuration
+   * @returns Promise<void>
+   */
+  async ensureConsumer(streamName: string, consumerConfig: {
+    durable_name: string;
+    filter_subject: string;
+    ack_policy: 'explicit' | 'none' | 'all';
+    deliver_policy: 'all' | 'last' | 'new' | 'by_start_sequence' | 'by_start_time' | 'last_per_subject';
+    max_deliver: number;
+    ack_wait: number;
+    max_ack_pending: number;
+  }): Promise<void> {
+    if (!this.jsm) throw new Error('JetStream manager not initialized');
+
+    try {
+      // Try to get existing consumer info
+      const existingConsumer = await this.jsm.consumers.info(streamName, consumerConfig.durable_name);
+      
+      // Check if configuration needs updating
+      const needsUpdate = 
+        existingConsumer.config.filter_subject !== consumerConfig.filter_subject ||
+        existingConsumer.config.ack_policy !== consumerConfig.ack_policy ||
+        existingConsumer.config.deliver_policy !== consumerConfig.deliver_policy ||
+        existingConsumer.config.max_deliver !== consumerConfig.max_deliver ||
+        existingConsumer.config.ack_wait !== consumerConfig.ack_wait ||
+        existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
+
+      if (needsUpdate) {
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
+        await this.jsm.consumers.add(streamName, consumerConfig as any);
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
+      } else {
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
+      }
+    } catch (error: any) {
+      if (error.code === '404' || error.message?.includes('not found')) {
+        // Consumer doesn't exist, create it
+        console.log(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
+        await this.jsm.consumers.add(streamName, consumerConfig as any);
+        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   getJetStreamManager(): JetStreamManager {
     if (!this.jsm) throw new Error('EventBus not connected');
     return this.jsm;
