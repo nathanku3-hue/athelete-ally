@@ -489,8 +489,8 @@ async function processHrvData(payload: { userId: string; date: string; rmssd: nu
       record: {
         userId: row.userId,
         date: typeof row.date === 'string' ? row.date : row.date.toISOString().split('T')[0],
-        rMSSD: row.rmssd,
-        lnRMSSD: row.lnRmssd,
+        rMSSD: row.rmssd ?? 0, // Handle null case
+        lnRMSSD: row.lnRmssd ?? 0, // Handle null case
         readinessScore: 0,
         vendor: 'oura',
         capturedAt: row.capturedAt.toISOString()
