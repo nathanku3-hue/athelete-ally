@@ -31,6 +31,8 @@ jobs:
     name: Contract Tests
     runs-on: ubuntu-latest
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (pinned ref)
         uses: actions/checkout@v4
@@ -52,18 +54,22 @@ jobs:
         run: npm run test:contracts -w packages/contracts
 
       - name: Upload contract test results
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: contract-test-results
+          name: contract-test-results-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
 
   # 數據庫模型測試
   database-tests:
     name: Database Model Tests
     runs-on: ubuntu-latest
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     services:
       postgres:
         image: postgres:15
@@ -102,18 +108,22 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
       - name: Upload database test results
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: database-test-results
+          name: database-test-results-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
 
   # API 端點測試
   api-tests:
     name: API Endpoint Tests
     runs-on: ubuntu-latest
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (pinned ref)
         uses: actions/checkout@v4
@@ -136,17 +146,22 @@ jobs:
         run: npm run test:api -w packages/contracts
 
       - name: Upload API test results
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: api-test-results
+          name: api-test-results-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
           path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
 
   # 集成測試
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     services:
       postgres:
         image: postgres:15
@@ -260,12 +275,14 @@ jobs:
           REDIS_URL: redis://redis:6379
 
       - name: Upload integration test results
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: integration-test-results
+          name: integration-test-results-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
 
       # 清理测试基础设施服务 (项目范围)
       - name: Stop test services (project-scoped)
@@ -279,6 +296,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: sanity
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (pinned ref)
         uses: actions/checkout@v4
@@ -301,12 +320,14 @@ jobs:
         run: npm run test:performance -w packages/contracts
 
       - name: Upload performance test results
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: performance-test-results
+          name: performance-test-results-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: packages/contracts/performance-results/
+          compression-level: 6
+          overwrite: true
 
   # 測試報告聚合
   test-report:
@@ -314,6 +335,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [sanity, contract-tests, database-tests, api-tests, integration-tests]
     if: always()
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (pinned ref)
         uses: actions/checkout@v4
@@ -335,6 +358,8 @@ jobs:
       - name: Download all test results
         uses: actions/download-artifact@v4
         with:
+          pattern: *-test-results-*
+          merge-multiple: true
           path: test-results/
 
       - name: Generate test report
@@ -342,17 +367,22 @@ jobs:
         run: node ./scripts/generate-test-report.js
 
       - name: Upload test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: comprehensive-test-report
+          name: comprehensive-test-report-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: test-results/
+          compression-level: 6
+          overwrite: true
 
   # 代碼質量檢查
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (pinned ref)
         uses: actions/checkout@v4

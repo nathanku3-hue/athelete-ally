@@ -52,6 +52,8 @@ jobs:
     name: Code Quality
     runs-on: ubuntu-latest
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
@@ -126,9 +128,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: eslint-boundaries-report-quality-${{ github.run_id }}
+          name: eslint-boundaries-report-${{ env.ARTIFACT_SUFFIX }}
           path: reports/deps/eslint-boundaries.json
           retention-days: 7
+          compression-level: 6
+          overwrite: true
 
       - name: Type check (force no stale cache)
         env:
@@ -139,10 +143,12 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: prisma-clients-quality-${{ github.run_id }}
+          name: prisma-clients-${{ env.ARTIFACT_SUFFIX }}
           path: |
             services/*/prisma/generated/client
             services/*/prisma/schema.prisma
+          compression-level: 6
+          overwrite: true
 
       - name: Enforce no large tracked files
         run: |
@@ -197,6 +203,8 @@ jobs:
             stream_core_name: ATHLETE_ALLY_EVENTS
           - event_stream_mode: multi
             stream_core_name: AA_CORE_HOT
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ matrix.event_stream_mode }}
     outputs:
       has_artifacts: ${{ steps.results_meta.outputs.has_files }}
     steps:
@@ -383,12 +391,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-unit-${{ github.run_id }}
+          name: test-results-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: |
             test-results/**
             coverage/**
             junit.xml
+          compression-level: 6
+          overwrite: true
 
   # ????
   contracts:
@@ -526,6 +536,8 @@ jobs:
     name: Test Check (Non-Blocking)
     runs-on: ubuntu-latest
     needs: [quality, contracts]
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     outputs:
       has_artifacts: ${{ steps.results_meta.outputs.has_files }}
     continue-on-error: true
@@ -600,12 +612,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-mandatory-${{ github.run_id }}
+          name: test-results-mandatory-${{ env.ARTIFACT_SUFFIX }}
           if-no-files-found: ignore
           path: |
             test-results/**
             coverage/**
             junit.xml
+          compression-level: 6
+          overwrite: true
 
   # ?????? (?PR)
   preview:
@@ -790,6 +804,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, test-mandatory]
     if: always() && (needs.test.result == 'success' || needs.test-mandatory.result == 'success')
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -815,7 +831,8 @@ jobs:
         if: ${{ needs.test.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: test-results-unit-${{ github.run_id }}
+          pattern: test-results-*
+          merge-multiple: true
           path: test-results/
         continue-on-error: true
 
@@ -823,7 +840,8 @@ jobs:
         if: ${{ needs.test-mandatory.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: test-results-mandatory-${{ github.run_id }}
+          pattern: test-results-mandatory-*
+          merge-multiple: true
           path: test-results-mandatory/
         continue-on-error: true
 
@@ -832,10 +850,13 @@ jobs:
         working-directory: ${{ github.workspace }}
 
       - name: Upload test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-report
+          name: test-report-${{ env.ARTIFACT_SUFFIX }}
           path: test-results/report.html
+          compression-level: 6
+          overwrite: true
 
   # ????
   e2e-pw:
@@ -843,6 +864,8 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
@@ -876,8 +899,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ github.run_id }}
+          name: playwright-report-${{ env.ARTIFACT_SUFFIX }}
           path: playwright-report
+          compression-level: 6
+          overwrite: true
   success:
     name: Pipeline Success
     runs-on: ubuntu-latest
@@ -900,6 +925,8 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
@@ -928,8 +955,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-smoke-log-${{ github.run_id }}
+          name: frontend-smoke-log-${{ env.ARTIFACT_SUFFIX }}
           path: frontend-smoke-log.txt
+          compression-level: 6
+          overwrite: true
 
   # Health endpoints smoke test (non-blocking)
   health-smoke:
@@ -937,6 +966,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: sanity
     continue-on-error: true
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
@@ -972,10 +1003,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: health-smoke-results-${{ github.run_id }}
+          name: health-smoke-results-${{ env.ARTIFACT_SUFFIX }}
           path: |
             health-smoke-log.txt
             health-test-results.json
+          compression-level: 6
+          overwrite: true
 
   docs-schemas:
     name: Docs Schemas Validation

@@ -16,6 +16,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,6 +43,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-smoke-logs-${{ github.run_id }}
+          name: alpha-smoke-logs-${{ env.ARTIFACT_SUFFIX }}
           path: smoke.log
+          compression-level: 6
+          overwrite: true
 
