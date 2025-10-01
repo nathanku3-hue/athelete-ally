@@ -167,34 +167,16 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
       },
     });
 
-    // 查询个人记录
-    const personalRecords = await prisma.workoutRecord.findMany({
+    // 查询个人记录 - 使用 PersonalRecord 模型而不是 WorkoutRecord
+    const personalRecords = await prisma.personalRecord.findMany({
       where: {
-        session: {
-          userId: userId,
-          startedAt: {
-            gte: startDate,
-          },
-        },
-        isPersonalRecord: true,
-      },
-      include: {
-        exercise: {
-          select: {
-            name: true,
-            category: true,
-          },
-        },
-        session: {
-          select: {
-            startedAt: true,
-          },
+        userId: userId,
+        createdAt: {
+          gte: startDate,
         },
       },
       orderBy: {
-        session: {
-          startedAt: 'desc',
-        },
+        createdAt: 'desc',
       },
       take: 20,
     });
@@ -202,18 +184,21 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
     // 格式化个人记录数据
     const formattedRecords = personalRecords.map((record: any) => ({
       id: record.id,
-      exerciseName: record.exercise.name,
-      category: record.exercise.category,
-      weight: record.weight,
-      reps: record.reps,
+      exerciseName: record.exerciseName,
+      category: record.exerciseName, // PersonalRecord 没有 category，使用 exerciseName
+      recordType: record.recordType,
+      value: record.value,
+      unit: record.unit,
+      sessionId: record.sessionId,
       setNumber: record.setNumber,
       notes: record.notes,
-      date: record.session.startedAt,
+      date: record.createdAt,
+      isVerified: record.isVerified,
     }));
 
     // 计算记录类型分布
     const recordTypes = personalRecords.reduce((acc: any[], record: any) => {
-      const category = record.exercise.category;
+      const category = record.exerciseName; // 使用 exerciseName 而不是 record.exercise.category
       const existing = acc.find(item => item.type === category);
       if (existing) {
         existing.count++;
