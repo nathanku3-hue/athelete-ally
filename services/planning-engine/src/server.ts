@@ -8,7 +8,7 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../prisma/generated/client';
 import { OnboardingCompletedEvent, PlanGenerationRequestedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
 import { toPlanGenerationRequest, toPlanGenerationRequestFromRequested } from './validation/plan-request.js';
 import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
