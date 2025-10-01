@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Athlete Ally - Normalize Service Metrics",
+    "tags": ["athlete-ally", "normalize", "nats"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "HRV Messages Processed",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(normalize_hrv_messages_total[5m])) by (result)",
+            "legendFormat": "{{result}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "list",
+              "orientation": "horizontal"
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Message Processing Success/Error Overlay",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(normalize_hrv_messages_total{result=\"success\"}[5m])) by (stream)",
+            "legendFormat": "Success - {{stream}}"
+          },
+          {
+            "expr": "sum(rate(normalize_hrv_messages_total{result=\"error\"}[5m])) by (stream)",
+            "legendFormat": "Error - {{stream}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "DLQ Messages Time Series",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(dlq_messages_total[5m])) by (subject)",
+            "legendFormat": "DLQ - {{subject}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.1
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Consumer Lag",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "nats_jetstream_consumer_num_pending",
+            "legendFormat": "Pending - {{consumer}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 100
+                },
+                {
+                  "color": "red",
+                  "value": 1000
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "schemaVersion": 30,
+    "version": 1
+  }
+}

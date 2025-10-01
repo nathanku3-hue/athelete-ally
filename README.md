@@ -23,6 +23,52 @@ athlete-ally/
 └── infrastructure/         # 基础设施
 ```
 
+## NATS JetStream 配置
+
+### Stream Mode 配置
+Athlete Ally 支持两种流模式：
+
+- **Single Mode** (`EVENT_STREAM_MODE=single`): 使用传统单流拓扑 `ATHLETE_ALLY_EVENTS`
+- **Multi Mode** (`EVENT_STREAM_MODE=multi`): 使用现代多流拓扑，首选 `AA_CORE_HOT`，回退到 `ATHLETE_ALLY_EVENTS`
+
+### 流候选表
+| Mode | 首选流 | 回退流 |
+|------|--------|--------|
+| single | `ATHLETE_ALLY_EVENTS` | - |
+| multi | `AA_CORE_HOT` | `ATHLETE_ALLY_EVENTS` |
+
+### 服务管理标志
+- `FEATURE_SERVICE_MANAGES_STREAMS`: 服务是否管理流创建（默认: true）
+- `FEATURE_SERVICE_MANAGES_CONSUMERS`: 服务是否管理消费者创建（默认: true）
+
+### 诊断工具
+- `scripts/nats/stream-info.js`: 流和消费者信息诊断
+- `scripts/test-multi-mode-fallback.js`: 多模式回退验证
+
+### DLQ 配置
+详见 `services/normalize-service/src/__tests__/dlq.test.ts` 和相关 runbook。
+
+### Multi-Mode Fallback 验证（无需创建流）
+
+验证多模式回退行为，无需创建新流：
+
+```bash
+# 测试单模式
+EVENT_STREAM_MODE=single node scripts/test-multi-mode-fallback.js
+
+# 测试多模式回退
+EVENT_STREAM_MODE=multi node scripts/test-multi-mode-fallback.js
+```
+
+**预期日志**：
+- 单模式：直接绑定到 `ATHLETE_ALLY_EVENTS`
+- 多模式：尝试 `AA_CORE_HOT` → 回退到 `ATHLETE_ALLY_EVENTS`
+
+**故障排查**：
+- 确保 NATS 运行在 `nats://localhost:4223`
+- 检查 `ATHLETE_ALLY_EVENTS` 流是否存在
+- 验证消费者 `normalize-hrv-durable` 状态
+
 ## 快速启动
 
 ### 环境要求
