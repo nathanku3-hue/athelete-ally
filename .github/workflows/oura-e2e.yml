@@ -29,6 +29,7 @@ jobs:
       STREAM_CORE_NAME: ${{ matrix.stream_core_name }}
       AA_STREAM_CANDIDATES: ${{ matrix.event_stream_mode == 'multi' && 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS' || 'ATHLETE_ALLY_EVENTS' }}
       FEATURE_SERVICE_MANAGES_CONSUMERS: false
+      NATS_URL: nats://localhost:4223
       DATABASE_URL: postgresql://athlete:athlete@localhost:55432/athlete_normalize
       DATABASE_URL_NORMALIZE: ${{ secrets.DATABASE_URL_NORMALIZE }}
       DATABASE_URL_INGEST: ${{ secrets.DATABASE_URL_INGEST }}
@@ -152,8 +153,6 @@ jobs:
 
           # Quick DB check via script or inline query
           echo "Probe sent; logs will confirm consumption."
-        env:
-          NATS_URL: nats://localhost:4223
           
       - name: Collect service logs
         if: always()

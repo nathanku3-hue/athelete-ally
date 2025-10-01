@@ -80,7 +80,8 @@ export class SummaryAggregator {
     console.log('Running full summary update...');
     
     try {
-      // 获取所有活跃用户 - 使用正确的模型
+      // Get all active users from UserSummary model (not User model)
+      // UserSummary contains aggregated user data and is the correct model for this operation
       const users = await prisma.userSummary.findMany({
         select: {
           userId: true,
@@ -88,7 +89,7 @@ export class SummaryAggregator {
         distinct: ['userId'],
       });
 
-      // 并行更新所有用户的摘要数据
+      // Update all user summaries in parallel for better performance
       const updatePromises = users.map((user: any) => this.updateUserSummary(user.userId));
       await Promise.all(updatePromises);
 

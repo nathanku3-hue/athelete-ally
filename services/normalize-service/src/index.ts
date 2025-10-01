@@ -101,16 +101,20 @@ async function connectNATS() {
       const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
       let actualStreamName = '';
 
-      // Only create consumers if explicitly enabled (default to true for development)
+      // Consumer creation strategy:
+      // - Default: Create consumers if FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false'
+      // - CI/Prod: Set FEATURE_SERVICE_MANAGES_CONSUMERS=false to bind to existing consumers
+      // - This allows services to self-manage consumers in development while relying on
+      //   external consumer management in production environments
       if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false') {
         for (const streamName of streamCandidates) {
           try {
             await jsm.consumers.add(streamName, {
-          durable_name: hrvDurable,
-          filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
+              durable_name: hrvDurable,
+              filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
               ack_policy: 'explicit' as any,
               deliver_policy: 'all' as any,
-          max_deliver: hrvMaxDeliver,
+              max_deliver: hrvMaxDeliver,
               ack_wait: hrvAckWaitMs * 1_000_000, // Convert ms to ns
               max_ack_pending: 1000 // High capacity to avoid blocking
             });
