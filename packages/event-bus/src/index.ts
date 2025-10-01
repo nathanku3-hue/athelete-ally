@@ -111,7 +111,7 @@ export class EventBus {
     }
   }
 
-  async connect(url: string = 'nats://localhost:4222') {
+  async connect(url: string = 'nats://localhost:4223') {
     console.log(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
