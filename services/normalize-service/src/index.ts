@@ -470,7 +470,7 @@ async function processHrvData(payload: any) {
     };
 
     await eventBus.publishHrvNormalizedStored(normalizedEvent);
-    console.log(`[normalize] HRV data upserted and event published for user ${userId}, date ${date}`);
+    console.log(`[normalize] HRV data upserted and event published for date ${date}`);
   } catch (error) {
     console.error('[normalize] Error processing HRV data:', error);
     throw error;
