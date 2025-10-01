@@ -30,7 +30,27 @@ export type StreamMode = 'single' | 'multi';
 
 // Environment-based configuration
 export const getStreamMode = (): StreamMode => {
-  return (process.env.EVENT_STREAM_MODE as StreamMode) || 'multi';
+  const raw = String(process.env.EVENT_STREAM_MODE || 'single').toLowerCase().trim();
+  const mode: StreamMode = raw === 'multi' ? 'multi' : 'single';
+
+  // Log mode for debugging (can be disabled with LOG_MODE=false)
+  if (process.env.LOG_MODE !== 'false') {
+    console.log(`[event-bus] Stream mode: ${mode} (EVENT_STREAM_MODE="${process.env.EVENT_STREAM_MODE || '(unset)'}")`);
+  }
+
+  return mode;
+};
+
+// Helper to derive stream candidates based on mode
+export const getStreamCandidates = (): string[] => {
+  const mode = getStreamMode();
+  
+  if (mode === 'single') {
+    return [getStreamName('LEGACY')]; // ATHLETE_ALLY_EVENTS
+  }
+  
+  // Multi mode: try AA_CORE_HOT first, fallback to ATHLETE_ALLY_EVENTS
+  return [getStreamName('CORE'), getStreamName('LEGACY')]; // AA_CORE_HOT, ATHLETE_ALLY_EVENTS
 };
 
 export const getStreamName = (type: keyof typeof STREAMS): string => {
