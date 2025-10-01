@@ -104,6 +104,11 @@ jobs:
           echo "🧪 Testing Prisma client import:"
           node -e "const { PrismaClient } = require('./prisma/generated/client'); console.log('✅ Prisma client can be imported successfully');" || echo "❌ Prisma client import failed"
           
+      - name: Check Prisma consistency
+        run: |
+          echo "🔍 Running Prisma consistency check..."
+          node scripts/prisma-consistency-check.js
+          
       - name: Setup database schema
         env:
           DATABASE_URL: postgresql://athlete:athlete@localhost:55432/athlete_normalize
