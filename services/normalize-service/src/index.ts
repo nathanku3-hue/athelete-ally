@@ -464,16 +464,20 @@ async function connectNATS() {
   }
 }
 
-async function processHrvData(payload: { userId: string; date: string; rmssd: number }) {
+async function processHrvData(payload: { userId: string; date: string; rMSSD?: number; rmssd?: number; lnRMSSD?: number; lnRmssd?: number }) {
   try {
-    const { userId, date, rmssd } = payload;
-    
+    const { userId, date } = payload;
+
+    // Contract compatibility: support both rMSSD (contract standard) and rmssd (legacy)
+    const rmssd = payload.rMSSD ?? payload.rmssd;
+    const lnRmssd = payload.lnRMSSD ?? payload.lnRmssd ?? (typeof rmssd === 'number' ? Math.log(rmssd) : null);
+
     if (!userId || !date || typeof rmssd !== 'number') {
       throw new Error('Invalid HRV payload: missing required fields');
     }
 
-    // Calculate lnRmssd
-    const lnRmssd = Math.log(rmssd);
+    // Calculate lnRmssd if not provided
+    const calculatedLnRmssd = lnRmssd ?? Math.log(rmssd);
 
     // Upsert HRV data
     const row = await prisma.hrvData.upsert({
@@ -485,7 +489,7 @@ async function processHrvData(payload: { userId: string; date: string; rmssd: nu
       },
       update: {
         rmssd,
-        lnRmssd,
+        lnRmssd: calculatedLnRmssd,
         capturedAt: new Date(),
         updatedAt: new Date()
       },
@@ -493,7 +497,7 @@ async function processHrvData(payload: { userId: string; date: string; rmssd: nu
         userId,
         date: new Date(date),
         rmssd,
-        lnRmssd,
+        lnRmssd: calculatedLnRmssd,
         capturedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date()
