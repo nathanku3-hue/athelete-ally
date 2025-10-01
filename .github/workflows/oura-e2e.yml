@@ -77,6 +77,15 @@ jobs:
           # Wait for NATS
           timeout 60 bash -c 'until nc -z localhost 4223; do sleep 2; done'
           
+      - name: Generate Prisma clients
+        run: |
+          cd services/normalize-service && npx prisma generate --schema prisma/schema.prisma
+          cd services/ingest-service && npx prisma generate --schema prisma/schema.prisma || true
+          
+      - name: Setup database schema
+        run: |
+          bash scripts/prisma-sync.sh services/normalize-service
+          
       - name: Start microservices
         run: |
           set -euo pipefail

@@ -83,15 +83,16 @@ export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): bool
 
 /** Ensure stream exists with desired config (update-if-different) */
 export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void> {
+  // Build strict config with only supported fields
   const desired = {
     name: cfg.name,
     subjects: cfg.subjects,
+    retention: "limits",
     max_age: nanos(cfg.maxAgeMs),
     storage: cfg.storage ?? "file",
     discard: cfg.discard ?? "old",
     duplicate_window: nanos(cfg.duplicateWindowMs ?? 120_000),
-    compression: cfg.compression ?? true,
-    num_replicas: cfg.replicas,
+    replicas: cfg.replicas,
   };
 
   try {
@@ -108,8 +109,45 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
     if (String(err?.message || "").includes("stream not found") ||
         String(err?.message || "").includes("not found")) {
       console.log(`[event-bus] Creating stream: ${cfg.name}`);
-      await jsm.streams.add(desired);
-      console.log(`[event-bus] Stream created: ${cfg.name}`);
+      
+      // Try creating with full config first
+      try {
+        await jsm.streams.add(desired);
+        console.log(`[event-bus] Stream created: ${cfg.name}`);
+        return;
+      } catch (createErr: any) {
+        // Handle invalid JSON error (err_code 10025) with fallback retries
+        if (createErr?.api_error?.err_code === 10025) {
+          console.log(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
+          
+          // Retry 1: Remove duplicate_window (older servers don't support it)
+          const fallback1 = { ...desired };
+          delete fallback1.duplicate_window;
+          try {
+            await jsm.streams.add(fallback1);
+            console.log(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
+            return;
+          } catch (fallback1Err: any) {
+            if (fallback1Err?.api_error?.err_code === 10025) {
+              // Retry 2: Remove discard (last resort)
+              const fallback2 = { ...fallback1 };
+              delete fallback2.discard;
+              try {
+                await jsm.streams.add(fallback2);
+                console.log(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
+                return;
+              } catch (fallback2Err: any) {
+                console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
+                throw fallback2Err;
+              }
+            } else {
+              throw fallback1Err;
+            }
+          }
+        } else {
+          throw createErr;
+        }
+      }
     } else {
       console.error(`[event-bus] Failed to ensure stream ${cfg.name}:`, err);
       throw err;
@@ -186,6 +224,10 @@ export class EventBus {
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
+    
+    // Log server version for debugging
+    const serverInfo = await this.nc.info();
+    console.log(`[event-bus] Connected to NATS server version: ${serverInfo.version}`);
     
     // Create streams if they don't exist
     await this.ensureStreams();
