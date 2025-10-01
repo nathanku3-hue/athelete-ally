@@ -123,7 +123,14 @@ async function connectNATS() {
             break; // Successfully created on this stream
           } catch (e) {
             // Consumer might already exist or stream not available
-            httpServer.log.info(`[normalize] Attempted to create HRV consumer on ${streamName}: ${hrvDurable}. Error: ${(e as Error).message}. Trying next candidate.`);
+            const error = e as Error;
+            httpServer.log.info(`[normalize] Attempted to create HRV consumer on ${streamName}: ${hrvDurable}. Error: ${error.message}. Trying next candidate.`);
+            if (error.message.includes('consumer already exists')) {
+              // Consumer already exists, try to bind to it
+              actualStreamName = streamName;
+              httpServer.log.info(`[normalize] Consumer ${hrvDurable} already exists on ${streamName}, will bind to existing consumer.`);
+              break;
+            }
           }
         }
       } else {
