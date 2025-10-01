@@ -1,7 +1,7 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator, ValidationResult } from './validator.js';
-import { config } from './config.js';
+import { config, nanos, getStreamConfigs, AppStreamConfig } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
 
 // Event Bus 指标
@@ -54,6 +54,76 @@ export const eventBusMetrics = {
 Object.values(eventBusMetrics).forEach(metric => {
   register.registerMetric(metric);
 });
+
+/** Compare arrays ignoring order */
+function sameSet(a: string[], b: string[]): boolean {
+  const A = new Set(a);
+  const B = new Set(b);
+  if (A.size !== B.size) return false;
+  for (const x of A) if (!B.has(x)) return false;
+  return true;
+}
+
+/** Determine if stream needs update (subjects/retention/replicas/etc.) */
+export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): boolean {
+  const ex = existing.config;
+  const d = desired;
+
+  const subjectsChanged = !sameSet(ex.subjects ?? [], d.subjects);
+  const ageChanged = Number(ex.max_age ?? 0) !== nanos(d.maxAgeMs);
+  const replChanged = Number(ex.num_replicas ?? 1) !== d.replicas;
+  const storageChanged = (ex.storage ?? "file") !== (d.storage ?? "file");
+  const discardChanged = (ex.discard ?? "old") !== (d.discard ?? "old");
+  const dupeChanged = Number(ex.duplicate_window ?? 0) !== nanos(d.duplicateWindowMs ?? 120_000);
+  const compChanged = Boolean(ex.compression) !== Boolean(d.compression);
+
+  return subjectsChanged || ageChanged || replChanged || storageChanged ||
+         discardChanged || dupeChanged || compChanged;
+}
+
+/** Ensure stream exists with desired config (update-if-different) */
+export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void> {
+  const desired = {
+    name: cfg.name,
+    subjects: cfg.subjects,
+    max_age: nanos(cfg.maxAgeMs),
+    storage: cfg.storage ?? "file",
+    discard: cfg.discard ?? "old",
+    duplicate_window: nanos(cfg.duplicateWindowMs ?? 120_000),
+    compression: cfg.compression ?? true,
+    num_replicas: cfg.replicas,
+  };
+
+  try {
+    const info = await jsm.streams.info(cfg.name);
+
+    if (streamNeedsUpdate(info, cfg)) {
+      console.log(`[event-bus] Updating stream: ${cfg.name}`);
+      await jsm.streams.update(cfg.name, desired);
+      console.log(`[event-bus] Stream updated: ${cfg.name}`);
+    } else {
+      console.log(`[event-bus] Stream up-to-date: ${cfg.name}`);
+    }
+  } catch (err: any) {
+    if (String(err?.message || "").includes("stream not found") ||
+        String(err?.message || "").includes("not found")) {
+      console.log(`[event-bus] Creating stream: ${cfg.name}`);
+      await jsm.streams.add(desired);
+      console.log(`[event-bus] Stream created: ${cfg.name}`);
+    } else {
+      console.error(`[event-bus] Failed to ensure stream ${cfg.name}:`, err);
+      throw err;
+    }
+  }
+}
+
+/** Ensure all configured streams exist */
+export async function ensureAllStreams(jsm: any): Promise<void> {
+  const configs = getStreamConfigs();
+  for (const cfg of configs) {
+    await ensureStream(jsm, cfg);
+  }
+}
 
 export class EventBus {
   private nc: NatsConnection | null = null;
@@ -125,35 +195,8 @@ export class EventBus {
   private async ensureStreams() {
     if (!this.jsm) throw new Error('JetStreamManager not initialized');
 
-    const streams = [
-      {
-        name: 'ATHLETE_ALLY_EVENTS',
-        subjects: ['athlete-ally.>', 'vendor.oura.>', 'sleep.*'],
-        retention: 'limits' as any,
-        max_age: 24 * 60 * 60 * 1000 * 1000 * 1000, // 24 hours in nanoseconds
-        max_msgs: 1000000,
-      }
-    ];
-
-    for (const stream of streams) {
-      try {
-        await this.jsm.streams.add(stream);
-        console.log(`Stream ${stream.name} created successfully`);
-      } catch (error) {
-        // Stream might already exist, try to update if subjects differ
-        if ((((error as any)?.message) || '').includes('already in use')) {
-          try {
-            console.log(`Updating stream ${stream.name} with new subjects...`);
-            await this.jsm.streams.update(stream.name, stream as any);
-            console.log(`Stream ${stream.name} updated successfully`);
-          } catch (updateError) {
-            console.log(`Failed to update stream ${stream.name}:`, (updateError as any)?.message || String(updateError));
-          }
-        } else {
-          console.log(`Stream ${stream.name} might already exist:`, (error as any)?.message || String(error));
-        }
-      }
-    }
+    // Use new multi-stream-aware function
+    await ensureAllStreams(this.jsm);
   }
 
   async publishOnboardingCompleted(event: OnboardingCompletedEvent) {

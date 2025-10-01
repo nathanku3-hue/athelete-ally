@@ -1,57 +1,46 @@
 #!/usr/bin/env node
+const { connect } = require("nats");
 
-/**
- * NATS JetStream Stream Information Checker
- * Prints subjects and configuration for ATHLETE_ALLY_EVENTS stream
- */
+async function printStreamInfo() {
+  const url = process.env.NATS_URL || "nats://localhost:4223";
+  const nc = await connect({ servers: url });
+  const jsm = await nc.jetstreamManager();
 
-const { connect } = require('nats');
+  // Check all possible streams
+  const streams = [
+    "AA_CORE_HOT",
+    "AA_VENDOR_HOT",
+    "AA_DLQ",
+    "ATHLETE_ALLY_EVENTS"  // Legacy
+  ];
 
-async function checkStreamInfo() {
-  const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
-  
-  console.log(`🔍 Checking JetStream at: ${natsUrl}`);
-  
-  try {
-    const nc = await connect({ servers: natsUrl });
-    const jsm = await nc.jetstreamManager();
-    
-    console.log('✅ Connected to NATS');
-    
-    // Get stream info
-    const streamName = 'ATHLETE_ALLY_EVENTS';
-    const streamInfo = await jsm.streams.info(streamName);
-    
-    console.log(`\n📊 Stream: ${streamName}`);
-    console.log(`   - Subjects: ${streamInfo.config.subjects.join(', ')}`);
-    console.log(`   - Retention: ${streamInfo.config.retention}`);
-    console.log(`   - Max Age: ${streamInfo.config.max_age}ns`);
-    console.log(`   - Max Messages: ${streamInfo.config.max_msgs}`);
-    console.log(`   - State: ${streamInfo.state.messages} messages, ${streamInfo.state.bytes} bytes`);
-    
-    // Check if required subjects are present
-    const requiredSubjects = ['athlete-ally.>', 'vendor.oura.>', 'sleep.*'];
-    const actualSubjects = streamInfo.config.subjects;
-    
-    console.log('\n🎯 Subject Validation:');
-    for (const subject of requiredSubjects) {
-      const found = actualSubjects.includes(subject);
-      console.log(`   ${found ? '✅' : '❌'} ${subject}`);
+  console.log(`\nNATS JetStream @ ${url}\n${'='.repeat(60)}\n`);
+
+  for (const name of streams) {
+    try {
+      const info = await jsm.streams.info(name);
+      const cfg = info.config;
+      const state = info.state;
+
+      console.log(`[${name}]`);
+      console.log(`  Subjects:     ${JSON.stringify(cfg.subjects || [])}`);
+      console.log(`  Max Age:      ${(cfg.max_age / 1e9 / 3600).toFixed(1)}h`);
+      console.log(`  Replicas:     ${cfg.num_replicas || 1}`);
+      console.log(`  Storage:      ${cfg.storage}`);
+      console.log(`  Messages:     ${state.messages}`);
+      console.log(`  Bytes:        ${state.bytes}`);
+      console.log(`  Consumers:    ${state.consumer_count}`);
+      console.log();
+    } catch (e) {
+      console.log(`[${name}] Not found\n`);
     }
-    
-    const allFound = requiredSubjects.every(subject => actualSubjects.includes(subject));
-    console.log(`\n${allFound ? '✅' : '❌'} All required subjects present: ${allFound}`);
-    
-    await nc.close();
-    
-  } catch (error) {
-    console.error('❌ Error checking stream info:', error.message);
-    process.exit(1);
   }
+
+  await nc.drain();
 }
 
 if (require.main === module) {
-  checkStreamInfo().catch(console.error);
+  printStreamInfo().catch(console.error);
 }
 
-module.exports = { checkStreamInfo };
+module.exports = { printStreamInfo };
