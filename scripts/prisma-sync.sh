@@ -41,7 +41,7 @@ DB_HOST=$(echo "$DATABASE_URL" | sed -n 's/.*@\([^:\/]*\).*/\1/p' || echo "unkno
 echo "🎯 Target database host: $DB_HOST"
 
 echo "🔧 CI environment detected. Running 'prisma db push' for $SERVICE_DIR"
-cd "$SERVICE_DIR" && npx prisma db push --skip-generate --force
+cd "$SERVICE_DIR" && npx prisma db push --skip-generate --accept-data-loss
 
 echo "✅ Database schema synchronized successfully for $SERVICE_DIR"
 
