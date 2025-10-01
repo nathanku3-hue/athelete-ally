@@ -126,7 +126,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: eslint-boundaries-report-${{ github.run_id }}
+          name: eslint-boundaries-report-quality-${{ github.run_id }}
           path: reports/deps/eslint-boundaries.json
           retention-days: 7
 
@@ -139,7 +139,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: prisma-clients-${{ github.run_id }}
+          name: prisma-clients-quality-${{ github.run_id }}
           path: |
             services/*/prisma/generated/client
             services/*/prisma/schema.prisma
@@ -383,7 +383,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-unit-${{ github.run_id }}
           if-no-files-found: ignore
           path: |
             test-results/**
@@ -600,7 +600,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-mandatory
+          name: test-results-mandatory-${{ github.run_id }}
           if-no-files-found: ignore
           path: |
             test-results/**
@@ -815,7 +815,7 @@ jobs:
         if: ${{ needs.test.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: test-results
+          name: test-results-unit-${{ github.run_id }}
           path: test-results/
         continue-on-error: true
 
@@ -823,7 +823,7 @@ jobs:
         if: ${{ needs.test-mandatory.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: test-results-mandatory
+          name: test-results-mandatory-${{ github.run_id }}
           path: test-results-mandatory/
         continue-on-error: true
 
