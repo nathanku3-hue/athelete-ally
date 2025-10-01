@@ -29,7 +29,7 @@ services:
     container_name: athlete-ally-nats
     command: ["-js", "-m", "8222"]
     ports:
-      - "4222:4222"
+      - "4223:4222"
       - "8222:8222"
   ingest-service:
     build:
@@ -39,7 +39,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4101
-      NATS_URL: nats://nats:4222
+      NATS_URL: nats://nats:4223
       OURA_WEBHOOK_SECRET: ${OURA_WEBHOOK_SECRET:-}
       OURA_IDEMPOTENCY_TTL_SECONDS: ${OURA_IDEMPOTENCY_TTL_SECONDS:-600}
       # Telemetry runtime configuration (default off for traces)
@@ -68,7 +68,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4102
-      NATS_URL: nats://nats:4222
+      NATS_URL: nats://nats:4223
       DATABASE_URL: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete}@postgres:5432/athlete_normalize
       NORMALIZE_DURABLE_NAME: ${NORMALIZE_DURABLE_NAME:-normalize-oura}
       NORMALIZE_OURA_MAX_DELIVER: ${NORMALIZE_OURA_MAX_DELIVER:-5}
@@ -131,7 +131,7 @@ services:
       NODE_ENV: development
       PORT: 4104
       PLANNING_DATABASE_URL: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete}@postgres:5432/athlete_planning
-      NATS_URL: nats://nats:4222
+      NATS_URL: nats://nats:4223
     ports:
       - "4104:4104"
     volumes:

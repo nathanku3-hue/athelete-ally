@@ -65,3 +65,5 @@ If issues arise:
 - DLQ rate > 5%: Investigate processing errors
 - Retry rate > 20%: Check database connectivity
 - Pending messages > 100: Consumer may be stuck
+
+

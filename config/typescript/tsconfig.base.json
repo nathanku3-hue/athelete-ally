@@ -34,7 +34,7 @@
       "@athlete-ally/shared": ["./packages/shared/src"],
       "@athlete-ally/shared/*": ["./packages/shared/src/*"],
       "@athlete-ally/shared/auth/jwt": ["./packages/shared/src/auth/jwt"],
-      "@athlete-ally/shared/fastify-augment": ["./packages/shared/src/fastify-augment.d.ts"],
+      "@athlete-ally/shared/fastify-augment": ["./packages/shared/src/fastify-augment"],
       "@athlete-ally/shared-types": ["./packages/shared-types/src"],
       "@athlete-ally/shared-types/*": ["./packages/shared-types/src/*"],
       "@athlete-ally/protocol-types": ["./packages/protocol-types/src"],

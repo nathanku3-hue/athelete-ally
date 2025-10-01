@@ -11,7 +11,7 @@ const EnvSchema = z.object({
   METRICS_PORT: z.string().transform((v) => Number(v)).default('9466'),
   
   // NATS配置
-  NATS_URL: z.string().url().default('nats://localhost:4222'),
+  NATS_URL: z.string().url().default('nats://localhost:4223'),
   
   // NATS并发控制配置
   NATS_MAX_ACK_PENDING: z.string().transform((v) => Number(v)).default('10'), // 最大待确认消息数

@@ -31,7 +31,7 @@ const SERVICES = [
 const INFRASTRUCTURE = [
   { name: 'PostgreSQL', host: 'localhost', port: 5432, type: 'postgres' },
   { name: 'Redis', host: 'localhost', port: 6379, type: 'redis' },
-  { name: 'NATS', host: 'localhost', port: 4222, type: 'nats' },
+  { name: 'NATS', host: 'localhost', port: 4223, type: 'nats' },
 ];
 
 // 颜色输出

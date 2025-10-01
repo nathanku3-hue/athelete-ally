@@ -190,8 +190,8 @@ jobs:
       # 预检查端口状态 (Linux兼容)
       - name: Pre-flight port check (Linux compatible)
         run: |
-          ss -tulpen | grep -E ':(5432|6379|4222)\b' || echo "Ports available"
-          if ss -tulpen | grep -E ':(5432|6379|4222)\b'; then
+          ss -tulpen | grep -E ':(5432|6379|4223)\b' || echo "Ports available"
+          if ss -tulpen | grep -E ':(5432|6379|4223)\b'; then
             echo "⚠️ Ports occupied, will use isolated project name"
           fi
 

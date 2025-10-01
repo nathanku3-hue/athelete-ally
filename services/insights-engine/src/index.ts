@@ -15,7 +15,7 @@ let eventHandlers: EventHandlers | null = null;
 
 async function connectEventBus() {
   try {
-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+    const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
     eventBus = new EventBus();
     await eventBus.connect(natsUrl);
     console.log('Connected to EventBus');

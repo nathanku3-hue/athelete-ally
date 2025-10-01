@@ -1,7 +1,7 @@
 // 设置测试环境变量 - 使用默认值避免连接问题
 process.env.PLANNING_DATABASE_URL ??= 'file:./tmp/test.db';
 process.env.REDIS_URL ??= 'redis://localhost:6379';
-process.env.NATS_URL ??= 'nats://localhost:4222';
+process.env.NATS_URL ??= 'nats://localhost:4223';
 process.env.OPENAI_API_KEY ??= 'test-key';
 // NODE_ENV is read-only in Jest environment, skip setting it
 

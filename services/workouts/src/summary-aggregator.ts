@@ -45,7 +45,7 @@ export class SummaryAggregator {
     console.log('Starting SummaryAggregator...');
 
     // 连接到事件总线
-    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4222');
+    await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4223');
 
     // 订阅计划生成请求事件，触发摘要更新
     await eventBus.subscribeToPlanGenerationRequested(this.handlePlanGenerated.bind(this) as any);

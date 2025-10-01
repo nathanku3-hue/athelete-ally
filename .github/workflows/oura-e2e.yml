@@ -6,11 +6,26 @@ on:
     branches:
       - release/phase3-foundation
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   oura-e2e:
     runs-on: ubuntu-latest
     continue-on-error: true
+    strategy:
+      matrix:
+        event_stream_mode: [single, multi]
+        include:
+          - event_stream_mode: single
+            stream_core_name: ATHLETE_ALLY_EVENTS
+          - event_stream_mode: multi
+            stream_core_name: AA_CORE_HOT
     env:
+      EVENT_STREAM_MODE: ${{ matrix.event_stream_mode }}
+      STREAM_CORE_NAME: ${{ matrix.stream_core_name }}
+      AA_STREAM_CANDIDATES: ${{ matrix.event_stream_mode == 'multi' && 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS' || 'ATHLETE_ALLY_EVENTS' }}
       DATABASE_URL_NORMALIZE: ${{ secrets.DATABASE_URL_NORMALIZE }}
       DATABASE_URL_INGEST: ${{ secrets.DATABASE_URL_INGEST }}
       OURA_ACCESS_TOKEN: ${{ secrets.OURA_ACCESS_TOKEN }}
@@ -60,18 +75,29 @@ jobs:
           timeout 60 bash -c 'until pg_isready -h localhost -p 55432 -U athlete; do sleep 2; done'
           
           # Wait for NATS
-          timeout 60 bash -c 'until nc -z localhost 4222; do sleep 2; done'
+          timeout 60 bash -c 'until nc -z localhost 4223; do sleep 2; done'
           
       - name: Start microservices
         run: |
-          cd services/ingest-service && PORT=4101 NATS_URL=nats://localhost:4222 npm run dev &
-          cd services/normalize-service && PORT=4102 NATS_URL=nats://localhost:4222 DATABASE_URL=postgresql://athlete:athlete@localhost:55432/athlete_normalize npm run dev &
-          sleep 15
+          set -euo pipefail
+          trap 'kill 0' EXIT
+          
+          # Start services in background and capture PIDs
+          cd services/ingest-service && PORT=4101 NATS_URL=nats://localhost:4223 npm run dev &
+          INGEST_PID=$!
+          
+          cd services/normalize-service && PORT=4102 NATS_URL=nats://localhost:4223 DATABASE_URL=postgresql://athlete:athlete@localhost:55432/athlete_normalize npm run dev &
+          NORMALIZE_PID=$!
+          
+          echo "Started ingest-service (PID: $INGEST_PID) and normalize-service (PID: $NORMALIZE_PID)"
+          sleep 30
           
       - name: Wait for microservices health
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:4101/health; do sleep 2; done'
-          timeout 60 bash -c 'until curl -f http://localhost:4102/health; do sleep 2; done'
+          set -euo pipefail
+          # Install wait-on for more reliable health checks
+          npm install -g wait-on
+          wait-on -t 120000 http://localhost:4101/health http://localhost:4102/health
           
       - name: Seed Oura token (optional)
         if: ${{ env.OURA_ACCESS_TOKEN != '' && env.OURA_REFRESH_TOKEN != '' && env.TOKEN_ENCRYPTION_KEY != '' }}
@@ -119,8 +145,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: oura-e2e-artifacts
+          name: oura-e2e-artifacts-${{ github.job }}-${{ matrix.event_stream_mode }}-${{ github.run_id }}
           path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
           
       - name: Cleanup
         if: always()

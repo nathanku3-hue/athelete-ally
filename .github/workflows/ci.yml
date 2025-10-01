@@ -206,10 +206,16 @@ jobs:
           ref: ${{ github.ref }}
       
       - name: Set Matrix Environment Variables
+        env:
+          EVENT_STREAM_MODE: ${{ matrix.event_stream_mode }}
+          STREAM_CORE_NAME: ${{ matrix.stream_core_name }}
+          AA_STREAM_CANDIDATES: ${{ matrix.event_stream_mode == 'multi' && 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS' || 'ATHLETE_ALLY_EVENTS' }}
         run: |
-          echo "EVENT_STREAM_MODE=${{ matrix.event_stream_mode }}" >> $GITHUB_ENV
-          echo "STREAM_CORE_NAME=${{ matrix.stream_core_name }}" >> $GITHUB_ENV
-          echo "AA_STREAM_CANDIDATES=${{ matrix.event_stream_mode == 'multi' && 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS' || 'ATHLETE_ALLY_EVENTS' }}" >> $GITHUB_ENV
+          {
+            echo "EVENT_STREAM_MODE=${EVENT_STREAM_MODE}";
+            echo "STREAM_CORE_NAME=${STREAM_CORE_NAME}";
+            echo "AA_STREAM_CANDIDATES=${AA_STREAM_CANDIDATES}";
+          } >> "$GITHUB_ENV"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

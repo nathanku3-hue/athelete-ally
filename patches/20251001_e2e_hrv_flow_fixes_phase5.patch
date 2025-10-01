@@ -1,0 +1,277 @@
+diff --git a/services/normalize-service/src/index.ts b/services/normalize-service/src/index.ts
+index e73f580..a5c6054 100644
+--- a/services/normalize-service/src/index.ts
++++ b/services/normalize-service/src/index.ts
+@@ -107,6 +107,7 @@ httpServer.addHook('onResponse', async (req: RequestWithStartTime, reply: Fastif
+ // EventBus connection
+ let eventBus: EventBus | null = null;
+ let nc: unknown = null;
++let running = true; // Global flag for graceful shutdown
+ 
+ httpServer.get('/health', async () => ({
+   status: 'healthy',
+@@ -128,7 +129,7 @@ httpServer.get('/metrics', async (request, reply) => {
+ 
+ async function connectNATS() {
+   try {
+-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
++    const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
+     
+     // Initialize EventBus
+     eventBus = new EventBus();
+@@ -143,9 +144,16 @@ async function connectNATS() {
+     
+     // Durable JetStream consumer for HRV raw data (JetStream)
+     try {
+-      const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-consumer';
++      const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-durable';
+       const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
+-      const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'athlete-ally.dlq.normalize.hrv_raw_received';
++      const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'dlq.vendor.oura.webhook';
++      const hrvAckWaitMs = parseInt(process.env.NORMALIZE_HRV_ACK_WAIT_MS || '30000'); // 30s default
++
++      // Create OTel counters for HRV metrics
++      const hrvMessagesCounter = telemetry.meter.createCounter('normalize_hrv_messages_total', {
++        description: 'Total number of HRV messages processed by normalize service',
++      });
++
+       try {
+         await jsm.consumers.add('ATHLETE_ALLY_EVENTS', {
+           durable_name: hrvDurable,
+@@ -153,61 +161,149 @@ async function connectNATS() {
+           ack_policy: 'explicit' as any, // Explicit
+           deliver_policy: 'all' as any, // All
+           max_deliver: hrvMaxDeliver,
+-          ack_wait: 60_000_000_000
++          ack_wait: hrvAckWaitMs * 1_000_000 // Convert ms to ns
+         });
++        console.log(`[normalize] HRV consumer created: ${hrvDurable}`);
+       } catch {
+         // Consumer might already exist
++        console.log(`[normalize] HRV consumer might already exist: ${hrvDurable}`);
+       }
++
+       const opts = consumerOpts();
+       opts.durable(hrvDurable);
+       opts.deliverAll();
+       opts.ackExplicit();
+       opts.manualAck();
+       opts.filterSubject(EVENT_TOPICS.HRV_RAW_RECEIVED);
+-            
++      opts.maxDeliver(hrvMaxDeliver);
++      opts.ackWait(hrvAckWaitMs);
++
+       const sub = await js.pullSubscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts);
++      console.log(`[normalize] HRV durable pull consumer: ${hrvDurable}, subject: ${EVENT_TOPICS.HRV_RAW_RECEIVED}, ackWait: ${hrvAckWaitMs}ms, maxDeliver: ${hrvMaxDeliver}`);
++
++      // Pull consumer loop using async iterator
+       (async () => {
+-        for await (const m of sub) {
+-          const msg = m as JsMsg;
+-          const hdrs = (() => { if (!msg.headers) return undefined as Record<string,string> | undefined; const out: Record<string,string> = {}; for (const [k, vals] of (msg.headers as unknown as Iterable<[string, string[]]>)) { out[k] = Array.isArray(vals) && vals.length ? vals[0] : ''; } return out; })();
+-          await withExtractedContext(hdrs || {}, async () => {
+-            await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
+-              const spanObj = span as { setStatus: (status: { code: number; message?: string }) => void; end: () => void; recordException: (err: unknown) => void };
+-              try {
+-                const text = msg.string();
+-                const eventData = JSON.parse(text);
+-                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
+-                if (!validation.valid) {
++        console.log(`[normalize] Starting HRV message processing loop...`);
++        try {
++          while (running) {
++            // Explicitly pull messages (pull consumers require explicit pull requests)
++            sub.pull({ batch: 1, expires: 5000 }); // Pull 1 message, 5s timeout
++
++            // Wait for one message using iterator
++            const iterator = sub[Symbol.asyncIterator]();
++            const result = await iterator.next();
++
++            if (result.done ||!running) break;
++
++            const m = result.value;
++            console.log(`[normalize] Processing HRV message: seq=${m.seq}, subject=${m.subject}`);
++            const msg = m as JsMsg;
++            const hdrs = (() => { if (!msg.headers) return undefined as Record<string,string> | undefined; const out: Record<string,string> = {}; for (const [k, vals] of (msg.headers as unknown as Iterable<[string, string[]]>)) { out[k] = Array.isArray(vals) && vals.length ? vals[0] : ''; } return out; })();
++
++            await withExtractedContext(hdrs || {}, async () => {
++              await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: unknown) => {
++                const spanObj = span as { setAttribute: (key: string, value: string | number) => void; setStatus: (status: { code: number; message?: string }) => void; end: () => void; recordException: (err: unknown) => void };
++
++                // Add JetStream metadata attributes
++                spanObj.setAttribute('messaging.system', 'nats');
++                spanObj.setAttribute('messaging.destination', EVENT_TOPICS.HRV_RAW_RECEIVED);
++                spanObj.setAttribute('messaging.operation', 'process');
++                const info = msg.info;
++                if (info.stream) spanObj.setAttribute('messaging.nats.stream', info.stream);
++                if (typeof info.streamSequence === 'number') spanObj.setAttribute('messaging.nats.stream_sequence', info.streamSequence);
++                if (typeof info.deliverySequence === 'number') spanObj.setAttribute('messaging.nats.delivery_sequence', info.deliverySequence);
++                if (typeof info.deliveryCount === 'number') spanObj.setAttribute('messaging.redelivery_count', Math.max(0, info.deliveryCount - 1));
++
++                try {
++                  const text = msg.string();
++                  console.log(`[normalize] HRV message text:`, text);
++                  const eventData = JSON.parse(text);
++                  console.log(`[normalize] HRV event data:`, eventData);
++
++                  // Validate event schema
++                  const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
++                  if (!validation.valid) {
++                    console.log(`[normalize] HRV validation failed:`, validation.errors);
++                    hrvMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
++
++                    // Schema validation failure is non-retryable - send to DLQ
++                    try {
++                      await js.publish(hrvDlq, msg.data as any, { headers: msg.headers });
++                      console.log(`[normalize] Sent schema-invalid message to DLQ: ${hrvDlq}`);
++                    } catch (dlqErr) {
++                      console.error(`[normalize] Failed to publish to DLQ:`, dlqErr);
++                    }
++                    msg.term(); // Terminate - non-retryable
++                    spanObj.setStatus({ code: 2, message: 'schema validation failed' });
++                    spanObj.end();
++                    return;
++                  }
++
++                  console.log(`[normalize] HRV validation passed, processing data...`);
++                  await processHrvData(eventData.payload);
++                  console.log(`[normalize] HRV data processed successfully`);
++                  msg.ack();
++                  hrvMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
++                  spanObj.setStatus({ code: 1 });
++                } catch (err: unknown) {
+                   const deliveries = (msg.info && typeof msg.info.deliveryCount === 'number') ? msg.info.deliveryCount : (msg.redelivered ? 2 : 1);
+                   const attempt = deliveries;
++
++                  // Determine if error is retryable
++                  const isRetryable = (err: unknown): boolean => {
++                    const errMsg = err instanceof Error ? err.message : String(err);
++                    // Database connection errors, timeouts, etc. are retryable
++                    return errMsg.includes('ECONNREFUSED') ||
++                           errMsg.includes('timeout') ||
++                           errMsg.includes('ETIMEDOUT') ||
++                           errMsg.includes('Connection') ||
++                           errMsg.includes('ENOTFOUND');
++                  };
++
+                   if (attempt >= hrvMaxDeliver) {
+-                    try { await js.publish(hrvDlq, msg.data as any, { headers: msg.headers }); } catch {}
++                    console.error('[normalize] maxDeliver reached, sending to DLQ', { dlqSubject: hrvDlq, attempt });
++                    try {
++                      await js.publish(hrvDlq, msg.data as any, { headers: msg.headers });
++                    } catch (dlqErr) {
++                      console.error('[normalize] Failed to publish to DLQ:', dlqErr);
++                    }
+                     msg.term();
+-                  } else { msg.nak(); }
+-                  spanObj.setStatus({ code: 2, message: 'schema validation failed' });
++                    hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
++                  } else if (isRetryable(err)) {
++                    console.warn('[normalize] Retryable error, NAK with delay', { attempt, maxDeliver: hrvMaxDeliver, error: err instanceof Error ? err.message : String(err) });
++                    msg.nak(5000); // 5s delay for retry
++                    hrvMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
++                  } else {
++                    console.error('[normalize] Non-retryable error, sending to DLQ', { dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) });
++                    try {
++                      await js.publish(hrvDlq, msg.data as any, { headers: msg.headers });
++                    } catch (dlqErr) {
++                      console.error('[normalize] Failed to publish to DLQ:', dlqErr);
++                    }
++                    msg.term();
++                    hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
++                  }
++                  spanObj.recordException(err);
++                  spanObj.setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
++                } finally {
+                   spanObj.end();
+-                  return;
+                 }
+-                await processHrvData(eventData.payload);
+-                msg.ack();
+-                spanObj.setStatus({ code: 1 });
+-              } catch (err: unknown) {
+-                const deliveries = (msg.info && typeof msg.info.deliveryCount === 'number') ? msg.info.deliveryCount : (msg.redelivered ? 2 : 1);
+-                  const attempt = deliveries;
+-                if (attempt >= hrvMaxDeliver) {
+-                  try { await js.publish(hrvDlq, msg.data as any, { headers: msg.headers }); } catch {}
+-                  msg.term();
+-                } else { msg.nak(); }
+-                spanObj.recordException(err);
+-                spanObj.setStatus({ code: 2, message: err instanceof Error ? err.message : 'Unknown error' });
+-              } finally { spanObj.end(); }
++              });
+             });
+-          });
++          }
++        } catch (err) {
++          if (!running) {
++            console.log('[normalize] HRV consumer loop stopped due to shutdown');
++          } else {
++            console.error('[normalize] HRV consumer loop error:', err);
++          }
+         }
++        console.log('[normalize] HRV message processing loop exited');
+       })();
+     } catch (e) {
+       // eslint-disable-next-line no-console
+       console.error('Failed to initialize durable HRV consumer:', e);
++      throw e; // Re-throw to see the error
+     }
+ 
+     // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
+@@ -374,7 +470,7 @@ async function processHrvData(data: { userId: string; date: string; rMSSD: numbe
+       where: {
+         userId_date: {
+           userId: normalized.userId,
+-          date: normalized.date.toISOString().split('T')[0]
++          date: normalized.date // Use Date object directly for Prisma @db.Date type
+         }
+       },
+       update: normalized,
+@@ -451,7 +547,7 @@ async function processSleepData(data: { userId: string; date: string; totalSleep
+ const start = async () => {
+   try {
+     await connectNATS();
+-    const port = parseInt(process.env.PORT || '4102');
++    const port = parseInt(process.env.PORT || '4112');
+     await httpServer.listen({ port, host: '0.0.0.0' });
+     // eslint-disable-next-line no-console
+     console.log('Normalize service listening on port ' + port);
+@@ -462,6 +558,37 @@ const start = async () => {
+   }
+ };
+ 
++// Graceful shutdown handler
++const shutdown = async (signal: string) => {
++  console.log(`[normalize] Received ${signal}, shutting down gracefully...`);
++  running = false; // Stop fetch loops
++
++  try {
++    // Give consumers time to finish in-flight messages
++    await new Promise(resolve => setTimeout(resolve, 2000));
++
++    // Close connections
++    if (eventBus) {
++      await eventBus.close();
++      console.log('[normalize] EventBus disconnected');
++    }
++
++    await prisma.$disconnect();
++    console.log('[normalize] Prisma disconnected');
++
++    await httpServer.close();
++    console.log('[normalize] HTTP server closed');
++
++    process.exit(0);
++  } catch (err) {
++    console.error('[normalize] Error during shutdown:', err);
++    process.exit(1);
++  }
++};
++
++process.on('SIGTERM', () => shutdown('SIGTERM'));
++process.on('SIGINT', () => shutdown('SIGINT'));
++
+ start();
+ 
+ 

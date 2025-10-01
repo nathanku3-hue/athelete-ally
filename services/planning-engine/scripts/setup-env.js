@@ -19,7 +19,7 @@ REDIS_URL=redis://localhost:6379
 OPENAI_API_KEY=your_openai_api_key_here
 
 # NATS配置
-NATS_URL=nats://localhost:4222
+NATS_URL=nats://localhost:4223
 
 # 服务配置
 NODE_ENV=development
@@ -70,7 +70,7 @@ try {
   console.log('1. 数据库: 确保PostgreSQL运行在localhost:5432');
   console.log('2. Redis: 确保Redis运行在localhost:6379');
   console.log('3. OpenAI: 需要有效的API密钥');
-  console.log('4. NATS: 确保NATS运行在localhost:4222');
+  console.log('4. NATS: 确保NATS运行在localhost:4223');
   
 } catch (error) {
   console.error('❌ 创建.env文件失败:', error.message);

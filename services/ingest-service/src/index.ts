@@ -36,7 +36,7 @@ let natsVendor: NatsConnection | null = null;
 registerOuraWebhookRoutes(fastify, { publish: async (subject, data) => {
   try {
     if (!natsVendor) {
-      const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+      const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
       natsVendor = await connectNats({ servers: natsUrl });
     }
     await natsVendor.publish(subject, data);
@@ -53,7 +53,7 @@ let eventBus: EventBus | null = null;
 
 async function connectEventBus() {
   try {
-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+    const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
     eventBus = new EventBus();
     await eventBus.connect(natsUrl);
     console.log('Connected to EventBus');
