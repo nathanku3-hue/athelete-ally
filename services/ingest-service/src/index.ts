@@ -6,7 +6,7 @@ type FastifyReply = any;
 import { registerOuraWebhookRoutes } from './oura';
 import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';
-import { EventBus } from '@athlete-ally/event-bus';
+import { EventBus, getStreamMode, getStreamCandidates } from '@athlete-ally/event-bus';
 import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
 import '@athlete-ally/shared/fastify-augment';
 import { z } from 'zod';
@@ -54,8 +54,16 @@ let eventBus: EventBus | null = null;
 async function connectEventBus() {
   try {
     const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
+    
+    // Get stream mode and candidates from event-bus config
+    const mode = getStreamMode();
+    const candidates = getStreamCandidates();
+    const manageStreams = process.env.FEATURE_SERVICE_MANAGES_STREAMS === 'true';
+
+    console.log(`[ingest] Startup config: { mode: "${mode}", candidates: [${candidates.join(', ')}], manageStreams: ${manageStreams} }`);
+
     eventBus = new EventBus();
-    await eventBus.connect(natsUrl);
+    await eventBus.connect(natsUrl, { manageStreams });
     console.log('Connected to EventBus');
   } catch (err) {
     console.error('Failed to connect to EventBus:', err);

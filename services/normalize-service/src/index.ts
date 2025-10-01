@@ -1,7 +1,7 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
-import { EventBus } from '@athlete-ally/event-bus';
+import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 import { SpanStatusCode } from '@opentelemetry/api';
@@ -97,9 +97,11 @@ async function connectNATS() {
         description: 'Total number of HRV messages processed by normalize service',
       });
 
-      // Stream binding order: AA_CORE_HOT first, then ATHLETE_ALLY_EVENTS
-      const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
+      // Stream binding order: Use event-bus config to determine candidates
+      const streamCandidates = getStreamCandidates();
       let actualStreamName = '';
+
+      console.log(`[normalize] Stream candidates: [${streamCandidates.join(', ')}]`);
 
       // Consumer creation strategy:
       // - Default: Create consumers if FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false'
@@ -120,16 +122,18 @@ async function connectNATS() {
             });
             httpServer.log.info(`[normalize] HRV consumer created on ${streamName}: ${hrvDurable}`);
             actualStreamName = streamName;
+            console.log(`[normalize] Using stream: ${actualStreamName}`);
             break; // Successfully created on this stream
           } catch (e) {
             // Consumer might already exist or stream not available
             const error = e as Error;
             httpServer.log.info(`[normalize] Attempted to create HRV consumer on ${streamName}: ${hrvDurable}. Error: ${error.message}. Trying next candidate.`);
             if (error.message.includes('consumer already exists')) {
-              // Consumer already exists, try to bind to it
-              actualStreamName = streamName;
-              httpServer.log.info(`[normalize] Consumer ${hrvDurable} already exists on ${streamName}, will bind to existing consumer.`);
-              break;
+                  // Consumer already exists, try to bind to it
+                  actualStreamName = streamName;
+                  console.log(`[normalize] Using stream: ${actualStreamName} (existing consumer)`);
+                  httpServer.log.info(`[normalize] Consumer ${hrvDurable} already exists on ${streamName}, will bind to existing consumer.`);
+                  break;
             }
           }
         }
@@ -137,11 +141,12 @@ async function connectNATS() {
         // Default: try to bind to existing consumers
         for (const streamName of streamCandidates) {
           try {
-            // Try to get consumer info to verify it exists
-            await jsm.consumers.info(streamName, hrvDurable);
-            actualStreamName = streamName;
-            httpServer.log.info(`[normalize] Found existing HRV consumer on ${streamName}: ${hrvDurable}`);
-            break;
+                  // Try to get consumer info to verify it exists
+                  await jsm.consumers.info(streamName, hrvDurable);
+                  actualStreamName = streamName;
+                  console.log(`[normalize] Using stream: ${actualStreamName} (found existing consumer)`);
+                  httpServer.log.info(`[normalize] Found existing HRV consumer on ${streamName}: ${hrvDurable}`);
+                  break;
           } catch (e) {
             httpServer.log.info(`[normalize] Consumer ${hrvDurable} not found on ${streamName}. Trying next candidate.`);
           }
@@ -295,6 +300,7 @@ async function connectNATS() {
             } catch (err: unknown) {
               if (!running) break;
               httpServer.log.error(`[normalize] Pull/process error: ${JSON.stringify(err)}`);
+              hrvMessagesCounter.add(1, { result: 'processing_error', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
@@ -459,10 +465,10 @@ async function connectNATS() {
   }
 }
 
-async function processHrvData(payload: { userId: string; date: string; rmssd: number }) {
+async function processHrvData(payload: { userId: string; date: string; rMSSD: number }) {
   try {
-    const { userId, date, rmssd } = payload;
-    
+    const { userId, date, rMSSD: rmssd } = payload;
+
     if (!userId || !date || typeof rmssd !== 'number') {
       throw new Error('Invalid HRV payload: missing required fields');
     }
