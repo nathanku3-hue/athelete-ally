@@ -83,8 +83,29 @@ jobs:
           
       - name: Generate Prisma clients
         run: |
-          cd services/normalize-service && npx prisma generate
-          cd services/ingest-service && npx prisma generate || true
+          echo "🔧 Generating Prisma clients..."
+          cd services/normalize-service
+          echo "📁 Current directory: $(pwd)"
+          echo "📄 Prisma schema exists: $(ls -la prisma/schema.prisma)"
+          npx prisma generate
+          echo "✅ Prisma client generated successfully"
+          ls -la prisma/generated/client/ || echo "Generated client directory not found"
+          
+          cd ../ingest-service
+          echo "📁 Current directory: $(pwd)"
+          echo "📄 Prisma schema exists: $(ls -la prisma/schema.prisma || echo 'No schema found')"
+          npx prisma generate || echo "⚠️ Ingest service Prisma generation failed (non-critical)"
+          
+      - name: Verify Prisma client availability
+        run: |
+          echo "🔍 Verifying Prisma client availability..."
+          cd services/normalize-service
+          echo "📁 Checking generated client:"
+          ls -la prisma/generated/client/ || echo "❌ Generated client not found"
+          echo "📄 Checking client files:"
+          ls -la prisma/generated/client/index.js || echo "❌ Client index.js not found"
+          echo "🧪 Testing Prisma client import:"
+          node -e "const { PrismaClient } = require('./prisma/generated/client'); console.log('✅ Prisma client can be imported successfully');" || echo "❌ Prisma client import failed"
           
       - name: Setup database schema
         env:
