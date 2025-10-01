@@ -101,8 +101,8 @@ async function connectNATS() {
       const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
       let actualStreamName = '';
 
-      // Only create consumers if explicitly enabled
-      if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS === 'true') {
+      // Only create consumers if explicitly enabled (default to true for development)
+      if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false') {
         for (const streamName of streamCandidates) {
           try {
             await jsm.consumers.add(streamName, {
@@ -138,7 +138,7 @@ async function connectNATS() {
       }
 
       if (!actualStreamName) {
-        throw new Error('Failed to find HRV consumer on any available stream. Ensure EventBus has created the consumer or set FEATURE_SERVICE_MANAGES_CONSUMERS=true.');
+        throw new Error('Failed to find HRV consumer on any available stream. Ensure EventBus has created the consumer or set FEATURE_SERVICE_MANAGES_CONSUMERS=false to disable consumer creation.');
       }
 
       // Bind to existing durable consumer
