@@ -2,7 +2,7 @@ import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
-import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
+import { EVENT_TOPICS, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { getMetricsRegistry } from '@athlete-ally/shared';
@@ -67,6 +67,14 @@ const register = getMetricsRegistry();
 const promHrvMessagesCounter = new Counter({
   name: 'normalize_hrv_messages_total',
   help: 'Total number of HRV messages processed by normalize service',
+  labelNames: ['result', 'subject', 'stream', 'durable'],
+  registers: [register]
+});
+
+// Create prom-client Counter for Sleep messages with full labels
+const promSleepMessagesCounter = new Counter({
+  name: 'normalize_sleep_messages_total',
+  help: 'Total number of Sleep messages processed by normalize service',
   labelNames: ['result', 'subject', 'stream', 'durable'],
   registers: [register]
 });
@@ -540,6 +548,72 @@ async function processHrvData(payload: { userId: string; date: string; rMSSD?: n
     httpServer.log.info(`[normalize] HRV data upserted and event published for date ${date}`);
   } catch (error) {
     httpServer.log.error(`[normalize] Error processing HRV data: ${JSON.stringify(error)}`);
+    throw error;
+  }
+}
+
+async function processSleepData(payload: { userId: string; date: string; durationMinutes: number; capturedAt?: string; raw?: Record<string, unknown> }) {
+  try {
+    const { userId, date, durationMinutes, capturedAt, raw } = payload;
+
+    if (!userId || !date || typeof durationMinutes !== 'number') {
+      throw new Error('Invalid Sleep payload: missing required fields');
+    }
+
+    // Determine vendor from raw data if available
+    const vendor = (raw && typeof raw === 'object' && 'source' in raw && typeof raw.source === 'string')
+      ? raw.source
+      : 'unknown';
+
+    // Extract qualityScore if available in raw data
+    const qualityScore = (raw && typeof raw === 'object' && 'qualityScore' in raw && typeof raw.qualityScore === 'number')
+      ? Math.min(100, Math.max(0, raw.qualityScore))
+      : null;
+
+    // Upsert Sleep data
+    const row = await prisma.sleepData.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date: new Date(date)
+        }
+      },
+      update: {
+        durationMinutes,
+        qualityScore,
+        vendor,
+        capturedAt: capturedAt ? new Date(capturedAt) : new Date(),
+        updatedAt: new Date()
+      },
+      create: {
+        userId,
+        date: new Date(date),
+        durationMinutes,
+        qualityScore,
+        vendor,
+        capturedAt: capturedAt ? new Date(capturedAt) : new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    });
+
+    // Publish normalized event
+    const normalizedEvent: SleepNormalizedStoredEvent = {
+      record: {
+        userId: row.userId,
+        date: typeof row.date === 'string' ? row.date : row.date.toISOString().split('T')[0],
+        durationMinutes: row.durationMinutes,
+        qualityScore: row.qualityScore ?? undefined,
+        vendor: (row.vendor === 'oura' || row.vendor === 'whoop') ? row.vendor : 'unknown',
+        capturedAt: row.capturedAt.toISOString()
+      }
+    };
+
+    await eventBus.publishSleepNormalizedStored(normalizedEvent);
+    httpServer.log.info( `[normalize] published ${EVENT_TOPICS.SLEEP_NORMALIZED_STORED} userId=${row.userId} date=${typeof row.date ===  'string' ? row.date : row.date.toISOString().split('T')[0]} `); 
+    httpServer.log.info(`[normalize] Sleep data upserted and event published for date ${date}`);
+  } catch (error) {
+    httpServer.log.error(`[normalize] Error processing Sleep data: ${JSON.stringify(error)}`);
     throw error;
   }
 }
