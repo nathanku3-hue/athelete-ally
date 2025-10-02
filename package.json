@@ -83,7 +83,7 @@
     "validate:schemas": "node scripts/validate-schemas.js",
     "dev:compose": "docker compose up --build",
     "dev:compose:obs": "docker compose --profile obs up --build",
-    "lint:json": "node scripts/json-lint.js monitoring/grafana/normalize-dashboard-sleep.json docs/examples/soak_sleep_summary.example.json",
+    "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
     "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
   },
   "dependencies": {
