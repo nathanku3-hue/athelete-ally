@@ -5,7 +5,14 @@ groups:
       - alert: SleepDLQRateNonZero
         expr: rate(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) > 0
         for: 5m
-        labels:\n          severity: warning\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
+        labels:
+          severity: warning
+          team: platform
+          service: normalize-service
+          env: unknown
+          stream: AA_CORE_HOT
+          durable: normalize-sleep-durable
+          subject: athlete-ally.sleep.raw-received
         annotations:
           summary: "Sleep pipeline DLQ rate > 0"
           description: "DLQ messages observed in the last 5m. Investigate schema or processing errors."
@@ -14,7 +21,14 @@ groups:
       - alert: SleepConsumerLagHigh
         expr: nats_consumer_num_pending{stream="AA_CORE_HOT",consumer="normalize-sleep-durable"} > 100
         for: 5m
-        labels:\n          severity: warning\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
+        labels:
+          severity: warning
+          team: platform
+          service: normalize-service
+          env: unknown
+          stream: AA_CORE_HOT
+          durable: normalize-sleep-durable
+          subject: athlete-ally.sleep.raw-received
         annotations:
           summary: "Sleep consumer lag high"
           description: "Num pending > 100 for 5m. If exporter missing, see TODO in runbook and use Soak script / NATS CLI."
@@ -23,7 +37,14 @@ groups:
       - alert: SleepNoSuccesses5m
         expr: increase(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) == 0
         for: 5m
-        labels:\n          severity: critical\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
+        labels:
+          severity: critical
+          team: platform
+          service: normalize-service
+          env: unknown
+          stream: AA_CORE_HOT
+          durable: normalize-sleep-durable
+          subject: athlete-ally.sleep.raw-received
         annotations:
           summary: "Sleep pipeline produced no successes for 5m"
           description: "No successful sleep normalizations in the last 5m. Check consumers, NATS, and DB connectivity."
