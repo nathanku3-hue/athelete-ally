@@ -7,7 +7,7 @@ import { registerOuraWebhookRoutes } from './oura';
 import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';
 import { EventBus, getStreamMode } from '@athlete-ally/event-bus';
-import { HRVRawReceivedEvent } from '@athlete-ally/contracts';
+import { HRVRawReceivedEvent, SleepRawReceivedEvent } from '@athlete-ally/contracts';
 import '@athlete-ally/shared/fastify-augment';
 import { z } from 'zod';
 import { getMetricsRegistry } from '@athlete-ally/shared';
@@ -17,6 +17,15 @@ const HRVPayloadSchema = z.object({
   userId: z.string().min(1),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   rmssd: z.number().positive('RMSSD must be a positive number'),
+  capturedAt: z.string().optional(),
+  raw: z.record(z.unknown()).optional()
+});
+
+// Sleep payload validation schema
+const SleepPayloadSchema = z.object({
+  userId: z.string().min(1),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  durationMinutes: z.number().nonnegative('Duration must be non-negative'),
   capturedAt: z.string().optional(),
   raw: z.record(z.unknown()).optional()
 });
@@ -130,20 +139,36 @@ const hrvHandler = async (request: FastifyRequest, reply: FastifyReply) => {
 // Sleep ingestion endpoint
 const sleepHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
-    // TODO: Add proper validation and event publishing for sleep data
-    const data = request.body as any;
-    
-    // For now, keep raw NATS publishing for sleep (will be updated in future PR)
-    // This maintains compatibility while we focus on HRV typed events
-    if (eventBus) {
-      try {
-        const nc = eventBus.getNatsConnection();
-        await nc.publish('sleep.raw-received', new TextEncoder().encode(JSON.stringify(data)));
-      } catch (err) {
-        fastify.log.warn({ err }, 'EventBus not connected, skipping sleep publish');
-      }
+    // Validate payload with Zod schema
+    const validationResult = SleepPayloadSchema.safeParse(request.body);
+
+    if (!validationResult.success) {
+      reply.code(400).send({
+        error: 'Invalid payload',
+        details: validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+      });
+      return;
     }
-    
+
+    const data = validationResult.data;
+
+    // Create typed Sleep event
+    const sleepEvent: SleepRawReceivedEvent = {
+      eventId: `sleep-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      payload: {
+        userId: data.userId,
+        date: data.date, // 'YYYY-MM-DD'
+        durationMinutes: data.durationMinutes,
+        capturedAt: data.capturedAt,
+        raw: data.raw
+      }
+    };
+
+    // Publish typed event via EventBus
+    if (eventBus) {
+      await eventBus.publishSleepRawReceived(sleepEvent);
+    }
+
     return { status: 'received', timestamp: new Date().toISOString() };
   } catch (error) {
     fastify.log.error(error);

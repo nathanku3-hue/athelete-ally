@@ -5,6 +5,8 @@ import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 import { SpanStatusCode } from '@opentelemetry/api';
+import { getMetricsRegistry } from '@athlete-ally/shared';
+import { Counter } from 'prom-client';
 
 // Type definitions for better type safety
 interface TelemetrySpan {
@@ -58,6 +60,17 @@ const BATCH_SIZE = 10;
 const EXPIRES_MS = 5000;
 const IDLE_BACKOFF_MS = 50;
 
+// Get shared metrics registry (ensures default metrics registered only once)
+const register = getMetricsRegistry();
+
+// Create prom-client Counter for HRV messages with full labels
+const promHrvMessagesCounter = new Counter({
+  name: 'normalize_hrv_messages_total',
+  help: 'Total number of HRV messages processed by normalize service',
+  labelNames: ['result', 'subject', 'stream', 'durable'],
+  registers: [register]
+});
+
 // Bootstrap telemetry early (traces + Prometheus exporter)
 const telemetry = bootstrapTelemetry({
   serviceName: 'normalize-service',
@@ -91,6 +104,10 @@ async function connectNATS() {
       const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
       const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'dlq.normalize.hrv.raw-received';
       const hrvAckWaitMs = parseInt(process.env.NORMALIZE_HRV_ACK_WAIT_MS || '60000'); // 60s default
+
+      // Log HRV consumer configuration for debugging
+      console.log(`[normalize-hrv] DLQ subject prefix: ${hrvDlq}`);
+      console.log(`[normalize-hrv] Consumer: ${hrvDurable}, maxDeliver: ${hrvMaxDeliver}, ackWait: ${hrvAckWaitMs}ms`);
 
       // Create OTel counters for HRV metrics
       const hrvMessagesCounter = telemetry.meter.createCounter('normalize_hrv_messages_total', {
@@ -205,6 +222,7 @@ async function connectNATS() {
                 if (!validation.valid) {
                 httpServer.log.warn(`[normalize] HRV validation failed: ${JSON.stringify(validation.errors)}`);
                 hrvMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
+                promHrvMessagesCounter.inc({ result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
 
                 // Schema validation failure is non-retryable - send to DLQ
                 try {
@@ -224,6 +242,7 @@ async function connectNATS() {
               httpServer.log.info(`[normalize] HRV data processed successfully`);
               m.ack();
                     hrvMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
+                    promHrvMessagesCounter.inc({ result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               span.setStatus({ code: SpanStatusCode.OK });
               } catch (err: unknown) {
               const deliveries = info?.deliveryCount || 1;
@@ -248,10 +267,12 @@ async function connectNATS() {
                 }
                 m.term();
                 hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
+                promHrvMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               } else if (isRetryable(err)) {
                 httpServer.log.warn(`[normalize] Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver: hrvMaxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
                 m.nak(5000); // 5s delay for retry
                 hrvMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
+                promHrvMessagesCounter.inc({ result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               } else {
                 httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) })}`);
                 try {
@@ -261,6 +282,7 @@ async function connectNATS() {
                 }
                 m.term();
                 hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
+                promHrvMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
               }
               span.recordException(err);
               span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : 'Unknown error' });
@@ -552,8 +574,8 @@ httpServer.get('/health', async (request: FastifyRequest, reply: FastifyReply) =
 
 // Metrics endpoint
 httpServer.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
-  reply.type('text/plain');
-  reply.send('# Metrics endpoint handled by telemetry bootstrap');
+  reply.type(register.contentType);
+  return register.metrics();
 });
 
 async function start() {
