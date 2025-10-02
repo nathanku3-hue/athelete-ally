@@ -11,10 +11,16 @@
 
 const { connect, consumerOpts } = require('nats');
 
+// Import the new stream candidates function
+async function getStreamCandidates() {
+  const { getStreamCandidates } = await import('../../packages/event-bus/dist/index.js');
+  return getStreamCandidates();
+}
+
 async function testStreamBinding() {
   const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
   const eventStreamMode = process.env.EVENT_STREAM_MODE || 'single';
-  const streamCandidates = (process.env.AA_STREAM_CANDIDATES || 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS').split(',');
+  const streamCandidates = await getStreamCandidates();
   const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-durable';
   const filterSubject = 'athlete-ally.hrv.raw-received';
   
