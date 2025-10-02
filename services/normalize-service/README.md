@@ -310,3 +310,42 @@ See [Sleep Troubleshooting Runbook](../../docs/runbook/sleep-troubleshooting.md#
 - [Ingest Service README](../ingest-service/README.md)
 - [Sleep Troubleshooting Runbook](../../docs/runbook/sleep-troubleshooting.md)
 - [Event Bus Package](../../packages/event-bus/README.md)
+
+---
+
+## Observability: Sleep Pipeline
+
+- Dashboard: monitoring/grafana/normalize-dashboard-sleep.json (import into Grafana; select DS_PROMETHEUS).
+- Variables: job (default normalize), stream (AA_CORE_HOT), durable (normalize-sleep-durable).
+- Metrics:
+  - normalize_sleep_messages_total{result,subject,stream,durable}
+  - event_bus_event_processing_duration_seconds_bucket{topic="sleep_raw_received", operation="consume|publish"}
+
+### Tracing Verification (W3C traceparent)
+- Ensure event-bus publishes inject headers (traceparent/tracestate) via OpenTelemetry.
+- Steps:
+  1) Send a Sleep payload (non-PII):
+     - curl -X POST http://localhost:4101/ingest/sleep -H "content-type: application/json" -d '{"eventId":"e1","payload":{"userId":"smoke-user","date":"2025-10-01","durationMinutes":420}}'
+  2) Observe normalize logs for received message and processing span; headers visible at receive if logged.
+  3) Temporary subscriber (Node) to inspect headers live:
+```ts
+import { connect, headers } from 'nats';
+const nc = await connect({ servers: process.env.NATS_URL || 'nats://localhost:4223' });
+const js = nc.jetstream();
+const sub = await js.pullSubscribe('athlete-ally.sleep.raw-received', { durable: 'tmp-inspect' } as any);
+const msgs = await (sub as any).fetch({ max: 1, expires: 1000 });
+for (const m of msgs) { console.log('headers:', m.headers?.toString?.()); m.ack(); }
+```
+
+### Using The Dashboard
+- Sleep Messages by Result: stacked counts (success/retry/dlq). ZH: 結果分佈堆疊。
+- DLQ Trend: result=dlq rate. ZH: DLQ 趨勢。
+- Processing Duration p95/p99: prefer consume; publish is optional. ZH: 延遲分位。
+- Consumer Lag: follow text panel instructions (NATS CLI primary; Soak script fallback). ZH: 延遲以 CLI 或 Soak 腳本檢查。
+
+### Alerts
+- File: monitoring/alert_rules.yml (group sleep-pipeline)
+- WARN: DLQ rate > 0 for 5m
+- WARN: Lag > 100 for 5m (placeholder if exporter missing)
+- CRIT: No successes in 5m
+- Runbook: docs/runbook/sleep-troubleshooting.md
