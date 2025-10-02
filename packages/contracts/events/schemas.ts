@@ -148,6 +148,43 @@ export const HRVNormalizedStoredSchema = {
   }
 } as const;
 
+export const SleepRawReceivedSchema = {
+  type: 'object',
+  required: ['payload'],
+  properties: {
+    payload: {
+      type: 'object',
+      required: ['userId', 'date', 'durationMinutes'],
+      properties: {
+        userId: { type: 'string', minLength: 1 },
+        date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+        durationMinutes: { type: 'number', minimum: 0 },
+        capturedAt: { type: 'string', format: 'date-time' },
+        raw: { type: 'object' }
+      }
+    }
+  }
+} as const;
+
+export const SleepNormalizedStoredSchema = {
+  type: 'object',
+  required: ['record'],
+  properties: {
+    record: {
+      type: 'object',
+      required: ['userId', 'date', 'durationMinutes', 'vendor', 'capturedAt'],
+      properties: {
+        userId: { type: 'string', minLength: 1 },
+        date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
+        durationMinutes: { type: 'number', minimum: 0 },
+        qualityScore: { type: 'number', minimum: 0, maximum: 100 },
+        vendor: { type: 'string', enum: ['oura', 'whoop', 'unknown'] },
+        capturedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  }
+} as const;
+
 // Schema registry for easy access
 export const EventSchemas = {
   'onboarding_completed': OnboardingCompletedSchema,
@@ -155,7 +192,9 @@ export const EventSchemas = {
   'plan_generated': PlanGeneratedSchema,
   'plan_generation_failed': PlanGenerationFailedSchema,
   'hrv_raw_received': HRVRawReceivedSchema,
-  'hrv_normalized_stored': HRVNormalizedStoredSchema
+  'hrv_normalized_stored': HRVNormalizedStoredSchema,
+  'sleep_raw_received': SleepRawReceivedSchema,
+  'sleep_normalized_stored': SleepNormalizedStoredSchema
 } as const;
 
 // Type for schema keys
