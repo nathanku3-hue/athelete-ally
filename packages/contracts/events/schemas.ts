@@ -199,7 +199,7 @@ export const ReadinessComputedSchema = {
       properties: {
         userId: { type: 'string', minLength: 1 },
         // UTC day in compact form YYYYMMDD
-        date: { type: 'string', pattern: '^\d{8}$' },
+        date: { type: 'string', pattern: '^[0-9]{8}$' },
         score: { type: 'number', minimum: 0, maximum: 100 },
         incomplete: { type: 'boolean' },
         components: {
@@ -226,7 +226,7 @@ export const ReadinessStoredSchema = {
       properties: {
         userId: { type: 'string', minLength: 1 },
         // UTC day in compact form YYYYMMDD
-        date: { type: 'string', pattern: '^\d{8}$' },
+        date: { type: 'string', pattern: '^[0-9]{8}$' },
         score: { type: 'number', minimum: 0, maximum: 100 },
         incomplete: { type: 'boolean' },
         components: {

@@ -349,3 +349,8 @@ for (const m of msgs) { console.log('headers:', m.headers?.toString?.()); m.ack(
 - WARN: Lag > 100 for 5m (placeholder if exporter missing)
 - CRIT: No successes in 5m
 - Runbook: docs/runbook/sleep-troubleshooting.md
+
+### Dashboard Variables and No-Data Behavior
+- Variables: job (default normalize), stream (AA_CORE_HOT), durable (normalize-sleep-durable), subject (default athlete-ally.sleep.raw-received).
+- If panels show "No data": confirm service is running, Prometheus is scraping, and variable labels match your env.
+- Import path: monitoring/grafana/dashboards/normalize-sleep.json (UID: aa-sleep-norm).
