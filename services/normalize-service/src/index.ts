@@ -346,6 +346,238 @@ async function connectNATS() {
       throw e;
     }
 
+    // Durable JetStream consumer for Sleep raw data
+    try {
+      const sleepDurable = process.env.NORMALIZE_SLEEP_DURABLE || 'normalize-sleep-durable';
+      const sleepMaxDeliver = parseInt(process.env.NORMALIZE_SLEEP_MAX_DELIVER || '5');
+      const sleepDlq = process.env.NORMALIZE_SLEEP_DLQ_SUBJECT || 'dlq.normalize.sleep.raw-received';
+      const sleepAckWaitMs = parseInt(process.env.NORMALIZE_SLEEP_ACK_WAIT_MS || '60000'); // 60s default
+
+      // Log Sleep consumer configuration for debugging
+      console.log(`[normalize-sleep] DLQ subject prefix: ${sleepDlq}`);
+      console.log(`[normalize-sleep] Consumer: ${sleepDurable}, maxDeliver: ${sleepMaxDeliver}, ackWait: ${sleepAckWaitMs}ms`);
+
+      // Create OTel counters for Sleep metrics
+      const sleepMessagesCounter = telemetry.meter.createCounter('normalize_sleep_messages_total', {
+        description: 'Total number of Sleep messages processed by normalize service',
+      });
+
+      // Stream binding order: Use getStreamCandidates() for mode-aware stream selection
+      const streamCandidates = getStreamCandidates();
+      let actualStreamName = '';
+
+      console.log(`[normalize-service] Sleep stream candidates: ${streamCandidates.join(', ')}`);
+
+      // Consumer creation strategy (same as HRV)
+      if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false') {
+        for (const streamName of streamCandidates) {
+          try {
+            await jsm.consumers.add(streamName, {
+              durable_name: sleepDurable,
+              filter_subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED,
+              ack_policy: 'explicit' as any,
+              deliver_policy: 'all' as any,
+              max_deliver: sleepMaxDeliver,
+              ack_wait: sleepAckWaitMs * 1_000_000, // Convert ms to ns
+              max_ack_pending: 1000
+            });
+            httpServer.log.info(`[normalize] Sleep consumer created on ${streamName}: ${sleepDurable}`);
+            actualStreamName = streamName;
+            break;
+          } catch (e) {
+            const error = e as Error;
+            httpServer.log.info(`[normalize] Attempted to create Sleep consumer on ${streamName}: ${sleepDurable}. Error: ${error.message}. Trying next candidate.`);
+            if (error.message.includes('consumer already exists')) {
+              actualStreamName = streamName;
+              httpServer.log.info(`[normalize] Consumer ${sleepDurable} already exists on ${streamName}, will bind to existing consumer.`);
+              break;
+            }
+          }
+        }
+      } else {
+        for (const streamName of streamCandidates) {
+          try {
+            await jsm.consumers.info(streamName, sleepDurable);
+            actualStreamName = streamName;
+            httpServer.log.info(`[normalize] Found existing Sleep consumer on ${streamName}: ${sleepDurable}`);
+            break;
+          } catch (e) {
+            httpServer.log.info(`[normalize] Consumer ${sleepDurable} not found on ${streamName}. Trying next candidate.`);
+          }
+        }
+      }
+
+      if (!actualStreamName) {
+        throw new Error('Failed to find Sleep consumer on any available stream.');
+      }
+
+      // Bind to existing durable consumer
+      const opts = consumerOpts();
+      opts.bind(actualStreamName, sleepDurable);
+      opts.ackExplicit();
+      opts.manualAck();
+      opts.maxDeliver(sleepMaxDeliver);
+      opts.ackWait(sleepAckWaitMs);
+
+      const sub = await js.pullSubscribe(EVENT_TOPICS.SLEEP_RAW_RECEIVED, opts) as JetStreamPullSubscription;
+      httpServer.log.info(`[normalize] Sleep durable pull consumer bound: ${sleepDurable}, subject: ${EVENT_TOPICS.SLEEP_RAW_RECEIVED}, ackWait: ${sleepAckWaitMs}ms, maxDeliver: ${sleepMaxDeliver}`);
+
+      // Message handler function
+      async function handleSleepMessage(m: JsMsg) {
+        const info = m.info;
+        const meta = {
+          streamSeq: info?.streamSequence,
+          deliverySeq: info?.deliverySequence,
+          redeliveries: info?.deliveryCount || 0,
+          subject: m.subject,
+        };
+
+        httpServer.log.info(`[normalize] Processing Sleep message: ${JSON.stringify(meta)}`);
+
+        // Extract headers safely
+        const hdrs = m.headers ? Object.fromEntries(
+          Array.from(m.headers as Iterable<[string, string[]]>).map(([k, vals]) => [k, Array.isArray(vals) && vals.length ? vals[0] : ''])
+        ) : {};
+
+        await withExtractedContext(hdrs, async () => {
+          await telemetry.tracer.startActiveSpan('normalize.sleep.consume', async (span: TelemetrySpan) => {
+
+            // Add JetStream metadata attributes
+            span.setAttribute('messaging.system', 'nats');
+            span.setAttribute('messaging.destination', EVENT_TOPICS.SLEEP_RAW_RECEIVED);
+            span.setAttribute('messaging.operation', 'process');
+            if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
+            if (typeof info.streamSequence === 'number') span.setAttribute('messaging.nats.stream_sequence', info.streamSequence);
+            if (typeof info.deliverySequence === 'number') span.setAttribute('messaging.nats.delivery_sequence', info.deliverySequence);
+            if (typeof info.deliveryCount === 'number') span.setAttribute('messaging.redelivery_count', Math.max(0, info.deliveryCount - 1));
+
+            try {
+              const text = m.string();
+              httpServer.log.debug(`[normalize] Sleep message text: ${text}`);
+              const eventData = JSON.parse(text);
+              httpServer.log.info(`[normalize] Sleep event data: ${JSON.stringify({ ...eventData, userId: 'present' })}`);
+
+              // Validate event schema
+              const validation = await eventValidator.validateEvent('sleep_raw_received', eventData as any);
+              if (!validation.valid) {
+                httpServer.log.warn(`[normalize] Sleep validation failed: ${JSON.stringify(validation.errors)}`);
+                sleepMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+                promSleepMessagesCounter.inc({ result: 'schema_invalid', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+
+                // Schema validation failure is non-retryable - send to DLQ
+                try {
+                  await js.publish(`${sleepDlq}.schema-invalid`, m.data as any, { headers: m.headers });
+                  httpServer.log.info(`[normalize] Sent schema-invalid message to DLQ: ${sleepDlq}.schema-invalid`);
+                } catch (dlqErr) {
+                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
+                }
+                m.term();
+                span.setStatus({ code: SpanStatusCode.ERROR, message: 'schema validation failed' });
+                span.end();
+                return;
+              }
+
+              httpServer.log.info(`[normalize] Sleep validation passed, processing data...`);
+              await processSleepData(eventData.payload);
+              httpServer.log.info(`[normalize] Sleep data processed successfully`);
+              m.ack();
+              sleepMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+              promSleepMessagesCounter.inc({ result: 'success', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+              span.setStatus({ code: SpanStatusCode.OK });
+            } catch (err: unknown) {
+              const deliveries = info?.deliveryCount || 1;
+              const attempt = deliveries;
+
+              // Determine if error is retryable
+              const isRetryable = (err: unknown): boolean => {
+                const errMsg = err instanceof Error ? err.message : String(err);
+                return errMsg.includes('ECONNREFUSED') ||
+                       errMsg.includes('timeout') ||
+                       errMsg.includes('ETIMEDOUT') ||
+                       errMsg.includes('Connection') ||
+                       errMsg.includes('ENOTFOUND');
+              };
+
+              if (attempt >= sleepMaxDeliver) {
+                httpServer.log.error(`[normalize] maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject: sleepDlq, attempt })}`);
+                try {
+                  await js.publish(`${sleepDlq}.max-deliver`, m.data as any, { headers: m.headers });
+                } catch (dlqErr) {
+                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
+                }
+                m.term();
+                sleepMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+                promSleepMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+              } else if (isRetryable(err)) {
+                httpServer.log.warn(`[normalize] Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver: sleepMaxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
+                m.nak(5000);
+                sleepMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+                promSleepMessagesCounter.inc({ result: 'retry', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+              } else {
+                httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: sleepDlq, error: err instanceof Error ? err.message : String(err) })}`);
+                try {
+                  await js.publish(`${sleepDlq}.non-retryable`, m.data as any, { headers: m.headers });
+                } catch (dlqErr) {
+                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
+                }
+                m.term();
+                sleepMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+                promSleepMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
+              }
+              span.recordException(err);
+              span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : 'Unknown error' });
+            } finally {
+              span.end();
+            }
+          });
+        });
+      }
+
+      // Pull consumer loop - using stable pull+iterator pattern
+      (async () => {
+        httpServer.log.info(`[normalize] Starting Sleep message processing loop...`);
+        try {
+          while (running) {
+            try {
+              await sub.pull({ batch: BATCH_SIZE, expires: EXPIRES_MS });
+
+              let processed = 0;
+              const deadline = Date.now() + EXPIRES_MS + 100;
+
+              for await (const m of sub) {
+                if (processed > 0 && processed % 3 === 0) {
+                  m.working();
+                }
+                await handleSleepMessage(m);
+                processed++;
+                if (processed >= BATCH_SIZE || Date.now() >= deadline) break;
+              }
+
+              if (processed === 0) {
+                httpServer.log.info(`[normalize] No Sleep messages pulled, waiting...`);
+              }
+            } catch (err: unknown) {
+              if (!running) break;
+              httpServer.log.error(`[normalize] Sleep pull/process error: ${JSON.stringify(err)}`);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            await new Promise(resolve => setTimeout(resolve, IDLE_BACKOFF_MS));
+          }
+        } catch (err) {
+          if (!running) {
+            httpServer.log.info('[normalize] Sleep consumer loop stopped due to shutdown');
+          } else {
+            httpServer.log.error(`[normalize] Sleep consumer loop error: ${JSON.stringify(err)}`);
+          }
+        }
+        httpServer.log.info('[normalize] Sleep message processing loop exited');
+      })();
+    } catch (e) {
+      httpServer.log.error(`Failed to initialize durable Sleep consumer: ${JSON.stringify(e)}`);
+      throw e;
+    }
+
     // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
     try {
       const js = eventBus.getJetStream();
