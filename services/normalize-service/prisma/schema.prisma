@@ -23,17 +23,15 @@ model HrvData {
 }
 
 model SleepData {
-  id         String   @id @default(cuid())
-  userId     String
-  date       DateTime @db.Date
-  totalSleep Int?
-  deepSleep  Int?
-  lightSleep Int?
-  remSleep   Int?
-  debtMin    Int?
-  capturedAt DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String   @id @default(cuid())
+  userId           String
+  date             DateTime @db.Date
+  durationMinutes  Int
+  qualityScore     Int?
+  vendor           String
+  capturedAt       DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@unique([userId, date])
   @@map("sleep_data")

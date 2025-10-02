@@ -1,5 +1,6 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
-import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
+import { context, propagation } from '@opentelemetry/api';
+import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator, ValidationResult } from './validator.js';
 import { config, nanos, getStreamConfigs, AppStreamConfig, getStreamMode, getStreamCandidates } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
@@ -267,6 +268,14 @@ export class EventBus {
 
   async publishHRVNormalizedStored(event: HRVNormalizedStoredEvent) {
     await this.publishEvent('hrv_normalized_stored', event, EVENT_TOPICS.HRV_NORMALIZED_STORED);
+  }
+
+  async publishSleepRawReceived(event: SleepRawReceivedEvent) {
+    await this.publishEvent('sleep_raw_received', event, EVENT_TOPICS.SLEEP_RAW_RECEIVED);
+  }
+
+  async publishSleepNormalizedStored(event: SleepNormalizedStoredEvent) {
+    await this.publishEvent('sleep_normalized_stored', event, EVENT_TOPICS.SLEEP_NORMALIZED_STORED);
   }
 
   async subscribeToOnboardingCompleted(callback: (event: OnboardingCompletedEvent) => Promise<void>) {
