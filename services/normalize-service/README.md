@@ -147,9 +147,12 @@ PORT=4112                       # HTTP port for health/metrics only
 PROMETHEUS_PORT=9464           # Prometheus metrics port
 PROMETHEUS_ENDPOINT=/metrics
 
+# Event Bus (from @athlete-ally/event-bus)
+EVENT_STREAM_MODE=multi        # Stream mode: multi (AA_CORE_HOT, AA_DLQ) or legacy (ATHLETE_ALLY_EVENTS)
+
 # Feature Flags
-FEATURE_SERVICE_MANAGES_STREAMS=true      # Publish-only when false (no stream creation)
-FEATURE_SERVICE_MANAGES_CONSUMERS=true    # Bind to existing consumers when false
+FEATURE_SERVICE_MANAGES_STREAMS=false      # Set to 'true' to allow stream creation (dev only)
+FEATURE_SERVICE_MANAGES_CONSUMERS=false    # Set to 'true' to allow consumer creation (dev only)
 
 # Sleep Consumer
 NORMALIZE_SLEEP_DURABLE=normalize-sleep-durable
@@ -167,6 +170,8 @@ NORMALIZE_HRV_ACK_WAIT_MS=60000
 **Stream Mode**:
 - **Multi-stream mode** (default): Separate streams per domain (`AA_CORE_HOT`, `AA_DLQ`)
 - **Legacy mode**: Single stream `ATHLETE_ALLY_EVENTS` with subject prefixes
+- Set via `EVENT_STREAM_MODE` env var in `@athlete-ally/event-bus` package
+- Consumers auto-detect and bind to available streams via `getStreamCandidates()`
 - Controlled via `STREAM_MODE` env var in `@athlete-ally/event-bus`
 
 ---
@@ -231,8 +236,27 @@ node scripts/ci/assert-normalized-sleep.js
 
 **Smoke Test** (requires full stack):
 ```bash
-# Ensure NATS, PostgreSQL, ingest-service, normalize-service running
+# Start infrastructure
+docker-compose up -d nats postgres ingest-service normalize-service
+
+# Run smoke test with default settings
 node scripts/smoke-sleep.js
+# Or: npm run e2e:sleep
+
+# Or with custom configuration
+INGEST_BASE_URL=http://localhost:4101 \
+NATS_URL=nats://localhost:4223 \
+DATABASE_URL=postgresql://user:password@localhost:5432/athlete_ally \
+STREAM_NAME=AA_CORE_HOT \
+E2E_USER=smoke-user \
+E2E_DATE=$(date +%Y-%m-%d) \
+node scripts/smoke-sleep.js
+
+# CI mode (skip if infrastructure unavailable)
+CI_SKIP_E2E=1 npm run e2e:sleep
+
+# CI mode (run only when infra available)
+CI_E2E=1 npm run e2e:sleep
 ```
 
 ---

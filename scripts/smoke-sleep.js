@@ -13,9 +13,15 @@
  * - INGEST_BASE_URL: Ingest service base URL (default: http://localhost:4101)
  * - NATS_URL: NATS server URL (default: nats://localhost:4223)
  * - DATABASE_URL: PostgreSQL connection string (for DB verification)
+ * - STREAM_NAME: Override stream for verification (default: try AA_CORE_HOT then ATHLETE_ALLY_EVENTS)
  * - E2E_USER: Test user ID (default: smoke-user)
  * - E2E_DATE: Test date (default: today)
  * - CI_SKIP_E2E: Skip test if infrastructure unavailable (exit 0 with SKIP)
+ *
+ * CI Integration:
+ * - Run with CI_E2E=1 to execute tests when infrastructure is available
+ * - Run with CI_SKIP_E2E=1 to skip gracefully when infrastructure is unavailable
+ * - npm script: `npm run e2e:sleep`
  *
  * Exit Codes:
  * 0: All tests passed or skipped (CI_SKIP_E2E=1)
@@ -27,6 +33,7 @@ const { spawn } = require('child_process');
 const ingestBase = process.env.INGEST_BASE_URL || 'http://localhost:4101';
 const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
 const databaseUrl = process.env.DATABASE_URL;
+const streamName = process.env.STREAM_NAME; // Optional: override stream for verification
 const e2eUser = process.env.E2E_USER || 'smoke-user';
 const e2eDate = process.env.E2E_DATE || new Date().toISOString().slice(0, 10);
 const ciSkipE2E = process.env.CI_SKIP_E2E === '1';
@@ -122,6 +129,7 @@ async function runDbAssert() {
   console.log(`Config:`);
   console.log(`  Ingest: ${ingestBase}`);
   console.log(`  NATS:   ${natsUrl}`);
+  console.log(`  Stream: ${streamName || 'AA_CORE_HOT → ATHLETE_ALLY_EVENTS (auto-detect)'}`);
   console.log(`  DB:     ${databaseUrl ? 'configured' : 'not configured'}`);
   console.log(`  User:   ${e2eUser}`);
   console.log(`  Date:   ${e2eDate}`);
@@ -248,24 +256,39 @@ async function runDbAssert() {
     // Test 8: NATS - Verify SleepNormalizedStored published
     console.log('\n--- Test 8: Verify SleepNormalizedStored Published ---');
     let normalizedFound = false;
-    try {
-      const msg = await jsm.streams.getMessage('AA_CORE_HOT', {
-        last_by_subj: 'athlete-ally.sleep.normalized-stored'
-      });
-      normalizedFound = !!msg;
-      if (normalizedFound) {
-        const eventData = JSON.parse(new TextDecoder().decode(msg.data));
-        console.log(`    Normalized event found (seq: ${msg.seq})`);
-        console.log(`    Record: ${JSON.stringify({ ...eventData.record, userId: 'present' })}`);
+    let foundInStream = null;
+
+    // Determine streams to try
+    const streamsToTry = streamName
+      ? [streamName]
+      : ['AA_CORE_HOT', 'ATHLETE_ALLY_EVENTS'];
+
+    for (const stream of streamsToTry) {
+      try {
+        console.log(`    Trying stream: ${stream}...`);
+        const msg = await jsm.streams.getMessage(stream, {
+          last_by_subj: 'athlete-ally.sleep.normalized-stored'
+        });
+        normalizedFound = !!msg;
+        foundInStream = stream;
+        if (normalizedFound) {
+          const eventData = JSON.parse(new TextDecoder().decode(msg.data));
+          console.log(`    ✅ Normalized event found in ${stream} (seq: ${msg.seq})`);
+          console.log(`    Record: ${JSON.stringify({ ...eventData.record, userId: 'present' })}`);
+          break; // Found it, no need to try other streams
+        }
+      } catch (e) {
+        console.log(`    Stream ${stream}: ${e.message}`);
+        // Continue to next stream
       }
-    } catch (e) {
-      console.log(`    Normalized event query failed: ${e.message}`);
     }
 
     logTest(
       'SleepNormalizedStored event published',
       normalizedFound,
-      normalizedFound ? 'Normalized event found in stream' : 'Normalized event not found'
+      normalizedFound
+        ? `Normalized event found in stream ${foundInStream}`
+        : `Normalized event not found in any stream (${streamsToTry.join(', ')})`
     );
 
     await nc.close();
