@@ -46,12 +46,30 @@ paths:
   /api/v1/ingest/sleep:
     post:
       summary: ingest raw Sleep data
+      tags:
+        - Ingestion
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/SleepIngestRequest'
+            examples:
+              basic:
+                summary: Basic sleep data
+                value:
+                  userId: "user-123"
+                  date: "2025-10-02"
+                  durationMinutes: 420
+              with_metadata:
+                summary: With vendor metadata and quality score
+                value:
+                  userId: "user-456"
+                  date: "2025-10-02"
+                  durationMinutes: 480
+                  raw:
+                    source: "oura"
+                    qualityScore: 85
       responses:
         '200':
           description: Sleep data ingested successfully
@@ -59,12 +77,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IngestResponse'
+              examples:
+                success:
+                  value:
+                    message: "Sleep data ingested successfully"
+                    eventId: "evt_abc123def456"
         '400':
           description: Validation failed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+              examples:
+                missing_field:
+                  value:
+                    error: "Validation failed"
+                    details: ["date: Required"]
+                invalid_duration:
+                  value:
+                    error: "Validation failed"
+                    details: ["durationMinutes: Number must be greater than or equal to 0"]
         '500':
           description: Internal server error
 components:
@@ -145,9 +177,13 @@ components:
             source:
               type: string
               description: 'Vendor name (e.g., "oura", "whoop")'
+              example: 'oura'
             qualityScore:
               type: number
-              description: 'Sleep quality score (will be clamped to 0-100 during normalization)'
+              minimum: 0
+              maximum: 100
+              description: 'Sleep quality score (0-100, values outside range will be clamped during normalization)'
+              example: 85
           additionalProperties: true
     IngestResponse:
       type: object

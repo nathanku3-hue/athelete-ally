@@ -110,15 +110,23 @@ Ingests raw HRV data and publishes to the event bus.
 
 **Environment Variables**:
 ```bash
+# Server
 PORT=4101                      # HTTP server port
-NATS_URL=nats://localhost:4223 # NATS server URL
 NODE_ENV=production            # Environment (development|production)
+
+# NATS
+NATS_URL=nats://localhost:4223 # NATS server URL
+
+# Event Bus (from @athlete-ally/event-bus)
+EVENT_STREAM_MODE=multi        # Stream mode: multi (AA_CORE_HOT, AA_DLQ) or legacy (ATHLETE_ALLY_EVENTS)
+FEATURE_SERVICE_MANAGES_STREAMS=false  # Set to 'true' to allow service to create streams (dev only)
 ```
 
 **NATS Configuration**:
-- Publishes to JetStream streams (does not create/manage streams)
+- Publishes to JetStream streams (does not create/manage streams in prod)
 - Uses typed publishers from `@athlete-ally/event-bus`
 - Respects `FEATURE_SERVICE_MANAGES_STREAMS` flag (publish-only when false)
+- Multi-stream mode uses `AA_CORE_HOT` for core events, `AA_DLQ` for dead letters
 
 ---
 
@@ -155,8 +163,27 @@ npm test
 
 **Smoke Test** (requires running services):
 ```bash
-# Ensure NATS, ingest-service, normalize-service are running
+# Start infrastructure
+docker-compose up -d nats postgres ingest-service normalize-service
+
+# Run smoke test with default settings
 node scripts/smoke-sleep.js
+# Or: npm run e2e:sleep
+
+# Or with custom configuration
+INGEST_BASE_URL=http://localhost:4101 \
+NATS_URL=nats://localhost:4223 \
+DATABASE_URL=postgresql://user:password@localhost:5432/athlete_ally \
+STREAM_NAME=AA_CORE_HOT \
+E2E_USER=smoke-user \
+E2E_DATE=$(date +%Y-%m-%d) \
+node scripts/smoke-sleep.js
+
+# CI mode (skip if infrastructure unavailable)
+CI_SKIP_E2E=1 npm run e2e:sleep
+
+# CI mode (run only when infra available)
+CI_E2E=1 npm run e2e:sleep
 ```
 
 **Manual Test**:
