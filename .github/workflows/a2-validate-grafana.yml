@@ -3,7 +3,13 @@ name: A2 Validate Grafana (Sleep)
 on:
   schedule:
     - cron: '0 9 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      moveToObservability:
+        description: 'Attempt to move dashboard to Observability folder (requires folders:read|write)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   validate:
@@ -55,7 +61,10 @@ jobs:
           VAR_STREAM: AA_CORE_HOT
           VAR_DURABLE: normalize-sleep-durable
           VAR_SUBJECT: athlete-ally.sleep.raw-received
+          MOVE_TO_OBSERVABILITY: ${{ inputs.moveToObservability }}
         run: |
           set -euo pipefail
           node scripts/ops/grafana-validate.mjs | tee -a $GITHUB_STEP_SUMMARY
+
+
 
