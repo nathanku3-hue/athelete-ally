@@ -73,3 +73,4 @@ ensures main/integration stay green.
 
 - `.gitattributes` marks hubs `merge=ours` to avoid local merge noise.
 - Windows devs: set `git config core.autocrlf false`.
+\n### Linting CI stability\n- Use local ESLint via npm scripts (npm run lint:ci) to avoid npx version drift.\n- Compact formatter is provided by devDep eslint-formatter-compact and enabled in CI workflows.\n
