@@ -1,0 +1,11 @@
+{
+  "time": "2025-10-03T17:27:51.881Z",
+  "status": "SKIP",
+  "reason": "Missing GRAFANA_URL or GRAFANA_TOKEN",
+  "uids": [
+    "aa-sleep-norm"
+  ],
+  "renderPNGs": false,
+  "basePath": "",
+  "results": []
+}
