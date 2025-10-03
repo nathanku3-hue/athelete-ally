@@ -46,7 +46,7 @@
     "validate-environment": "npx tsx scripts/validate-environment.ts",
     "predev": "npm run validate-environment && npx tsx ./scripts/check-ports.ts 3000",
     "dev:check": "npm run validate-environment && npm run check-ports && npm run dev",
-    "build:all": "turbo run build",
+    "build:all": "npm run build:infra && turbo run build",
     "test:all:workspace": "turbo run test",
     "type-check:all": "turbo run type-check",
     "lint:all": "turbo run lint",
