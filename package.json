@@ -82,7 +82,9 @@
     "e2e:pw:ci": "playwright test --project=chromium --reporter=dot",
     "validate:schemas": "node scripts/validate-schemas.js",
     "dev:compose": "docker compose up --build",
-    "dev:compose:obs": "docker compose --profile obs up --build"
+    "dev:compose:obs": "docker compose --profile obs up --build",
+    "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
+    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
