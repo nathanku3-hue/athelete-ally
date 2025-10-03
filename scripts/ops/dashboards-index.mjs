@@ -2,13 +2,22 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import cp from 'node:child_process';
 
 const DASH_DIR = 'monitoring/grafana/dashboards';
 const INDEX_PATH = path.join(DASH_DIR, 'index.json');
 
-async function sha256File(file) {
-  const buf = await fs.readFile(file);
-  return crypto.createHash('sha256').update(buf).digest('hex');
+function gitLastCommitISO(file) {
+  try {
+    const out = cp.execSync(`git log -1 --format=%cI -- "${file}"`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    return out || null;
+  } catch { return null; }
+}
+
+function stableGeneratedAt(files) {
+  // Deterministic: max commit timestamp across included files (ISO 8601)
+  const stamps = files.map((f) => gitLastCommitISO(f)).filter(Boolean).sort();
+  return stamps.length ? stamps[stamps.length - 1] : '1970-01-01T00:00:00Z';
 }
 
 function extractFields(obj) {
@@ -28,7 +37,6 @@ function countLeafPanels(panels) {
     const children = Array.isArray(p.panels) ? p.panels : [];
     const isRow = p.type === 'row';
     if (children.length > 0 || isRow) {
-      // container: traverse children only
       for (const c of children) stack.push(c);
       continue;
     }
@@ -38,7 +46,6 @@ function countLeafPanels(panels) {
 }
 
 async function main() {
-  // read dashboard files (exclude index.json, ignore subfolders)
   const entries = await fs.readdir(DASH_DIR, { withFileTypes: true });
   const files = entries
     .filter((e) => e.isFile() && e.name.endsWith('.json') && e.name !== 'index.json')
@@ -57,15 +64,13 @@ async function main() {
         panelsCount: countLeafPanels(panels),
         checksumSha256: crypto.createHash('sha256').update(Buffer.from(raw, 'utf8')).digest('hex'),
       });
-    } catch (e) {
-      // skip invalid json files; do not fail CI for non-dashboard json
-    }
+    } catch {}
   }
 
   dashboards.sort((a, b) => {
     const aEmpty = !a.uid;
     const bEmpty = !b.uid;
-    if (aEmpty !== bEmpty) return aEmpty ? 1 : -1; // non-empty first
+    if (aEmpty !== bEmpty) return aEmpty ? 1 : -1;
     const uidCmp = (a.uid || '').localeCompare(b.uid || '');
     if (uidCmp !== 0) return uidCmp;
     const titleCmp = (a.title || '').localeCompare(b.title || '');
@@ -74,14 +79,11 @@ async function main() {
   });
 
   const out = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: stableGeneratedAt(files),
     dashboards,
   };
   const json = JSON.stringify(out, null, 2) + '\n';
   await fs.writeFile(INDEX_PATH, json, 'utf8');
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+main().catch((e) => { console.error(e); process.exit(1); });
