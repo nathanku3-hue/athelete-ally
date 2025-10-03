@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 set -eu
+# Prettier shard scope
+npx --no prettier --check "{scripts,openapi,monitoring,docs,registry,.github}/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || exit 1
 HUBS="README.md docs/README.md docs/runbook/index.md openapi.yaml monitoring/alert_rules.yml monitoring/grafana/dashboards/index.json CHANGELOG.md registry.json registry.ts infra/index.yaml protobuf/registry.yaml sql/migrations/catalog.yaml"
 changed=0
 for f in $HUBS; do
