@@ -4,8 +4,53 @@ info:
   version: 0.1.0
 servers:
   - url: http://localhost:4000
-paths:
-  /health:
+
+  /api/v1/readiness/{userId}/latest:
+    get:
+      summary: Get latest readiness record for a user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Latest readiness record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessRecord'
+        "204":
+          description: No data
+  /api/v1/readiness/{userId}:
+    get:
+      summary: Get readiness records for recent days
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: days
+          schema:
+            type: integer
+            default: 7
+      responses:
+        "200":
+          description: Readiness records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReadinessRecord'/health:
     get:
       summary: health check
       responses:
@@ -67,9 +112,124 @@ paths:
                 $ref: '#/components/schemas/ValidationError'
         '500':
           description: Internal server error
-components:
-  schemas:
-    OnboardingPayload:
+
+    ReadinessRecord:
+      type: object
+      properties:
+        userId:
+          type: string
+        date:
+          type: string
+          description: 'YYYYMMDD'
+          pattern: '^\\d{8}OnboardingPayload:
+      type: object
+      properties:
+        userId:
+          type: string
+        purpose:
+          type: string
+        proficiency:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        season:
+          type: string
+          enum: [offseason, preseason, inseason]
+        availabilityDays:
+          type: integer
+          minimum: 1
+          maximum: 7
+        weeklyGoalDays:
+          type: integer
+          minimum: 1
+          maximum: 7
+          description: 'User preferred weekly training goal days'
+        equipment:
+          type: array
+          items:
+            type: string
+        fixedSchedules:
+          type: array
+          items:
+            type: object
+            properties:
+              day:
+                type: string
+              start:
+                type: string
+              end:
+                type: string
+    PlanGenerateRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        seedPlanId:
+          type: string
+      required: [userId]
+    JobAccepted:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued]
+    SleepIngestRequest:
+      type: object
+      required: [userId, date, durationMinutes]
+      properties:
+        userId:
+          type: string
+          minLength: 1
+        date:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: 'Sleep date in ISO format (YYYY-MM-DD)'
+        durationMinutes:
+          type: integer
+          minimum: 0
+          description: 'Total sleep duration in minutes (non-negative)'
+        raw:
+          type: object
+          description: 'Vendor-specific metadata'
+          properties:
+            source:
+              type: string
+              description: 'Vendor name (e.g., "oura", "whoop")'
+            qualityScore:
+              type: number
+              description: 'Sleep quality score (will be clamped to 0-100 during normalization)'
+          additionalProperties: true
+    IngestResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Sleep data ingested successfully'
+        eventId:
+          type: string
+          description: 'Auto-generated event ID (UUID)'
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: 'Validation failed'
+        details:
+          type: array
+          items:
+            type: string
+          example: ['date: Required']
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        incomplete:
+          type: boolean
+        components:
+          type: object
+          additionalProperties: trueOnboardingPayload:
       type: object
       properties:
         userId:
