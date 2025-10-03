@@ -122,6 +122,37 @@ components:
         status:
           type: string
           enum: [queued]
+    ReadinessRecord:
+      type: object
+      description: "Daily readiness record for a user (UTC day)."
+      required: [userId, date, score]
+      properties:
+        userId:
+          type: string
+        date:
+          type: string
+          pattern: '^\\d{8}$'
+          description: 'UTC date in compact form YYYYMMDD'
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        incomplete:
+          type: boolean
+          description: 'true if any required input (sleep/hrv) was missing'
+        components:
+          type: object
+          properties:
+            hrvScore:
+              type: integer
+              minimum: 0
+              maximum: 100
+            sleepScore:
+              type: integer
+              minimum: 0
+              maximum: 100
+            notes:
+              type: string
     SleepIngestRequest:
       type: object
       required: [userId, date, durationMinutes]

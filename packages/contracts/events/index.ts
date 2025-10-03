@@ -122,6 +122,8 @@ export const EVENT_TOPICS = {
   HRV_NORMALIZED_STORED: 'athlete-ally.hrv.normalized-stored',
   SLEEP_RAW_RECEIVED: 'athlete-ally.sleep.raw-received',
   SLEEP_NORMALIZED_STORED: 'athlete-ally.sleep.normalized-stored',
+  READINESS_COMPUTED: 'athlete-ally.readiness.computed',
+  READINESS_STORED: 'athlete-ally.readiness.stored',
 } as const;
 
 // Export schemas from dedicated file
