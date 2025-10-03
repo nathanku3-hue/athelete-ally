@@ -17,7 +17,10 @@
     "check:nohub": "tsx scripts/check-no-hub-edits.ts",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build:reserved": "tsx scripts/dev/update-reserved-ids.ts",
+    "dev:hubs:assume": "tsx scripts/dev/hubs-assume-unchanged.ts",
+    "dev:hubs:track": "tsx scripts/dev/hubs-track.ts"
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [

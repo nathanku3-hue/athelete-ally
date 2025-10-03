@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+set -eu
+HUBS="README.md docs/README.md docs/runbook/index.md openapi.yaml monitoring/alert_rules.yml monitoring/grafana/dashboards/index.json CHANGELOG.md registry.json registry.ts infra/index.yaml protobuf/registry.yaml sql/migrations/catalog.yaml"
+changed=0
+for f in $HUBS; do
+  if git diff --quiet -- "$f" && git diff --cached --quiet -- "$f"; then :; else echo "ERROR: Hub file has changes: $f"; changed=1; fi
+done
+if [ "$changed" -ne 0 ]; then echo "Do not push hub changes. Revert or drop from commit."; exit 1; fi
