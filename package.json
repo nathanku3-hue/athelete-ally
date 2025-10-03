@@ -20,7 +20,8 @@
     "prepare": "husky install",
     "build:reserved": "tsx scripts/dev/update-reserved-ids.ts",
     "dev:hubs:assume": "tsx scripts/dev/hubs-assume-unchanged.ts",
-    "dev:hubs:track": "tsx scripts/dev/hubs-track.ts"
+    "dev:hubs:track": "tsx scripts/dev/hubs-track.ts",
+    "lint:ci": "eslint"
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@stoplight/spectral-cli": "6.11.1",
+    "eslint-formatter-compact": "8.40.0",
     "husky": "9.1.6",
     "lint-staged": "15.2.9",
     "prettier": "3.3.3",

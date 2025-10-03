@@ -9,6 +9,10 @@ permissions:
   contents: read
   pull-requests: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-validate:
     name: Build + Validate
@@ -28,9 +32,6 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Prettier Check
-        run: npm run format:check
-
       - name: Validate IDs (duplicate + format)
         run: npm run validate:ids
 
@@ -47,14 +48,14 @@ jobs:
               core.info('allowhubedit label present; skipping hub edit block');
             }
 
-      - name: Build All Hubs (no commit)
+      - name: Prettier Shard Scope
+        run: npx --no prettier --check "{scripts,openapi,monitoring,docs,registry,.github}/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}"
+
+      - name: Build All Hubs
         run: npm run build:all
 
       - name: Spectral Lint (OpenAPI)
-        run:
-          npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml
-          openapi/components/**/*.yaml || true
-        # Spectral runs best on composed spec; fragments may have warnings
+        run: npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml openapi/components/**/*.yaml || true
 
       - name: Install promtool
         run: |
