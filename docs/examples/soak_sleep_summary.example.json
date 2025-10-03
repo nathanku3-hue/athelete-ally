@@ -1,0 +1,10 @@
+{
+  "generated_at": "2025-10-02T00:00:00Z",
+  "stream": "AA_CORE_HOT",
+  "durable": "normalize-sleep-durable",
+  "fallback_count": 0,
+  "dlq_rate": 0,
+  "pending_max": 0,
+  "success_rate": 1.0,
+  "notes": "Example only; real script writes ./soak_sleep_summary.json"
+}

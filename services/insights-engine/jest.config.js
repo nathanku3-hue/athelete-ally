@@ -8,6 +8,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@athlete-ally/contracts$': '<rootDir>/test-support/contracts-mock.js',
   },
   transform: {
     '^.+\\.ts$': 'ts-jest',
