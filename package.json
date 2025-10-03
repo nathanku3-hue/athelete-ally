@@ -12,7 +12,7 @@
     "build:alerts": "tsx scripts/build-alerts.ts",
     "build:docs": "tsx scripts/build-docs-index.ts",
     "build:registry": "tsx scripts/build-registry.ts",
-    "build:all": "npm run build:openapi && npm run build:alerts && npm run build:docs && npm run build:registry",
+    "build:all": "npm run build:openapi && npm run build:alerts && npm run build:docs && npm run build:registry && npm run build:dashboards-index",
     "validate:ids": "tsx scripts/validate-ids.ts",
     "check:nohub": "tsx scripts/check-no-hub-edits.ts",
     "format:check": "prettier --check .",
@@ -21,7 +21,9 @@
     "build:reserved": "tsx scripts/dev/update-reserved-ids.ts",
     "dev:hubs:assume": "tsx scripts/dev/hubs-assume-unchanged.ts",
     "dev:hubs:track": "tsx scripts/dev/hubs-track.ts",
-    "lint:ci": "eslint"
+    "lint:ci": "eslint",
+    "build:dashboards-index": "node scripts/ops/dashboards-index.mjs",
+    "verify:dashboards-index": "npm run build:dashboards-index && git diff --exit-code -- monitoring/grafana/dashboards/index.json"
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [
