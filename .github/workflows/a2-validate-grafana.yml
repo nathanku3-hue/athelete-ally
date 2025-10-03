@@ -1,0 +1,61 @@
+name: A2 Validate Grafana (Sleep)
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    name: Validate Dashboard + Alerts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Promtool | Download
+        id: prom
+        run: |
+          set -euo pipefail
+          PROM_VERSION=2.53.0
+          curl -sL -o prom.tar.gz https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+          tar xzf prom.tar.gz
+          echo "promtool=$(pwd)/prometheus-${PROM_VERSION}.linux-amd64/promtool" >> $GITHUB_OUTPUT
+
+      - name: Promtool | Check alert rules
+        run: |
+          set -euo pipefail
+          PT="${{ steps.prom.outputs.promtool }}"
+          ok=0
+          if [ -f monitoring/alert_rules.yml ]; then
+            "$PT" check rules monitoring/alert_rules.yml | tee -a $GITHUB_STEP_SUMMARY || ok=1
+          else
+            echo "[A2] NOTE: monitoring/alert_rules.yml missing; skipping" | tee -a $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f monitoring/normalize-alerts.yml ]; then
+            "$PT" check rules monitoring/normalize-alerts.yml | tee -a $GITHUB_STEP_SUMMARY || ok=1
+          else
+            echo "[A2] NOTE: monitoring/normalize-alerts.yml missing; skipping" | tee -a $GITHUB_STEP_SUMMARY
+          fi
+          exit $ok
+
+      - name: Grafana | Validate dashboard and variables
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          VALIDATE_UID: aa-sleep-norm
+          VAR_JOB: normalize
+          VAR_STREAM: AA_CORE_HOT
+          VAR_DURABLE: normalize-sleep-durable
+          VAR_SUBJECT: athlete-ally.sleep.raw-received
+        run: |
+          set -euo pipefail
+          node scripts/ops/grafana-validate.mjs | tee -a $GITHUB_STEP_SUMMARY
+
