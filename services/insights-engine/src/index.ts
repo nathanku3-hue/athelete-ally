@@ -3,7 +3,6 @@ import { EventBus } from '@athlete-ally/event-bus';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventHandlers } from './eventHandlers';
 import { readinessRoutes } from './routes/readiness';
-import { readinessV1Routes } from './routes/readinessV1';
 
 const fastify = Fastify({
   logger: true
@@ -47,9 +46,9 @@ async function initializeEventHandlers() {
   console.log('Event handlers initialized');
 }
 
-// Register routes
-fastify.register(readinessRoutes);
-fastify.register(readinessV1Routes);
+
+// API v1 routes for readiness
+fastify.register(readinessApiV1Routes, { prefix: '/api/v1/readiness' });
 
 // Feature flag: READINESS_STUB
 if (process.env.READINESS_STUB === 'true') {
