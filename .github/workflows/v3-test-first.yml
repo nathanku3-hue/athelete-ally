@@ -1,8 +1,8 @@
-name: V3 Test-First Development Pipeline
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
+
+name: V3 Test-First Development Pipeline
 
 on:
   push:
