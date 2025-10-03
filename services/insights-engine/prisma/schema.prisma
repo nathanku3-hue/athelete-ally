@@ -21,3 +21,48 @@ model ReadinessScore {
   @@id([userId, date])
   @@index([userId, date])
 }
+
+/// Read-only views of normalized data from normalize-service
+model HrvData {
+  id         String   @id @default(cuid())
+  userId     String
+  date       DateTime @db.Date
+  rmssd      Float?
+  lnRmssd    Float?
+  capturedAt DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("hrv_data")
+}
+
+model SleepData {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @db.Date
+  durationMinutes Int
+  qualityScore    Int?
+  vendor          String
+  capturedAt      DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("sleep_data")
+}
+
+/// Readiness v1 storage for API (PRR2)
+model ReadinessData {
+  id         String   @id @default(cuid())
+  userId     String
+  date       DateTime @db.Date
+  score      Int
+  incomplete Boolean  @default(false)
+  components Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@map("readiness_data")
+}
