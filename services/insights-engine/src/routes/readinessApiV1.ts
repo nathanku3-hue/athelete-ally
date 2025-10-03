@@ -42,8 +42,8 @@ export async function readinessApiV1Routes(fastify: FastifyInstance) {
 
     await prisma.readinessData.upsert({
       where: { userId_date: { userId, date: dateOnly } },
-      update: { score, incomplete: newIncomplete, components: inputsPresent ? components : existing?.components },
-      create: { userId, date: dateOnly, score, incomplete: newIncomplete, components: inputsPresent ? components : undefined }
+      update: { score, incomplete: newIncomplete, components: inputsPresent ? (components as any) : (existing?.components as any) },
+      create: { userId, date: dateOnly, score, incomplete: newIncomplete, components: inputsPresent ? (components as any) : undefined }
     });
 
     const result = { userId, date: fmtYYYYMMDD(dateOnly), score, incomplete: newIncomplete } as any;
@@ -129,3 +129,4 @@ export async function readinessApiV1Routes(fastify: FastifyInstance) {
     }
   });
 }
+
