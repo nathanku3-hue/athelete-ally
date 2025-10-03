@@ -84,7 +84,12 @@
     "dev:compose": "docker compose up --build",
     "dev:compose:obs": "docker compose --profile obs up --build",
     "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
-    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
+    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml",
+    "build:infra": "npm run build:openapi && npm run build:alerts && npm run build:docs && npm run build:registry",
+    "build:openapi": "node scripts/build-openapi.ts",
+    "build:alerts": "node scripts/build-alerts.ts",
+    "build:docs": "node scripts/build-docs-index.ts",
+    "build:registry": "node scripts/build-registry.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
