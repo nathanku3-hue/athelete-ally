@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: boundaries-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-          fetch-depth: 2  # Need previous commit for diff
+          fetch-depth: 2 # Need previous commit for diff
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
@@ -45,18 +45,18 @@ jobs:
         run: |
           set -euo pipefail
           echo "?? Checking boundaries for new/modified files..."
-          
+
           # Get list of changed TypeScript/TSX files (excluding test files)
           CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' | grep -v -E '(test|spec)\.(ts|tsx)$' | grep -v '__tests__' || true)"
-          
+
           if [ -z "${CHANGED_FILES:-}" ]; then
             echo "? No non-test TypeScript files changed, skipping boundary check"
             exit 0
           fi
-          
+
           echo "?? Changed non-test TypeScript files:"
           echo "${CHANGED_FILES}"
-          
+
           # Run ESLint with error-level boundary rules on changed files only
           # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
           echo "?? Running strict boundary checks on changed files..."
@@ -65,7 +65,7 @@ jobs:
             --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
             --rule "no-restricted-imports: error" \
             --format=compact
-          
+
           echo "? Boundary checks passed for new/modified files"
 
       - name: Generate boundaries report
