@@ -1,19 +1,23 @@
-# Insights Engine (Readiness v1)
+# Insights Engine
 
-Endpoints
-- GET /api/v1/readiness/:userId/latest → latest ReadinessRecord or { userId, incomplete: true }
-- GET /api/v1/readiness/:userId?days=7 → array of ReadinessRecord (desc)
+- Port: 4103
+- Env: `DATABASE_URL` must point to the DB with normalized `sleep_data` and `hrv_data`.
 
-Contracts & Schemas
-- ReadinessRecord in packages/contracts/openapi.yaml
+## Readiness API v1
+- `GET /api/v1/readiness/:userId/latest`
+  - Always `200`; returns a ReadinessRecord with `incomplete=true` when inputs are missing.
+- `GET /api/v1/readiness/:userId?days=7`
+  - Returns `ReadinessRecord[]` (descending by date).
 
-Environment
-- PORT=4103
-- DATABASE_URL=postgresql://user:pass@localhost:5432/athlete_insights
-- READINESS_CONSUMER_ENABLED=false
-- PUBLISH_READINESS_EVENTS=false
-- READINESS_FORMULA_VARIANT=baseline
+ReadinessRecord fields: `userId`, `date` (YYYYMMDD), `score` (0..100), `incomplete` (boolean), optional `components` `{ sleepScore, hrvScore }`.
 
-Notes
-- DB date is DATE (UTC). API returns dates as YYYYMMDD.
-- Upsert is idempotent by (userId, date).
+## Metrics
+- `readiness_compute_total{result=success|incomplete|error}`
+- `readiness_compute_duration_seconds` (histogram)
+- `api_requests_total{route,status}`
+
+## Tracing
+- Span `readiness.compute` with attrs: `user_id_hash` (sha256 first 8), `date`, `result`.
+
+## Smoke
+- `node scripts/smoke-readiness.js` (seeds normalized rows when `DATABASE_URL` set) then calls both endpoints.
