@@ -1,0 +1,59 @@
+name: A2 Validate Grafana
+
+on:
+  workflow_dispatch:
+    inputs:
+      uids:
+        description: 'Comma-separated Grafana dashboard UIDs'
+        required: false
+        default: 'aa-sleep-norm'
+      renderPNGs:
+        description: 'Render PNGs (requires renderer)'
+        required: false
+        type: boolean
+        default: false
+      basePath:
+        description: 'Optional Grafana base path (e.g., /grafana)'
+        required: false
+        default: ''
+      rejectUnauthorized:
+        description: 'Reject self-signed TLS certs'
+        required: false
+        type: boolean
+        default: true
+  schedule:
+    - cron: '0 9 * * *'
+
+jobs:
+  validate:
+    name: A2 Grafana Validator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.x'
+      - name: Install
+        run: npm ci
+      - name: Run validator
+        id: run
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+        run: |
+          mkdir -p a2-artifacts
+          node scripts/ops/grafana-validate.mjs \
+            --uids "${{ inputs.uids || 'aa-sleep-norm' }}" \
+            --renderPNGs "${{ inputs.renderPNGs || 'false' }}" \
+            --basePath "${{ inputs.basePath || '' }}" \
+            --rejectUnauthorized "${{ inputs.rejectUnauthorized || 'true' }}" \
+            --outDir a2-artifacts
+      - name: Upload artifacts (7 days)
+        uses: actions/upload-artifact@v4
+        with:
+          name: a2-validator-${{ github.run_id }}
+          path: a2-artifacts
+          retention-days: 7
+      - name: Mark skip if no secrets
+        if: "${{ env.GRAFANA_URL == '' || env.GRAFANA_TOKEN == '' }}"
+        run: echo "SKIP: Missing secrets (GRAFANA_URL/GRAFANA_TOKEN)"
