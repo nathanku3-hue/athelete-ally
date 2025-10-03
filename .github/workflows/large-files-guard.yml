@@ -65,3 +65,7 @@ jobs:
           else
             echo "✅ No large tracked files found"
           fi
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

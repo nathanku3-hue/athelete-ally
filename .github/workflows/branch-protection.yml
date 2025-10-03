@@ -60,3 +60,7 @@ jobs:
           
           echo "✅ 分支保护规则设置完成！"
           echo "受保护的检查：${{ github.event.inputs.required_status_checks }}"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

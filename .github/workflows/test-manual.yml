@@ -18,3 +18,7 @@ jobs:
       - name: "Test step"
         run: |
           echo "Test workflow triggered with input: ${{ inputs.test_input }}"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

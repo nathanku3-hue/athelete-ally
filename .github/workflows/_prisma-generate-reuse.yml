@@ -35,3 +35,7 @@ jobs:
           echo "✅ All Prisma clients generated"
         env:
           PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
