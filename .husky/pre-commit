@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx --no -- lint-staged
+npx --no -- tsx scripts/validate-ids.ts
+
+# Block committing hub files
+hublist="README.md docs/README.md docs/runbook/index.md openapi.yaml monitoring/alert_rules.yml monitoring/grafana/dashboards/index.json CHANGELOG.md registry.json registry.ts infra/index.yaml protobuf/registry.yaml sql/migrations/catalog.yaml"
+if git diff --cached --name-only -- $hublist | grep -q .; then
+  echo "ERROR: Do not commit generated hub files. Commit shards only."
+  exit 1
+fi
