@@ -1,0 +1,70 @@
+name: Integration Hub Commit
+
+on:
+  push:
+    branches: [integration]
+  merge_group:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  integrate:
+    name: Compose Hubs + Commit (single-writer)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build All Hubs + Reserved IDs
+        run: npm run build:all
+
+      - name: Update Reserved IDs
+        run: npm run build:reserved
+
+      - name: Spectral Lint (OpenAPI)
+        run: npx --no @stoplight/spectral-cli lint openapi.yaml || true
+
+      - name: Install promtool
+        run: |
+          set -euo pipefail
+          VER=2.52.0
+          curl -sSL -o /tmp/prometheus.tar.gz https://github.com/prometheus/prometheus/releases/download/v${VER}/prometheus-${VER}.linux-amd64.tar.gz
+          tar -xf /tmp/prometheus.tar.gz -C /tmp
+          sudo mv /tmp/prometheus-${VER}.linux-amd64/promtool /usr/local/bin/promtool
+          promtool --version
+
+      - name: Promtool Validate Rules
+        run: |
+          if [ -f monitoring/alert_rules.yml ]; then promtool check rules monitoring/alert_rules.yml; fi
+
+      - name: Commit Hub Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore(integration): regenerate hubs'
+          commit_user_name: 'integration-bot'
+          commit_user_email: 'integration-bot@users.noreply.github.com'
+          file_pattern: |
+            README.md
+            docs/README.md
+            docs/runbook/index.md
+            openapi.yaml
+            monitoring/alert_rules.yml
+            monitoring/grafana/dashboards/index.json
+            CHANGELOG.md
+            registry.json
+            registry.ts
+            registry/reserved-ids.json
+            infra/index.yaml
+            protobuf/registry.yaml
+            sql/migrations/catalog.yaml
