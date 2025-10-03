@@ -25,8 +25,11 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Build All Hubs
+      - name: Build All Hubs + Reserved IDs
         run: npm run build:all
+
+      - name: Update Reserved IDs
+        run: npm run build:reserved
 
       - name: Spectral Lint (OpenAPI)
         run: npx --no @stoplight/spectral-cli lint openapi.yaml || true
@@ -48,6 +51,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore(integration): regenerate hubs'
+          commit_user_name: 'integration-bot'
+          commit_user_email: 'integration-bot@users.noreply.github.com'
           file_pattern: |
             README.md
             docs/README.md
@@ -58,6 +63,7 @@ jobs:
             CHANGELOG.md
             registry.json
             registry.ts
+            registry/reserved-ids.json
             infra/index.yaml
             protobuf/registry.yaml
             sql/migrations/catalog.yaml
