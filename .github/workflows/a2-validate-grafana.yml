@@ -33,22 +33,22 @@ jobs:
           PROM_VERSION=2.53.0
           curl -sL -o prom.tar.gz https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz
           tar xzf prom.tar.gz
-          echo "promtool=$(pwd)/prometheus-${PROM_VERSION}.linux-amd64/promtool" >> $GITHUB_OUTPUT
+          echo "promtool=$(pwd)/prometheus-${PROM_VERSION}.linux-amd64/promtool" >> "$GITHUB_OUTPUT"
 
       - name: Promtool | Check alert rules
         run: |
           set -euo pipefail
           PT="${{ steps.prom.outputs.promtool }}"
           ok=0
-          if [ -f monitoring/alert_rules.yml ]; then
-            "$PT" check rules monitoring/alert_rules.yml | tee -a $GITHUB_STEP_SUMMARY || ok=1
+          if [ -f "monitoring/alert_rules.yml" ]; then
+            "$PT" check rules "monitoring/alert_rules.yml" | tee -a "$GITHUB_STEP_SUMMARY" || ok=1
           else
-            echo "[A2] NOTE: monitoring/alert_rules.yml missing; skipping" | tee -a $GITHUB_STEP_SUMMARY
+            echo "[A2] NOTE: monitoring/alert_rules.yml missing; skipping" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
-          if [ -f monitoring/normalize-alerts.yml ]; then
-            "$PT" check rules monitoring/normalize-alerts.yml | tee -a $GITHUB_STEP_SUMMARY || ok=1
+          if [ -f "monitoring/normalize-alerts.yml" ]; then
+            "$PT" check rules "monitoring/normalize-alerts.yml" | tee -a "$GITHUB_STEP_SUMMARY" || ok=1
           else
-            echo "[A2] NOTE: monitoring/normalize-alerts.yml missing; skipping" | tee -a $GITHUB_STEP_SUMMARY
+            echo "[A2] NOTE: monitoring/normalize-alerts.yml missing; skipping" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
           exit $ok
 
@@ -64,4 +64,4 @@ jobs:
           MOVE_TO_OBSERVABILITY: ${{ inputs.moveToObservability }}
         run: |
           set -euo pipefail
-          node scripts/ops/grafana-validate.mjs | tee -a $GITHUB_STEP_SUMMARY
+          node "scripts/ops/grafana-validate.mjs" | tee -a "$GITHUB_STEP_SUMMARY"
