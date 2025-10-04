@@ -112,4 +112,8 @@ cripts -Name start-*.ps1* | Sort-Object
 # Large dependency analysis files
 reports/deps/eslint-boundaries*.json
 
+# Reports directory
 reports/
+
+# Smoke test artifacts
+smoke-results/

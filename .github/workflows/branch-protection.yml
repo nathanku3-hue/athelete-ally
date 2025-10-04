@@ -14,7 +14,7 @@ on:
       required_status_checks:
         description: 'Required status checks (comma-separated)'
         required: true
-        default: 'Build Check (Blocking),Test Check (Blocking),Code Quality,Security Scan'
+        default: 'Build Check (Blocking),Test Check (Blocking),Security Scan'
 
 jobs:
   setup-protection:

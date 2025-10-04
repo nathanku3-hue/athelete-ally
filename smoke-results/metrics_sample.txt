@@ -1,0 +1,4 @@
+# HELP event_bus_events_consumed_total Total number of events consumed
+# TYPE event_bus_events_consumed_total counter
+# HELP normalize_sleep_messages_total Total number of Sleep messages processed by normalize service
+# TYPE normalize_sleep_messages_total counter
