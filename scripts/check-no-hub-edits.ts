@@ -24,10 +24,34 @@ function run(cmd: string): string {
 
 function main() {
   const base = process.env.GITHUB_BASE_REF || 'origin/main';
+  
+  // Try to fetch the base ref, but don't fail if it doesn't exist
   try {
     execSync(`git fetch --no-tags --depth=1 origin ${base}`, { stdio: 'inherit' });
-  } catch {}
-  const diff = run(`git diff --name-only --diff-filter=ACMRT ${base}...HEAD`);
+  } catch (e) {
+    console.log(`Warning: Could not fetch ${base}, trying alternative approach`);
+  }
+  
+  // Try different approaches to get changed files
+  let diff = '';
+  try {
+    // First try: use base...HEAD
+    diff = run(`git diff --name-only --diff-filter=ACMRT ${base}...HEAD`);
+  } catch (e) {
+    try {
+      // Second try: use origin/main...HEAD if base failed
+      diff = run(`git diff --name-only --diff-filter=ACMRT origin/main...HEAD`);
+    } catch (e2) {
+      try {
+        // Third try: use HEAD~1...HEAD (compare with previous commit)
+        diff = run(`git diff --name-only --diff-filter=ACMRT HEAD~1...HEAD`);
+      } catch (e3) {
+        // Last resort: use git show to get files from current commit
+        diff = run(`git show --name-only --pretty=format: HEAD | tail -n +2`);
+      }
+    }
+  }
+  
   const changed = new Set(diff.split('\n').filter(Boolean));
   const hits = hubGlobs.filter((g) => changed.has(g));
   if (hits.length) {
