@@ -6,17 +6,23 @@ import fs from 'fs';
 import path from 'path';
 
 function parseArgs(argv) {
-  const args = { uids: [], uidsFile: '', toDashboards: false, outRoot: '', basePath: '' };
+  const args = { uids: [], uidsFile: '', toDashboards: false, outRoot: '', basePath: '', rejectUnauthorized: true, help: false };
   for (let i = 2; i < argv.length; i++) {
     const k = argv[i];
     const v = argv[i + 1];
-    if (k === '--uids' && v) { args.uids = v.split(',').map(s => s.trim()).filter(Boolean); i++; }
+    if (k === '--help' || k === '-h') { args.help = true; }
+    else if (k === '--uids' && v) { args.uids = v.split(',').map(s => s.trim()).filter(Boolean); i++; }
     else if (k === '--uids-file' && v) { args.uidsFile = v; i++; }
     else if (k === '--to-dashboards') { args.toDashboards = true; }
     else if (k === '--out' && v) { args.outRoot = v; i++; }
     else if (k === '--basePath' && v) { args.basePath = v; i++; }
+    else if (k === '--rejectUnauthorized' && v) { args.rejectUnauthorized = !/^false$/i.test(v); i++; }
   }
   return args;
+}
+
+function usage(){
+  console.log(`\nUsage: node scripts/ops/grafana-export.mjs [options]\n\nOptions:\n  --uids <csv>                 Comma-separated dashboard UIDs\n  --uids-file <file>           File with one UID per line\n  --to-dashboards              Write to monitoring/grafana/dashboards/\n  --out <dir>                  Output directory (default: reports/grafana-export/YYYYMMDD)\n  --basePath <path>            Optional Grafana base path (e.g., /grafana)\n  --rejectUnauthorized <bool>  Reject self-signed TLS (default: true)\n  -h, --help                   Show this help\n`);
 }
 
 function stripEphemeral(d) {
@@ -30,9 +36,13 @@ function kebab(s) { return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').repl
 
 async function main() {
   const args = parseArgs(process.argv);
+  if (args.help) { usage(); process.exit(0); }
+
   const GRAFANA_URL = process.env.GRAFANA_URL || '';
   const GRAFANA_TOKEN = process.env.GRAFANA_TOKEN || '';
   const BASE_PATH = args.basePath || process.env.GRAFANA_BASE_PATH || '';
+  if (!args.rejectUnauthorized) { process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; }
+
   if (!GRAFANA_URL || !GRAFANA_TOKEN) {
     console.error('Missing GRAFANA_URL or GRAFANA_TOKEN');
     process.exit(1);
