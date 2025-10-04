@@ -4,12 +4,14 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   schedule:
-    - cron: "15 7 * * *"
+    - cron: '15 7 * * *'
 
 jobs:
   verify-generated:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'allowhubedit') }}
+    if:
+      ${{ github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name,
+      'allowhubedit') }}
     env:
       TZ: UTC
     steps:
