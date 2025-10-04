@@ -81,3 +81,7 @@ jobs:
           echo "NPM version: $(npm --version)"
           echo "Available disk space:"
           df -h
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

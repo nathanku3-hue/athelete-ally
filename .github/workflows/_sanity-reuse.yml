@@ -73,3 +73,7 @@ jobs:
             git ls-files -- '**/package-lock.json' || find . -type f -name 'package-lock.json' -not -path './node_modules/*'
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

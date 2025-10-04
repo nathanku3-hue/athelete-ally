@@ -1,0 +1,30 @@
+name: Dashboards Determinism (Report)
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dashboards-determinism:
+    name: Dashboards Index Determinism (report-only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.x'
+      - name: Run check
+        run: |
+          node scripts/ops/check-grafana-index.mjs || true
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboards-index-report
+          path: reports/
+          retention-days: 7

@@ -60,3 +60,7 @@ jobs:
           path: |
             npm-debug.log
             **/npm-debug.log
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
