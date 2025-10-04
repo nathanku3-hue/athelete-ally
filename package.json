@@ -16,6 +16,8 @@
     "build": "next build apps/frontend",
     "start": "next start apps/frontend",
     "lint": "eslint",
+    "lint:ci": "eslint",
+    "validate:ids": "tsx scripts/validate-ids.ts",
     "type-check": "tsc --noEmit",
     "prisma:generate": "bash ./scripts/generate-prisma-clients.sh",
     "test": "jest --projects jest/jest.projects.cjs",
