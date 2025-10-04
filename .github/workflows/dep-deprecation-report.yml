@@ -1,0 +1,49 @@
+name: Supply Chain - Dependency Report
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 2 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  deps:
+    name: Outdated/Deprecated Report
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      TZ: UTC
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.x'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Run dependency report
+        run: node scripts/ops/dep-report.mjs
+
+      - name: Upload dependency artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-${{ github.run_id }}
+          path: reports/deps/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## Dependency report artifacts" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Run ID: ${{ github.run_id }}" >> "$GITHUB_STEP_SUMMARY"
