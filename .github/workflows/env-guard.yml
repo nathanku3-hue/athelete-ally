@@ -39,3 +39,7 @@ jobs:
           else
             echo "✅ No .env files found (excluding examples)"
           fi
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

@@ -83,3 +83,7 @@ jobs:
         run: |
           echo "ℹ️  This is a non-blocking check for now"
           echo "It will be promoted to blocking after monitoring a few successful runs"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

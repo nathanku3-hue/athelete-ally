@@ -88,14 +88,10 @@
     "dev:compose:obs": "docker compose --profile obs up --build",
     "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
     "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml",
+    "lint:ci": "eslint . -f compact",
     "deps:lint": "syncpack list-mismatches && syncpack lint-semver-ranges",
     "deps:fix": "syncpack format && syncpack fix-mismatches",
     "verify:generated:report": "node -e \"process.exit(0)\""
-  },
-  "lint-staged": {
-    "**/*.{ts,js,json,md,yml,yaml}": [
-      "prettier --write"
-    ]
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [
