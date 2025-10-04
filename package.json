@@ -8,7 +8,7 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "preinstall": "node scripts/check-node-version.js",
+    "preinstall": "node scripts/check-node-version.cjs",
     "dev": "next dev apps/frontend -p 3000",
     "dev:frontend": "next dev apps/frontend -p 3000",
     "dev:bff": "npm run dev -w apps/gateway-bff",
@@ -91,6 +91,11 @@
     "deps:lint": "syncpack list-mismatches && syncpack lint-semver-ranges",
     "deps:fix": "syncpack format && syncpack fix-mismatches",
     "verify:generated:report": "node -e \"process.exit(0)\""
+  },
+  "lint-staged": {
+    "**/*.{ts,js,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [

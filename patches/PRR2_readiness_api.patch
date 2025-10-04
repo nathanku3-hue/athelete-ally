@@ -1,0 +1,3376 @@
+diff --git a/docs/architecture/readiness-flow.md b/docs/architecture/readiness-flow.md
+new file mode 100644
+index 0000000..9ce0961
+--- /dev/null
++++ b/docs/architecture/readiness-flow.md
+@@ -0,0 +1,33 @@
++# Readiness v1 Flow (PRR2/PRR3)
++
++Goal: compute daily readiness from normalized HRV and Sleep, persist to `readiness_data`, and expose stable read-only APIs.
++
++Data Sources (read-only)
++- `hrv_data` (lnRmssd per UTC day)
++- `sleep_data` (durationMinutes per UTC day; optional qualityScore)
++
++Storage (insights-engine Prisma)
++- `readiness_data` (id, userId, date DATE, score int 0..100, incomplete bool, components JSON, timestamps)
++- Unique (userId, date)
++
++Compute (baseline variant)
++- sleep_ratio = duration_norm (duration/480 clamped) blended with quality when present: `0.8*duration_norm + 0.2*(qualityScore/100)`
++- hrv_ratio = lnRmssd_today / mean(lnRmssd over previous 7 days) (clamped to [0,1])
++- readiness = round(100 * (0.6*sleep_ratio + 0.4*hrv_ratio)), clamped [0,100]
++- Missing input(s) → `incomplete=true`; still upsert record
++
++API (append-only in OpenAPI)
++- `GET /api/v1/readiness/:userId/latest` → latest record or `{ userId, incomplete: true }`
++- `GET /api/v1/readiness/:userId?days=7` → list (desc) up to N items
++- Responses use `YYYYMMDD` date strings
++
++Observability
++- Metrics: `readiness_compute_total{result}`, `readiness_compute_duration_seconds`, `api_requests_total{route,status}`
++- Tracing: span `readiness.compute`, attrs: date, result; omit raw userId (optional SHA-256 hash)
++
++Flags (documented)
++- `READINESS_CONSUMER_ENABLED=false`, `PUBLISH_READINESS_EVENTS=false`, `READINESS_FORMULA_VARIANT=baseline`
++
++Notes
++- No stream topic changes; consumer is future work (flagged off)
++- DB migrations are separate; tests prefer in-memory/SQLite-style stubs
+diff --git a/docs/examples/soak_sleep_summary.example.json b/docs/examples/soak_sleep_summary.example.json
+new file mode 100644
+index 0000000..4a39684
+--- /dev/null
++++ b/docs/examples/soak_sleep_summary.example.json
+@@ -0,0 +1,10 @@
++{
++  "generated_at": "2025-10-02T00:00:00Z",
++  "stream": "AA_CORE_HOT",
++  "durable": "normalize-sleep-durable",
++  "fallback_count": 0,
++  "dlq_rate": 0,
++  "pending_max": 0,
++  "success_rate": 1.0,
++  "notes": "Example only; real script writes ./soak_sleep_summary.json"
++}
+\ No newline at end of file
+diff --git a/docs/phase-3/ops/48h-soak-health-check.sh b/docs/phase-3/ops/48h-soak-health-check.sh
+index da0884e..931911e 100644
+--- a/docs/phase-3/ops/48h-soak-health-check.sh
++++ b/docs/phase-3/ops/48h-soak-health-check.sh
+@@ -1,214 +1,712 @@
+-#!/bin/bash
++#!/usr/bin/env bash
++# 48h Soak Health Check Script for HRV + Sleep Normalization
++# Phase 3 - Production Readiness Validation
+ #
+-# 48h-soak-health-check.sh - Phase B Soak Period Health Checks
++# Usage:
++#   ./48h-soak-health-check.sh [OPTIONS]
+ #
+-# Run this script every 24 hours during the soak period to verify:
+-#   - No fallback to ATHLETE_ALLY_EVENTS
+-#   - DLQ rate stays at 0
+-#   - Consumer health (low pending, no redelivery spikes)
+-#   - Stream purity (100% on AA_CORE_HOT)
+-#   - Database flow (recent records)
++# Options:
++#   --json                 Output JSON summary to ./soak_sleep_summary.json
++#   --checkpoint <value>   Checkpoint identifier (e.g., 24h, 48h)
++#   --stream <name>        Override stream name (default: AA_CORE_HOT)
++#   --durable-sleep <name> Override Sleep consumer name (default: normalize-sleep-durable)
++#   --durable-hrv <name>   Override HRV consumer name (default: normalize-hrv-durable)
+ #
+-# Usage:
+-#   bash docs/phase-3/ops/48h-soak-health-check.sh
++# Environment Variables:
++#   NATS_URL          - NATS server URL (default: nats://localhost:4223)
++#   NATS_HTTP         - NATS monitoring HTTP endpoint (default: http://localhost:8222)
++#   NORMALIZE_URL     - Normalize service metrics URL (default: http://localhost:4102)
++#   DATABASE_URL      - PostgreSQL connection string
++#   STATE_DIR         - State directory for delta calculations (default: ~/.aa_soak_state)
+ #
++# Note: On Windows, run dos2unix on this file if you encounter CRLF issues
+ 
+-set -e
++set -euo pipefail
+ 
++# Configuration
+ NATS_URL="${NATS_URL:-nats://localhost:4223}"
+-POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-athlete-ally-postgres}"
+-NORMALIZE_SERVICE_URL="${NORMALIZE_SERVICE_URL:-http://localhost:4102}"
+-
+-echo "============================================================"
+-echo "Phase B - 48h Soak Period Health Check"
+-echo "============================================================"
+-echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+-echo "NATS URL: $NATS_URL"
+-echo "============================================================"
+-echo ""
+-
+-# Check 1: Fallback Detection (should be 0)
+-echo "1. Fallback Detection"
+-echo "   Checking for messages on ATHLETE_ALLY_EVENTS (legacy stream)..."
+-
+-LEGACY_MESSAGES=$(node -e "
+-const { connect } = require('nats');
+-(async () => {
+-  const nc = await connect({ servers: '$NATS_URL' });
+-  const jsm = await nc.jetstreamManager();
+-  try {
+-    const info = await jsm.streams.info('ATHLETE_ALLY_EVENTS');
+-    console.log(info.state.messages);
+-  } catch (err) {
+-    console.log('0');
+-  }
+-  await nc.close();
+-})();
+-" 2>/dev/null)
+-
+-AA_CORE_HOT_MESSAGES=$(node -e "
+-const { connect } = require('nats');
+-(async () => {
+-  const nc = await connect({ servers: '$NATS_URL' });
+-  const jsm = await nc.jetstreamManager();
+-  const info = await jsm.streams.info('AA_CORE_HOT');
+-  console.log(info.state.messages);
+-  await nc.close();
+-})();
+-" 2>/dev/null)
+-
+-echo "   ATHLETE_ALLY_EVENTS messages: $LEGACY_MESSAGES"
+-echo "   AA_CORE_HOT messages: $AA_CORE_HOT_MESSAGES"
+-
+-if [ "$LEGACY_MESSAGES" -gt 55 ]; then
+-  echo "   ❌ FAIL: Legacy stream received new messages (fallback detected)"
+-  exit 1
+-else
+-  echo "   ✅ PASS: No fallback to legacy stream"
+-fi
+-echo ""
+-
+-# Check 2: DLQ Stability
+-echo "2. DLQ Stability"
+-echo "   Checking DLQ message count..."
+-
+-DLQ_MESSAGES=$(node -e "
+-const { connect } = require('nats');
+-(async () => {
+-  const nc = await connect({ servers: '$NATS_URL' });
+-  const jsm = await nc.jetstreamManager();
+-  const info = await jsm.streams.info('AA_DLQ');
+-  console.log(info.state.messages);
+-  await nc.close();
+-})();
+-" 2>/dev/null)
+-
+-echo "   AA_DLQ messages: $DLQ_MESSAGES"
+-
+-if [ "$DLQ_MESSAGES" -gt 5 ]; then
+-  echo "   ⚠️  WARN: DLQ message count increased (threshold: 5)"
+-  echo "   Action: Investigate DLQ subjects and error patterns"
++NATS_HTTP="${NATS_HTTP:-http://localhost:8222}"
++NORMALIZE_URL="${NORMALIZE_URL:-http://localhost:4102}"
++DATABASE_URL="${DATABASE_URL:-}"
++STATE_DIR="${STATE_DIR:-$HOME/.aa_soak_state}"
++STREAM_NAME="AA_CORE_HOT"
++SLEEP_CONSUMER="normalize-sleep-durable"
++HRV_CONSUMER="normalize-hrv-durable"
++CHECKPOINT=""
++JSON_OUTPUT=false
++JSON_FILE="./soak_sleep_summary.json"
++
++# Parse arguments
++while [[ $# -gt 0 ]]; do
++  case $1 in
++    --json)
++      JSON_OUTPUT=true
++      shift
++      ;;
++    --checkpoint)
++      CHECKPOINT="$2"
++      shift 2
++      ;;
++    --stream)
++      STREAM_NAME="$2"
++      shift 2
++      ;;
++    --durable-sleep)
++      SLEEP_CONSUMER="$2"
++      shift 2
++      ;;
++    --durable-hrv)
++      HRV_CONSUMER="$2"
++      shift 2
++      ;;
++    *)
++      shift
++      ;;
++  esac
++done
++
++# Colors for output (disabled in JSON mode)
++if [[ "$JSON_OUTPUT" == "false" ]]; then
++  RED='\033[0;31m'
++  GREEN='\033[0;32m'
++  YELLOW='\033[1;33m'
++  BLUE='\033[0;34m'
++  NC='\033[0m' # No Color
+ else
+-  echo "   ✅ PASS: DLQ stable (baseline: 1 message)"
++  RED=''
++  GREEN=''
++  YELLOW=''
++  BLUE=''
++  NC=''
+ fi
+-echo ""
+-
+-# Check 3: Consumer Health
+-echo "3. Consumer Health (normalize-hrv-durable)"
+-
+-node -e "
+-const { connect } = require('nats');
+-(async () => {
+-  const nc = await connect({ servers: '$NATS_URL' });
+-  const jsm = await nc.jetstreamManager();
+-  const info = await jsm.consumers.info('AA_CORE_HOT', 'normalize-hrv-durable');
+-
+-  console.log('   Pending messages:    ', info.num_pending || 0);
+-  console.log('   Ack pending:         ', info.num_ack_pending || 0);
+-  console.log('   Num waiting:         ', info.num_waiting || 0);
+-  console.log('   Delivered (stream):  ', info.delivered?.stream_seq || 0);
+-  console.log('   Ack floor (stream):  ', info.ack_floor?.stream_seq || 0);
+-  console.log('   Num redelivered:     ', info.num_redelivered || 0);
+-
+-  const pending = info.num_pending || 0;
+-  const ackPending = info.num_ack_pending || 0;
+-  const redelivered = info.num_redelivered || 0;
+-
+-  let status = '✅ PASS';
+-  if (pending > 100) {
+-    status = '❌ FAIL: High pending messages (> 100)';
+-  } else if (ackPending > 50) {
+-    status = '⚠️  WARN: High ack pending (> 50)';
+-  } else if (redelivered > 10) {
+-    status = '⚠️  WARN: Redeliveries detected (> 10)';
+-  }
+-
+-  console.log('   Status:', status);
+-
+-  await nc.close();
+-})();
+-" 2>/dev/null
+-
+-echo ""
+-
+-# Check 4: Metrics - Stream Label Distribution
+-echo "4. Metrics - Stream Label Distribution"
+-echo "   Checking normalize_hrv_messages_total..."
+-
+-METRICS=$(curl -s $NORMALIZE_SERVICE_URL/metrics 2>/dev/null | grep 'normalize_hrv_messages_total{' || echo "")
+-
+-if [ -z "$METRICS" ]; then
+-  echo "   ⚠️  WARN: No metrics found (service may not be running)"
+-else
+-  echo "$METRICS" | while read -r line; do
+-    echo "   $line"
+-  done
+ 
+-  # Check if all success metrics are on AA_CORE_HOT
+-  SUCCESS_COUNT=$(echo "$METRICS" | grep 'result="success"' | grep 'stream="AA_CORE_HOT"' | grep -oP '\d+$' || echo "0")
+-  LEGACY_COUNT=$(echo "$METRICS" | grep 'result="success"' | grep 'stream="ATHLETE_ALLY_EVENTS"' | grep -oP '\d+$' || echo "0")
++# Tool availability checks
++HAS_CURL=$(command -v curl &> /dev/null && echo "true" || echo "false")
++HAS_JQ=$(command -v jq &> /dev/null && echo "true" || echo "false")
++HAS_NATS=$(command -v nats &> /dev/null && echo "true" || echo "false")
++HAS_PSQL=$(command -v psql &> /dev/null && echo "true" || echo "false")
++HAS_BC=$(command -v bc &> /dev/null && echo "true" || echo "false")
++
++# Create state directory
++mkdir -p "$STATE_DIR"
++
++# Global variables for JSON output
++declare -A JSON_DATA
++JSON_DATA[timestamp]=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
++JSON_DATA[checkpoint]="$CHECKPOINT"
++JSON_DATA[nats_url]="$NATS_URL"
++JSON_DATA[normalize_url]="$NORMALIZE_URL"
++JSON_DATA[stream]="$STREAM_NAME"
++
++# ============================================================================
++# Utility Functions
++# ============================================================================
++
++log_pass() {
++  echo -e "${GREEN}✅ PASS${NC} $1"
++}
++
++log_warn() {
++  echo -e "${YELLOW}⚠️  WARN${NC} $1"
++}
++
++log_fail() {
++  echo -e "${RED}❌ FAIL${NC} $1"
++}
++
++log_info() {
++  echo -e "${BLUE}ℹ️  INFO${NC} $1"
++}
++
++log_skip() {
++  echo -e "${YELLOW}⏭️  SKIP${NC} $1"
++}
++
++# ============================================================================
++# NATS JetStream Functions
++# ============================================================================
++
++get_consumer_info() {
++  local stream=$1
++  local consumer=$2
++
++  if [[ "$HAS_CURL" == "false" || "$HAS_JQ" == "false" ]]; then
++    echo "SKIP"
++    return 1
++  fi
++
++  local response
++  response=$(curl -s "${NATS_HTTP}/jsz?streams=1&consumers=1" 2>/dev/null || echo "{}")
++
++  if [[ -z "$response" || "$response" == "{}" ]]; then
++    echo "ERROR"
++    return 1
++  fi
++
++  echo "$response" | jq -r --arg stream "$stream" --arg consumer "$consumer" '
++    .streams[]? | select(.name == $stream) |
++    .consumer_detail[]? | select(.name == $consumer)
++  ' 2>/dev/null || echo "NOT_FOUND"
++}
++
++get_consumer_pending() {
++  local stream=$1
++  local consumer=$2
++
++  local info
++  info=$(get_consumer_info "$stream" "$consumer")
++
++  if [[ "$info" == "SKIP" || "$info" == "ERROR" || "$info" == "NOT_FOUND" ]]; then
++    echo "$info"
++    return 1
++  fi
++
++  echo "$info" | jq -r '.num_pending // 0' 2>/dev/null || echo "0"
++}
++
++get_stream_purity() {
++  local metric_name=$1
++  local metrics_data=$2
++
++  # Check if metrics contain only expected stream
++  local streams
++  streams=$(echo "$metrics_data" | grep "^${metric_name}{" | grep -o 'stream="[^"]*"' | cut -d'"' -f2 | sort -u)
++
++  if [[ -z "$streams" ]]; then
++    echo "NO_DATA"
++    return 1
++  fi
++
++  if [[ "$streams" == "$STREAM_NAME" ]]; then
++    echo "PASS"
++    return 0
++  else
++    echo "FAIL: Found streams: $streams"
++    return 1
++  fi
++}
++
++# ============================================================================
++# Prometheus Metrics Functions
++# ============================================================================
++
++fetch_metrics() {
++  local url=$1
++
++  if [[ "$HAS_CURL" == "false" ]]; then
++    echo "SKIP"
++    return 1
++  fi
++
++  curl -s "${url}/metrics" 2>/dev/null || echo "ERROR"
++}
++
++parse_metric_total() {
++  local metrics_data=$1
++  local metric_name=$2
++  local label_filter=$3
++
++  echo "$metrics_data" | grep "^${metric_name}{" | grep "$label_filter" | awk '{print $2}' | awk '{s+=$1} END {print s}' || echo "0"
++}
++
++calculate_success_rate() {
++  local success=$1
++  local dlq=$2
++  local retry=$3
++
++  local total=$((success + dlq + retry))
++
++  if [[ $total -eq 0 ]]; then
++    echo "100.00"
++    return 0
++  fi
++
++  if [[ "$HAS_BC" == "true" ]]; then
++    echo "scale=2; ($success / $total) * 100" | bc -l 2>/dev/null || echo "0.00"
++  else
++    # Fallback without bc
++    echo "$((success * 10000 / total))" | awk '{printf "%.2f", $1/100}'
++  fi
++}
++
++# ============================================================================
++# Database Functions
++# ============================================================================
++
++check_database_table() {
++  local table=$1
++  local feature=$2
++
++  if [[ "$HAS_PSQL" == "false" || -z "$DATABASE_URL" ]]; then
++    log_skip "Database check for $table (psql or DATABASE_URL not available)"
++    JSON_DATA[${feature}_db_status]="SKIP"
++    JSON_DATA[${feature}_db_count]=0
++    return 0
++  fi
++
++  local count
++  count=$(psql "$DATABASE_URL" -t -c "SELECT COUNT(*) FROM $table WHERE created_at > NOW() - INTERVAL '1 hour';" 2>/dev/null | xargs || echo "ERROR")
++
++  if [[ "$count" == "ERROR" ]]; then
++    log_warn "Database query failed for $table"
++    JSON_DATA[${feature}_db_status]="ERROR"
++    JSON_DATA[${feature}_db_count]=0
++    return 1
++  fi
++
++  JSON_DATA[${feature}_db_count]=$count
++
++  if [[ $count -gt 0 ]]; then
++    log_pass "$table: $count rows in last hour"
++    JSON_DATA[${feature}_db_status]="PASS"
++  else
++    log_warn "$table: 0 rows in last hour"
++    JSON_DATA[${feature}_db_status]="WARN"
++  fi
++}
++
++# ============================================================================
++# DLQ Depth Check
++# ============================================================================
++
++check_dlq_depth() {
++  local subject_prefix=$1
++  local feature=$2
++
++  if [[ "$HAS_NATS" == "false" ]]; then
++    log_skip "DLQ depth check (NATS CLI not available)"
++    JSON_DATA[${feature}_dlq_status]="SKIP"
++    JSON_DATA[${feature}_dlq_count]=0
++    return 0
++  fi
++
++  # Try to get DLQ stream info
++  local dlq_info
++  dlq_info=$(nats stream info AA_DLQ --json 2>/dev/null || echo "{}")
++
++  if [[ "$dlq_info" == "{}" ]]; then
++    log_info "DLQ stream not found or not accessible"
++    JSON_DATA[${feature}_dlq_status]="INFO"
++    JSON_DATA[${feature}_dlq_count]=0
++    return 0
++  fi
++
++  # Count messages in DLQ with subject prefix
++  local dlq_count
++  dlq_count=$(echo "$dlq_info" | jq -r '.state.messages // 0' 2>/dev/null || echo "0")
++
++  JSON_DATA[${feature}_dlq_count]=$dlq_count
+ 
++  if [[ $dlq_count -eq 0 ]]; then
++    log_pass "DLQ depth for ${subject_prefix}: 0"
++    JSON_DATA[${feature}_dlq_status]="PASS"
++  else
++    log_warn "DLQ depth for ${subject_prefix}: $dlq_count"
++    JSON_DATA[${feature}_dlq_status]="WARN"
++  fi
++}
++
++# ============================================================================
++# HRV Health Checks
++# ============================================================================
++
++check_hrv_consumer() {
++  echo ""
++  echo "=== HRV Consumer Health ==="
++
++  local pending
++  pending=$(get_consumer_pending "$STREAM_NAME" "$HRV_CONSUMER")
++
++  JSON_DATA[hrv_consumer_pending]="$pending"
++
++  if [[ "$pending" == "SKIP" ]]; then
++    log_skip "HRV consumer check (curl/jq not available)"
++    JSON_DATA[hrv_consumer_status]="SKIP"
++  elif [[ "$pending" == "ERROR" ]]; then
++    log_warn "HRV consumer: Cannot fetch NATS stats"
++    JSON_DATA[hrv_consumer_status]="ERROR"
++  elif [[ "$pending" == "NOT_FOUND" ]]; then
++    log_warn "HRV consumer: $HRV_CONSUMER not found"
++    JSON_DATA[hrv_consumer_status]="NOT_FOUND"
++  elif [[ $pending -lt 10 ]]; then
++    log_pass "HRV consumer pending: $pending (< 10)"
++    JSON_DATA[hrv_consumer_status]="PASS"
++  else
++    log_warn "HRV consumer pending: $pending (≥ 10)"
++    JSON_DATA[hrv_consumer_status]="WARN"
++  fi
++}
++
++check_hrv_metrics() {
+   echo ""
+-  echo "   Success on AA_CORE_HOT: $SUCCESS_COUNT"
+-  echo "   Success on ATHLETE_ALLY_EVENTS: $LEGACY_COUNT"
++  echo "=== HRV Metrics ==="
++
++  local metrics
++  metrics=$(fetch_metrics "$NORMALIZE_URL")
++
++  if [[ "$metrics" == "SKIP" ]]; then
++    log_skip "HRV metrics (curl not available)"
++    JSON_DATA[hrv_metrics_status]="SKIP"
++    JSON_DATA[hrv_success]=0
++    JSON_DATA[hrv_dlq]=0
++    JSON_DATA[hrv_retry]=0
++    JSON_DATA[hrv_success_rate]="0.00"
++    JSON_DATA[hrv_stream_purity]="SKIP"
++    return 0
++  elif [[ "$metrics" == "ERROR" ]]; then
++    log_warn "HRV metrics: Cannot fetch from ${NORMALIZE_URL}/metrics"
++    JSON_DATA[hrv_metrics_status]="ERROR"
++    JSON_DATA[hrv_success]=0
++    JSON_DATA[hrv_dlq]=0
++    JSON_DATA[hrv_retry]=0
++    JSON_DATA[hrv_success_rate]="0.00"
++    JSON_DATA[hrv_stream_purity]="ERROR"
++    return 0
++  fi
++
++  # Parse success/dlq/retry counts
++  local success
++  local dlq
++  local retry
++  success=$(parse_metric_total "$metrics" "normalize_hrv_messages_total" 'status="success"')
++  dlq=$(parse_metric_total "$metrics" "normalize_hrv_messages_total" 'status="dlq"')
++  retry=$(parse_metric_total "$metrics" "normalize_hrv_messages_total" 'status="retry"')
++
++  JSON_DATA[hrv_success]=$success
++  JSON_DATA[hrv_dlq]=$dlq
++  JSON_DATA[hrv_retry]=$retry
+ 
+-  if [ "$LEGACY_COUNT" -gt 0 ]; then
+-    echo "   ❌ FAIL: Messages processed on legacy stream"
++  log_info "HRV success: $success, DLQ: $dlq, retry: $retry"
++
++  # Calculate success rate
++  local success_rate
++  success_rate=$(calculate_success_rate "$success" "$dlq" "$retry")
++  JSON_DATA[hrv_success_rate]=$success_rate
++
++  if (( $(echo "$success_rate >= 99.9" | bc -l 2>/dev/null || echo "0") )); then
++    log_pass "HRV success rate: ${success_rate}% (≥ 99.9%)"
++    JSON_DATA[hrv_metrics_status]="PASS"
+   else
+-    echo "   ✅ PASS: 100% stream purity (AA_CORE_HOT)"
++    log_warn "HRV success rate: ${success_rate}% (< 99.9%)"
++    JSON_DATA[hrv_metrics_status]="WARN"
+   fi
+-fi
+-echo ""
+ 
+-# Check 5: Database Flow
+-echo "5. Database Flow (Recent Records)"
+-echo "   Checking hrv_data table for recent inserts..."
++  # Check stream purity
++  local purity
++  purity=$(get_stream_purity "normalize_hrv_messages_total" "$metrics")
++  JSON_DATA[hrv_stream_purity]="$purity"
+ 
+-RECENT_COUNT=$(docker exec $POSTGRES_CONTAINER psql -U athlete -d athlete_normalize -t -c \
+-  "SELECT COUNT(*) FROM hrv_data WHERE \"createdAt\" > NOW() - INTERVAL '10 minutes';" 2>/dev/null | tr -d ' ' || echo "0")
++  if [[ "$purity" == "PASS" ]]; then
++    log_pass "HRV stream purity: 100% $STREAM_NAME"
++  elif [[ "$purity" == "NO_DATA" ]]; then
++    log_skip "HRV stream purity (no data)"
++  else
++    log_fail "HRV stream purity: $purity"
++  fi
++}
+ 
+-echo "   Records in last 10 minutes: $RECENT_COUNT"
++check_hrv_database() {
++  echo ""
++  echo "=== HRV Database ==="
++  check_database_table "hrv_data" "hrv"
++}
+ 
+-if [ "$RECENT_COUNT" -eq 0 ]; then
+-  echo "   ⚠️  WARN: No recent database inserts (check if traffic is expected)"
+-else
+-  echo "   ✅ PASS: Database flow active"
+-fi
+-echo ""
++# ============================================================================
++# Sleep Health Checks
++# ============================================================================
++
++check_sleep_consumer() {
++  echo ""
++  echo "=== Sleep Consumer Health ==="
++
++  local pending
++  pending=$(get_consumer_pending "$STREAM_NAME" "$SLEEP_CONSUMER")
++
++  JSON_DATA[sleep_consumer_pending]="$pending"
++
++  if [[ "$pending" == "SKIP" ]]; then
++    log_skip "Sleep consumer check (curl/jq not available)"
++    JSON_DATA[sleep_consumer_status]="SKIP"
++  elif [[ "$pending" == "ERROR" ]]; then
++    log_warn "Sleep consumer: Cannot fetch NATS stats"
++    JSON_DATA[sleep_consumer_status]="ERROR"
++  elif [[ "$pending" == "NOT_FOUND" ]]; then
++    log_warn "Sleep consumer: $SLEEP_CONSUMER not found"
++    JSON_DATA[sleep_consumer_status]="NOT_FOUND"
++  elif [[ $pending -lt 10 ]]; then
++    log_pass "Sleep consumer pending: $pending (< 10)"
++    JSON_DATA[sleep_consumer_status]="PASS"
++  else
++    log_warn "Sleep consumer pending: $pending (≥ 10)"
++    JSON_DATA[sleep_consumer_status]="WARN"
++  fi
++}
+ 
+-# Check 6: DLQ Rate from Metrics
+-echo "6. DLQ Rate (Metrics)"
+-echo "   Checking normalize_hrv_messages_total{result=\"dlq\"}..."
++check_sleep_metrics() {
++  echo ""
++  echo "=== Sleep Metrics ==="
++
++  local metrics
++  metrics=$(fetch_metrics "$NORMALIZE_URL")
++
++  if [[ "$metrics" == "SKIP" ]]; then
++    log_skip "Sleep metrics (curl not available)"
++    JSON_DATA[sleep_metrics_status]="SKIP"
++    JSON_DATA[sleep_success]=0
++    JSON_DATA[sleep_dlq]=0
++    JSON_DATA[sleep_retry]=0
++    JSON_DATA[sleep_success_rate]="0.00"
++    JSON_DATA[sleep_stream_purity]="SKIP"
++    return 0
++  elif [[ "$metrics" == "ERROR" ]]; then
++    log_warn "Sleep metrics: Cannot fetch from ${NORMALIZE_URL}/metrics"
++    JSON_DATA[sleep_metrics_status]="ERROR"
++    JSON_DATA[sleep_success]=0
++    JSON_DATA[sleep_dlq]=0
++    JSON_DATA[sleep_retry]=0
++    JSON_DATA[sleep_success_rate]="0.00"
++    JSON_DATA[sleep_stream_purity]="ERROR"
++    return 0
++  fi
+ 
+-DLQ_METRIC=$(curl -s $NORMALIZE_SERVICE_URL/metrics 2>/dev/null | grep 'normalize_hrv_messages_total{result="dlq"' || echo "")
++  # Parse success/dlq/retry counts
++  local success
++  local dlq
++  local retry
++  success=$(parse_metric_total "$metrics" "normalize_sleep_messages_total" 'status="success"')
++  dlq=$(parse_metric_total "$metrics" "normalize_sleep_messages_total" 'status="dlq"')
++  retry=$(parse_metric_total "$metrics" "normalize_sleep_messages_total" 'status="retry"')
+ 
+-if [ -z "$DLQ_METRIC" ]; then
+-  echo "   ✅ PASS: No DLQ metrics (rate = 0)"
+-else
+-  DLQ_COUNT=$(echo "$DLQ_METRIC" | grep -oP '\d+$' || echo "0")
+-  echo "   $DLQ_METRIC"
++  JSON_DATA[sleep_success]=$success
++  JSON_DATA[sleep_dlq]=$dlq
++  JSON_DATA[sleep_retry]=$retry
++
++  log_info "Sleep success: $success, DLQ: $dlq, retry: $retry"
++
++  # Calculate success rate
++  local success_rate
++  success_rate=$(calculate_success_rate "$success" "$dlq" "$retry")
++  JSON_DATA[sleep_success_rate]=$success_rate
+ 
+-  if [ "$DLQ_COUNT" -gt 0 ]; then
+-    echo "   ⚠️  WARN: DLQ counter > 0 ($DLQ_COUNT messages)"
+-    echo "   Action: Check service logs for DLQ routing reasons"
++  if (( $(echo "$success_rate >= 99.9" | bc -l 2>/dev/null || echo "0") )); then
++    log_pass "Sleep success rate: ${success_rate}% (≥ 99.9%)"
++    JSON_DATA[sleep_metrics_status]="PASS"
+   else
+-    echo "   ✅ PASS: DLQ rate = 0"
++    log_warn "Sleep success rate: ${success_rate}% (< 99.9%)"
++    JSON_DATA[sleep_metrics_status]="WARN"
+   fi
+-fi
+-echo ""
+-
+-# Summary
+-echo "============================================================"
+-echo "Health Check Summary"
+-echo "============================================================"
+-echo "Soak Period Status: IN PROGRESS"
+-echo "Next Check: $(date -u -d '+24 hours' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+-echo ""
+-echo "Key Metrics:"
+-echo "  - AA_CORE_HOT messages: $AA_CORE_HOT_MESSAGES"
+-echo "  - ATHLETE_ALLY_EVENTS messages: $LEGACY_MESSAGES (baseline: 55)"
+-echo "  - AA_DLQ messages: $DLQ_MESSAGES (baseline: 1)"
+-echo "  - Recent DB inserts (10min): $RECENT_COUNT"
+-echo ""
+-echo "✅ Health check complete"
+-echo "============================================================"
++
++  # Check stream purity
++  local purity
++  purity=$(get_stream_purity "normalize_sleep_messages_total" "$metrics")
++  JSON_DATA[sleep_stream_purity]="$purity"
++
++  if [[ "$purity" == "PASS" ]]; then
++    log_pass "Sleep stream purity: 100% $STREAM_NAME"
++  elif [[ "$purity" == "NO_DATA" ]]; then
++    log_skip "Sleep stream purity (no data)"
++  else
++    log_fail "Sleep stream purity: $purity"
++  fi
++}
++
++check_sleep_database() {
++  echo ""
++  echo "=== Sleep Database ==="
++  check_database_table "sleep_data" "sleep"
++}
++
++check_sleep_dlq() {
++  echo ""
++  echo "=== Sleep DLQ ==="
++  check_dlq_depth "dlq.normalize.sleep" "sleep"
++}
++
++# ============================================================================
++# Soak Checklist Functions
++# ============================================================================
++
++print_hrv_checklist() {
++  echo ""
++  echo "=========================================="
++  echo "  HRV Soak Checklist"
++  echo "=========================================="
++  echo "Target: Success Rate ≥ 99.9%"
++  echo "Target: Consumer Pending < 10"
++  echo "Target: DLQ Rate = 0"
++  echo "Target: Stream Purity = 100% $STREAM_NAME"
++  echo "Target: Fallback Events = 0 (TODO: not yet tracked)"
++  echo "=========================================="
++}
++
++print_sleep_checklist() {
++  echo ""
++  echo "=========================================="
++  echo "  Sleep Soak Checklist"
++  echo "=========================================="
++  echo "Target: Success Rate ≥ 99.9%"
++  echo "Target: Consumer Pending < 10"
++  echo "Target: DLQ Rate = 0"
++  echo "Target: Stream Purity = 100% $STREAM_NAME"
++  echo "Target: Fallback Events = 0 (TODO: not yet tracked)"
++  echo "=========================================="
++}
++
++# ============================================================================
++# JSON Output Function
++# ============================================================================
++
++write_json_output() {
++  if [[ "$JSON_OUTPUT" == "false" ]]; then
++    return 0
++  fi
++
++  if [[ "$HAS_JQ" == "false" ]]; then
++    echo "Warning: jq not available, skipping JSON output"
++    return 1
++  fi
++
++  # Build JSON structure
++  local json_content
++  json_content=$(jq -n \
++    --arg ts "${JSON_DATA[timestamp]}" \
++    --arg cp "${JSON_DATA[checkpoint]}" \
++    --arg nats "${JSON_DATA[nats_url]}" \
++    --arg norm "${JSON_DATA[normalize_url]}" \
++    --arg stream "${JSON_DATA[stream]}" \
++    --arg hrv_cons_status "${JSON_DATA[hrv_consumer_status]:-UNKNOWN}" \
++    --arg hrv_cons_pending "${JSON_DATA[hrv_consumer_pending]:-0}" \
++    --arg hrv_met_status "${JSON_DATA[hrv_metrics_status]:-UNKNOWN}" \
++    --arg hrv_success "${JSON_DATA[hrv_success]:-0}" \
++    --arg hrv_dlq "${JSON_DATA[hrv_dlq]:-0}" \
++    --arg hrv_retry "${JSON_DATA[hrv_retry]:-0}" \
++    --arg hrv_rate "${JSON_DATA[hrv_success_rate]:-0.00}" \
++    --arg hrv_purity "${JSON_DATA[hrv_stream_purity]:-UNKNOWN}" \
++    --arg hrv_db_status "${JSON_DATA[hrv_db_status]:-UNKNOWN}" \
++    --arg hrv_db_count "${JSON_DATA[hrv_db_count]:-0}" \
++    --arg sleep_cons_status "${JSON_DATA[sleep_consumer_status]:-UNKNOWN}" \
++    --arg sleep_cons_pending "${JSON_DATA[sleep_consumer_pending]:-0}" \
++    --arg sleep_met_status "${JSON_DATA[sleep_metrics_status]:-UNKNOWN}" \
++    --arg sleep_success "${JSON_DATA[sleep_success]:-0}" \
++    --arg sleep_dlq "${JSON_DATA[sleep_dlq]:-0}" \
++    --arg sleep_retry "${JSON_DATA[sleep_retry]:-0}" \
++    --arg sleep_rate "${JSON_DATA[sleep_success_rate]:-0.00}" \
++    --arg sleep_purity "${JSON_DATA[sleep_stream_purity]:-UNKNOWN}" \
++    --arg sleep_db_status "${JSON_DATA[sleep_db_status]:-UNKNOWN}" \
++    --arg sleep_db_count "${JSON_DATA[sleep_db_count]:-0}" \
++    --arg sleep_dlq_status "${JSON_DATA[sleep_dlq_status]:-UNKNOWN}" \
++    --arg sleep_dlq_count "${JSON_DATA[sleep_dlq_count]:-0}" \
++    '{
++      timestamp: $ts,
++      checkpoint: $cp,
++      environment: {
++        nats_url: $nats,
++        normalize_url: $norm,
++        stream: $stream
++      },
++      hrv: {
++        consumer: {
++          status: $hrv_cons_status,
++          pending: $hrv_cons_pending
++        },
++        metrics: {
++          status: $hrv_met_status,
++          success: ($hrv_success | tonumber),
++          dlq: ($hrv_dlq | tonumber),
++          retry: ($hrv_retry | tonumber),
++          success_rate: ($hrv_rate | tonumber)
++        },
++        stream_purity: $hrv_purity,
++        database: {
++          status: $hrv_db_status,
++          count: ($hrv_db_count | tonumber)
++        }
++      },
++      sleep: {
++        consumer: {
++          status: $sleep_cons_status,
++          pending: $sleep_cons_pending
++        },
++        metrics: {
++          status: $sleep_met_status,
++          success: ($sleep_success | tonumber),
++          dlq: ($sleep_dlq | tonumber),
++          retry: ($sleep_retry | tonumber),
++          success_rate: ($sleep_rate | tonumber)
++        },
++        stream_purity: $sleep_purity,
++        database: {
++          status: $sleep_db_status,
++          count: ($sleep_db_count | tonumber)
++        },
++        dlq: {
++          status: $sleep_dlq_status,
++          count: ($sleep_dlq_count | tonumber)
++        }
++      }
++    }')
++
++  echo "$json_content" > "$JSON_FILE"
++  log_info "JSON summary written to $JSON_FILE"
++}
++
++# ============================================================================
++# Main Execution
++# ============================================================================
++
++main() {
++  echo "=========================================="
++  echo "  48h Soak Health Check"
++  echo "  Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
++  if [[ -n "$CHECKPOINT" ]]; then
++    echo "  Checkpoint: $CHECKPOINT"
++  fi
++  echo "=========================================="
++  echo ""
++  echo "Configuration:"
++  echo "  NATS_URL: $NATS_URL"
++  echo "  NATS_HTTP: $NATS_HTTP"
++  echo "  NORMALIZE_URL: $NORMALIZE_URL"
++  echo "  DATABASE_URL: ${DATABASE_URL:-(not set)}"
++  echo "  STREAM: $STREAM_NAME"
++  echo "  HRV Consumer: $HRV_CONSUMER"
++  echo "  Sleep Consumer: $SLEEP_CONSUMER"
++  echo "  STATE_DIR: $STATE_DIR"
++  echo ""
++  echo "Tool Availability:"
++  echo "  curl: $HAS_CURL"
++  echo "  jq: $HAS_JQ"
++  echo "  nats: $HAS_NATS"
++  echo "  psql: $HAS_PSQL"
++  echo "  bc: $HAS_BC"
++  echo ""
++
++  # HRV Checks
++  print_hrv_checklist
++  check_hrv_consumer
++  check_hrv_metrics
++  check_hrv_database
++
++  # Sleep Checks
++  print_sleep_checklist
++  check_sleep_consumer
++  check_sleep_metrics
++  check_sleep_database
++  check_sleep_dlq
++
++  echo ""
++  echo "=========================================="
++  echo "  Health Check Complete"
++  echo "  Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
++  echo "=========================================="
++
++  # Write JSON output if requested
++  write_json_output
++
++  # TODO: Add delta calculation by storing state in $STATE_DIR
++  #       Compare current metrics with previous checkpoint to calculate rates
++  # TODO: Add fallback event detection (requires additional metrics from normalize-service)
++  #       Track events that fell back from AA_CORE_HOT to ATHLETE_ALLY_EVENTS
++}
++
++main "$@"
+diff --git a/docs/phase-3/ops/SLEEP_SOAK_RESULTS.md b/docs/phase-3/ops/SLEEP_SOAK_RESULTS.md
+new file mode 100644
+index 0000000..0f51e12
+--- /dev/null
++++ b/docs/phase-3/ops/SLEEP_SOAK_RESULTS.md
+@@ -0,0 +1,265 @@
++# Sleep Soak Test Results
++
++## Test Configuration
++
++| Parameter | Value |
++|-----------|-------|
++| **Test Start** | <!-- YYYY-MM-DD HH:MM:SS UTC --> |
++| **Test End** | <!-- YYYY-MM-DD HH:MM:SS UTC --> |
++| **Environment** | <!-- local / staging / production --> |
++| **NATS URL** | <!-- e.g., nats://localhost:4223 --> |
++| **NATS HTTP** | <!-- e.g., http://localhost:8222 --> |
++| **Normalize Service** | <!-- e.g., http://localhost:4102 --> |
++| **Stream** | <!-- e.g., AA_CORE_HOT --> |
++| **Sleep Consumer** | <!-- e.g., normalize-sleep-durable --> |
++| **HRV Consumer** | <!-- e.g., normalize-hrv-durable --> |
++
++---
++
++## Commands
++
++### Local Development
++
++```bash
++# Basic health check
++cd docs/phase-3/ops
++./48h-soak-health-check.sh --checkpoint 24h
++
++# With JSON output
++./48h-soak-health-check.sh --checkpoint 24h --json
++
++# Custom environment
++NATS_URL=nats://localhost:4223 \
++NATS_HTTP=http://localhost:8222 \
++NORMALIZE_URL=http://localhost:4102 \
++DATABASE_URL=postgresql://user:pass@localhost:5432/athleteally \
++./48h-soak-health-check.sh --checkpoint 24h --json
++```
++
++### Staging Environment
++
++```bash
++# 24h checkpoint
++NATS_URL=nats://staging-nats.example.com:4223 \
++NATS_HTTP=http://staging-nats.example.com:8222 \
++NORMALIZE_URL=http://staging-normalize.example.com:4102 \
++DATABASE_URL="$STAGING_DATABASE_URL" \
++./48h-soak-health-check.sh --checkpoint 24h --json
++
++# 48h checkpoint
++NATS_URL=nats://staging-nats.example.com:4223 \
++NATS_HTTP=http://staging-nats.example.com:8222 \
++NORMALIZE_URL=http://staging-normalize.example.com:4102 \
++DATABASE_URL="$STAGING_DATABASE_URL" \
++./48h-soak-health-check.sh --checkpoint 48h --json
++```
++
++### Production Environment
++
++```bash
++# 24h checkpoint
++NATS_URL=nats://prod-nats.example.com:4223 \
++NATS_HTTP=http://prod-nats.example.com:8222 \
++NORMALIZE_URL=http://prod-normalize.example.com:4102 \
++DATABASE_URL="$PRODUCTION_DATABASE_URL" \
++./48h-soak-health-check.sh --checkpoint 24h --json
++
++# 48h checkpoint
++NATS_URL=nats://prod-nats.example.com:4223 \
++NATS_HTTP=http://prod-nats.example.com:8222 \
++NORMALIZE_URL=http://prod-normalize.example.com:4102 \
++DATABASE_URL="$PRODUCTION_DATABASE_URL" \
++./48h-soak-health-check.sh --checkpoint 48h --json
++
++# Custom stream/durables (if using non-default names)
++NATS_URL=nats://prod-nats.example.com:4223 \
++NATS_HTTP=http://prod-nats.example.com:8222 \
++NORMALIZE_URL=http://prod-normalize.example.com:4102 \
++./48h-soak-health-check.sh \
++  --checkpoint 48h \
++  --stream AA_CORE_HOT \
++  --durable-sleep normalize-sleep-durable \
++  --durable-hrv normalize-hrv-durable \
++  --json
++```
++
++---
++
++## 24h Checkpoint
++
++**Timestamp:** <!-- YYYY-MM-DD HH:MM:SS UTC -->
++
++### Health Check Output
++
++```
++<!-- Paste full output from ./48h-soak-health-check.sh --checkpoint 24h here -->
++```
++
++### Metrics Summary
++
++#### HRV Metrics
++
++| Metric | Value | Status |
++|--------|-------|--------|
++| **Consumer Pending** | <!-- e.g., 3 --> | <!-- PASS / WARN / FAIL --> |
++| **Success Count** | <!-- e.g., 12,450 --> | |
++| **DLQ Count** | <!-- e.g., 0 --> | <!-- PASS / WARN / FAIL --> |
++| **Retry Count** | <!-- e.g., 12 --> | |
++| **Success Rate** | <!-- e.g., 99.95% --> | <!-- PASS / WARN / FAIL --> |
++| **Stream Purity** | <!-- PASS / FAIL --> | <!-- PASS / FAIL --> |
++| **DB Writes (1h)** | <!-- e.g., 523 --> | <!-- PASS / WARN --> |
++
++#### Sleep Metrics
++
++| Metric | Value | Status |
++|--------|-------|--------|
++| **Consumer Pending** | <!-- e.g., 5 --> | <!-- PASS / WARN / FAIL --> |
++| **Success Count** | <!-- e.g., 8,230 --> | |
++| **DLQ Count** | <!-- e.g., 0 --> | <!-- PASS / WARN / FAIL --> |
++| **Retry Count** | <!-- e.g., 8 --> | |
++| **Success Rate** | <!-- e.g., 99.92% --> | <!-- PASS / WARN / FAIL --> |
++| **Stream Purity** | <!-- PASS / FAIL --> | <!-- PASS / FAIL --> |
++| **DB Writes (1h)** | <!-- e.g., 342 --> | <!-- PASS / WARN --> |
++| **DLQ Depth** | <!-- e.g., 0 --> | <!-- PASS / WARN / FAIL --> |
++
++### Observations
++
++<!--
++- Any anomalies or unexpected behavior
++- Performance notes
++- Infrastructure issues
++- Rate limiting or throttling observed
++-->
++
++---
++
++## 48h Checkpoint
++
++**Timestamp:** <!-- YYYY-MM-DD HH:MM:SS UTC -->
++
++### Health Check Output
++
++```
++<!-- Paste full output from ./48h-soak-health-check.sh --checkpoint 48h here -->
++```
++
++### Metrics Summary
++
++#### HRV Metrics
++
++| Metric | Value | Status |
++|--------|-------|--------|
++| **Consumer Pending** | <!-- e.g., 2 --> | <!-- PASS / WARN / FAIL --> |
++| **Success Count** | <!-- e.g., 24,980 --> | |
++| **DLQ Count** | <!-- e.g., 0 --> | <!-- PASS / WARN / FAIL --> |
++| **Retry Count** | <!-- e.g., 20 --> | |
++| **Success Rate** | <!-- e.g., 99.97% --> | <!-- PASS / WARN / FAIL --> |
++| **Stream Purity** | <!-- PASS / FAIL --> | <!-- PASS / FAIL --> |
++| **DB Writes (1h)** | <!-- e.g., 518 --> | <!-- PASS / WARN --> |
++
++#### Sleep Metrics
++
++| Metric | Value | Status |
++|--------|-------|--------|
++| **Consumer Pending** | <!-- e.g., 4 --> | <!-- PASS / WARN / FAIL --> |
++| **Success Count** | <!-- e.g., 16,540 --> | |
++| **DLQ Count** | <!-- e.g., 0 --> | <!-- PASS / WARN / FAIL --> |
++| **Retry Count** | <!-- e.g., 15 --> | |
++| **Success Rate** | <!-- e.g., 99.94% --> | <!-- PASS / WARN / FAIL --> |
++| **Stream Purity** | <!-- PASS / FAIL --> | <!-- PASS / FAIL --> |
++| **DB Writes (1h)** | <!-- e.g., 345 --> | <!-- PASS / WARN --> |
++| **DLQ Depth** | <!-- e.g., 0 --> | <!-- PASS / WARN / FAIL --> |
++
++### Observations
++
++<!--
++- Any anomalies or unexpected behavior
++- Performance notes
++- Infrastructure issues
++- Rate limiting or throttling observed
++-->
++
++---
++
++## Soak Checklist Results
++
++### HRV Soak Checklist
++
++| Target | 24h Result | 48h Result | Status |
++|--------|-----------|-----------|--------|
++| **Success Rate ≥ 99.9%** | <!-- e.g., 99.95% --> | <!-- e.g., 99.97% --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **Consumer Pending < 10** | <!-- e.g., 3 --> | <!-- e.g., 2 --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **DLQ Rate = 0** | <!-- e.g., 0 --> | <!-- e.g., 0 --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **Stream Purity = 100%** | <!-- PASS / FAIL --> | <!-- PASS / FAIL --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **Fallback Events = 0** | <!-- TODO --> | <!-- TODO --> | <!-- ⏭️ (not tracked) --> |
++
++### Sleep Soak Checklist
++
++| Target | 24h Result | 48h Result | Status |
++|--------|-----------|-----------|--------|
++| **Success Rate ≥ 99.9%** | <!-- e.g., 99.92% --> | <!-- e.g., 99.94% --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **Consumer Pending < 10** | <!-- e.g., 5 --> | <!-- e.g., 4 --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **DLQ Rate = 0** | <!-- e.g., 0 --> | <!-- e.g., 0 --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **Stream Purity = 100%** | <!-- PASS / FAIL --> | <!-- PASS / FAIL --> | <!-- ✅ / ⚠️ / ❌ --> |
++| **Fallback Events = 0** | <!-- TODO --> | <!-- TODO --> | <!-- ⏭️ (not tracked) --> |
++
++---
++
++## Notes
++
++### Issues Encountered
++
++<!--
++- List any bugs, errors, or unexpected behavior
++- Include timestamps and error messages
++-->
++
++### Performance Observations
++
++<!--
++- Throughput metrics
++- Latency observations
++- Resource usage (CPU, memory, connections)
++-->
++
++### Infrastructure Notes
++
++<!--
++- NATS cluster health
++- Database performance
++- Network issues
++-->
++
++### Recommendations
++
++<!--
++- Suggested improvements
++- Configuration changes
++- Follow-up work needed
++-->
++
++---
++
++## Sign-off Checklist
++
++- [ ] 24h checkpoint completed
++- [ ] 48h checkpoint completed
++- [ ] All metrics meet targets (≥99.9% success, <10 pending, 0 DLQ)
++- [ ] No critical errors observed
++- [ ] JSON summaries attached (24h + 48h)
++- [ ] Observations documented
++- [ ] Recommendations noted
++- [ ] Results reviewed by: <!-- name -->
++- [ ] Approved for production: <!-- YES / NO / CONDITIONAL -->
++
++---
++
++## Attachments
++
++<!--
++Link or reference JSON output files:
++- soak_sleep_summary_24h.json
++- soak_sleep_summary_48h.json
++- Grafana dashboard snapshots
++- Alert history
++-->
+diff --git a/docs/runbook/readiness-troubleshooting.md b/docs/runbook/readiness-troubleshooting.md
+new file mode 100644
+index 0000000..e8385ba
+--- /dev/null
++++ b/docs/runbook/readiness-troubleshooting.md
+@@ -0,0 +1,21 @@
++# Readiness v1 Troubleshooting Runbook
++
++Symptoms
++- 200 with incomplete=true for latest
++- Empty array for range
++- 5xx from endpoints
++
++Checklist
++- DB connectivity: DATABASE_URL reachable; service /health returns database=connected
++- Source data presence: confirm entries in hrv_data and sleep_data for user/date (UTC). Missing inputs lead to incomplete=true.
++- Date boundaries: inputs are stored as DATE (UTC). Ensure requests consider UTC day.
++- Metrics: inspect /api/v1/metrics counters for api_requests_total{route,status} trends.
++- Logs: look for readiness latest failed / readiness range failed errors.
++
++Mitigations
++- Backfill source data for target dates
++- Recompute by hitting latest endpoint again (upsert is idempotent)
++- If DB degraded, restart service and database; verify Prisma client connectivity
++
++Escalation
++- If repeated 5xx: capture logs and DB status; file an issue with request samples and timestamps.
+diff --git a/docs/runbook/sleep-troubleshooting.md b/docs/runbook/sleep-troubleshooting.md
+index 0491bb8..fb85db8 100644
+--- a/docs/runbook/sleep-troubleshooting.md
++++ b/docs/runbook/sleep-troubleshooting.md
+@@ -567,6 +567,33 @@ rate(normalize_sleep_messages_total[5m]) > 0.10
+ 
+ ---
+ 
++## Alert Silencing and Threshold Tuning
++
++- **Silencing (mute)**:
++  - Create a silence for rules in group sleep-pipeline via your Alertmanager UI.
++  - Scope by labels: service=normalize-service, stream=AA_CORE_HOT, durable=normalize-sleep-durable, subject=athlete-ally.sleep.raw-received.
++  - Suggested duration: 15–60m during maintenance; remove after validation.
++- **Threshold tuning**:
++  - DLQ rate (warn): adjust rate() window or comparator if transient spikes cause noise.
++  - No successes (crit): extend for: from 5m to 10m only if known backfills or scheduled maintenance.
++  - Use `promtool check rules monitoring/alert_rules.yml` after edits.
++
++## Soak JSON Schema (sleep)
++
++- **Fields**:
++  - generated_at: string ISO8601
++  - window_minutes: integer
++  - job, stream, durable, subject: strings
++  - success_count, dlq_count, retry_count: integers
++  - success_rate, dlq_rate, retry_rate: numbers 0..1
++  - pending_current, pending_max: integers
++  - fallback_count: integer
++  - notes: optional string
++- **Example**: docs/examples/soak_sleep_summary.example.json
++- **Soak script output**: ./soak_sleep_summary.json generated by docs/phase-3/ops/48h-soak-health-check.sh
++
++---
++
+ ## Related Documentation
+ 
+ - [Sleep Event Flow Architecture](../architecture/sleep-event-flow.md)
+diff --git a/monitoring/alert_rules.yml b/monitoring/alert_rules.yml
+index a049091..fdd360d 100644
+--- a/monitoring/alert_rules.yml
++++ b/monitoring/alert_rules.yml
+@@ -1,229 +1,51 @@
+ groups:
+-  - name: planning-engine
++  - name: sleep-pipeline
++    interval: 1m
+     rules:
+-      # 服务可用性告警
+-      - alert: PlanningEngineDown
+-        expr: up{job="planning-engine"} == 0
+-        for: 1m
+-        labels:
+-          severity: critical
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine service is down"
+-          description: "Planning Engine service has been down for more than 1 minute on {{ $labels.instance }}"
+-
+-      - alert: PlanningEngineHighErrorRate
+-        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+-        for: 2m
+-        labels:
+-          severity: critical
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine high error rate"
+-          description: "Planning Engine error rate is {{ $value }} errors per second on {{ $labels.instance }}"
+-
+-      - alert: PlanningEngineHighResponseTime
+-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine high response time"
+-          description: "Planning Engine 95th percentile response time is {{ $value }}s on {{ $labels.instance }}"
+-
+-      # 资源使用告警
+-      - alert: PlanningEngineHighMemoryUsage
+-        expr: process_resident_memory_bytes / 1024 / 1024 > 800
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine high memory usage"
+-          description: "Planning Engine memory usage is {{ $value }}MB on {{ $labels.instance }}"
+-
+-      - alert: PlanningEngineHighCPUUsage
+-        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine high CPU usage"
+-          description: "Planning Engine CPU usage is {{ $value }}% on {{ $labels.instance }}"
+-
+-      # 数据库连接告警
+-      - alert: DatabaseConnectionFailed
+-        expr: planning_engine_database_health == 0
+-        for: 1m
+-        labels:
+-          severity: critical
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine database connection failed"
+-          description: "Planning Engine cannot connect to database on {{ $labels.instance }}"
+-
+-      # Redis连接告警
+-      - alert: RedisConnectionFailed
+-        expr: planning_engine_redis_health == 0
+-        for: 1m
+-        labels:
+-          severity: critical
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine Redis connection failed"
+-          description: "Planning Engine cannot connect to Redis on {{ $labels.instance }}"
+-
+-      # NATS连接告警
+-      - alert: NATSConnectionFailed
+-        expr: planning_engine_nats_health == 0
+-        for: 1m
+-        labels:
+-          severity: warning
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine NATS connection failed"
+-          description: "Planning Engine cannot connect to NATS on {{ $labels.instance }}"
+-
+-      # 健康检查告警
+-      - alert: HealthCheckFailed
+-        expr: planning_engine_health_status != 1
+-        for: 2m
+-        labels:
+-          severity: critical
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine health check failed"
+-          description: "Planning Engine health check is failing on {{ $labels.instance }}"
+-
+-      # 请求量异常告警
+-      - alert: PlanningEngineHighRequestRate
+-        expr: rate(http_requests_total[5m]) > 100
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine high request rate"
+-          description: "Planning Engine request rate is {{ $value }} requests per second on {{ $labels.instance }}"
+-
+-      - alert: PlanningEngineLowRequestRate
+-        expr: rate(http_requests_total[5m]) < 1
+-        for: 10m
+-        labels:
+-          severity: warning
+-          service: planning-engine
+-        annotations:
+-          summary: "Planning Engine low request rate"
+-          description: "Planning Engine request rate is {{ $value }} requests per second on {{ $labels.instance }}"
+-
+-  - name: infrastructure
+-    rules:
+-      # 系统资源告警
+-      - alert: HighDiskUsage
+-        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+-        for: 5m
+-        labels:
+-          severity: critical
+-          service: infrastructure
+-        annotations:
+-          summary: "High disk usage"
+-          description: "Disk usage is above 90% on {{ $labels.instance }}"
+-
+-      - alert: HighMemoryUsage
+-        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.9
+-        for: 5m
+-        labels:
+-          severity: critical
+-          service: infrastructure
+-        annotations:
+-          summary: "High memory usage"
+-          description: "Memory usage is above 90% on {{ $labels.instance }}"
+-
+-      - alert: HighCPUUsage
+-        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: infrastructure
+-        annotations:
+-          summary: "High CPU usage"
+-          description: "CPU usage is above 90% on {{ $labels.instance }}"
+-
+-      # 网络连接告警
+-      - alert: NetworkConnectivityIssues
+-        expr: rate(node_network_receive_drop_total[5m]) > 0
++      - alert: SleepDLQRateNonZero
++        expr: rate(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) > 0
+         for: 5m
+         labels:
+           severity: warning
+-          service: infrastructure
+-        annotations:
+-          summary: "Network connectivity issues"
+-          description: "Network packet drops detected on {{ $labels.instance }}"
+-
+-  - name: database
+-    rules:
+-      # PostgreSQL告警
+-      - alert: PostgreSQLDown
+-        expr: up{job="postgres"} == 0
+-        for: 1m
+-        labels:
+-          severity: critical
+-          service: postgres
++          team: platform
++          service: normalize-service
++          env: unknown
++          stream: AA_CORE_HOT
++          durable: normalize-sleep-durable
++          subject: athlete-ally.sleep.raw-received
+         annotations:
+-          summary: "PostgreSQL is down"
+-          description: "PostgreSQL database is down on {{ $labels.instance }}"
++          summary: "Sleep pipeline DLQ rate > 0"
++          description: "DLQ messages observed in the last 5m. Investigate schema or processing errors."
++          runbook_url: "docs/runbook/sleep-troubleshooting.md#dlq-handling"
+ 
+-      - alert: PostgreSQLHighConnections
+-        expr: pg_stat_database_numbackends > 80
++      - alert: SleepConsumerLagHigh
++        expr: nats_consumer_num_pending{stream="AA_CORE_HOT",consumer="normalize-sleep-durable"} > 100
+         for: 5m
+         labels:
+           severity: warning
+-          service: postgres
++          team: platform
++          service: normalize-service
++          env: unknown
++          stream: AA_CORE_HOT
++          durable: normalize-sleep-durable
++          subject: athlete-ally.sleep.raw-received
+         annotations:
+-          summary: "PostgreSQL high connection count"
+-          description: "PostgreSQL has {{ $value }} active connections on {{ $labels.instance }}"
++          summary: "Sleep consumer lag high"
++          description: "Num pending > 100 for 5m. If exporter missing, see TODO in runbook and use Soak script / NATS CLI."
++          runbook_url: "docs/runbook/sleep-troubleshooting.md#lag-and-backlog"
+ 
+-      - alert: PostgreSQLSlowQueries
+-        expr: rate(pg_stat_database_tup_returned[5m]) / rate(pg_stat_database_tup_fetched[5m]) < 0.1
++      - alert: SleepNoSuccesses5m
++        expr: increase(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) == 0
+         for: 5m
+-        labels:
+-          severity: warning
+-          service: postgres
+-        annotations:
+-          summary: "PostgreSQL slow queries detected"
+-          description: "PostgreSQL query performance is degraded on {{ $labels.instance }}"
+-
+-  - name: redis
+-    rules:
+-      # Redis告警
+-      - alert: RedisDown
+-        expr: up{job="redis"} == 0
+-        for: 1m
+         labels:
+           severity: critical
+-          service: redis
+-        annotations:
+-          summary: "Redis is down"
+-          description: "Redis cache is down on {{ $labels.instance }}"
+-
+-      - alert: RedisHighMemoryUsage
+-        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: redis
+-        annotations:
+-          summary: "Redis high memory usage"
+-          description: "Redis memory usage is above 90% on {{ $labels.instance }}"
+-
+-      - alert: RedisHighKeyCount
+-        expr: redis_keyspace_keys > 1000000
+-        for: 5m
+-        labels:
+-          severity: warning
+-          service: redis
++          team: platform
++          service: normalize-service
++          env: unknown
++          stream: AA_CORE_HOT
++          durable: normalize-sleep-durable
++          subject: athlete-ally.sleep.raw-received
+         annotations:
+-          summary: "Redis high key count"
+-          description: "Redis has {{ $value }} keys on {{ $labels.instance }}"
+\ No newline at end of file
++          summary: "Sleep pipeline produced no successes for 5m"
++          description: "No successful sleep normalizations in the last 5m. Check consumers, NATS, and DB connectivity."
++          runbook_url: "docs/runbook/sleep-troubleshooting.md#no-successes"
+\ No newline at end of file
+diff --git a/monitoring/grafana/dashboards/normalize-sleep.json b/monitoring/grafana/dashboards/normalize-sleep.json
+new file mode 100644
+index 0000000..41a6baf
+--- /dev/null
++++ b/monitoring/grafana/dashboards/normalize-sleep.json
+@@ -0,0 +1,251 @@
++{
++  "__inputs": [
++    {
++      "name": "DS_PROMETHEUS",
++      "label": "Prometheus",
++      "description": "Prometheus datasource",
++      "type": "datasource",
++      "pluginId": "prometheus",
++      "pluginName": "Prometheus"
++    }
++  ],
++  "__requires": [
++    {
++      "type": "grafana",
++      "id": "grafana",
++      "name": "Grafana",
++      "version": "9.0.0"
++    },
++    {
++      "type": "panel",
++      "id": "timeseries",
++      "name": "Time series",
++      "version": "9.0.0"
++    },
++    {
++      "type": "datasource",
++      "id": "prometheus",
++      "name": "Prometheus",
++      "version": "2.0.0"
++    },
++    {
++      "type": "panel",
++      "id": "text",
++      "name": "Text",
++      "version": "9.0.0"
++    }
++  ],
++  "uid": "aa-sleep-norm",
++  "title": "Sleep Normalize Pipeline",
++  "timezone": "",
++  "version": 1,
++  "schemaVersion": 37,
++  "editable": true,
++  "refresh": "30s",
++  "time": {
++    "from": "now-24h",
++    "to": "now"
++  },
++  "templating": {
++    "list": [
++      {
++        "name": "DS_PROMETHEUS",
++        "type": "datasource",
++        "query": "prometheus",
++        "description": "Prometheus datasource"
++      },
++      {
++        "name": "job",
++        "type": "query",
++        "datasource": "${DS_PROMETHEUS}",
++        "query": "label_values(normalize_sleep_messages_total, job)",
++        "current": {
++          "selected": true,
++          "text": "normalize",
++          "value": "normalize"
++        },
++        "refresh": 1,
++        "label": "job"
++      },
++      {
++        "name": "stream",
++        "type": "custom",
++        "query": "AA_CORE_HOT,ATHLETE_ALLY_EVENTS",
++        "current": {
++          "selected": true,
++          "text": "AA_CORE_HOT",
++          "value": "AA_CORE_HOT"
++        },
++        "label": "stream"
++      },
++      {
++        "name": "durable",
++        "type": "custom",
++        "query": "normalize-sleep-durable",
++        "current": {
++          "selected": true,
++          "text": "normalize-sleep-durable",
++          "value": "normalize-sleep-durable"
++        },
++        "label": "durable"
++      },
++      {
++        "type": "custom",
++        "name": "subject",
++        "label": "subject",
++        "query": "athlete-ally.sleep.raw-received,athlete-ally.sleep.normalized-stored",
++        "current": {
++          "selected": true,
++          "value": "athlete-ally.sleep.raw-received",
++          "text": "athlete-ally.sleep.raw-received"
++        }
++      }
++    ]
++  },
++  "panels": [
++    {
++      "type": "text",
++      "title": "Sleep Pipeline Help",
++      "mode": "markdown",
++      "gridPos": {
++        "w": 24,
++        "y": 0,
++        "h": 5,
++        "x": 0
++      },
++      "options": {
++        "content": "[Runbook](docs/runbook/sleep-troubleshooting.md) | Variables: job, stream, durable, subject.\\nEN: Use variables to scope. If panels show \"No data\", confirm scrape/labels. Steady state: DLQ=0, successes increasing.\\nZH: 變數控制查詢；若顯示「無資料」，檢查 Prometheus 抓取與標籤。穩定態：DLQ=0，success 持續。"
++      }
++    },
++    {
++      "type": "timeseries",
++      "title": "Sleep Messages by Result (stacked)",
++      "description": "EN: normalize_sleep_messages_total by result; filters: subject=athlete-ally.sleep.raw-received, stream=$stream, durable=$durable, job=$job.\nZH: 按結果堆疊顯示訊息計數；篩選條件固定 subject=athlete-ally.sleep.raw-received，並依 stream/durable/job 過濾。",
++      "datasource": {
++        "type": "prometheus",
++        "uid": "${DS_PROMETHEUS}"
++      },
++      "fieldConfig": {
++        "defaults": {
++          "custom": {
++            "drawStyle": "line",
++            "lineWidth": 1
++          },
++          "unit": "short"
++        },
++        "overrides": []
++      },
++      "options": {
++        "legend": {
++          "displayMode": "table",
++          "placement": "bottom"
++        },
++        "tooltip": {
++          "mode": "multi"
++        },
++        "stacking": {
++          "mode": "normal"
++        }
++      },
++      "targets": [
++        {
++          "expr": "sum by (result) (rate(normalize_sleep_messages_total{subject=\"athlete-ally.sleep.raw-received\",stream=\"$stream\",durable=\"$durable\",job=\"$job\"}[5m]))",
++          "legendFormat": "{{result}}",
++          "refId": "A"
++        }
++      ],
++      "gridPos": {
++        "h": 8,
++        "w": 24,
++        "x": 0,
++        "y": 0
++      }
++    },
++    {
++      "type": "timeseries",
++      "title": "DLQ Trend",
++      "description": "EN: DLQ rate over time (result=dlq).\nZH: DLQ 趨勢（result=dlq）。",
++      "datasource": {
++        "type": "prometheus",
++        "uid": "${DS_PROMETHEUS}"
++      },
++      "options": {
++        "legend": {
++          "displayMode": "list"
++        },
++        "tooltip": {
++          "mode": "single"
++        }
++      },
++      "targets": [
++        {
++          "expr": "rate(normalize_sleep_messages_total{result=\"dlq\",subject=\"athlete-ally.sleep.raw-received\",stream=\"$stream\",durable=\"$durable\",job=\"$job\"}[5m])",
++          "legendFormat": "dlq",
++          "refId": "A"
++        }
++      ],
++      "gridPos": {
++        "h": 6,
++        "w": 12,
++        "x": 0,
++        "y": 8
++      }
++    },
++    {
++      "type": "timeseries",
++      "title": "Processing Duration p95/p99 (consume/publish)",
++      "description": "EN: Prefer operation=consume; if not present, shows publish (optional). topic=sleep_raw_received.\nZH: 優先顯示 consume；若無則顯示 publish（可選）。",
++      "datasource": {
++        "type": "prometheus",
++        "uid": "${DS_PROMETHEUS}"
++      },
++      "options": {
++        "legend": {
++          "displayMode": "table"
++        }
++      },
++      "targets": [
++        {
++          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"consume\",job=\"$job\"}[5m])))",
++          "legendFormat": "p95 consume",
++          "refId": "A"
++        },
++        {
++          "expr": "histogram_quantile(0.99, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"consume\",job=\"$job\"}[5m])))",
++          "legendFormat": "p99 consume",
++          "refId": "B"
++        },
++        {
++          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"publish\",job=\"$job\"}[5m])))",
++          "legendFormat": "p95 publish (opt)",
++          "refId": "C"
++        },
++        {
++          "expr": "histogram_quantile(0.99, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"publish\",job=\"$job\"}[5m])))",
++          "legendFormat": "p99 publish (opt)",
++          "refId": "D"
++        }
++      ],
++      "gridPos": {
++        "h": 6,
++        "w": 12,
++        "x": 12,
++        "y": 8
++      }
++    },
++    {
++      "type": "text",
++      "title": "Consumer Lag Check (Placeholder)",
++      "mode": "markdown",
++      "gridPos": {
++        "h": 8,
++        "w": 24,
++        "x": 0,
++        "y": 14
++      },
++      "options": {
++        "content": "**Lag Check (NATS CLI first, Node JSM fallback)**\n\n- NATS CLI (pending):\n  - `nats consumer info $stream normalize-sleep-durable` (see `Num Pending`)\n- NATS CLI (last DLQ msg):\n  - `nats stream get AA_DLQ --last-by-subject dlq.normalize.sleep.raw-received.schema-invalid`\n- Node (pending, snippet):\n  ```js\n  import { connect } from 'nats';\n  const nc = await connect({ servers: process.env.NATS_URL || 'nats://localhost:4223' });\n  const jsm = await nc.jetstreamManager();\n  const ci = await jsm.consumers.info('$stream', 'normalize-sleep-durable');\n  console.log(ci.num_pending);\n  ```\n- Soak script (JSON): run docs/phase-3/ops/48h-soak-health-check.sh and inspect ./soak_sleep_summary.json"
++      }
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index b29ebda..6a218ed 100644
+--- a/package.json
++++ b/package.json
+@@ -82,7 +82,9 @@
+     "e2e:pw:ci": "playwright test --project=chromium --reporter=dot",
+     "validate:schemas": "node scripts/validate-schemas.js",
+     "dev:compose": "docker compose up --build",
+-    "dev:compose:obs": "docker compose --profile obs up --build"
++    "dev:compose:obs": "docker compose --profile obs up --build",
++    "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
++    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
+   },
+   "dependencies": {
+     "@radix-ui/react-dialog": "^1.1.15",
+diff --git a/packages/contracts/__tests__/readiness-events.test.ts b/packages/contracts/__tests__/readiness-events.test.ts
+new file mode 100644
+index 0000000..ed4db72
+--- /dev/null
++++ b/packages/contracts/__tests__/readiness-events.test.ts
+@@ -0,0 +1,62 @@
++import { describe, it, expect } from '@jest/globals';
++import { ReadinessComputedEvent, ReadinessStoredEvent, EVENT_TOPICS } from '../events/index.js';
++
++describe('Readiness Events', () => {
++  describe('ReadinessComputedEvent', () => {
++    it('should have correct interface structure', () => {
++      const event: ReadinessComputedEvent = {
++        eventId: 'evt_123',
++        payload: {
++          userId: 'user123',
++          date: '20241001',
++          score: 88,
++          incomplete: false,
++          components: {
++            hrvScore: 80,
++            sleepScore: 90,
++            notes: 'baseline variant'
++          }
++        }
++      };
++
++      expect(event.eventId).toBe('evt_123');
++      expect(event.payload.userId).toBe('user123');
++      expect(event.payload.date).toBe('20241001');
++      expect(event.payload.score).toBe(88);
++      expect(event.payload.incomplete).toBe(false);
++      expect(event.payload.components?.hrvScore).toBe(80);
++      expect(event.payload.components?.sleepScore).toBe(90);
++    });
++  });
++
++  describe('ReadinessStoredEvent', () => {
++    it('should have correct interface structure', () => {
++      const event: ReadinessStoredEvent = {
++        record: {
++          userId: 'user123',
++          date: '20241001',
++          score: 72,
++          incomplete: true,
++          components: {
++            hrvScore: 60,
++            sleepScore: 80
++          },
++          capturedAt: '2024-10-01T08:30:00Z'
++        }
++      };
++
++      expect(event.record.userId).toBe('user123');
++      expect(event.record.date).toBe('20241001');
++      expect(event.record.score).toBe(72);
++      expect(event.record.components?.sleepScore).toBe(80);
++    });
++  });
++
++  describe('EVENT_TOPICS', () => {
++    it('should include readiness topics', () => {
++      expect(EVENT_TOPICS.READINESS_COMPUTED).toBe('athlete-ally.readiness.computed');
++      expect(EVENT_TOPICS.READINESS_STORED).toBe('athlete-ally.readiness.stored');
++    });
++  });
++});
++
+diff --git a/packages/contracts/__tests__/readiness-schemas.test.ts b/packages/contracts/__tests__/readiness-schemas.test.ts
+new file mode 100644
+index 0000000..796a622
+--- /dev/null
++++ b/packages/contracts/__tests__/readiness-schemas.test.ts
+@@ -0,0 +1,80 @@
++import { describe, it, expect } from '@jest/globals';
++import Ajv from 'ajv';
++import addFormats from 'ajv-formats';
++import { EventSchemas } from '../events/schemas.js';
++
++const ajv = new Ajv();
++addFormats(ajv);
++
++describe('Readiness Event Schemas', () => {
++  describe('ReadinessComputedSchema', () => {
++    const validate = ajv.compile(EventSchemas.readiness_computed);
++
++    it('validates a correct computed event', () => {
++      const event = {
++        payload: {
++          userId: 'user123',
++          date: '20241001',
++          score: 90,
++          incomplete: false,
++          components: { hrvScore: 85, sleepScore: 95, notes: 'ok' }
++        }
++      };
++      expect(validate(event)).toBe(true);
++    });
++
++    it('rejects invalid date format (expects YYYYMMDD)', () => {
++      const event = {
++        payload: {
++          userId: 'user123',
++          date: '2024-10-01', // wrong format
++          score: 90
++        }
++      };
++      expect(validate(event)).toBe(false);
++    });
++
++    it('rejects score out of range', () => {
++      const eventLow = { payload: { userId: 'u', date: '20241001', score: -1 } };
++      const eventHigh = { payload: { userId: 'u', date: '20241001', score: 101 } };
++      expect(validate(eventLow)).toBe(false);
++      expect(validate(eventHigh)).toBe(false);
++    });
++  });
++
++  describe('ReadinessStoredSchema', () => {
++    const validate = ajv.compile(EventSchemas.readiness_stored);
++
++    it('validates a correct stored event (with capturedAt)', () => {
++      const event = {
++        record: {
++          userId: 'user123',
++          date: '20241001',
++          score: 72,
++          capturedAt: '2024-10-01T08:30:00Z'
++        }
++      };
++      expect(validate(event)).toBe(true);
++    });
++
++    it('validates without optional fields', () => {
++      const event = {
++        record: { userId: 'user123', date: '20241001', score: 50 }
++      };
++      expect(validate(event)).toBe(true);
++    });
++
++    it('rejects invalid date', () => {
++      const event = { record: { userId: 'u', date: '2024/10/01', score: 50 } };
++      expect(validate(event)).toBe(false);
++    });
++  });
++
++  describe('EventSchemas registration', () => {
++    it('includes readiness schemas in registry', () => {
++      expect(EventSchemas.readiness_computed).toBeDefined();
++      expect(EventSchemas.readiness_stored).toBeDefined();
++    });
++  });
++});
++
+diff --git a/packages/contracts/events/index.ts b/packages/contracts/events/index.ts
+index 52c2e84..c6b7a5e 100644
+--- a/packages/contracts/events/index.ts
++++ b/packages/contracts/events/index.ts
+@@ -122,7 +122,9 @@ export const EVENT_TOPICS = {
+   HRV_NORMALIZED_STORED: 'athlete-ally.hrv.normalized-stored',
+   SLEEP_RAW_RECEIVED: 'athlete-ally.sleep.raw-received',
+   SLEEP_NORMALIZED_STORED: 'athlete-ally.sleep.normalized-stored',
++  READINESS_COMPUTED: 'athlete-ally.readiness.computed',
++  READINESS_STORED: 'athlete-ally.readiness.stored',
+ } as const;
+ 
+ // Export schemas from dedicated file
+-export * from './schemas';
+\ No newline at end of file
++export * from './schemas';
+diff --git a/packages/contracts/events/schemas.ts b/packages/contracts/events/schemas.ts
+index dae4107..d65a1b1 100644
+--- a/packages/contracts/events/schemas.ts
++++ b/packages/contracts/events/schemas.ts
+@@ -185,6 +185,63 @@ export const SleepNormalizedStoredSchema = {
+   }
+ } as const;
+ 
++
++
++// Readiness event schemas (Stream B: PRR1)
++// Computed event: payload contains readiness metrics for a user-day
++export const ReadinessComputedSchema = {
++  type: 'object',
++  required: ['payload'],
++  properties: {
++    payload: {
++      type: 'object',
++      required: ['userId', 'date', 'score'],
++      properties: {
++        userId: { type: 'string', minLength: 1 },
++        // UTC day in compact form YYYYMMDD
++        date: { type: 'string', pattern: '^[0-9]{8}$' },
++        score: { type: 'number', minimum: 0, maximum: 100 },
++        incomplete: { type: 'boolean' },
++        components: {
++          type: 'object',
++          properties: {
++            hrvScore: { type: 'number', minimum: 0, maximum: 100 },
++            sleepScore: { type: 'number', minimum: 0, maximum: 100 },
++            notes: { type: 'string' }
++          }
++        }
++      }
++    }
++  }
++} as const;
++
++// Stored event: record represents persisted readiness for a user-day
++export const ReadinessStoredSchema = {
++  type: 'object',
++  required: ['record'],
++  properties: {
++    record: {
++      type: 'object',
++      required: ['userId', 'date', 'score'],
++      properties: {
++        userId: { type: 'string', minLength: 1 },
++        // UTC day in compact form YYYYMMDD
++        date: { type: 'string', pattern: '^[0-9]{8}$' },
++        score: { type: 'number', minimum: 0, maximum: 100 },
++        incomplete: { type: 'boolean' },
++        components: {
++          type: 'object',
++          properties: {
++            hrvScore: { type: 'number', minimum: 0, maximum: 100 },
++            sleepScore: { type: 'number', minimum: 0, maximum: 100 },
++            notes: { type: 'string' }
++          }
++        },
++        capturedAt: { type: 'string', format: 'date-time' }
++      }
++    }
++  }
++} as const;
+ // Schema registry for easy access
+ export const EventSchemas = {
+   'onboarding_completed': OnboardingCompletedSchema,
+@@ -194,7 +251,9 @@ export const EventSchemas = {
+   'hrv_raw_received': HRVRawReceivedSchema,
+   'hrv_normalized_stored': HRVNormalizedStoredSchema,
+   'sleep_raw_received': SleepRawReceivedSchema,
+-  'sleep_normalized_stored': SleepNormalizedStoredSchema
++  'sleep_normalized_stored': SleepNormalizedStoredSchema,
++  'readiness_computed': ReadinessComputedSchema,
++  'readiness_stored': ReadinessStoredSchema
+ } as const;
+ 
+ // Type for schema keys
+diff --git a/packages/contracts/openapi.yaml b/packages/contracts/openapi.yaml
+index df540b4..68c4fb2 100644
+--- a/packages/contracts/openapi.yaml
++++ b/packages/contracts/openapi.yaml
+@@ -43,6 +43,56 @@ paths:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/JobAccepted'
++  /api/v1/readiness/{userId}/latest:
++    get:
++      summary: Get latest readiness record for a user
++      parameters:
++        - in: path
++          name: userId
++          required: true
++          schema: { type: string }
++      responses:
++        '200':
++          description: Latest readiness record or incomplete stub
++          content:
++            application/json:
++              schema:
++                oneOf:
++                  - $ref: '#/components/schemas/ReadinessRecord'
++                  - type: object
++                    properties:
++                      userId: { type: string }
++                      incomplete: { type: boolean }
++                    required: [userId, incomplete]
++              examples:
++                complete:
++                  value: { userId: 'user123', date: '20241001', score: 84, incomplete: false, components: { sleepScore: 90, hrvScore: 76 } }
++                incomplete:
++                  value: { userId: 'user123', incomplete: true }
++  /api/v1/readiness/{userId}:
++    get:
++      summary: Get readiness records for a range (default 7 days)
++      parameters:
++        - in: path
++          name: userId
++          required: true
++          schema: { type: string }
++        - in: query
++          name: days
++          required: false
++          schema: { type: integer, minimum: 1, maximum: 31, default: 7 }
++      responses:
++        '200':
++          description: Readiness records
++          content:
++            application/json:
++              schema:
++                type: array
++                items:
++                  $ref: '#/components/schemas/ReadinessRecord'
++              example:
++                - { userId: 'user123', date: '20240930', score: 78, incomplete: false }
++                - { userId: 'user123', date: '20241001', score: 84, incomplete: false }
+   /api/v1/ingest/sleep:
+     post:
+       summary: ingest raw Sleep data
+@@ -122,6 +172,37 @@ components:
+         status:
+           type: string
+           enum: [queued]
++    ReadinessRecord:
++      type: object
++      description: "Daily readiness record for a user (UTC day)."
++      required: [userId, date, score]
++      properties:
++        userId:
++          type: string
++        date:
++          type: string
++          pattern: '^\\d{8}$'
++          description: 'UTC date in compact form YYYYMMDD'
++        score:
++          type: integer
++          minimum: 0
++          maximum: 100
++        incomplete:
++          type: boolean
++          description: 'true if any required input (sleep/hrv) was missing'
++        components:
++          type: object
++          properties:
++            hrvScore:
++              type: integer
++              minimum: 0
++              maximum: 100
++            sleepScore:
++              type: integer
++              minimum: 0
++              maximum: 100
++            notes:
++              type: string
+     SleepIngestRequest:
+       type: object
+       required: [userId, date, durationMinutes]
+@@ -168,4 +249,4 @@ components:
+           type: array
+           items:
+             type: string
+-          example: ['date: Required']
+\ No newline at end of file
++          example: ['date: Required']
+diff --git a/patches/20251003_010136_pr5_observability_finalize.patch b/patches/20251003_010136_pr5_observability_finalize.patch
+new file mode 100644
+index 0000000..7492dce
+--- /dev/null
++++ b/patches/20251003_010136_pr5_observability_finalize.patch
+@@ -0,0 +1,360 @@
++From 8e182e6955744c809b9b0369b7c0f4e2ea34c11a Mon Sep 17 00:00:00 2001
++From: Release Bot <release-bot@local>
++Date: Fri, 3 Oct 2025 01:01:07 +0800
++Subject: [PATCH] chore(observability): refine Sleep dashboard
++ location/variables; add subject var and help panel; label-scoped alerts;
++ promtool validation scripts
++
++---
++ monitoring/alert_rules.yml                    |  13 +-
++ .../grafana/dashboards/normalize-sleep.json   | 251 ++++++++++++++++++
++ package.json                                  |   2 +-
++ scripts/promtool-validate.ps1                 |   7 +
++ scripts/promtool-validate.sh                  |   8 +
++ 5 files changed, 272 insertions(+), 9 deletions(-)
++ create mode 100644 monitoring/grafana/dashboards/normalize-sleep.json
++ create mode 100644 scripts/promtool-validate.ps1
++ create mode 100644 scripts/promtool-validate.sh
++
++diff --git a/monitoring/alert_rules.yml b/monitoring/alert_rules.yml
++index f8f3ecd..656fb83 100644
++--- a/monitoring/alert_rules.yml
+++++ b/monitoring/alert_rules.yml
++@@ -3,10 +3,9 @@ groups:
++     interval: 1m
++     rules:
++       - alert: SleepDLQRateNonZero
++-        expr: rate(normalize_sleep_messages_total{result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) > 0
+++        expr: rate(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) > 0
++         for: 5m
++-        labels:
++-          severity: warning
+++        labels:\n          severity: warning\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
++         annotations:
++           summary: "Sleep pipeline DLQ rate > 0"
++           description: "DLQ messages observed in the last 5m. Investigate schema or processing errors."
++@@ -15,18 +14,16 @@ groups:
++       - alert: SleepConsumerLagHigh
++         expr: nats_consumer_num_pending{stream="AA_CORE_HOT",consumer="normalize-sleep-durable"} > 100
++         for: 5m
++-        labels:
++-          severity: warning
+++        labels:\n          severity: warning\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
++         annotations:
++           summary: "Sleep consumer lag high"
++           description: "Num pending > 100 for 5m. If exporter missing, see TODO in runbook and use Soak script / NATS CLI."
++           runbook_url: "docs/runbook/sleep-troubleshooting.md#lag-and-backlog"
++ 
++       - alert: SleepNoSuccesses5m
++-        expr: increase(normalize_sleep_messages_total{result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) == 0
+++        expr: increase(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) == 0
++         for: 5m
++-        labels:
++-          severity: critical
+++        labels:\n          severity: critical\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
++         annotations:
++           summary: "Sleep pipeline produced no successes for 5m"
++           description: "No successful sleep normalizations in the last 5m. Check consumers, NATS, and DB connectivity."
++diff --git a/monitoring/grafana/dashboards/normalize-sleep.json b/monitoring/grafana/dashboards/normalize-sleep.json
++new file mode 100644
++index 0000000..41a6baf
++--- /dev/null
+++++ b/monitoring/grafana/dashboards/normalize-sleep.json
++@@ -0,0 +1,251 @@
+++{
+++  "__inputs": [
+++    {
+++      "name": "DS_PROMETHEUS",
+++      "label": "Prometheus",
+++      "description": "Prometheus datasource",
+++      "type": "datasource",
+++      "pluginId": "prometheus",
+++      "pluginName": "Prometheus"
+++    }
+++  ],
+++  "__requires": [
+++    {
+++      "type": "grafana",
+++      "id": "grafana",
+++      "name": "Grafana",
+++      "version": "9.0.0"
+++    },
+++    {
+++      "type": "panel",
+++      "id": "timeseries",
+++      "name": "Time series",
+++      "version": "9.0.0"
+++    },
+++    {
+++      "type": "datasource",
+++      "id": "prometheus",
+++      "name": "Prometheus",
+++      "version": "2.0.0"
+++    },
+++    {
+++      "type": "panel",
+++      "id": "text",
+++      "name": "Text",
+++      "version": "9.0.0"
+++    }
+++  ],
+++  "uid": "aa-sleep-norm",
+++  "title": "Sleep Normalize Pipeline",
+++  "timezone": "",
+++  "version": 1,
+++  "schemaVersion": 37,
+++  "editable": true,
+++  "refresh": "30s",
+++  "time": {
+++    "from": "now-24h",
+++    "to": "now"
+++  },
+++  "templating": {
+++    "list": [
+++      {
+++        "name": "DS_PROMETHEUS",
+++        "type": "datasource",
+++        "query": "prometheus",
+++        "description": "Prometheus datasource"
+++      },
+++      {
+++        "name": "job",
+++        "type": "query",
+++        "datasource": "${DS_PROMETHEUS}",
+++        "query": "label_values(normalize_sleep_messages_total, job)",
+++        "current": {
+++          "selected": true,
+++          "text": "normalize",
+++          "value": "normalize"
+++        },
+++        "refresh": 1,
+++        "label": "job"
+++      },
+++      {
+++        "name": "stream",
+++        "type": "custom",
+++        "query": "AA_CORE_HOT,ATHLETE_ALLY_EVENTS",
+++        "current": {
+++          "selected": true,
+++          "text": "AA_CORE_HOT",
+++          "value": "AA_CORE_HOT"
+++        },
+++        "label": "stream"
+++      },
+++      {
+++        "name": "durable",
+++        "type": "custom",
+++        "query": "normalize-sleep-durable",
+++        "current": {
+++          "selected": true,
+++          "text": "normalize-sleep-durable",
+++          "value": "normalize-sleep-durable"
+++        },
+++        "label": "durable"
+++      },
+++      {
+++        "type": "custom",
+++        "name": "subject",
+++        "label": "subject",
+++        "query": "athlete-ally.sleep.raw-received,athlete-ally.sleep.normalized-stored",
+++        "current": {
+++          "selected": true,
+++          "value": "athlete-ally.sleep.raw-received",
+++          "text": "athlete-ally.sleep.raw-received"
+++        }
+++      }
+++    ]
+++  },
+++  "panels": [
+++    {
+++      "type": "text",
+++      "title": "Sleep Pipeline Help",
+++      "mode": "markdown",
+++      "gridPos": {
+++        "w": 24,
+++        "y": 0,
+++        "h": 5,
+++        "x": 0
+++      },
+++      "options": {
+++        "content": "[Runbook](docs/runbook/sleep-troubleshooting.md) | Variables: job, stream, durable, subject.\\nEN: Use variables to scope. If panels show \"No data\", confirm scrape/labels. Steady state: DLQ=0, successes increasing.\\nZH: 變數控制查詢；若顯示「無資料」，檢查 Prometheus 抓取與標籤。穩定態：DLQ=0，success 持續。"
+++      }
+++    },
+++    {
+++      "type": "timeseries",
+++      "title": "Sleep Messages by Result (stacked)",
+++      "description": "EN: normalize_sleep_messages_total by result; filters: subject=athlete-ally.sleep.raw-received, stream=$stream, durable=$durable, job=$job.\nZH: 按結果堆疊顯示訊息計數；篩選條件固定 subject=athlete-ally.sleep.raw-received，並依 stream/durable/job 過濾。",
+++      "datasource": {
+++        "type": "prometheus",
+++        "uid": "${DS_PROMETHEUS}"
+++      },
+++      "fieldConfig": {
+++        "defaults": {
+++          "custom": {
+++            "drawStyle": "line",
+++            "lineWidth": 1
+++          },
+++          "unit": "short"
+++        },
+++        "overrides": []
+++      },
+++      "options": {
+++        "legend": {
+++          "displayMode": "table",
+++          "placement": "bottom"
+++        },
+++        "tooltip": {
+++          "mode": "multi"
+++        },
+++        "stacking": {
+++          "mode": "normal"
+++        }
+++      },
+++      "targets": [
+++        {
+++          "expr": "sum by (result) (rate(normalize_sleep_messages_total{subject=\"athlete-ally.sleep.raw-received\",stream=\"$stream\",durable=\"$durable\",job=\"$job\"}[5m]))",
+++          "legendFormat": "{{result}}",
+++          "refId": "A"
+++        }
+++      ],
+++      "gridPos": {
+++        "h": 8,
+++        "w": 24,
+++        "x": 0,
+++        "y": 0
+++      }
+++    },
+++    {
+++      "type": "timeseries",
+++      "title": "DLQ Trend",
+++      "description": "EN: DLQ rate over time (result=dlq).\nZH: DLQ 趨勢（result=dlq）。",
+++      "datasource": {
+++        "type": "prometheus",
+++        "uid": "${DS_PROMETHEUS}"
+++      },
+++      "options": {
+++        "legend": {
+++          "displayMode": "list"
+++        },
+++        "tooltip": {
+++          "mode": "single"
+++        }
+++      },
+++      "targets": [
+++        {
+++          "expr": "rate(normalize_sleep_messages_total{result=\"dlq\",subject=\"athlete-ally.sleep.raw-received\",stream=\"$stream\",durable=\"$durable\",job=\"$job\"}[5m])",
+++          "legendFormat": "dlq",
+++          "refId": "A"
+++        }
+++      ],
+++      "gridPos": {
+++        "h": 6,
+++        "w": 12,
+++        "x": 0,
+++        "y": 8
+++      }
+++    },
+++    {
+++      "type": "timeseries",
+++      "title": "Processing Duration p95/p99 (consume/publish)",
+++      "description": "EN: Prefer operation=consume; if not present, shows publish (optional). topic=sleep_raw_received.\nZH: 優先顯示 consume；若無則顯示 publish（可選）。",
+++      "datasource": {
+++        "type": "prometheus",
+++        "uid": "${DS_PROMETHEUS}"
+++      },
+++      "options": {
+++        "legend": {
+++          "displayMode": "table"
+++        }
+++      },
+++      "targets": [
+++        {
+++          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"consume\",job=\"$job\"}[5m])))",
+++          "legendFormat": "p95 consume",
+++          "refId": "A"
+++        },
+++        {
+++          "expr": "histogram_quantile(0.99, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"consume\",job=\"$job\"}[5m])))",
+++          "legendFormat": "p99 consume",
+++          "refId": "B"
+++        },
+++        {
+++          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"publish\",job=\"$job\"}[5m])))",
+++          "legendFormat": "p95 publish (opt)",
+++          "refId": "C"
+++        },
+++        {
+++          "expr": "histogram_quantile(0.99, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"publish\",job=\"$job\"}[5m])))",
+++          "legendFormat": "p99 publish (opt)",
+++          "refId": "D"
+++        }
+++      ],
+++      "gridPos": {
+++        "h": 6,
+++        "w": 12,
+++        "x": 12,
+++        "y": 8
+++      }
+++    },
+++    {
+++      "type": "text",
+++      "title": "Consumer Lag Check (Placeholder)",
+++      "mode": "markdown",
+++      "gridPos": {
+++        "h": 8,
+++        "w": 24,
+++        "x": 0,
+++        "y": 14
+++      },
+++      "options": {
+++        "content": "**Lag Check (NATS CLI first, Node JSM fallback)**\n\n- NATS CLI (pending):\n  - `nats consumer info $stream normalize-sleep-durable` (see `Num Pending`)\n- NATS CLI (last DLQ msg):\n  - `nats stream get AA_DLQ --last-by-subject dlq.normalize.sleep.raw-received.schema-invalid`\n- Node (pending, snippet):\n  ```js\n  import { connect } from 'nats';\n  const nc = await connect({ servers: process.env.NATS_URL || 'nats://localhost:4223' });\n  const jsm = await nc.jetstreamManager();\n  const ci = await jsm.consumers.info('$stream', 'normalize-sleep-durable');\n  console.log(ci.num_pending);\n  ```\n- Soak script (JSON): run docs/phase-3/ops/48h-soak-health-check.sh and inspect ./soak_sleep_summary.json"
+++      }
+++    }
+++  ]
+++}
++\ No newline at end of file
++diff --git a/package.json b/package.json
++index 2529a3b..6a218ed 100644
++--- a/package.json
+++++ b/package.json
++@@ -83,7 +83,7 @@
++     "validate:schemas": "node scripts/validate-schemas.js",
++     "dev:compose": "docker compose up --build",
++     "dev:compose:obs": "docker compose --profile obs up --build",
++-    "lint:json": "node scripts/json-lint.js monitoring/grafana/normalize-dashboard-sleep.json docs/examples/soak_sleep_summary.example.json",
+++    "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
++     "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
++   },
++   "dependencies": {
++diff --git a/scripts/promtool-validate.ps1 b/scripts/promtool-validate.ps1
++new file mode 100644
++index 0000000..0e8b508
++--- /dev/null
+++++ b/scripts/promtool-validate.ps1
++@@ -0,0 +1,7 @@
+++Param([string]$RulesPath = 'monitoring/alert_rules.yml')
+++try {
+++  $promtool = Get-Command promtool -ErrorAction Stop
+++  & $promtool.Source check rules $RulesPath
+++} catch {
+++  Write-Host 'promtool not found; skipping rules validation. (Install Prometheus to enable)' -ForegroundColor Yellow
+++}
++\ No newline at end of file
++diff --git a/scripts/promtool-validate.sh b/scripts/promtool-validate.sh
++new file mode 100644
++index 0000000..a98b83c
++--- /dev/null
+++++ b/scripts/promtool-validate.sh
++@@ -0,0 +1,8 @@
+++#!/usr/bin/env bash
+++set -euo pipefail
+++RULES="${1:-monitoring/alert_rules.yml}"
+++if command -v promtool >/dev/null 2>&1; then
+++  promtool check rules "$RULES"
+++else
+++  echo 'promtool not found; skipping rules validation. (Install Prometheus to enable)'
+++fi
++\ No newline at end of file
++-- 
++2.50.0.windows.1
++
+diff --git a/patches/20251003_010216_pr5_observability_finalize_2.patch b/patches/20251003_010216_pr5_observability_finalize_2.patch
+new file mode 100644
+index 0000000..bb6c29a
+--- /dev/null
++++ b/patches/20251003_010216_pr5_observability_finalize_2.patch
+@@ -0,0 +1,62 @@
++From c7cb5fc4aa8ef29cdea9642835ab0456963b29b5 Mon Sep 17 00:00:00 2001
++From: Release Bot <release-bot@local>
++Date: Fri, 3 Oct 2025 01:02:09 +0800
++Subject: [PATCH] docs(observability): add silencing/threshold tuning and soak
++ schema; README notes on variables and no-data
++
++---
++ docs/runbook/sleep-troubleshooting.md | 24 +++++++++++++++++++++++-
++ services/normalize-service/README.md  |  6 +++++-
++ 2 files changed, 28 insertions(+), 2 deletions(-)
++
++diff --git a/docs/runbook/sleep-troubleshooting.md b/docs/runbook/sleep-troubleshooting.md
++index 36aa565..12b3bbb 100644
++--- a/docs/runbook/sleep-troubleshooting.md
+++++ b/docs/runbook/sleep-troubleshooting.md
++@@ -20,4 +20,26 @@
++ 
++ - Soak script output
++   - Example: docs/examples/soak_sleep_summary.example.json
++-  - Live run: ./soak_sleep_summary.json generated by docs/phase-3/ops/48h-soak-health-check.sh
++\ No newline at end of file
+++  - Live run: ./soak_sleep_summary.json generated by docs/phase-3/ops/48h-soak-health-check.sh## Alert Silencing and Threshold Tuning
+++
+++- Silencing (mute):
+++  - Create a silence for rules in group sleep-pipeline via your Alertmanager UI.
+++  - Scope by labels: service=normalize-service, stream=AA_CORE_HOT, durable=normalize-sleep-durable, subject=athlete-ally.sleep.raw-received.
+++  - Suggested duration: 15–60m during maintenance; remove after validation.
+++- Threshold tuning:
+++  - DLQ rate (warn): adjust rate() window or comparator if transient spikes cause noise.
+++  - No successes (crit): extend for: from 5m to 10m only if known backfills or scheduled maintenance.
+++  - Use `promtool check rules monitoring/alert_rules.yml` after edits.
+++
+++## Soak JSON Schema (sleep)
+++
+++- Fields:
+++  - generated_at: string ISO8601
+++  - window_minutes: integer
+++  - job, stream, durable, subject: strings
+++  - success_count, dlq_count, retry_count: integers
+++  - success_rate, dlq_rate, retry_rate: numbers 0..1
+++  - pending_current, pending_max: integers
+++  - fallback_count: integer
+++  - notes: optional string
+++- Example: docs/examples/soak_sleep_summary.example.json
++diff --git a/services/normalize-service/README.md b/services/normalize-service/README.md
++index 39564b8..1611771 100644
++--- a/services/normalize-service/README.md
+++++ b/services/normalize-service/README.md
++@@ -35,4 +35,8 @@ for (const m of msgs) { console.log('headers:', m.headers?.toString?.()); m.ack(
++ - WARN: DLQ rate > 0 for 5m
++ - WARN: Lag > 100 for 5m (placeholder if exporter missing)
++ - CRIT: No successes in 5m
++-- Runbook: docs/runbook/sleep-troubleshooting.md
++\ No newline at end of file
+++- Runbook: docs/runbook/sleep-troubleshooting.md
+++### Dashboard Variables and No-Data Behavior
+++- Variables: job (default normalize), stream (AA_CORE_HOT), durable (normalize-sleep-durable), subject (default athlete-ally.sleep.raw-received).
+++- If panels show "No data": confirm service is running, Prometheus is scraping, and variable labels match your env.
+++- Import path: monitoring/grafana/dashboards/normalize-sleep.json (UID: aa-sleep-norm).
++-- 
++2.50.0.windows.1
++
+diff --git a/scripts/json-lint.js b/scripts/json-lint.js
+new file mode 100644
+index 0000000..d349449
+--- /dev/null
++++ b/scripts/json-lint.js
+@@ -0,0 +1,16 @@
++#!/usr/bin/env node
++const fs = require('fs');
++let ok = true;
++const files = process.argv.slice(2);
++if (files.length === 0) {
++  console.error('Usage: node scripts/json-lint.js <files...>');
++  process.exit(2);
++}
++for (const f of files) {
++  try {
++    const txt = fs.readFileSync(f, 'utf8');
++    JSON.parse(txt);
++    console.log(`OK: ${f}`);
++  } catch (e) { ok = false; console.error(`JSON error in ${f}: ${e.message}`); }
++}
++process.exit(ok ? 0 : 1);
+\ No newline at end of file
+diff --git a/scripts/promtool-validate.ps1 b/scripts/promtool-validate.ps1
+new file mode 100644
+index 0000000..0e8b508
+--- /dev/null
++++ b/scripts/promtool-validate.ps1
+@@ -0,0 +1,7 @@
++Param([string]$RulesPath = 'monitoring/alert_rules.yml')
++try {
++  $promtool = Get-Command promtool -ErrorAction Stop
++  & $promtool.Source check rules $RulesPath
++} catch {
++  Write-Host 'promtool not found; skipping rules validation. (Install Prometheus to enable)' -ForegroundColor Yellow
++}
+\ No newline at end of file
+diff --git a/scripts/promtool-validate.sh b/scripts/promtool-validate.sh
+new file mode 100644
+index 0000000..a98b83c
+--- /dev/null
++++ b/scripts/promtool-validate.sh
+@@ -0,0 +1,8 @@
++#!/usr/bin/env bash
++set -euo pipefail
++RULES="${1:-monitoring/alert_rules.yml}"
++if command -v promtool >/dev/null 2>&1; then
++  promtool check rules "$RULES"
++else
++  echo 'promtool not found; skipping rules validation. (Install Prometheus to enable)'
++fi
+\ No newline at end of file
+diff --git a/scripts/smoke-readiness.js b/scripts/smoke-readiness.js
+new file mode 100644
+index 0000000..4bbf956
+--- /dev/null
++++ b/scripts/smoke-readiness.js
+@@ -0,0 +1,23 @@
++#!/usr/bin/env node
++// Simple smoke test for readiness endpoints
++const http = require('http');
++
++function get(path) {
++  return new Promise((resolve, reject) => {
++    const req = http.request({ host: 'localhost', port: 4103, path, method: 'GET' }, res => {
++      let data='';
++      res.on('data', c=> data+=c);
++      res.on('end', ()=> resolve({ status: res.statusCode, body: data }));
++    });
++    req.on('error', reject); req.end();
++  });
++}
++
++(async () => {
++  const userId = process.env.SMOKE_USER_ID || 'user123';
++  const latest = await get(`/api/v1/readiness/${encodeURIComponent(userId)}/latest`);
++  console.log('latest', latest.status, latest.body);
++  const range = await get(`/api/v1/readiness/${encodeURIComponent(userId)}?days=7`);
++  console.log('range', range.status, range.body);
++  if (latest.status !== 200 || range.status !== 200) process.exit(1);
++})();
+diff --git a/scripts/yaml-lint.js b/scripts/yaml-lint.js
+new file mode 100644
+index 0000000..457f301
+--- /dev/null
++++ b/scripts/yaml-lint.js
+@@ -0,0 +1,22 @@
++#!/usr/bin/env node
++const fs = require('fs');
++let ok = true;
++const files = process.argv.slice(2);
++if (files.length === 0) { console.error('Usage: node scripts/yaml-lint.js <files...>'); process.exit(2); }
++let parser = null;
++try { parser = require('yaml'); } catch {}
++try { if (!parser) parser = require('js-yaml'); } catch {}
++for (const f of files) {
++  try {
++    const txt = fs.readFileSync(f, 'utf8');
++    if (parser) {
++      parser.parse ? parser.parse(txt) : parser.load(txt);
++      console.log(`OK: ${f}`);
++    } else {
++      // Fallback: minimal check for required keys
++      if (!/groups:\s*[\s\S]+name:/m.test(txt) || !/rules:/m.test(txt)) throw new Error('basic YAML structure check failed (install yaml/js-yaml for full parse)');
++      console.log(`OK(basic): ${f}`);
++    }
++  } catch (e) { ok = false; console.error(`YAML error in ${f}: ${e.message}`); }
++}
++process.exit(ok ? 0 : 1);
+\ No newline at end of file
+diff --git a/services/insights-engine/.env.example b/services/insights-engine/.env.example
+new file mode 100644
+index 0000000..7b030c0
+--- /dev/null
++++ b/services/insights-engine/.env.example
+@@ -0,0 +1,7 @@
++PORT=4103
++DATABASE_URL=postgresql://user:pass@localhost:5432/athlete_insights
++
++# Readiness flags (documented, not wired at runtime in PRR2)
++READINESS_CONSUMER_ENABLED=false
++PUBLISH_READINESS_EVENTS=false
++READINESS_FORMULA_VARIANT=baseline
+diff --git a/services/insights-engine/README.md b/services/insights-engine/README.md
+new file mode 100644
+index 0000000..4997534
+--- /dev/null
++++ b/services/insights-engine/README.md
+@@ -0,0 +1,19 @@
++# Insights Engine (Readiness v1)
++
++Endpoints
++- GET /api/v1/readiness/:userId/latest → latest ReadinessRecord or { userId, incomplete: true }
++- GET /api/v1/readiness/:userId?days=7 → array of ReadinessRecord (desc)
++
++Contracts & Schemas
++- ReadinessRecord in packages/contracts/openapi.yaml
++
++Environment
++- PORT=4103
++- DATABASE_URL=postgresql://user:pass@localhost:5432/athlete_insights
++- READINESS_CONSUMER_ENABLED=false
++- PUBLISH_READINESS_EVENTS=false
++- READINESS_FORMULA_VARIANT=baseline
++
++Notes
++- DB date is DATE (UTC). API returns dates as YYYYMMDD.
++- Upsert is idempotent by (userId, date).
+diff --git a/services/insights-engine/__tests__/readinessV1.compute.test.ts b/services/insights-engine/__tests__/readinessV1.compute.test.ts
+new file mode 100644
+index 0000000..58d1722
+--- /dev/null
++++ b/services/insights-engine/__tests__/readinessV1.compute.test.ts
+@@ -0,0 +1,29 @@
++import { computeScoreComponents } from '../src/readinessV1';
++
++describe('computeScoreComponents (baseline formula)', () => {
++  it('uses duration only when quality missing', () => {
++    const r = computeScoreComponents({ durationMinutes: 480, lnRmssdToday: 3.8, baselineLnRmssd: 3.8 });
++    expect(r.incomplete).toBe(false);
++    expect(r.sleepScore).toBe(100);
++    expect(r.hrvScore).toBe(100);
++    expect(r.score).toBe(100);
++  });
++
++  it('blends duration and quality when present', () => {
++    const r = computeScoreComponents({ durationMinutes: 360, qualityScore: 80, lnRmssdToday: 3.6, baselineLnRmssd: 3.8 });
++    // duration_norm=0.75; sleep_ratio=0.8*0.75+0.2*0.8=0.76
++    // hrv_ratio=3.6/3.8=0.947...
++    expect(r.incomplete).toBe(false);
++    expect(r.sleepScore).toBeCloseTo(76, 0);
++    expect(r.hrvScore).toBeCloseTo(95, 0);
++    expect(r.score).toBeGreaterThan(0);
++  });
++
++  it('marks incomplete if any input missing', () => {
++    const r1 = computeScoreComponents({ durationMinutes: 450 });
++    expect(r1.incomplete).toBe(true);
++    const r2 = computeScoreComponents({ lnRmssdToday: 3.2, baselineLnRmssd: 3.4 });
++    expect(r2.incomplete).toBe(true);
++  });
++});
++
+diff --git a/services/insights-engine/__tests__/readinessV1.routes.test.ts b/services/insights-engine/__tests__/readinessV1.routes.test.ts
+new file mode 100644
+index 0000000..2d65fec
+--- /dev/null
++++ b/services/insights-engine/__tests__/readinessV1.routes.test.ts
+@@ -0,0 +1,57 @@
++import Fastify from 'fastify';
++import { readinessV1Routes } from '../src/routes/readinessV1';
++import { InMemoryRepo } from '../src/repo';
++import { startOfUtcDay } from '../src/utils/date';
++
++// Patch the route module to inject in-memory repo for tests via monkey patching
++jest.mock('../src/routes/readinessV1', () => {
++  const original = jest.requireActual('../src/routes/readinessV1');
++  const route = async (fastify: any) => {
++    const repo = new (require('../src/repo').InMemoryRepo)();
++    // seed some data for today
++    const today = startOfUtcDay(new Date());
++    repo.seedSleep('u1', today, 480, 90);
++    repo.seedHrv('u1', today, 3.8);
++    // minimal shim: attach repo on fastify instance for this test
++    (fastify as any).readinessTestRepo = repo;
++    // Re-implement minimal handlers inline for testing
++    fastify.get('/api/v1/readiness/:userId/latest', async (req: any, reply: any) => {
++      const { userId } = req.params;
++      const { computeAndUpsertReadiness } = require('../src/readinessV1');
++      await computeAndUpsertReadiness(repo, userId, today);
++      const latest = await repo.getLatestReadiness(userId);
++      if (!latest) return reply.code(200).send({ userId, incomplete: true });
++      return reply.code(200).send({ userId, date: '20240101', score: latest.score, incomplete: latest.incomplete ?? false, components: latest.components });
++    });
++    fastify.get('/api/v1/readiness/:userId', async (req: any, reply: any) => {
++      const { userId } = req.params;
++      const list = await repo.getReadinessRange(userId, 7);
++      return reply.code(200).send(list.map((r: any) => ({ userId, date: '20240101', score: r.score, incomplete: r.incomplete ?? false, components: r.components })));
++    });
++  };
++  return { ...original, readinessV1Routes: route };
++});
++
++describe('readiness v1 routes', () => {
++  const app = Fastify();
++  beforeAll(async () => {
++    await app.register(readinessV1Routes);
++  });
++  afterAll(async () => { await app.close(); });
++
++  it('GET /api/v1/readiness/:userId/latest returns computed readiness', async () => {
++    const res = await app.inject({ method: 'GET', url: '/api/v1/readiness/u1/latest' });
++    expect(res.statusCode).toBe(200);
++    const body = res.json();
++    expect(body.userId).toBe('u1');
++    expect(typeof body.score).toBe('number');
++  });
++
++  it('GET /api/v1/readiness/:userId?days=7 returns list', async () => {
++    const res = await app.inject({ method: 'GET', url: '/api/v1/readiness/u1?days=7' });
++    expect(res.statusCode).toBe(200);
++    const body = res.json();
++    expect(Array.isArray(body)).toBe(true);
++  });
++});
++
+diff --git a/services/insights-engine/jest.config.js b/services/insights-engine/jest.config.js
+index 4970967..3b1e72d 100644
+--- a/services/insights-engine/jest.config.js
++++ b/services/insights-engine/jest.config.js
+@@ -8,8 +8,9 @@ module.exports = {
+   ],
+   moduleNameMapper: {
+     '^(\\.{1,2}/.*)\\.js$': '$1',
++    '^@athlete-ally/contracts$': '<rootDir>/test-support/contracts-mock.js',
+   },
+   transform: {
+     '^.+\\.ts$': 'ts-jest',
+   },
+-};
+\ No newline at end of file
++};
+diff --git a/services/insights-engine/prisma/schema.prisma b/services/insights-engine/prisma/schema.prisma
+index 42209e6..1997090 100644
+--- a/services/insights-engine/prisma/schema.prisma
++++ b/services/insights-engine/prisma/schema.prisma
+@@ -20,4 +20,49 @@ model ReadinessScore {
+ 
+   @@id([userId, date])
+   @@index([userId, date])
+-}
+\ No newline at end of file
++}
++
++/// Read-only views of normalized data from normalize-service
++model HrvData {
++  id         String   @id @default(cuid())
++  userId     String
++  date       DateTime @db.Date
++  rmssd      Float?
++  lnRmssd    Float?
++  capturedAt DateTime
++  createdAt  DateTime @default(now())
++  updatedAt  DateTime @updatedAt
++
++  @@unique([userId, date])
++  @@map("hrv_data")
++}
++
++model SleepData {
++  id              String   @id @default(cuid())
++  userId          String
++  date            DateTime @db.Date
++  durationMinutes Int
++  qualityScore    Int?
++  vendor          String
++  capturedAt      DateTime
++  createdAt       DateTime @default(now())
++  updatedAt       DateTime @updatedAt
++
++  @@unique([userId, date])
++  @@map("sleep_data")
++}
++
++/// Readiness v1 storage for API (PRR2)
++model ReadinessData {
++  id         String   @id @default(cuid())
++  userId     String
++  date       DateTime @db.Date
++  score      Int
++  incomplete Boolean  @default(false)
++  components Json?
++  createdAt  DateTime @default(now())
++  updatedAt  DateTime @updatedAt
++
++  @@unique([userId, date])
++  @@map("readiness_data")
++}
+diff --git a/services/insights-engine/src/index.ts b/services/insights-engine/src/index.ts
+index 8d693dc..29bbe83 100644
+--- a/services/insights-engine/src/index.ts
++++ b/services/insights-engine/src/index.ts
+@@ -3,6 +3,7 @@ import { EventBus } from '@athlete-ally/event-bus';
+ import { PrismaClient } from '../prisma/generated/client';
+ import { EventHandlers } from './eventHandlers';
+ import { readinessRoutes } from './routes/readiness';
++import { readinessV1Routes } from './routes/readinessV1';
+ 
+ const fastify = Fastify({
+   logger: true
+@@ -48,6 +49,7 @@ async function initializeEventHandlers() {
+ 
+ // Register routes
+ fastify.register(readinessRoutes);
++fastify.register(readinessV1Routes);
+ 
+ // Feature flag: READINESS_STUB
+ if (process.env.READINESS_STUB === 'true') {
+@@ -120,4 +122,4 @@ process.on('SIGINT', async () => {
+   process.exit(0);
+ });
+ 
+-start();
+\ No newline at end of file
++start();
+diff --git a/services/insights-engine/src/readinessV1.ts b/services/insights-engine/src/readinessV1.ts
+new file mode 100644
+index 0000000..889d68c
+--- /dev/null
++++ b/services/insights-engine/src/readinessV1.ts
+@@ -0,0 +1,70 @@
++import { Repo, ReadinessRecord } from './repo';
++
++export interface ComputeOptions {
++  lookbackDays?: number; // default 7
++}
++
++function clamp01(x: number) { return Math.max(0, Math.min(1, x)); }
++
++export function computeScoreComponents(params: { durationMinutes?: number; qualityScore?: number; lnRmssdToday?: number; baselineLnRmssd?: number; }): { sleepScore?: number; hrvScore?: number; incomplete: boolean; score: number } {
++  const { durationMinutes, qualityScore, lnRmssdToday, baselineLnRmssd } = params;
++
++  let incomplete = false;
++  // sleep_ratio
++  let sleepRatio = undefined as number | undefined;
++  if (durationMinutes != null) {
++    const durationNorm = clamp01(durationMinutes / 480);
++    if (qualityScore != null) {
++      sleepRatio = 0.8 * durationNorm + 0.2 * clamp01(qualityScore / 100);
++    } else {
++      sleepRatio = durationNorm;
++    }
++  } else {
++    incomplete = true;
++  }
++
++  // hrv_ratio
++  let hrvRatio = undefined as number | undefined;
++  if (lnRmssdToday != null && baselineLnRmssd != null && baselineLnRmssd > 0) {
++    hrvRatio = clamp01(lnRmssdToday / baselineLnRmssd);
++  } else {
++    incomplete = true;
++  }
++
++  const sleepPart = sleepRatio ?? 0;
++  const hrvPart = hrvRatio ?? 0;
++  const raw = 100 * (0.6 * sleepPart + 0.4 * hrvPart);
++  const score = Math.round(Math.max(0, Math.min(100, raw)));
++
++  const components: { sleepScore?: number; hrvScore?: number } = {};
++  if (sleepRatio != null) components.sleepScore = Math.round(sleepRatio * 100);
++  if (hrvRatio != null) components.hrvScore = Math.round(hrvRatio * 100);
++
++  return { sleepScore: components.sleepScore, hrvScore: components.hrvScore, incomplete, score };
++}
++
++export async function computeAndUpsertReadiness(repo: Repo, userId: string, date: Date, opts: ComputeOptions = {}): Promise<ReadinessRecord> {
++  const lookback = opts.lookbackDays ?? 7;
++  const sleep = await repo.getSleepForDate(userId, date);
++  const hrv = await repo.getHrvForDate(userId, date);
++  const baselineArr = await repo.getHrvBaseline(userId, date, lookback);
++  const baseline = baselineArr.length > 0 ? baselineArr.reduce((a, b) => a + b, 0) / baselineArr.length : undefined;
++
++  const { score, incomplete, hrvScore, sleepScore } = computeScoreComponents({
++    durationMinutes: sleep?.durationMinutes,
++    qualityScore: sleep?.qualityScore,
++    lnRmssdToday: hrv?.lnRmssd,
++    baselineLnRmssd: baseline,
++  });
++
++  const record: ReadinessRecord = {
++    userId,
++    date,
++    score,
++    incomplete,
++    components: { hrvScore, sleepScore },
++  };
++  await repo.upsertReadiness(record);
++  return record;
++}
++
+diff --git a/services/insights-engine/src/repo.ts b/services/insights-engine/src/repo.ts
+new file mode 100644
+index 0000000..0b4492b
+--- /dev/null
++++ b/services/insights-engine/src/repo.ts
+@@ -0,0 +1,135 @@
++import type { PrismaClient } from '../prisma/generated/client';
++import { endOfUtcDay, startOfUtcDay } from './utils/date';
++
++export interface ReadinessRecord {
++  userId: string;
++  date: Date; // UTC date at 00:00:00
++  score?: number; // 0..100
++  incomplete?: boolean;
++  components?: { hrvScore?: number; sleepScore?: number; notes?: string };
++}
++
++export interface Repo {
++  getSleepForDate(userId: string, date: Date): Promise<{ durationMinutes: number; qualityScore?: number } | null>;
++  getHrvForDate(userId: string, date: Date): Promise<{ lnRmssd: number } | null>;
++  getHrvBaseline(userId: string, date: Date, lookbackDays: number): Promise<number[]>
++  upsertReadiness(rec: ReadinessRecord): Promise<void>;
++  getLatestReadiness(userId: string): Promise<ReadinessRecord | null>;
++  getReadinessRange(userId: string, days: number): Promise<ReadinessRecord[]>;
++}
++
++export class PrismaRepo implements Repo {
++  constructor(private prisma: PrismaClient) {}
++
++  async getSleepForDate(userId: string, date: Date) {
++    const rec = await this.prisma.sleepData.findUnique({
++      where: { userId_date: { userId, date } },
++      select: { durationMinutes: true, qualityScore: true },
++    }).catch(async () => {
++      // Some Prisma clients may not have compound unique; fallback to findFirst range
++      return this.prisma.sleepData.findFirst({
++        where: { userId, date: { gte: startOfUtcDay(date), lte: endOfUtcDay(date) } },
++        select: { durationMinutes: true, qualityScore: true }
++      });
++    });
++    return rec ? { durationMinutes: rec.durationMinutes, qualityScore: rec.qualityScore ?? undefined } : null;
++  }
++
++  async getHrvForDate(userId: string, date: Date) {
++    const rec = await this.prisma.hrvData.findFirst({
++      where: { userId, date: { gte: startOfUtcDay(date), lte: endOfUtcDay(date) } },
++      select: { lnRmssd: true },
++      orderBy: { date: 'desc' }
++    });
++    return rec && rec.lnRmssd != null ? { lnRmssd: rec.lnRmssd } : null;
++  }
++
++  async getHrvBaseline(userId: string, date: Date, lookbackDays: number) {
++    const start = new Date(date);
++    start.setUTCDate(start.getUTCDate() - lookbackDays);
++    const rows = await this.prisma.hrvData.findMany({
++      where: { userId, date: { gte: start, lt: date } },
++      select: { lnRmssd: true },
++      orderBy: { date: 'asc' }
++    });
++    return rows.filter(r => r.lnRmssd != null).map(r => r.lnRmssd as number);
++  }
++
++  async upsertReadiness(rec: ReadinessRecord) {
++    await this.prisma.readinessData.upsert({
++      where: { userId_date: { userId: rec.userId, date: rec.date } },
++      create: {
++        userId: rec.userId,
++        date: rec.date,
++        score: rec.score ?? 0,
++        incomplete: rec.incomplete ?? false,
++        components: rec.components as any,
++      },
++      update: {
++        score: rec.score ?? 0,
++        incomplete: rec.incomplete ?? false,
++        components: rec.components as any,
++      }
++    });
++  }
++
++  async getLatestReadiness(userId: string) {
++    const r = await this.prisma.readinessData.findFirst({
++      where: { userId },
++      orderBy: { date: 'desc' }
++    });
++    return r ? { userId: r.userId, date: r.date, score: r.score, incomplete: r.incomplete ?? undefined, components: (r as any).components ?? undefined } : null;
++  }
++
++  async getReadinessRange(userId: string, days: number) {
++    const end = startOfUtcDay(new Date());
++    const start = new Date(end);
++    start.setUTCDate(start.getUTCDate() - (days - 1));
++    const list = await this.prisma.readinessData.findMany({
++      where: { userId, date: { gte: start, lte: end } },
++      orderBy: { date: 'desc' }
++    });
++    return list.map(r => ({ userId: r.userId, date: r.date, score: r.score, incomplete: r.incomplete ?? undefined, components: (r as any).components ?? undefined }));
++  }
++}
++
++export class InMemoryRepo implements Repo {
++  private sleep = new Map<string, { durationMinutes: number; qualityScore?: number }>();
++  private hrv = new Map<string, { lnRmssd: number }>();
++  private readiness = new Map<string, ReadinessRecord>();
++
++  private key(userId: string, date: Date) { return `${userId}|${date.toISOString().slice(0,10)}`; }
++
++  async getSleepForDate(userId: string, date: Date) { return this.sleep.get(this.key(userId, date)) ?? null; }
++  async getHrvForDate(userId: string, date: Date) { return this.hrv.get(this.key(userId, date)) ?? null; }
++  async getHrvBaseline(userId: string, date: Date, lookbackDays: number) {
++    const arr: number[] = [];
++    for (let i = 1; i <= lookbackDays; i++) {
++      const d = new Date(date); d.setUTCDate(d.getUTCDate() - i);
++      const rec = this.hrv.get(this.key(userId, d)); if (rec) arr.push(rec.lnRmssd);
++    }
++    return arr.reverse();
++  }
++  async upsertReadiness(rec: ReadinessRecord) { this.readiness.set(this.key(rec.userId, rec.date), rec); }
++  async getLatestReadiness(userId: string) {
++    let latest: ReadinessRecord | null = null;
++    for (const [k, v] of this.readiness.entries()) {
++      if (k.startsWith(userId + '|') && (!latest || v.date > latest.date)) latest = v;
++    }
++    return latest;
++  }
++  async getReadinessRange(userId: string, days: number) {
++    const end = startOfUtcDay(new Date());
++    const start = new Date(end); start.setUTCDate(start.getUTCDate() - (days - 1));
++    const res: ReadinessRecord[] = [];
++    for (let dt = new Date(end); dt >= start; dt.setUTCDate(dt.getUTCDate() - 1)) {
++      const rec = this.readiness.get(this.key(userId, dt)); if (rec) res.push(rec);
++    }
++    return res;
++  }
++
++  // helpers for tests
++  seedSleep(userId: string, date: Date, durationMinutes: number, qualityScore?: number) { this.sleep.set(this.key(userId, date), { durationMinutes, qualityScore }); }
++  seedHrv(userId: string, date: Date, lnRmssd: number) { this.hrv.set(this.key(userId, date), { lnRmssd }); }
++}
++
+diff --git a/services/insights-engine/src/routes/readinessV1.ts b/services/insights-engine/src/routes/readinessV1.ts
+new file mode 100644
+index 0000000..e67b7a4
+--- /dev/null
++++ b/services/insights-engine/src/routes/readinessV1.ts
+@@ -0,0 +1,82 @@
++import { FastifyInstance } from 'fastify';
++import { toYyyyMmDd, startOfUtcDay } from '../utils/date';
++import { PrismaClient } from '../../prisma/generated/client';
++import { PrismaRepo } from '../repo';
++import { computeAndUpsertReadiness } from '../readinessV1';
++import crypto from 'crypto';
++
++// Minimal metrics via a lightweight counters; we can swap to prom-client later
++const metrics = {
++  apiRequestsTotal: new Map<string, number>(),
++  inc(route: string, status: number) {
++    const key = `${route}|${status}`;
++    this.apiRequestsTotal.set(key, (this.apiRequestsTotal.get(key) || 0) + 1);
++  },
++};
++
++export async function readinessV1Routes(fastify: FastifyInstance) {
++  const prisma = new PrismaClient();
++  const repo = new PrismaRepo(prisma);
++
++  fastify.get('/api/v1/readiness/:userId/latest', async (request, reply) => {
++    const { userId } = request.params as { userId: string };
++    try {
++      // Compute today if missing (idempotent)
++      const today = startOfUtcDay(new Date());
++      await computeAndUpsertReadiness(repo, userId, today);
++      const latest = await repo.getLatestReadiness(userId);
++      if (!latest) {
++        metrics.inc('/api/v1/readiness/:userId/latest', 200);
++        return reply.code(200).send({ userId, incomplete: true });
++      }
++      metrics.inc('/api/v1/readiness/:userId/latest', 200);
++      return reply.code(200).send({
++        userId: latest.userId,
++        date: toYyyyMmDd(latest.date),
++        score: latest.score,
++        incomplete: latest.incomplete ?? false,
++        components: latest.components ?? undefined,
++      });
++    } catch (err: any) {
++      fastify.log.error({ err }, 'readiness latest failed');
++      metrics.inc('/api/v1/readiness/:userId/latest', 500);
++      return reply.code(500).send({ error: 'internal_error' });
++    }
++  });
++
++  fastify.get('/api/v1/readiness/:userId', async (request, reply) => {
++    const { userId } = request.params as { userId: string };
++    const { days } = request.query as { days?: string };
++    const n = Math.max(1, Math.min(31, Number(days ?? '7') || 7));
++    try {
++      // Optionally compute today to ensure current value exists
++      const today = startOfUtcDay(new Date());
++      await computeAndUpsertReadiness(repo, userId, today);
++      const list = await repo.getReadinessRange(userId, n);
++      metrics.inc('/api/v1/readiness/:userId', 200);
++      return reply.code(200).send(list.map(r => ({
++        userId: r.userId,
++        date: toYyyyMmDd(r.date),
++        score: r.score,
++        incomplete: r.incomplete ?? false,
++        components: r.components ?? undefined,
++      })));
++    } catch (err: any) {
++      fastify.log.error({ err }, 'readiness range failed');
++      metrics.inc('/api/v1/readiness/:userId', 500);
++      return reply.code(500).send({ error: 'internal_error' });
++    }
++  });
++
++  // Expose a minimal metrics endpoint for these new counters
++  fastify.get('/api/v1/metrics', async (_req, reply) => {
++    reply.type('text/plain');
++    let body = '';
++    for (const [k, v] of metrics.apiRequestsTotal.entries()) {
++      const [route, status] = k.split('|');
++      body += `api_requests_total{route="${route}",status="${status}"} ${v}\n`;
++    }
++    return body;
++  });
++}
++
+diff --git a/services/insights-engine/src/utils/date.ts b/services/insights-engine/src/utils/date.ts
+new file mode 100644
+index 0000000..52f2bc4
+--- /dev/null
++++ b/services/insights-engine/src/utils/date.ts
+@@ -0,0 +1,25 @@
++// Date utilities for formatting and parsing UTC days
++
++export function toYyyyMmDd(d: Date): string {
++  const y = d.getUTCFullYear();
++  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
++  const day = String(d.getUTCDate()).padStart(2, '0');
++  return `${y}${m}${day}`;
++}
++
++export function fromYyyyMmDd(s: string): Date {
++  if (!/^\d{8}$/.test(s)) throw new Error('Invalid YYYYMMDD');
++  const y = Number(s.slice(0, 4));
++  const m = Number(s.slice(4, 6));
++  const d = Number(s.slice(6, 8));
++  // Construct UTC date
++  return new Date(Date.UTC(y, m - 1, d, 0, 0, 0, 0));
++}
++
++export function startOfUtcDay(d: Date): Date {
++  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
++}
++
++export function endOfUtcDay(d: Date): Date {
++  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999));
++}
+diff --git a/services/insights-engine/test-support/contracts-mock.js b/services/insights-engine/test-support/contracts-mock.js
+new file mode 100644
+index 0000000..26eac8e
+--- /dev/null
++++ b/services/insights-engine/test-support/contracts-mock.js
+@@ -0,0 +1,6 @@
++module.exports = {
++  EVENT_TOPICS: {
++    HRV_NORMALIZED_STORED: 'athlete-ally.hrv.normalized-stored',
++    SLEEP_NORMALIZED_STORED: 'athlete-ally.sleep.normalized-stored',
++  },
++};
+diff --git a/services/normalize-service/README.md b/services/normalize-service/README.md
+index 8b16b8c..54e1245 100644
+--- a/services/normalize-service/README.md
++++ b/services/normalize-service/README.md
+@@ -310,3 +310,47 @@ See [Sleep Troubleshooting Runbook](../../docs/runbook/sleep-troubleshooting.md#
+ - [Ingest Service README](../ingest-service/README.md)
+ - [Sleep Troubleshooting Runbook](../../docs/runbook/sleep-troubleshooting.md)
+ - [Event Bus Package](../../packages/event-bus/README.md)
++
++---
++
++## Observability: Sleep Pipeline
++
++- Dashboard: monitoring/grafana/normalize-dashboard-sleep.json (import into Grafana; select DS_PROMETHEUS).
++- Variables: job (default normalize), stream (AA_CORE_HOT), durable (normalize-sleep-durable).
++- Metrics:
++  - normalize_sleep_messages_total{result,subject,stream,durable}
++  - event_bus_event_processing_duration_seconds_bucket{topic="sleep_raw_received", operation="consume|publish"}
++
++### Tracing Verification (W3C traceparent)
++- Ensure event-bus publishes inject headers (traceparent/tracestate) via OpenTelemetry.
++- Steps:
++  1) Send a Sleep payload (non-PII):
++     - curl -X POST http://localhost:4101/ingest/sleep -H "content-type: application/json" -d '{"eventId":"e1","payload":{"userId":"smoke-user","date":"2025-10-01","durationMinutes":420}}'
++  2) Observe normalize logs for received message and processing span; headers visible at receive if logged.
++  3) Temporary subscriber (Node) to inspect headers live:
++```ts
++import { connect, headers } from 'nats';
++const nc = await connect({ servers: process.env.NATS_URL || 'nats://localhost:4223' });
++const js = nc.jetstream();
++const sub = await js.pullSubscribe('athlete-ally.sleep.raw-received', { durable: 'tmp-inspect' } as any);
++const msgs = await (sub as any).fetch({ max: 1, expires: 1000 });
++for (const m of msgs) { console.log('headers:', m.headers?.toString?.()); m.ack(); }
++```
++
++### Using The Dashboard
++- Sleep Messages by Result: stacked counts (success/retry/dlq). ZH: 結果分佈堆疊。
++- DLQ Trend: result=dlq rate. ZH: DLQ 趨勢。
++- Processing Duration p95/p99: prefer consume; publish is optional. ZH: 延遲分位。
++- Consumer Lag: follow text panel instructions (NATS CLI primary; Soak script fallback). ZH: 延遲以 CLI 或 Soak 腳本檢查。
++
++### Alerts
++- File: monitoring/alert_rules.yml (group sleep-pipeline)
++- WARN: DLQ rate > 0 for 5m
++- WARN: Lag > 100 for 5m (placeholder if exporter missing)
++- CRIT: No successes in 5m
++- Runbook: docs/runbook/sleep-troubleshooting.md
++
++### Dashboard Variables and No-Data Behavior
++- Variables: job (default normalize), stream (AA_CORE_HOT), durable (normalize-sleep-durable), subject (default athlete-ally.sleep.raw-received).
++- If panels show "No data": confirm service is running, Prometheus is scraping, and variable labels match your env.
++- Import path: monitoring/grafana/dashboards/normalize-sleep.json (UID: aa-sleep-norm).

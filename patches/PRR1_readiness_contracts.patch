@@ -1,0 +1,298 @@
+diff --git a/packages/contracts/__tests__/readiness-events.test.ts b/packages/contracts/__tests__/readiness-events.test.ts
+new file mode 100644
+index 0000000..ed4db72
+--- /dev/null
++++ b/packages/contracts/__tests__/readiness-events.test.ts
+@@ -0,0 +1,62 @@
++import { describe, it, expect } from '@jest/globals';
++import { ReadinessComputedEvent, ReadinessStoredEvent, EVENT_TOPICS } from '../events/index.js';
++
++describe('Readiness Events', () => {
++  describe('ReadinessComputedEvent', () => {
++    it('should have correct interface structure', () => {
++      const event: ReadinessComputedEvent = {
++        eventId: 'evt_123',
++        payload: {
++          userId: 'user123',
++          date: '20241001',
++          score: 88,
++          incomplete: false,
++          components: {
++            hrvScore: 80,
++            sleepScore: 90,
++            notes: 'baseline variant'
++          }
++        }
++      };
++
++      expect(event.eventId).toBe('evt_123');
++      expect(event.payload.userId).toBe('user123');
++      expect(event.payload.date).toBe('20241001');
++      expect(event.payload.score).toBe(88);
++      expect(event.payload.incomplete).toBe(false);
++      expect(event.payload.components?.hrvScore).toBe(80);
++      expect(event.payload.components?.sleepScore).toBe(90);
++    });
++  });
++
++  describe('ReadinessStoredEvent', () => {
++    it('should have correct interface structure', () => {
++      const event: ReadinessStoredEvent = {
++        record: {
++          userId: 'user123',
++          date: '20241001',
++          score: 72,
++          incomplete: true,
++          components: {
++            hrvScore: 60,
++            sleepScore: 80
++          },
++          capturedAt: '2024-10-01T08:30:00Z'
++        }
++      };
++
++      expect(event.record.userId).toBe('user123');
++      expect(event.record.date).toBe('20241001');
++      expect(event.record.score).toBe(72);
++      expect(event.record.components?.sleepScore).toBe(80);
++    });
++  });
++
++  describe('EVENT_TOPICS', () => {
++    it('should include readiness topics', () => {
++      expect(EVENT_TOPICS.READINESS_COMPUTED).toBe('athlete-ally.readiness.computed');
++      expect(EVENT_TOPICS.READINESS_STORED).toBe('athlete-ally.readiness.stored');
++    });
++  });
++});
++
+diff --git a/packages/contracts/__tests__/readiness-schemas.test.ts b/packages/contracts/__tests__/readiness-schemas.test.ts
+new file mode 100644
+index 0000000..796a622
+--- /dev/null
++++ b/packages/contracts/__tests__/readiness-schemas.test.ts
+@@ -0,0 +1,80 @@
++import { describe, it, expect } from '@jest/globals';
++import Ajv from 'ajv';
++import addFormats from 'ajv-formats';
++import { EventSchemas } from '../events/schemas.js';
++
++const ajv = new Ajv();
++addFormats(ajv);
++
++describe('Readiness Event Schemas', () => {
++  describe('ReadinessComputedSchema', () => {
++    const validate = ajv.compile(EventSchemas.readiness_computed);
++
++    it('validates a correct computed event', () => {
++      const event = {
++        payload: {
++          userId: 'user123',
++          date: '20241001',
++          score: 90,
++          incomplete: false,
++          components: { hrvScore: 85, sleepScore: 95, notes: 'ok' }
++        }
++      };
++      expect(validate(event)).toBe(true);
++    });
++
++    it('rejects invalid date format (expects YYYYMMDD)', () => {
++      const event = {
++        payload: {
++          userId: 'user123',
++          date: '2024-10-01', // wrong format
++          score: 90
++        }
++      };
++      expect(validate(event)).toBe(false);
++    });
++
++    it('rejects score out of range', () => {
++      const eventLow = { payload: { userId: 'u', date: '20241001', score: -1 } };
++      const eventHigh = { payload: { userId: 'u', date: '20241001', score: 101 } };
++      expect(validate(eventLow)).toBe(false);
++      expect(validate(eventHigh)).toBe(false);
++    });
++  });
++
++  describe('ReadinessStoredSchema', () => {
++    const validate = ajv.compile(EventSchemas.readiness_stored);
++
++    it('validates a correct stored event (with capturedAt)', () => {
++      const event = {
++        record: {
++          userId: 'user123',
++          date: '20241001',
++          score: 72,
++          capturedAt: '2024-10-01T08:30:00Z'
++        }
++      };
++      expect(validate(event)).toBe(true);
++    });
++
++    it('validates without optional fields', () => {
++      const event = {
++        record: { userId: 'user123', date: '20241001', score: 50 }
++      };
++      expect(validate(event)).toBe(true);
++    });
++
++    it('rejects invalid date', () => {
++      const event = { record: { userId: 'u', date: '2024/10/01', score: 50 } };
++      expect(validate(event)).toBe(false);
++    });
++  });
++
++  describe('EventSchemas registration', () => {
++    it('includes readiness schemas in registry', () => {
++      expect(EventSchemas.readiness_computed).toBeDefined();
++      expect(EventSchemas.readiness_stored).toBeDefined();
++    });
++  });
++});
++
+diff --git a/packages/contracts/events/index.ts b/packages/contracts/events/index.ts
+index 52c2e84..c6b7a5e 100644
+--- a/packages/contracts/events/index.ts
++++ b/packages/contracts/events/index.ts
+@@ -122,7 +122,9 @@ export const EVENT_TOPICS = {
+   HRV_NORMALIZED_STORED: 'athlete-ally.hrv.normalized-stored',
+   SLEEP_RAW_RECEIVED: 'athlete-ally.sleep.raw-received',
+   SLEEP_NORMALIZED_STORED: 'athlete-ally.sleep.normalized-stored',
++  READINESS_COMPUTED: 'athlete-ally.readiness.computed',
++  READINESS_STORED: 'athlete-ally.readiness.stored',
+ } as const;
+ 
+ // Export schemas from dedicated file
+-export * from './schemas';
+\ No newline at end of file
++export * from './schemas';
+diff --git a/packages/contracts/events/schemas.ts b/packages/contracts/events/schemas.ts
+index dae4107..d65a1b1 100644
+--- a/packages/contracts/events/schemas.ts
++++ b/packages/contracts/events/schemas.ts
+@@ -185,6 +185,63 @@ export const SleepNormalizedStoredSchema = {
+   }
+ } as const;
+ 
++
++
++// Readiness event schemas (Stream B: PRR1)
++// Computed event: payload contains readiness metrics for a user-day
++export const ReadinessComputedSchema = {
++  type: 'object',
++  required: ['payload'],
++  properties: {
++    payload: {
++      type: 'object',
++      required: ['userId', 'date', 'score'],
++      properties: {
++        userId: { type: 'string', minLength: 1 },
++        // UTC day in compact form YYYYMMDD
++        date: { type: 'string', pattern: '^[0-9]{8}$' },
++        score: { type: 'number', minimum: 0, maximum: 100 },
++        incomplete: { type: 'boolean' },
++        components: {
++          type: 'object',
++          properties: {
++            hrvScore: { type: 'number', minimum: 0, maximum: 100 },
++            sleepScore: { type: 'number', minimum: 0, maximum: 100 },
++            notes: { type: 'string' }
++          }
++        }
++      }
++    }
++  }
++} as const;
++
++// Stored event: record represents persisted readiness for a user-day
++export const ReadinessStoredSchema = {
++  type: 'object',
++  required: ['record'],
++  properties: {
++    record: {
++      type: 'object',
++      required: ['userId', 'date', 'score'],
++      properties: {
++        userId: { type: 'string', minLength: 1 },
++        // UTC day in compact form YYYYMMDD
++        date: { type: 'string', pattern: '^[0-9]{8}$' },
++        score: { type: 'number', minimum: 0, maximum: 100 },
++        incomplete: { type: 'boolean' },
++        components: {
++          type: 'object',
++          properties: {
++            hrvScore: { type: 'number', minimum: 0, maximum: 100 },
++            sleepScore: { type: 'number', minimum: 0, maximum: 100 },
++            notes: { type: 'string' }
++          }
++        },
++        capturedAt: { type: 'string', format: 'date-time' }
++      }
++    }
++  }
++} as const;
+ // Schema registry for easy access
+ export const EventSchemas = {
+   'onboarding_completed': OnboardingCompletedSchema,
+@@ -194,7 +251,9 @@ export const EventSchemas = {
+   'hrv_raw_received': HRVRawReceivedSchema,
+   'hrv_normalized_stored': HRVNormalizedStoredSchema,
+   'sleep_raw_received': SleepRawReceivedSchema,
+-  'sleep_normalized_stored': SleepNormalizedStoredSchema
++  'sleep_normalized_stored': SleepNormalizedStoredSchema,
++  'readiness_computed': ReadinessComputedSchema,
++  'readiness_stored': ReadinessStoredSchema
+ } as const;
+ 
+ // Type for schema keys
+diff --git a/packages/contracts/openapi.yaml b/packages/contracts/openapi.yaml
+index df540b4..4a7f151 100644
+--- a/packages/contracts/openapi.yaml
++++ b/packages/contracts/openapi.yaml
+@@ -122,6 +122,37 @@ components:
+         status:
+           type: string
+           enum: [queued]
++    ReadinessRecord:
++      type: object
++      description: "Daily readiness record for a user (UTC day)."
++      required: [userId, date, score]
++      properties:
++        userId:
++          type: string
++        date:
++          type: string
++          pattern: '^\\d{8}$'
++          description: 'UTC date in compact form YYYYMMDD'
++        score:
++          type: integer
++          minimum: 0
++          maximum: 100
++        incomplete:
++          type: boolean
++          description: 'true if any required input (sleep/hrv) was missing'
++        components:
++          type: object
++          properties:
++            hrvScore:
++              type: integer
++              minimum: 0
++              maximum: 100
++            sleepScore:
++              type: integer
++              minimum: 0
++              maximum: 100
++            notes:
++              type: string
+     SleepIngestRequest:
+       type: object
+       required: [userId, date, durationMinutes]
+@@ -168,4 +199,4 @@ components:
+           type: array
+           items:
+             type: string
+-          example: ['date: Required']
+\ No newline at end of file
++          example: ['date: Required']

@@ -1,27 +1,25 @@
+# DO NOT EDIT ? GENERATED: Docs Index (docs/README.md)
+# Sources:
+#  - docs/streams/A1/overview__sample.md
+#  - docs/streams/A2/PR38_COMMENT_TEMPLATE.md
+#  - docs/streams/A2/PR_feat-a2-validate-grafana.md
+#  - docs/streams/A2/overview__sample.md
+#  - docs/streams/B/overview__sample.md
+
+
 # Documentation Index
 
-Last updated: 2025-09-21
+## Stream A1
 
-## Getting Started
-- User Guide: USER_GUIDE.md
-- Local Development Guide: ../LOCAL_DEVELOPMENT_GUIDE.md
+- A1 Overview (docs/streams/A1/overview__sample.md)
 
-## Architecture & Services
-- Technical Docs (overview): TECHNICAL_DOCS.md
-- Planning Engine Service: ../services/planning-engine/README.md
+## Stream A2
 
-## Plans & Releases
-- Phase 3 Plan: PHASE_3_PLAN.md
-- Releases: releases/
+- docs/streams/A2/PR38_COMMENT_TEMPLATE.md (docs/streams/A2/PR38_COMMENT_TEMPLATE.md)
+- docs/streams/A2/PR_feat-a2-validate-grafana.md (docs/streams/A2/PR_feat-a2-validate-grafana.md)
+- A2 Overview (docs/streams/A2/overview__sample.md)
 
-## Operations
-- Monitoring (Prometheus/Grafana): ../monitoring/
-- Ops Notes: ops/
+## Stream B
 
-## Security
-- Audit Log Pipeline: security/AUDIT_LOG_PIPELINE_DESIGN.md
-- Encryption Infrastructure: security/ENCRYPTION_INFRASTRUCTURE_DESIGN.md
-- Row-Level Security Policies: security/RLS_POLICIES_DESIGN.md
+- B Overview (docs/streams/B/overview__sample.md)
 
-## Testing
-- Test docs and guides: testing/
