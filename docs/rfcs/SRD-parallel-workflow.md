@@ -73,7 +73,11 @@ ensures main/integration stay green.
 
 - `.gitattributes` marks hubs `merge=ours` to avoid local merge noise.
 - Windows devs: set `git config core.autocrlf false`.
-\n### Linting CI stability\n- Use local ESLint via npm scripts (npm run lint:ci) to avoid npx version drift.\n- Compact formatter is provided by devDep eslint-formatter-compact and enabled in CI workflows.\n
+
+### Linting CI stability
+- Use local ESLint via npm scripts (npm run lint:ci) to avoid npx version drift.
+- Compact formatter is provided by devDep eslint-formatter-compact and enabled in CI workflows.
+
 ### Dashboards Index (generated)
 - A small generator builds `monitoring/grafana/dashboards/index.json` from `monitoring/grafana/dashboards/*.json` (excluding subfolders and `index.json`).
 - Each entry: `file`, `title`, `uid`, `panelsCount` (leaf panels only), `checksumSha256` (raw file bytes).
