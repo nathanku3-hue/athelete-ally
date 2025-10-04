@@ -3,7 +3,7 @@
 //  - registry/a1-metric-requests__sample.json
 //  - registry/reserved-ids.json
 // 
-export type RegistryItem = { id: string; [k: string]: any };
+export type RegistryItem = { id: string; [k: string]: unknown };
 export const registry: { items: RegistryItem[] } = {
   "items": [
     {
