@@ -9,7 +9,7 @@ async function build() {
     } catch {}
   }
   // sort by id
-  items.sort((a, b) => String(a?.id || '').localeCompare(String(b?.id || '')));
+  items.sort((a, b) => String((a as any)?.id || '').localeCompare(String((b as any)?.id || '')));
 
   const header = headerWithSources('Registry (registry.json / registry.ts)', sources);
   const jsonPath = 'registry.json';
