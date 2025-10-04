@@ -74,7 +74,12 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p reports/deps
-          npm run lint:ci
+          # Generate report using the same boundary rules as the check above
+          ESLINT=node_modules/.bin/eslint
+          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \\
+            --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
+            --rule "no-restricted-imports: error" \
+            --format=json > reports/deps/boundaries-report.json || true
       - name: Upload Boundaries Report
         if: always()
         uses: actions/upload-artifact@v4
