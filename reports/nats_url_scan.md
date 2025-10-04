@@ -1,22 +1,176 @@
-# NATS_URL Scan Report
+# NATS URL Scan
 
-Scanned files: 1552
-Findings: 61
+Generated: 2025-10-04T09:07:49.858Z
 
-## Summary by URL
-- nats://... (1)
-- nats://[user:pass@]host:port[,host2:port2,...] (1)
-- nats://${NATS_HOST}:4223 (1)
-- nats://athlete_ally_nats:YOUR_NATS_PASSWORD@nats:4223 (1)
-- nats://localhost:4222 (1)
-- nats://localhost:4223 (70)
-- nats://localhost:4223) (5)
-- nats://nats:4223 (8)
-- nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (3)
-- nats://prod-nats:4222 (1)
-- nats://staging-nats:4222 (10)
-- nats://user:pass@nats.prod:4223 (1)
+- Total matches: 165
+- Prod-tier matches: 7
+- TLS-protected: 88
+- Warnings (plain nats://): 12
 
-## Recommendation
+## Findings
 
-- Prefer `nats://localhost:4223` for local/dev; centralize config to avoid drift.
+- [url] nats://localhost:4223 (AUTONOMOUS_TODO.md:26) tier=unknown tls=yes
+- [url] nats://localhost:4223 (AUTONOMOUS_TODO.md:163) tier=unknown tls=yes
+- [url] nats://nats:4223 (docker-compose.yml:42) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (docker-compose.yml:42) tier=unknown tls=no
+- [url] nats://nats:4223 (docker-compose.yml:71) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (docker-compose.yml:71) tier=unknown tls=no
+- [url] nats://nats:4223 (docker-compose.yml:134) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (docker-compose.yml:134) tier=unknown tls=no
+- [url] nats://localhost:4223 (HANDOFF_REPORT.md:35) tier=unknown tls=yes
+- [url] nats://localhost:4223 (HANDOFF_REPORT.md:434) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (HANDOFF_REPORT.md:434) tier=unknown tls=no
+- [url] nats://localhost:4223 (HANDOFF_REPORT.md:453) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (HANDOFF_REPORT.md:453) tier=unknown tls=no
+- [url] nats://localhost:4223 (MISSION_BRIEF.md:28) tier=unknown tls=yes
+- [url] nats://localhost:4223 (MISSION_BRIEF.md:103) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (MISSION_BRIEF.md:103) tier=unknown tls=no
+- [url] nats://localhost:4223 (POST_MERGE_IMPLEMENTATION_SUMMARY.md:28) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (POST_MERGE_IMPLEMENTATION_SUMMARY.md:28) tier=unknown tls=no
+- [url] nats://localhost:4223 (POST_MERGE_TEST_RESULTS.md:25) tier=unknown tls=yes
+- [url] nats://localhost:4223 (README.md:68) tier=unknown tls=yes
+- [url] nats://localhost:4223 (smoke-results/smoke_sleep_summary.json:24) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/workouts/src/summary-aggregator.ts:48) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/profile-onboarding/src/index.ts:38) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/planning-engine/.env.development.example:7) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/.env.development.example:7) tier=unknown tls=no
+- [env] NATS_URL=nats://${NATS_HOST}:4223 (services/planning-engine/.env.production.example:12) tier=unknown tls=no
+- [env] NATS_URL=${NATS_URL} (services/planning-engine/docker-compose.production.yml:16) tier=unknown tls=no
+- [url] nats://nats:4223 (services/planning-engine/docker-compose.yml:55) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (services/planning-engine/docker-compose.yml:55) tier=unknown tls=no
+- [env] NATS_URL=nats://... (services/planning-engine/README.md:72) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/planning-engine/src/config.ts:14) tier=unknown tls=yes
+- [env] NATS_URL=z.string().url().default( (services/planning-engine/src/config.ts:14) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/planning-engine/src/__tests__/setup.ts:4) tier=unknown tls=yes
+- [env] NATS_URL=z.string().min(1, (services/planning-engine/src/config/environment.ts:13) tier=unknown tls=no
+- [env] NATS_URL=config.NATS_URL, (services/planning-engine/src/config/environment.ts:68) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/planning-engine/scripts/setup-env.js:22) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/scripts/setup-env.js:22) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:30) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:30) tier=unknown tls=no
+- [url] nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:75) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:75) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:139) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:139) tier=unknown tls=no
+- [url] nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:232) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:232) tier=unknown tls=no
+- [env] NATS_URL=nats://\${NATS_HOST}:4223 (services/planning-engine/scripts/setup-production.sh:20) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/planning-engine/docs/HEALTH_CHECK_README.md:163) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/docs/HEALTH_CHECK_README.md:163) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/normalize-service/.env.example:12) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/normalize-service/.env.example:12) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/normalize-service/README.md:140) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/normalize-service/README.md:140) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/normalize-service/README.md:333) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/normalize-service/src/index.ts:98) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/insights-engine/src/index.ts:19) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/ingest-service/README.md:114) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (services/ingest-service/README.md:114) tier=unknown tls=no
+- [url] nats://localhost:4223 (services/ingest-service/src/index.ts:48) tier=unknown tls=yes
+- [url] nats://localhost:4223 (services/ingest-service/src/index.ts:65) tier=unknown tls=yes
+- [env] NATS_URL=${natsUrl} (services/ingest-service/src/index.ts:70) tier=unknown tls=no
+- [url] nats://localhost:4223 (scripts/create-streams.js:11) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/smoke-sleep.js:14) tier=unknown tls=yes
+- [env] NATS_URL=NATS (scripts/smoke-sleep.js:14) tier=unknown tls=no
+- [url] nats://localhost:4223 (scripts/smoke-sleep.js:28) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/test-multi-mode-fallback.js:24) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/test-stream-init.js:15) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/nats/consumer-diagnostic.js:5) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/nats/migration-verify.js:5) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/nats/pull-diagnose.js:6) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (scripts/nats/pull-diagnose.js:6) tier=unknown tls=no
+- [url] nats://localhost:4223 (scripts/nats/pull-diagnose.js:12) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/nats/stream-binding-test.js:21) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/nats/stream-info.js:13) tier=unknown tls=yes
+- [url] nats://localhost:4223 (scripts/nats/stream-info.js:19) tier=unknown tls=yes
+- [url] nats://localhost:4223 (patches/20251001_db_connection_fix.md:17) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (patches/20251001_db_connection_fix.md:17) tier=unknown tls=no
+- [url] nats://localhost:4223 (packages/event-bus/src/config.ts:4) tier=unknown tls=yes
+- [env] NATS_URL=z.string().url().default( (packages/event-bus/src/config.ts:4) tier=unknown tls=no
+- [url] nats://localhost:4223 (packages/event-bus/src/index.ts:223) tier=unknown tls=yes
+- [url] nats://localhost:4223 (monitoring/grafana/dashboards/normalize-sleep.json:247) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:379) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:430) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:480) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:601) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:601) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:702) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:702) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:186) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:186) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:191) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:198) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:198) tier=unknown tls=no
+- [url] nats://nats1.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:201) tier=prod tls=yes
+- [env] NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:201) tier=unknown tls=no
+- [url] nats://user:pass (docs/PHASE2_ENV_VARIABLES.md:204) tier=unknown tls=no WARN
+- [env] NATS_URL=nats:[REDACTED]@nats.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:204) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:349) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:349) tier=unknown tls=no
+- [url] nats://nats1.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:399) tier=prod tls=yes
+- [env] NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:399) tier=unknown tls=no
+- [url] nats://localhost:4222 (docs/PHASE2_ENV_VARIABLES.md:466) tier=unknown tls=no WARN
+- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:466) tier=unknown tls=yes
+- [url] nats://nats1.prod:4223 (docs/PHASE2_RUNBOOK.md:85) tier=prod tls=yes
+- [env] NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (docs/PHASE2_RUNBOOK.md:85) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/testing/TEST_INTEGRATION_SUPPORT.md:392) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/testing/TEST_INTEGRATION_SUPPORT.md:392) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/48h-soak-health-check.sh:16) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/48h-soak-health-check.sh:27) tier=unknown tls=yes
+- [env] NATS_URL=${NATS_URL:-nats://localhost:4223} (docs/phase-3/ops/48h-soak-health-check.sh:27) tier=unknown tls=no
+- [env] NATS_URL=$NATS_URL (docs/phase-3/ops/48h-soak-health-check.sh:667) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/create-consumers.js:9) tier=unknown tls=yes
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/create-consumers.js:15) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/create-consumers.js:15) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/create-consumers.js:25) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/create-streams.js:9) tier=unknown tls=yes
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/create-streams.js:16) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/create-streams.js:16) tier=unknown tls=no
+- [url] nats://prod-nats:4222 (docs/phase-3/ops/create-streams.js:19) tier=prod tls=no WARN
+- [env] NATS_URL=nats://prod-nats:4222 (docs/phase-3/ops/create-streams.js:19) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/create-streams.js:29) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:11) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:15) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:15) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:21) tier=unknown tls=yes
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:76) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:76) tier=unknown tls=no
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:79) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:79) tier=unknown tls=no
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:88) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:88) tier=unknown tls=no
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:100) tier=non-prod tls=no WARN
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:144) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:144) tier=unknown tls=no
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:154) tier=non-prod tls=no WARN
+- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:485) tier=non-prod tls=no WARN
+- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:485) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:10) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:32) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:32) tier=unknown tls=no
+- [url] nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:43) tier=non-prod tls=yes
+- [env] NATS_URL=nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:43) tier=unknown tls=no
+- [url] nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:50) tier=non-prod tls=yes
+- [env] NATS_URL=nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:50) tier=unknown tls=no
+- [url] nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:61) tier=prod tls=yes
+- [env] NATS_URL=nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:61) tier=unknown tls=no
+- [url] nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:68) tier=prod tls=yes
+- [env] NATS_URL=nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:68) tier=unknown tls=no
+- [url] nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:75) tier=prod tls=yes
+- [env] NATS_URL=nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:75) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/SMOKE_SLEEP_REPORT.md:209) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (docs/phase-3/ops/SMOKE_SLEEP_REPORT.md:209) tier=unknown tls=no
+- [url] nats://localhost:4223 (docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md:48) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md:64) tier=unknown tls=yes
+- [url] nats://localhost:4223 (docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md:141) tier=unknown tls=yes
+- [url] nats://nats:4223 (docker-compose/preview.yml:31) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (docker-compose/preview.yml:31) tier=unknown tls=no
+- [url] nats://nats:4223 (docker-compose/preview.yml:49) tier=unknown tls=yes
+- [env] NATS_URL=nats://nats:4223 (docker-compose/preview.yml:49) tier=unknown tls=no
+- [url] ws://localhost:3001 (apps/frontend/src/lib/realtime.ts:28) tier=unknown tls=no
+- [url] nats://localhost:4223 (.github/workflows/oura-e2e.yml:32) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (.github/workflows/oura-e2e.yml:32) tier=unknown tls=no
+- [env] NATS_URL=$NATS_URL (.github/workflows/oura-e2e.yml:137) tier=unknown tls=no
+- [env] NATS_URL=$NATS_URL (.github/workflows/oura-e2e.yml:139) tier=unknown tls=no
+- [url] nats://localhost:4223 (.github/workflows/oura-e2e.yml:190) tier=unknown tls=yes
+- [env] NATS_URL=nats://localhost:4223 (.github/workflows/oura-e2e.yml:190) tier=unknown tls=no
