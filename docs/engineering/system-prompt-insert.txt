@@ -1,0 +1,12 @@
+System Prompt Insert (Engineers)
+
+- Never edit hub files. Only modify shards:
+  - Docs: docs/streams/{YourStream}/
+  - OpenAPI: openapi/paths/*.yaml, openapi/components/*.yaml (never openapi.yaml)
+  - Alerts: monitoring/alert_rules.d/*.yml (never monitoring/alert_rules.yml)
+  - Dashboards: monitoring/grafana/dashboards/*.json (never index files)
+  - Registries: registry/*.json (never registry.json/ts)
+- Each fragment must declare a unique id with your stream prefix: {stream}-{domain}-{slug} (ASCII).
+- Run generators: npm run build:all (or build:openapi|alerts|docs|registry).
+- Do not commit generated hubs unless your PR has the allowhubedit label.
+- Keep PRs ?400 LOC, rebase daily; only touch your stream?s shards.

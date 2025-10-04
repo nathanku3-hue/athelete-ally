@@ -1,0 +1,772 @@
+{
+  "scanned": 1552,
+  "findings": [
+    {
+      "file": ".env",
+      "occurrences": [
+        {
+          "line": 50,
+          "value": "nats://athlete_ally_nats:YOUR_NATS_PASSWORD@nats:4223"
+        }
+      ]
+    },
+    {
+      "file": "AUTONOMOUS_TODO.md",
+      "occurrences": [
+        {
+          "line": 26,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 163,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docker-compose.yml",
+      "occurrences": [
+        {
+          "line": 42,
+          "value": "nats://nats:4223"
+        },
+        {
+          "line": 71,
+          "value": "nats://nats:4223"
+        },
+        {
+          "line": 134,
+          "value": "nats://nats:4223"
+        }
+      ]
+    },
+    {
+      "file": "HANDOFF_REPORT.md",
+      "occurrences": [
+        {
+          "line": 35,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 434,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 453,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "MISSION_BRIEF.md",
+      "occurrences": [
+        {
+          "line": 28,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 103,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "POST_MERGE_IMPLEMENTATION_SUMMARY.md",
+      "occurrences": [
+        {
+          "line": 28,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "POST_MERGE_TEST_RESULTS.md",
+      "occurrences": [
+        {
+          "line": 25,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "README.md",
+      "occurrences": [
+        {
+          "line": 68,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docker-compose/preview.yml",
+      "occurrences": [
+        {
+          "line": 31,
+          "value": "nats://nats:4223"
+        },
+        {
+          "line": 49,
+          "value": "nats://nats:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/PHASE2_CODE_SNIPPETS.md",
+      "occurrences": [
+        {
+          "line": 379,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 430,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 480,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 601,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 702,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/PHASE2_ENV_VARIABLES.md",
+      "occurrences": [
+        {
+          "line": 186,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 191,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 193,
+          "value": "nats://[user:pass@]host:port[,host2:port2,...]"
+        },
+        {
+          "line": 198,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 201,
+          "value": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223"
+        },
+        {
+          "line": 204,
+          "value": "nats://user:pass@nats.prod:4223"
+        },
+        {
+          "line": 349,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 399,
+          "value": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223"
+        },
+        {
+          "line": 466,
+          "value": "nats://localhost:4222"
+        },
+        {
+          "line": 466,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/PHASE2_RUNBOOK.md",
+      "occurrences": [
+        {
+          "line": 85,
+          "value": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223"
+        }
+      ]
+    },
+    {
+      "file": "patches/20251001_db_connection_fix.md",
+      "occurrences": [
+        {
+          "line": 17,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/create-streams.js",
+      "occurrences": [
+        {
+          "line": 11,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/smoke-sleep.js",
+      "occurrences": [
+        {
+          "line": 14,
+          "value": "nats://localhost:4223)"
+        },
+        {
+          "line": 28,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/test-multi-mode-fallback.js",
+      "occurrences": [
+        {
+          "line": 24,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/test-stream-init.js",
+      "occurrences": [
+        {
+          "line": 15,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "smoke-results/smoke_sleep_summary.json",
+      "occurrences": [
+        {
+          "line": 24,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "tmp/aa-sleep-norm_model.json",
+      "occurrences": [
+        {
+          "line": 182,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "tmp/create-hrv-consumer.js",
+      "occurrences": [
+        {
+          "line": 4,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "tmp/grafana_import_payload.json",
+      "occurrences": [
+        {
+          "line": 248,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "tmp/normalize-sleep.json",
+      "occurrences": [
+        {
+          "line": 247,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "tmp/test-eventbus.ts",
+      "occurrences": [
+        {
+          "line": 5,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "tmp/test-nats.js",
+      "occurrences": [
+        {
+          "line": 4,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": ".github/workflows/oura-e2e.yml",
+      "occurrences": [
+        {
+          "line": 32,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 190,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/testing/TEST_INTEGRATION_SUPPORT.md",
+      "occurrences": [
+        {
+          "line": 392,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/ops/scan-nats-urls.mjs",
+      "occurrences": [
+        {
+          "line": 57,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/nats/consumer-diagnostic.js",
+      "occurrences": [
+        {
+          "line": 5,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/nats/migration-verify.js",
+      "occurrences": [
+        {
+          "line": 5,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/nats/pull-diagnose.js",
+      "occurrences": [
+        {
+          "line": 6,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 12,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/nats/stream-binding-test.js",
+      "occurrences": [
+        {
+          "line": 21,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "scripts/nats/stream-info.js",
+      "occurrences": [
+        {
+          "line": 13,
+          "value": "nats://localhost:4223)"
+        },
+        {
+          "line": 19,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/ingest-service/README.md",
+      "occurrences": [
+        {
+          "line": 114,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/normalize-service/.env",
+      "occurrences": [
+        {
+          "line": 8,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/normalize-service/.env.example",
+      "occurrences": [
+        {
+          "line": 12,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/normalize-service/README.md",
+      "occurrences": [
+        {
+          "line": 140,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/.env",
+      "occurrences": [
+        {
+          "line": 18,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/.env.development.example",
+      "occurrences": [
+        {
+          "line": 7,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/.env.production.example",
+      "occurrences": [
+        {
+          "line": 12,
+          "value": "nats://${NATS_HOST}:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/docker-compose.yml",
+      "occurrences": [
+        {
+          "line": 55,
+          "value": "nats://nats:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/README.md",
+      "occurrences": [
+        {
+          "line": 72,
+          "value": "nats://..."
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/create-consumers.js",
+      "occurrences": [
+        {
+          "line": 9,
+          "value": "nats://localhost:4223)"
+        },
+        {
+          "line": 15,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 25,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/create-streams.js",
+      "occurrences": [
+        {
+          "line": 9,
+          "value": "nats://localhost:4223)"
+        },
+        {
+          "line": 16,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 19,
+          "value": "nats://prod-nats:4222"
+        },
+        {
+          "line": 29,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/migrate-subjects.js",
+      "occurrences": [
+        {
+          "line": 11,
+          "value": "nats://localhost:4223)"
+        },
+        {
+          "line": 15,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 21,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/PHASE_B_ISSUE.md",
+      "occurrences": [
+        {
+          "line": 76,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 79,
+          "value": "nats://staging-nats:4222"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
+      "occurrences": [
+        {
+          "line": 88,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 100,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 144,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 154,
+          "value": "nats://staging-nats:4222"
+        },
+        {
+          "line": 485,
+          "value": "nats://staging-nats:4222"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/SMOKE_SLEEP_REPORT.md",
+      "occurrences": [
+        {
+          "line": 209,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md",
+      "occurrences": [
+        {
+          "line": 48,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 64,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 141,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "docs/phase-3/ops/staging.env.example",
+      "occurrences": [
+        {
+          "line": 38,
+          "value": "nats://staging-nats:4222"
+        }
+      ]
+    },
+    {
+      "file": "packages/event-bus/src/config.ts",
+      "occurrences": [
+        {
+          "line": 4,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "packages/event-bus/src/index.ts",
+      "occurrences": [
+        {
+          "line": 223,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/ingest-service/src/index.ts",
+      "occurrences": [
+        {
+          "line": 48,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 65,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/insights-engine/src/index.ts",
+      "occurrences": [
+        {
+          "line": 18,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/normalize-service/src/index.ts",
+      "occurrences": [
+        {
+          "line": 98,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/docs/HEALTH_CHECK_README.md",
+      "occurrences": [
+        {
+          "line": 163,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/scripts/setup-env.js",
+      "occurrences": [
+        {
+          "line": 22,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/scripts/setup-environment.js",
+      "occurrences": [
+        {
+          "line": 30,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 75,
+          "value": "nats://nats:4223"
+        },
+        {
+          "line": 139,
+          "value": "nats://localhost:4223"
+        },
+        {
+          "line": 232,
+          "value": "nats://nats:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/src/config.ts",
+      "occurrences": [
+        {
+          "line": 14,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/profile-onboarding/src/index.ts",
+      "occurrences": [
+        {
+          "line": 38,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/workouts/src/summary-aggregator.ts",
+      "occurrences": [
+        {
+          "line": 48,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    },
+    {
+      "file": "services/planning-engine/src/__tests__/setup.ts",
+      "occurrences": [
+        {
+          "line": 4,
+          "value": "nats://localhost:4223"
+        }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "url": "nats://...",
+      "count": 1
+    },
+    {
+      "url": "nats://[user:pass@]host:port[,host2:port2,...]",
+      "count": 1
+    },
+    {
+      "url": "nats://${NATS_HOST}:4223",
+      "count": 1
+    },
+    {
+      "url": "nats://athlete_ally_nats:YOUR_NATS_PASSWORD@nats:4223",
+      "count": 1
+    },
+    {
+      "url": "nats://localhost:4222",
+      "count": 1
+    },
+    {
+      "url": "nats://localhost:4223",
+      "count": 70
+    },
+    {
+      "url": "nats://localhost:4223)",
+      "count": 5
+    },
+    {
+      "url": "nats://nats:4223",
+      "count": 8
+    },
+    {
+      "url": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
+      "count": 3
+    },
+    {
+      "url": "nats://prod-nats:4222",
+      "count": 1
+    },
+    {
+      "url": "nats://staging-nats:4222",
+      "count": 10
+    },
+    {
+      "url": "nats://user:pass@nats.prod:4223",
+      "count": 1
+    }
+  ]
+}

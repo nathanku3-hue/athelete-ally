@@ -1,0 +1,9 @@
+# Generated hubs (single-writer)
+openapi.yaml
+monitoring/alert_rules.yml
+monitoring/grafana/dashboards/index.json
+docs/README.md
+docs/runbook/index.md
+registry.json
+registry.ts
+CHANGELOG.md

@@ -1,0 +1,14 @@
+# Prometheus rules shard (annotate id in rule annotations)
+groups:
+  - name: a1-api
+    rules:
+      - alert: A1ApiHighLatency
+        expr:
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="a1"}[5m]))
+          by (le))
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: A1 API high latency
+          id: A1-alerts-api-latency
