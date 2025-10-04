@@ -1,0 +1,280 @@
+From 64fa1525e942d6db54f590c6fa5df7347f901da5 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 01:13:25 +0800
+Subject: [PATCH 1/2] feat: A2 Grafana validator (workflow + script + runbook)
+
+---
+ .github/workflows/a2-validate-grafana.yml |  59 +++++++++++
+ docs/phase-3/ops/a2-validator-runbook.md  |  32 ++++++
+ scripts/ops/grafana-validate.mjs          | 119 ++++++++++++++++++++++
+ 3 files changed, 210 insertions(+)
+ create mode 100644 .github/workflows/a2-validate-grafana.yml
+ create mode 100644 docs/phase-3/ops/a2-validator-runbook.md
+ create mode 100644 scripts/ops/grafana-validate.mjs
+
+diff --git a/.github/workflows/a2-validate-grafana.yml b/.github/workflows/a2-validate-grafana.yml
+new file mode 100644
+index 0000000..5ad1811
+--- /dev/null
++++ b/.github/workflows/a2-validate-grafana.yml
+@@ -0,0 +1,59 @@
++name: A2 Validate Grafana
++
++on:
++  workflow_dispatch:
++    inputs:
++      uids:
++        description: 'Comma-separated Grafana dashboard UIDs'
++        required: false
++        default: 'aa-sleep-norm'
++      renderPNGs:
++        description: 'Render PNGs (requires renderer)'
++        required: false
++        type: boolean
++        default: false
++      basePath:
++        description: 'Optional Grafana base path (e.g., /grafana)'
++        required: false
++        default: ''
++      rejectUnauthorized:
++        description: 'Reject self-signed TLS certs'
++        required: false
++        type: boolean
++        default: true
++  schedule:
++    - cron: '0 9 * * *'
++
++jobs:
++  validate:
++    name: A2 Grafana Validator
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: '20.18.x'
++      - name: Install
++        run: npm ci
++      - name: Run validator
++        id: run
++        env:
++          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
++          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
++        run: |
++          mkdir -p a2-artifacts
++          node scripts/ops/grafana-validate.mjs \
++            --uids "${{ inputs.uids || 'aa-sleep-norm' }}" \
++            --renderPNGs "${{ inputs.renderPNGs || 'false' }}" \
++            --basePath "${{ inputs.basePath || '' }}" \
++            --rejectUnauthorized "${{ inputs.rejectUnauthorized || 'true' }}" \
++            --outDir a2-artifacts
++      - name: Upload artifacts (7 days)
++        uses: actions/upload-artifact@v4
++        with:
++          name: a2-validator-${{ github.run_id }}
++          path: a2-artifacts
++          retention-days: 7
++      - name: Mark skip if no secrets
++        if: "${{ env.GRAFANA_URL == '' || env.GRAFANA_TOKEN == '' }}"
++        run: echo "SKIP: Missing secrets (GRAFANA_URL/GRAFANA_TOKEN)"
+\ No newline at end of file
+diff --git a/docs/phase-3/ops/a2-validator-runbook.md b/docs/phase-3/ops/a2-validator-runbook.md
+new file mode 100644
+index 0000000..ef4f3a9
+--- /dev/null
++++ b/docs/phase-3/ops/a2-validator-runbook.md
+@@ -0,0 +1,32 @@
++# A2 Grafana Validator Runbook
++
++Purpose
++- Provide a safe, non-blocking validation of key Grafana dashboards. When secrets are absent, the job clearly SKIPs and uploads no sensitive data.
++
++Triggers
++- Scheduled daily at 09:00 UTC
++- Manual via workflow dispatch with inputs: `uids` (csv), `renderPNGs` (bool), `basePath` (optional), `rejectUnauthorized` (bool)
++
++Secrets
++- GRAFANA_URL: base URL (e.g., https://grafana.example.com)
++- GRAFANA_TOKEN: API token with Dashboard read, and Render permissions if PNGs enabled
++
++Outputs
++- Artifact: JSON summary always; optional PNGs when renderPNGs=true and renderer available; retention 7 days
++- Repo (optional/manual): You may commit selected summaries under `reports/a2-validator/` for historical records.
++
++Behavior
++- No secrets -> SKIP (log: NO_AUTH/MISSING_SECRETS) and exit 0
++- 401/403 -> SKIP (NO_AUTH)
++- Partial failures -> still exit 0 (non-blocking), summarize per-UID results
++
++Local Dry Run
++```
++GRAFANA_URL=https://grafana.example.com \
++GRAFANA_TOKEN=xxxxx \
++node scripts/ops/grafana-validate.mjs --uids aa-sleep-norm --renderPNGs false --outDir a2-artifacts
++```
++
++Notes
++- Supports optional self-signed TLS via `rejectUnauthorized=false` (use cautiously)
++- Supports Grafana behind a base path via `basePath` input or `GRAFANA_BASE_PATH` env
+\ No newline at end of file
+diff --git a/scripts/ops/grafana-validate.mjs b/scripts/ops/grafana-validate.mjs
+new file mode 100644
+index 0000000..71f7359
+--- /dev/null
++++ b/scripts/ops/grafana-validate.mjs
+@@ -0,0 +1,119 @@
++#!/usr/bin/env node
++// scripts/ops/grafana-validate.mjs
++// Grafana A2 validator: validates dashboard UIDs, optionally renders PNGs. SKIP-safe without secrets.
++// Node 18+ required (global fetch). No external deps.
++
++import fs from 'fs';
++import path from 'path';
++import { fileURLToPath } from 'url';
++
++const __filename = fileURLToPath(import.meta.url);
++const __dirname = path.dirname(__filename);
++
++function parseArgs(argv) {
++  const args = { uids: [], renderPNGs: false, basePath: '', rejectUnauthorized: true, outDir: 'a2-artifacts' };
++  for (let i = 2; i < argv.length; i++) {
++    const k = argv[i];
++    const v = argv[i + 1];
++    if (k === '--uids' && v) { args.uids = v.split(',').map(s => s.trim()).filter(Boolean); i++; }
++    else if (k === '--renderPNGs' && v) { args.renderPNGs = /^true$/i.test(v); i++; }
++    else if (k === '--basePath' && v) { args.basePath = v; i++; }
++    else if (k === '--rejectUnauthorized' && v) { args.rejectUnauthorized = !/^false$/i.test(v); i++; }
++    else if (k === '--outDir' && v) { args.outDir = v; i++; }
++  }
++  return args;
++}
++
++async function main() {
++  const args = parseArgs(process.argv);
++  const GRAFANA_URL = process.env.GRAFANA_URL || '';
++  const GRAFANA_TOKEN = process.env.GRAFANA_TOKEN || '';
++  const BASE_PATH = args.basePath || process.env.GRAFANA_BASE_PATH || '';
++
++  if (!args.rejectUnauthorized) {
++    // Allow self-signed certs when explicitly requested
++    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
++  }
++
++  const outRoot = path.resolve(process.cwd(), args.outDir);
++  fs.mkdirSync(outRoot, { recursive: true });
++
++  const summary = {
++    time: new Date().toISOString(),
++    status: 'UNKNOWN',
++    reason: '',
++    uids: args.uids,
++    renderPNGs: !!args.renderPNGs,
++    basePath: BASE_PATH,
++    results: [],
++  };
++
++  if (!GRAFANA_URL || !GRAFANA_TOKEN) {
++    summary.status = 'SKIP';
++    summary.reason = 'Missing GRAFANA_URL or GRAFANA_TOKEN';
++    writeSummary(outRoot, summary);
++    console.log('::notice::A2 Validator SKIP: missing secrets');
++    return 0;
++  }
++
++  const api = (p) => {
++    const url = new URL(GRAFANA_URL);
++    const base = BASE_PATH ? `${url.origin}${BASE_PATH}` : url.origin;
++    return `${base}${p}`;
++  };
++  const headers = { 'Authorization': `Bearer ${GRAFANA_TOKEN}`, 'Content-Type': 'application/json' };
++
++  let okCount = 0; let failCount = 0;
++  if (args.uids.length === 0) args.uids = ['aa-sleep-norm'];
++
++  for (const uid of args.uids) {
++    const res = { uid, exists: false, title: '', panels: 0, png: null, error: null };
++    try {
++      const r = await fetch(api(`/api/dashboards/uid/${encodeURIComponent(uid)}`), { headers });
++      if (r.status === 401 || r.status === 403) {
++        summary.status = 'SKIP';
++        summary.reason = `NO_AUTH (${r.status})`;
++        writeSummary(outRoot, summary);
++        console.log(`::notice::A2 Validator SKIP: auth ${r.status}`);
++        return 0;
++      }
++      if (!r.ok) throw new Error(`GET /api/dashboards/uid/${uid} -> ${r.status}`);
++      const j = await r.json();
++      res.exists = true;
++      res.title = j?.dashboard?.title || '';
++      res.panels = Array.isArray(j?.dashboard?.panels) ? j.dashboard.panels.length : 0;
++      okCount++;
++
++      if (args.renderPNGs) {
++        // Best-effort PNG render via share link rendering endpoint (renderer plugin must be installed).
++        const pngPath = path.join(outRoot, `${uid}.png`);
++        const url = api(`/render/d-solo/${encodeURIComponent(uid)}/_?panelId=1&width=1000&height=500&tz=UTC`);
++        const pr = await fetch(url, { headers });
++        if (pr.ok) {
++          const buf = Buffer.from(await pr.arrayBuffer());
++          fs.writeFileSync(pngPath, buf);
++          res.png = path.basename(pngPath);
++        } else {
++          res.png = null;
++        }
++      }
++    } catch (e) {
++      res.error = String(e?.message || e);
++      failCount++;
++    }
++    summary.results.push(res);
++  }
++
++  summary.status = failCount === 0 ? 'OK' : (okCount > 0 ? 'PARTIAL' : 'FAIL');
++  writeSummary(outRoot, summary);
++  console.log(`::notice::A2 Validator ${summary.status}: ${okCount} ok, ${failCount} failed`);
++  return summary.status === 'OK' ? 0 : 0; // Non-blocking
++}
++
++function writeSummary(outRoot, summary) {
++  const ts = new Date().toISOString().replace(/[:.]/g, '-');
++  const outFile = path.join(outRoot, `a2-summary-${ts}.json`);
++  fs.writeFileSync(outFile, JSON.stringify(summary, null, 2));
++}
++
++main().catch(e => { console.error(e); process.exit(0); });
+\ No newline at end of file
+-- 
+2.50.0.windows.1
+
+
+From b1d3b51bb1c94febc014b22af43a77bb3d590e68 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 01:27:52 +0800
+Subject: [PATCH 2/2] docs: add initial A2 validator SKIP summary (no secrets)
+
+---
+ .../a2-summary-2025-10-03T17-27-51-884Z.json          | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+ create mode 100644 reports/a2-validator/a2-summary-2025-10-03T17-27-51-884Z.json
+
+diff --git a/reports/a2-validator/a2-summary-2025-10-03T17-27-51-884Z.json b/reports/a2-validator/a2-summary-2025-10-03T17-27-51-884Z.json
+new file mode 100644
+index 0000000..eed05a7
+--- /dev/null
++++ b/reports/a2-validator/a2-summary-2025-10-03T17-27-51-884Z.json
+@@ -0,0 +1,11 @@
++{
++  "time": "2025-10-03T17:27:51.881Z",
++  "status": "SKIP",
++  "reason": "Missing GRAFANA_URL or GRAFANA_TOKEN",
++  "uids": [
++    "aa-sleep-norm"
++  ],
++  "renderPNGs": false,
++  "basePath": "",
++  "results": []
++}
+\ No newline at end of file
+-- 
+2.50.0.windows.1
+

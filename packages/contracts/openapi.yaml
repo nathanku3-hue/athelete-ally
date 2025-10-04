@@ -43,6 +43,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JobAccepted'
+  /api/v1/readiness/{userId}/latest:
+    get:
+      summary: Get latest readiness record for a user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Latest readiness record or incomplete stub
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ReadinessRecord'
+                  - type: object
+                    properties:
+                      userId: { type: string }
+                      incomplete: { type: boolean }
+                    required: [userId, incomplete]
+              examples:
+                complete:
+                  value: { userId: 'user123', date: '20241001', score: 84, incomplete: false, components: { sleepScore: 90, hrvScore: 76 } }
+                incomplete:
+                  value: { userId: 'user123', incomplete: true }
+  /api/v1/readiness/{userId}:
+    get:
+      summary: Get readiness records for a range (default 7 days)
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: days
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 31, default: 7 }
+      responses:
+        '200':
+          description: Readiness records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReadinessRecord'
+              example:
+                - { userId: 'user123', date: '20240930', score: 78, incomplete: false }
+                - { userId: 'user123', date: '20241001', score: 84, incomplete: false }
   /api/v1/ingest/sleep:
     post:
       summary: ingest raw Sleep data
@@ -122,6 +172,37 @@ components:
         status:
           type: string
           enum: [queued]
+    ReadinessRecord:
+      type: object
+      description: "Daily readiness record for a user (UTC day)."
+      required: [userId, date, score]
+      properties:
+        userId:
+          type: string
+        date:
+          type: string
+          pattern: '^\\d{8}$'
+          description: 'UTC date in compact form YYYYMMDD'
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        incomplete:
+          type: boolean
+          description: 'true if any required input (sleep/hrv) was missing'
+        components:
+          type: object
+          properties:
+            hrvScore:
+              type: integer
+              minimum: 0
+              maximum: 100
+            sleepScore:
+              type: integer
+              minimum: 0
+              maximum: 100
+            notes:
+              type: string
     SleepIngestRequest:
       type: object
       required: [userId, date, durationMinutes]

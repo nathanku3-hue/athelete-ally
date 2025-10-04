@@ -1,0 +1,6 @@
+{
+  "id": "A1-registry-metrics-requests",
+  "type": "metric",
+  "name": "a1_requests_total",
+  "description": "Total requests for A1"
+}
