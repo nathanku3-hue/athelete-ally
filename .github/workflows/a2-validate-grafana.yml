@@ -1,64 +1,67 @@
-name: A2 Validate Grafana
+name: A2 Validate Grafana (Sleep)
 
 on:
+  schedule:
+    - cron: '0 9 * * *'
   workflow_dispatch:
     inputs:
-      uids:
-        description: 'Comma-separated Grafana dashboard UIDs'
-        required: false
-        default: 'aa-sleep-norm'
-      renderPNGs:
-        description: 'Render PNGs (requires renderer)'
+      moveToObservability:
+        description: 'Attempt to move dashboard to Observability folder (requires folders:read|write)'
         required: false
         type: boolean
         default: false
-      basePath:
-        description: 'Optional Grafana base path (e.g., /grafana)'
-        required: false
-        default: ''
-      rejectUnauthorized:
-        description: 'Reject self-signed TLS certs'
-        required: false
-        type: boolean
-        default: true
-  schedule:
-    - cron: '0 9 * * *'
 
 jobs:
   validate:
-    name: A2 Grafana Validator
+    name: Validate Dashboard + Alerts
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.18.x'
-      - name: Install
-        run: npm ci
-      - name: Run validator
-        id: run
+          node-version: '20'
+
+      - name: Promtool | Download
+        id: prom
+        run: |
+          set -euo pipefail
+          PROM_VERSION=2.53.0
+          curl -sL -o prom.tar.gz https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+          tar xzf prom.tar.gz
+          echo "promtool=$(pwd)/prometheus-${PROM_VERSION}.linux-amd64/promtool" >> $GITHUB_OUTPUT
+
+      - name: Promtool | Check alert rules
+        run: |
+          set -euo pipefail
+          PT="${{ steps.prom.outputs.promtool }}"
+          ok=0
+          if [ -f monitoring/alert_rules.yml ]; then
+            "$PT" check rules monitoring/alert_rules.yml | tee -a $GITHUB_STEP_SUMMARY || ok=1
+          else
+            echo "[A2] NOTE: monitoring/alert_rules.yml missing; skipping" | tee -a $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f monitoring/normalize-alerts.yml ]; then
+            "$PT" check rules monitoring/normalize-alerts.yml | tee -a $GITHUB_STEP_SUMMARY || ok=1
+          else
+            echo "[A2] NOTE: monitoring/normalize-alerts.yml missing; skipping" | tee -a $GITHUB_STEP_SUMMARY
+          fi
+          exit $ok
+
+      - name: Grafana | Validate dashboard and variables
         env:
           GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          VALIDATE_UID: aa-sleep-norm
+          VAR_JOB: normalize
+          VAR_STREAM: AA_CORE_HOT
+          VAR_DURABLE: normalize-sleep-durable
+          VAR_SUBJECT: athlete-ally.sleep.raw-received
+          MOVE_TO_OBSERVABILITY: ${{ inputs.moveToObservability }}
         run: |
-          mkdir -p "a2-artifacts"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            node scripts/ops/grafana-validate.mjs \
-              --uids "${{ inputs.uids }}" \
-              --renderPNGs "${{ inputs.renderPNGs }}" \
-              --basePath "${{ inputs.basePath }}" \
-              --rejectUnauthorized "${{ inputs.rejectUnauthorized }}" \
-              --outDir "a2-artifacts"
-          else
-            node scripts/ops/grafana-validate.mjs --outDir "a2-artifacts"
-          fi
-      - name: Upload artifacts (7 days)
-        uses: actions/upload-artifact@v4
-        with:
-          name: a2-validator-${{ github.run_id }}
-          path: "a2-artifacts"
-          retention-days: 7
-
-      - name: Mark skip if no secrets
-        if: ${{ !secrets.GRAFANA_URL || !secrets.GRAFANA_TOKEN }}
-        run: echo "SKIP: Missing secrets (GRAFANA_URL/GRAFANA_TOKEN)"
+          set -euo pipefail
+          node scripts/ops/grafana-validate.mjs | tee -a $GITHUB_STEP_SUMMARY
