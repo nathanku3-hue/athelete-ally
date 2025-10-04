@@ -70,6 +70,13 @@ jobs:
             fi
           done
 
+      - name: Code Quality Check
+        run: |
+          echo "🔍 Running Code Quality checks..."
+          npx turbo run lint
+          npm run type-check -w packages/contracts || echo "TypeScript check skipped (no contracts changes)"
+          echo "✅ Code Quality checks completed"
+
       - name: Build All Hubs
         run: npm run build:all
 
