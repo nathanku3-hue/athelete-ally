@@ -40,8 +40,6 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-
-
         run: npm ci --no-audit --no-fund
       - name: Check boundaries for new/modified files
         run: |
@@ -63,7 +61,7 @@ jobs:
           # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
           echo "🚨 Running strict boundary checks on changed files..."
           ESLINT=node_modules/.bin/eslint
-          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \\
+          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \
             --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
             --rule "no-restricted-imports: error" \
             --format=compact
@@ -76,7 +74,7 @@ jobs:
           mkdir -p reports/deps
           # Generate report using the same boundary rules as the check above
           ESLINT=node_modules/.bin/eslint
-          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \\
+          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \
             --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
             --rule "no-restricted-imports: error" \
             --format=json > reports/deps/boundaries-report.json || true
@@ -85,5 +83,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: boundaries-report-${{ github.run_id }}
-          path: reports/deps/eslint-boundaries-strict.json
+          path: reports/deps/boundaries-report.json
           retention-days: 7
