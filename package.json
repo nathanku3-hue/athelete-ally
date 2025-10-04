@@ -84,7 +84,10 @@
     "dev:compose": "docker compose up --build",
     "dev:compose:obs": "docker compose --profile obs up --build",
     "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
-    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
+    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml",
+    "deps:lint": "syncpack list-mismatches && syncpack lint-semver-ranges",
+    "deps:fix": "syncpack format && syncpack fix-mismatches",
+    "verify:generated:report": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -140,7 +143,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.16.2",
     "turbo": "^2.0.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "syncpack": "^12.3.0"
   },
   "overrides": {
     "@prisma/client": "^5.22.0",
