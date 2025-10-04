@@ -96,6 +96,7 @@ jobs:
 
       - name: Verify Hubs Match (if tracked)
         shell: bash
+<<<<<<< HEAD
         run: |
           set -euo pipefail
           failed=0
@@ -150,3 +151,34 @@ jobs:
           npx turbo run lint
           npm run type-check -w packages/contracts || echo "TypeScript check skipped (no contracts changes)"
           echo "✅ Code Quality checks completed"
+=======
+        run: |
+          set -euo pipefail
+          failed=0
+          hubs=(
+            README.md
+            docs/README.md
+            docs/runbook/index.md
+            openapi.yaml
+            monitoring/alert_rules.yml
+            monitoring/grafana/dashboards/index.json
+            CHANGELOG.md
+            registry.json
+            registry.ts
+            infra/index.yaml
+            protobuf/registry.yaml
+            sql/migrations/catalog.yaml
+          )
+          for f in "${hubs[@]}"; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              if ! git diff --exit-code -- "$f"; then
+                echo "Hub drift detected: $f differs after build"
+                failed=1
+              fi
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "Run generators locally (npm run build:all). Commit hubs only with label allowhubedit."
+            exit 1
+          fi
+>>>>>>> efb7bc05a2d1b94b81cdb70b1c3787026927c14b
