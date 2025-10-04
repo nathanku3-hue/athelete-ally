@@ -23,6 +23,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fail on merge conflict markers
+        shell: bash
+        run: |
+          if git grep -nE '^(<<<<<<<|=======|>>>>>>>)' -- . ':!patches/' ':!.git'; then
+            echo "❌ Merge conflict markers found. Please resolve before pushing."
+            exit 1
+          else
+            echo "✅ No conflict markers found."
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,13 +59,17 @@ jobs:
             }
 
       - name: Prettier Shard Scope
-        run: npx --no prettier --check "{scripts,openapi,monitoring,docs,registry,.github}/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}"
+        run:
+          npx --no prettier --check
+          "{scripts,openapi,monitoring,docs,registry,.github}/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}"
 
       - name: Build All Hubs
         run: npm run build:all
 
       - name: Spectral Lint (OpenAPI)
-        run: npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml openapi/components/**/*.yaml || true
+        run:
+          npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml
+          openapi/components/**/*.yaml || true
 
       - name: Install promtool
         run: |
