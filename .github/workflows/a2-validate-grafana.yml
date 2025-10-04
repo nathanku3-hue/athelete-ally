@@ -42,12 +42,16 @@ jobs:
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
         run: |
           mkdir -p a2-artifacts
-          node scripts/ops/grafana-validate.mjs \
-            --uids "${{ inputs.uids || 'aa-sleep-norm' }}" \
-            --renderPNGs "${{ inputs.renderPNGs || 'false' }}" \
-            --basePath "${{ inputs.basePath || '' }}" \
-            --rejectUnauthorized "${{ inputs.rejectUnauthorized || 'true' }}" \
-            --outDir a2-artifacts
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            node scripts/ops/grafana-validate.mjs \
+              --uids "${{ inputs.uids }}" \
+              --renderPNGs "${{ inputs.renderPNGs }}" \
+              --basePath "${{ inputs.basePath }}" \
+              --rejectUnauthorized "${{ inputs.rejectUnauthorized }}" \
+              --outDir a2-artifacts
+          else
+            node scripts/ops/grafana-validate.mjs --outDir a2-artifacts
+          fi
       - name: Upload artifacts (7 days)
         uses: actions/upload-artifact@v4
         with:
