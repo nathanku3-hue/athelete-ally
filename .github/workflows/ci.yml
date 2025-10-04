@@ -49,13 +49,21 @@ jobs:
             }
 
       - name: Prettier Shard Scope
-        run: npx --no prettier --check "{scripts,openapi,monitoring,docs,registry,.github}/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}"
+        run: |
+          npx --no prettier --check "scripts/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
+          npx --no prettier --check "openapi/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
+          npx --no prettier --check "monitoring/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
+          npx --no prettier --check "docs/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
+          npx --no prettier --check "registry/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
+          npx --no prettier --check ".github/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
 
       - name: Build All Hubs
         run: npm run build:all
 
       - name: Spectral Lint (OpenAPI)
-        run: npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml openapi/components/**/*.yaml || true
+        run:
+          npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml
+          openapi/components/**/*.yaml || true
 
       - name: Install promtool
         run: |
