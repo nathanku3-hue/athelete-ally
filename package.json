@@ -8,7 +8,7 @@
     "node": ">=20 <21"
   },
   "scripts": {
-    "preinstall": "node scripts/check-node-version.js",
+    "preinstall": "node scripts/check-node-version.cjs",
     "dev": "next dev apps/frontend -p 3000",
     "dev:frontend": "next dev apps/frontend -p 3000",
     "dev:bff": "npm run dev -w apps/gateway-bff",
