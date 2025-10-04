@@ -2,6 +2,7 @@
   "name": "athlete-ally",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "packageManager": "npm@10.9.3",
   "engines": {
     "node": ">=20.18.0 <21.0.0",
@@ -89,10 +90,10 @@
     "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
     "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml",
     "build:infra": "npm run build:openapi && npm run build:alerts && npm run build:docs && npm run build:registry",
-    "build:openapi": "node scripts/build-openapi.ts",
-    "build:alerts": "node scripts/build-alerts.ts",
-    "build:docs": "node scripts/build-docs-index.ts",
-    "build:registry": "node scripts/build-registry.ts"
+    "build:openapi": "tsx scripts/build-openapi.ts",
+    "build:alerts": "tsx scripts/build-alerts.ts",
+    "build:docs": "tsx scripts/build-docs-index.ts",
+    "build:registry": "tsx scripts/build-registry.ts"
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [
