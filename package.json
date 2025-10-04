@@ -16,7 +16,7 @@
     "build": "next build apps/frontend",
     "start": "next start apps/frontend",
     "lint": "eslint",
-    "lint:ci": "eslint",
+    "lint:ci": "eslint . -f compact",
     "validate:ids": "tsx scripts/validate-ids.ts",
     "check:nohub": "tsx scripts/check-no-hub-edits.ts",
     "type-check": "tsc --noEmit",
