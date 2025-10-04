@@ -600,3 +600,49 @@ rate(normalize_sleep_messages_total[5m]) > 0.10
 - [Ingest Service README](../../services/ingest-service/README.md)
 - [Normalize Service README](../../services/normalize-service/README.md)
 - [NATS JetStream Documentation](https://docs.nats.io/nats-concepts/jetstream)
+
+## Validation & Troubleshooting (A2 Sleep Observability)
+
+This section documents the daily validation for the "Sleep Normalize Pipeline" dashboard (uid=aa-sleep-norm) on Grafana Cloud and how to troubleshoot failures.
+
+- What runs:
+  - Prometheus rule validation via promtool for `monitoring/alert_rules.yml` and `monitoring/normalize-alerts.yml`.
+  - Grafana API validation ensuring the dashboard exists, required variables are present (`job`, `stream`, `durable`, `subject`), and a representative panel renders with variables applied.
+- Where it runs:
+  - GitHub Actions workflow: `.github/workflows/a2-validate-grafana.yml` (daily at 09:00 UTC and on-demand via `workflow_dispatch`).
+- Secrets required (Actions): `GRAFANA_URL`, `GRAFANA_TOKEN` (scopes: `dashboards:write`, `folders:read|write`, `datasources:read`). If secrets are absent, the workflow logs a SKIP note and exits successfully to avoid CI noise.
+
+### Manual Run
+
+To run locally (Node 20+):
+
+```bash
+# Use staging Grafana; token must have at least dashboards:read
+export GRAFANA_URL="https://nkgss.grafana.net"
+export GRAFANA_TOKEN="<token>"
+node scripts/ops/grafana-validate.mjs
+```
+
+Optional move to the `Observability` folder (requires folders:read|write):
+
+```bash
+export MOVE_TO_OBSERVABILITY=true
+node scripts/ops/grafana-validate.mjs
+```
+
+### Common Failures
+
+- 404 dashboard not found: The dashboard UID (`aa-sleep-norm`) is missing. Re-import the dashboard and re-run.
+- Missing variables: One or more required variables are absent. Open the dashboard JSON and ensure variables `job`, `stream`, `durable`, `subject` exist under `templating.list`.
+- 403 folder permissions: The token lacks folder permissions; the move step is skipped and the dashboard remains in `General`.
+- Render errors: If `/render/d-solo/...` returns non-200, verify the dashboard `slug` matches and at least one panel is present. The validator prints the panel id it attempted.
+- Promtool failures: The validator prints the exact rule and line number. Fix the YAML and re-run `promtool check rules` locally to confirm.
+
+### Attach Evidence To PR
+
+When updating PR threads (e.g., PR #38), attach:
+- Variables panel screenshot (UI capture),
+- DLQ and Overview panels (last 6h),
+- Alerts UI detail (if provisioned) or `promtool` OK output.
+
+If UI uploads are blocked, temporarily host images in a docs-only branch and link them in the PR comment; remove the branch afterwards to keep the repo slim.
