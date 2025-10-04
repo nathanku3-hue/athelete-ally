@@ -1,0 +1,108 @@
+From 66c0318e521b2d3802f6ff7c8e16accb80c2f86e Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 01:19:21 +0800
+Subject: [PATCH 1/2] chore: zero-conf infra build wiring
+
+- Add build:infra (openapi/alerts/docs/registry)
+- Change build:all to chain build:infra && turbo run build
+- Add stub generators (no-op safe)
+---
+ package.json                | 2 +-
+ scripts/build-alerts.ts     | 4 ++++
+ scripts/build-docs-index.ts | 4 ++++
+ scripts/build-openapi.ts    | 4 ++++
+ scripts/build-registry.ts   | 4 ++++
+ 5 files changed, 17 insertions(+), 1 deletion(-)
+ create mode 100644 scripts/build-alerts.ts
+ create mode 100644 scripts/build-docs-index.ts
+ create mode 100644 scripts/build-openapi.ts
+ create mode 100644 scripts/build-registry.ts
+
+diff --git a/package.json b/package.json
+index 6a218ed..ee4523d 100644
+--- a/package.json
++++ b/package.json
+@@ -46,7 +46,7 @@
+     "validate-environment": "npx tsx scripts/validate-environment.ts",
+     "predev": "npm run validate-environment && npx tsx ./scripts/check-ports.ts 3000",
+     "dev:check": "npm run validate-environment && npm run check-ports && npm run dev",
+-    "build:all": "turbo run build",
++    "build:all": "npm run build:infra && turbo run build",
+     "test:all:workspace": "turbo run test",
+     "type-check:all": "turbo run type-check",
+     "lint:all": "turbo run lint",
+diff --git a/scripts/build-alerts.ts b/scripts/build-alerts.ts
+new file mode 100644
+index 0000000..c528196
+--- /dev/null
++++ b/scripts/build-alerts.ts
+@@ -0,0 +1,4 @@
++// build-alerts.ts
++// Stub generator: safe no-op. Replace with real implementation when ready.
++console.log( '[build] build-alerts.ts noop'); 
++process.exit(0);
+diff --git a/scripts/build-docs-index.ts b/scripts/build-docs-index.ts
+new file mode 100644
+index 0000000..b47468f
+--- /dev/null
++++ b/scripts/build-docs-index.ts
+@@ -0,0 +1,4 @@
++// build-docs-index.ts
++// Stub generator: safe no-op. Replace with real implementation when ready.
++console.log( '[build] build-docs-index.ts noop'); 
++process.exit(0);
+diff --git a/scripts/build-openapi.ts b/scripts/build-openapi.ts
+new file mode 100644
+index 0000000..1992de8
+--- /dev/null
++++ b/scripts/build-openapi.ts
+@@ -0,0 +1,4 @@
++// build-openapi.ts
++// Stub generator: safe no-op. Replace with real implementation when ready.
++console.log( '[build] build-openapi.ts noop'); 
++process.exit(0);
+diff --git a/scripts/build-registry.ts b/scripts/build-registry.ts
+new file mode 100644
+index 0000000..1a989bc
+--- /dev/null
++++ b/scripts/build-registry.ts
+@@ -0,0 +1,4 @@
++// build-registry.ts
++// Stub generator: safe no-op. Replace with real implementation when ready.
++console.log( '[build] build-registry.ts noop'); 
++process.exit(0);
+-- 
+2.50.0.windows.1
+
+
+From 76b8439f4b7bd6e008e3b0009cb48626755cc698 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 01:20:00 +0800
+Subject: [PATCH 2/2] chore: add build:infra and generator scripts to
+ package.json (zero-conf)
+
+---
+ package.json | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/package.json b/package.json
+index ee4523d..cb190dc 100644
+--- a/package.json
++++ b/package.json
+@@ -84,7 +84,12 @@
+     "dev:compose": "docker compose up --build",
+     "dev:compose:obs": "docker compose --profile obs up --build",
+     "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
+-    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
++    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml",
++    "build:infra": "npm run build:openapi && npm run build:alerts && npm run build:docs && npm run build:registry",
++    "build:openapi": "node scripts/build-openapi.ts",
++    "build:alerts": "node scripts/build-alerts.ts",
++    "build:docs": "node scripts/build-docs-index.ts",
++    "build:registry": "node scripts/build-registry.ts"
+   },
+   "dependencies": {
+     "@radix-ui/react-dialog": "^1.1.15",
+-- 
+2.50.0.windows.1
+

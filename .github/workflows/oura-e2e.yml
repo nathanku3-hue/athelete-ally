@@ -1,3 +1,7 @@
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 name: Oura E2E Test
 
 on:
@@ -5,10 +9,6 @@ on:
   push:
     branches:
       - release/phase3-foundation
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   oura-e2e:

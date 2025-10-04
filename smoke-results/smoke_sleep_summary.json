@@ -1,0 +1,172 @@
+{
+  "testSuite": "Sleep E2E Smoke Test",
+  "date": "2025-10-02T17:47:57Z",
+  "status": "BLOCKED",
+  "summary": {
+    "total": 9,
+    "passed": 6,
+    "failed": 3,
+    "skipped": 0
+  },
+  "infrastructure": {
+    "ingest": {
+      "url": "http://localhost:4101",
+      "health": "healthy",
+      "natsConnected": true
+    },
+    "normalize": {
+      "url": "http://localhost:4102",
+      "health": "healthy",
+      "natsConnected": true,
+      "dbConnected": true
+    },
+    "nats": {
+      "url": "nats://localhost:4223",
+      "version": "2.10.29",
+      "streams": {
+        "AA_CORE_HOT": { "messages": 3, "status": "active" },
+        "AA_VENDOR_HOT": { "messages": 0, "status": "active" },
+        "AA_DLQ": { "messages": 0, "status": "active" }
+      }
+    },
+    "postgres": {
+      "host": "127.0.0.1:55432",
+      "database": "athlete_normalize",
+      "connected": true
+    }
+  },
+  "consumers": {
+    "normalize-sleep-durable": {
+      "stream": "AA_CORE_HOT",
+      "filterSubject": "athlete-ally.sleep.raw-received",
+      "pending": 3,
+      "delivered": 0,
+      "acknowledged": 0,
+      "status": "BLOCKED - not pulling messages"
+    },
+    "normalize-hrv-durable": {
+      "stream": "AA_CORE_HOT",
+      "filterSubject": "athlete-ally.hrv.raw-received",
+      "pending": 0,
+      "status": "idle"
+    }
+  },
+  "testResults": [
+    {
+      "id": 1,
+      "name": "Valid Sleep payload accepted",
+      "status": "PASS",
+      "httpStatus": 200,
+      "response": "{\"status\":\"received\"}"
+    },
+    {
+      "id": 2,
+      "name": "Missing durationMinutes rejected",
+      "status": "PASS",
+      "httpStatus": 400
+    },
+    {
+      "id": 3,
+      "name": "Negative durationMinutes rejected",
+      "status": "PASS",
+      "httpStatus": 400
+    },
+    {
+      "id": 4,
+      "name": "Missing date rejected",
+      "status": "PASS",
+      "httpStatus": 400
+    },
+    {
+      "id": 5,
+      "name": "Valid with raw metadata accepted",
+      "status": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "id": 6,
+      "name": "Duplicate userId+date accepted (upsert)",
+      "status": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "id": 7,
+      "name": "DLQ contains schema-invalid messages",
+      "status": "FAIL",
+      "reason": "No DLQ messages found (normalization never attempted)"
+    },
+    {
+      "id": 8,
+      "name": "SleepNormalizedStored event published",
+      "status": "FAIL",
+      "reason": "No normalized events found in NATS"
+    },
+    {
+      "id": 9,
+      "name": "Sleep row persisted in database",
+      "status": "FAIL",
+      "reason": "DB assertion failed: column durationMinutes does not exist"
+    }
+  ],
+  "metrics": {
+    "ingest": {
+      "sleep_raw_received_published": 3,
+      "sleep_raw_received_validated": 3
+    },
+    "normalize": {
+      "sleep_messages_processed": 0,
+      "sleep_messages_success": 0,
+      "sleep_messages_dlq": 0
+    }
+  },
+  "rootCause": {
+    "issue": "Pull consumer not requesting messages",
+    "component": "normalize-service Sleep consumer",
+    "symptoms": [
+      "Consumer bound successfully",
+      "Processing loop started (log message present)",
+      "But num_pending=3, delivered=0",
+      "No pull() requests being made",
+      "Metrics never incremented"
+    ],
+    "diagnosis": "Same issue as HRV flow (phase 5), consumer needs explicit pull() calls in loop",
+    "fix": "Apply pattern from patches/20251001_consumer_loop_fix_phase5_v2.patch to Sleep consumer"
+  },
+  "blockers": [
+    {
+      "severity": "CRITICAL",
+      "component": "normalize-service Sleep consumer",
+      "issue": "Consumer not pulling messages from queue",
+      "impact": "End-to-end Sleep flow completely blocked",
+      "workaround": "None - code fix required"
+    },
+    {
+      "severity": "MEDIUM",
+      "component": "Database schema / assertion script",
+      "issue": "Column name mismatch: durationMinutes vs duration_minutes",
+      "impact": "Cannot verify DB persistence even if normalization works",
+      "workaround": "Check actual schema, update assertion script"
+    }
+  ],
+  "artifacts": {
+    "report": "docs/phase-3/ops/SMOKE_SLEEP_REPORT.md",
+    "metricsSample": "smoke-results/metrics_sample.txt",
+    "summary": "smoke-results/smoke_sleep_summary.json"
+  },
+  "recommendations": {
+    "immediate": [
+      "Fix Sleep consumer pull loop (apply HRV pattern)",
+      "Verify/fix database schema column names"
+    ],
+    "shortTerm": [
+      "Re-run smoke test after fixes",
+      "Verify all 9 tests pass",
+      "Check consumer metrics increment correctly"
+    ],
+    "mediumTerm": [
+      "Extract shared pull consumer utility",
+      "Add consumer lag monitoring to /health",
+      "Add integration tests for pull consumer pattern"
+    ]
+  }
+}
