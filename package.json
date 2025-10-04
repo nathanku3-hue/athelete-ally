@@ -30,7 +30,7 @@
     "build:docs": "tsx scripts/build-docs-index.ts",
     "build:registry": "tsx scripts/build-registry.ts",
     "build:dashboards-index": "node scripts/ops/dashboards-index.mjs",
-    "build:infra": "npm run build:openapi && npm run build:alerts && npm run build:docs && npm run build:registry && npm run build:dashboards-index",
+    "build:infra": "npm run --if-present build:openapi && npm run --if-present build:alerts && npm run --if-present build:docs && npm run --if-present build:registry && npm run --if-present build:dashboards-index",
     "build:all": "npm run build:infra && turbo run build",
     "validate:ids": "tsx scripts/validate-ids.ts",
     "check:nohub": "tsx scripts/check-no-hub-edits.ts",
