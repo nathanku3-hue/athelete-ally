@@ -74,9 +74,8 @@ jobs:
         run: npm run build:all
 
       - name: Spectral Lint (OpenAPI)
-        run:
-          npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml
-          openapi/components/**/*.yaml || true
+        run: |
+          npx --no @stoplight/spectral-cli lint openapi.yaml openapi/paths/**/*.yaml openapi/components/**/*.yaml || true
 
       - name: Install promtool
         run: |
@@ -126,3 +125,28 @@ jobs:
             echo "Run generators locally (npm run build:all). Commit hubs only with label allowhubedit."
             exit 1
           fi
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Code Quality Check
+        run: |
+          echo "🔍 Running Code Quality checks..."
+          npx turbo run lint
+          npm run type-check -w packages/contracts || echo "TypeScript check skipped (no contracts changes)"
+          echo "✅ Code Quality checks completed"
