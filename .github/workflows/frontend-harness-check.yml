@@ -1,24 +1,19 @@
 name: Frontend Harness Check (jsdom)
-
-on:
+'on':
   workflow_dispatch:
     inputs:
       reason:
-        description: 'Reason for manual trigger'
+        description: Reason for manual trigger
         required: false
-        default: 'Manual verification'
-
+        default: Manual verification
 permissions:
   contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   sanity:
     uses: ./.github/workflows/_sanity-reuse.yml
-
   harness:
     name: Frontend Multi-Spec (PlanCard + useTrainingQueries)
     runs-on: ubuntu-latest
@@ -32,10 +27,9 @@ jobs:
       - name: Setup Node 20 (no cache)
         uses: actions/setup-node@v4
         with:
-          node-version: '20.18.0'
-          cache: 'npm'
+          node-version: 20.18.0
+          cache: npm
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
-
       - name: Force fresh install (no cache)
         run: |
           echo "=== Removing all npm cache and node_modules ==="
@@ -45,13 +39,13 @@ jobs:
           echo "=== Installing with npm install (not ci) ==="
           # NOTE: Intentionally using npm install (not ci) for harness testing
           npm install --legacy-peer-deps --no-audit --no-fund
-
       - name: Print Jest version
         run: npx jest --version
-
       - name: Run frontend specs (jsdom)
         run: |
           npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
             apps/frontend/src/__tests__/hooks/useTrainingQueries.test.tsx \
             --runInBand --verbose --detectOpenHandles --forceExit
-
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true

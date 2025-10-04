@@ -1,15 +1,12 @@
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
-
 name: Oura E2E Test
-
-on:
-  workflow_dispatch:
+'on':
+  workflow_dispatch: null
   push:
     branches:
       - release/phase3-foundation
-
 jobs:
   oura-e2e:
     runs-on: ubuntu-latest
@@ -17,17 +14,23 @@ jobs:
     timeout-minutes: 25
     strategy:
       matrix:
-        event_stream_mode: [single, multi]
+        event_stream_mode:
+          - single
+          - multi
         include:
           - event_stream_mode: single
             stream_core_name: ATHLETE_ALLY_EVENTS
           - event_stream_mode: multi
             stream_core_name: AA_CORE_HOT
     env:
-      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ matrix.event_stream_mode }}
+      ARTIFACT_SUFFIX:
+        ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{
+        matrix.event_stream_mode }}
       EVENT_STREAM_MODE: ${{ matrix.event_stream_mode }}
       STREAM_CORE_NAME: ${{ matrix.stream_core_name }}
-      AA_STREAM_CANDIDATES: ${{ matrix.event_stream_mode == 'multi' && 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS' || 'ATHLETE_ALLY_EVENTS' }}
+      AA_STREAM_CANDIDATES:
+        ${{ matrix.event_stream_mode == 'multi' && 'AA_CORE_HOT,ATHLETE_ALLY_EVENTS' ||
+        'ATHLETE_ALLY_EVENTS' }}
       FEATURE_SERVICE_MANAGES_CONSUMERS: true
       NATS_URL: nats://localhost:4223
       DATABASE_URL: postgresql://athlete:athlete@localhost:55432/athlete_normalize
@@ -37,27 +40,24 @@ jobs:
       OURA_REFRESH_TOKEN: ${{ secrets.OURA_REFRESH_TOKEN }}
       OURA_WEBHOOK_SECRET: ${{ secrets.OURA_WEBHOOK_SECRET }}
       TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          
+          cache: npm
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund --maxsockets 1 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000 --fetch-retries 3
-        
+        run: >-
+          npm ci --no-audit --no-fund --maxsockets 1 --fetch-retry-mintimeout 20000
+          --fetch-retry-maxtimeout 120000 --fetch-retries 3
       - name: Cache Prisma engines
         uses: actions/cache@v4
         with:
           path: ~/.cache/prisma
           key: ${{ runner.os }}-prisma-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-prisma-
-
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
@@ -68,20 +68,17 @@ jobs:
           done
         env:
           PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
-        
       - name: Start infrastructure services
         run: |
           docker compose -f docker-compose.yml up -d postgres nats
           sleep 10
-          
       - name: Wait for services to be healthy
         run: |
           # Wait for PostgreSQL
           timeout 60 bash -c 'until pg_isready -h localhost -p 55432 -U athlete; do sleep 2; done'
-          
+
           # Wait for NATS
           timeout 60 bash -c 'until nc -z localhost 4223; do sleep 2; done'
-          
       - name: Generate Prisma clients
         run: |
           echo "🔧 Generating Prisma clients..."
@@ -91,28 +88,33 @@ jobs:
           npx prisma generate
           echo "✅ Prisma client generated successfully"
           ls -la prisma/generated/client/ || echo "Generated client directory not found"
-          
+
           cd ../ingest-service
           echo "📁 Current directory: $(pwd)"
           echo "📄 Prisma schema exists: $(ls -la prisma/schema.prisma || echo 'No schema found')"
           npx prisma generate || echo "⚠️ Ingest service Prisma generation failed (non-critical)"
-          
       - name: Verify Prisma client availability
-        run: |
+        run: >
           echo "🔍 Verifying Prisma client availability..."
+
           cd services/normalize-service
+
           echo "📁 Checking generated client:"
+
           ls -la prisma/generated/client/ || echo "❌ Generated client not found"
+
           echo "📄 Checking client files:"
+
           ls -la prisma/generated/client/index.js || echo "❌ Client index.js not found"
+
           echo "🧪 Testing Prisma client import:"
-          node -e "const { PrismaClient } = require('./prisma/generated/client'); console.log('✅ Prisma client can be imported successfully');" || echo "❌ Prisma client import failed"
-          
+
+          node -e "const { PrismaClient } = require('./prisma/generated/client'); console.log('✅
+          Prisma client can be imported successfully');" || echo "❌ Prisma client import failed"
       - name: Check Prisma consistency
         run: |
           echo "🔍 Running Prisma consistency check..."
           node scripts/prisma-consistency-check.js
-          
       - name: Setup database schema
         env:
           DATABASE_URL: postgresql://athlete:athlete@localhost:55432/athlete_normalize
@@ -127,7 +129,6 @@ jobs:
           ls -la scripts/prisma-sync.sh || echo "Script not found"
           chmod +x scripts/prisma-sync.sh
           bash scripts/prisma-sync.sh services/normalize-service
-          
       - name: Start services, probe, and assert
         run: |
           set -Eeo pipefail
@@ -153,21 +154,18 @@ jobs:
 
           # Quick DB check via script or inline query
           echo "Probe sent; logs will confirm consumption."
-          
       - name: Collect service logs
         if: always()
         run: |
           mkdir -p artifacts/logs
           docker compose logs ingest-service > artifacts/logs/ingest-service.log 2>&1 || true
           docker compose logs normalize-service > artifacts/logs/normalize-service.log 2>&1 || true
-          
       - name: Collect metrics
         if: always()
         run: |
           mkdir -p artifacts/metrics
           curl -s http://localhost:4101/metrics > artifacts/metrics/ingest-metrics.txt || true
           curl -s http://localhost:4102/metrics > artifacts/metrics/normalize-metrics.txt || true
-          
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -178,7 +176,6 @@ jobs:
           retention-days: 7
           compression-level: 6
           overwrite: true
-          
       - name: NATS diagnostics (on failure)
         if: failure()
         run: |
@@ -188,9 +185,11 @@ jobs:
           nats --server "$NATS_URL" consumer info ATHLETE_ALLY_EVENTS normalize-hrv-durable || true
         env:
           NATS_URL: nats://localhost:4223
-          
       - name: Cleanup
         if: always()
         run: |
           docker compose down -v
           pkill -f "npm run dev" || true
+    concurrency:
+      group: e2e-${{ github.ref }}
+      cancel-in-progress: true
