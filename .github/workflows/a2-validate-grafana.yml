@@ -41,23 +41,24 @@ jobs:
           GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
         run: |
-          mkdir -p a2-artifacts
+          mkdir -p "a2-artifacts"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             node scripts/ops/grafana-validate.mjs \
               --uids "${{ inputs.uids }}" \
               --renderPNGs "${{ inputs.renderPNGs }}" \
               --basePath "${{ inputs.basePath }}" \
               --rejectUnauthorized "${{ inputs.rejectUnauthorized }}" \
-              --outDir a2-artifacts
+              --outDir "a2-artifacts"
           else
-            node scripts/ops/grafana-validate.mjs --outDir a2-artifacts
+            node scripts/ops/grafana-validate.mjs --outDir "a2-artifacts"
           fi
       - name: Upload artifacts (7 days)
         uses: actions/upload-artifact@v4
         with:
           name: a2-validator-${{ github.run_id }}
-          path: a2-artifacts
+          path: "a2-artifacts"
           retention-days: 7
+
       - name: Mark skip if no secrets
         if: ${{ !secrets.GRAFANA_URL || !secrets.GRAFANA_TOKEN }}
         run: echo "SKIP: Missing secrets (GRAFANA_URL/GRAFANA_TOKEN)"
