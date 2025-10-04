@@ -18,6 +18,7 @@
     "lint": "eslint",
     "lint:ci": "eslint",
     "validate:ids": "tsx scripts/validate-ids.ts",
+    "check:nohub": "tsx scripts/check-no-hub-edits.ts",
     "type-check": "tsc --noEmit",
     "prisma:generate": "bash ./scripts/generate-prisma-clients.sh",
     "test": "jest --projects jest/jest.projects.cjs",
