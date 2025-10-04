@@ -13,6 +13,12 @@ Outputs (artifact-first):
 - `reports/licenses/<date>/{root,workspace}.json` and `summary.md`
 - `reports/deps/<date>/{root,workspace}.json` and `summary.md`
 
+Job summaries (usability):
+- SBOM: shows component counts per target.
+- Licenses: highlights top non-allowlisted licenses and first offenders.
+- Dependencies: lists Top 10 outdated by impact and deprecated count.
+- Secrets: shows counts by rule and top files (redacted).
+
 Local usage (optional):
 
 ```bash
@@ -34,6 +40,9 @@ Notes:
 - Scripts degrade gracefully if offline: they emit stub or partial reports rather than failing.
 - Initial policy is report-only; future PRs can move disallowed licenses to a blocking gate once reviewed.
 
+Secrets scanning config:
+- `.gitleaks.toml` reduces noise in tests/fixtures, docs, and placeholders; action runs with `--config-path .gitleaks.toml`.
+
 Allowlist policy (initial):
 - Allow: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, EPL-2.0, CC0-1.0, Unlicense
 - Warn: LGPL-2.1, LGPL-3.0 (manual review)
@@ -47,4 +56,3 @@ Next steps (optional):
 - Add exceptions/overrides per package (license or secret scan) as needed.
 - Consider exporting SBOMs to a registry or SCA system for cross-run diffing.
 - Tighten license policy incrementally (introduce blocking on deny list) once reports are stable.
-

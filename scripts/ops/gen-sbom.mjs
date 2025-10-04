@@ -103,10 +103,12 @@ async function main() {
 
   // Root SBOM (monorepo)
   const rootOut = path.join(outBase, `${sanitizeName(pkg.name || 'root')}.cdx.json`);
+  const produced = [];
   try {
     await runCycloneDX(rootDir, rootOut);
     // eslint-disable-next-line no-console
     console.log(`SBOM (root) -> ${path.relative(rootDir, rootOut)}`);
+    produced.push({ name: pkg.name || 'root', file: rootOut });
   } catch (err) {
     await writeStub(rootOut, `SBOM generation failed: ${err?.message || String(err)}`);
   }
@@ -119,9 +121,32 @@ async function main() {
       await runCycloneDX(ws.dir, wsOut);
       // eslint-disable-next-line no-console
       console.log(`SBOM (${ws.name}) -> ${path.relative(rootDir, wsOut)}`);
+      produced.push({ name: ws.name, file: wsOut });
     } catch (err) {
       await writeStub(wsOut, `SBOM generation failed: ${err?.message || String(err)}`);
     }
+  }
+
+  // Append compact summary
+  try {
+    const counts = [];
+    for (const p of produced) {
+      try {
+        const json = JSON.parse(await fs.readFile(p.file, 'utf8'));
+        const comps = Array.isArray(json.components) ? json.components.length : (json.bom && Array.isArray(json.bom.components) ? json.bom.components.length : 0);
+        counts.push({ name: p.name, components: comps });
+      } catch {
+        counts.push({ name: p.name, components: 0 });
+      }
+    }
+    const summaryFile = process.env.GITHUB_STEP_SUMMARY;
+    if (summaryFile) {
+      const lines = ['\n### SBOM Summary', `- Files: ${produced.length}`, '- Components per target:'];
+      for (const c of counts) lines.push(`  - ${c.name}: ${c.components}`);
+      await fs.appendFile(summaryFile, lines.join('\n') + '\n', 'utf8');
+    }
+  } catch {
+    // ignore
   }
 }
 
@@ -130,4 +155,3 @@ main().catch(err => {
   console.error(err);
   process.exitCode = 1;
 });
-

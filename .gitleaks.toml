@@ -1,0 +1,24 @@
+# Minimal gitleaks configuration to reduce false positives in test/fixture content
+# and obvious placeholders. Keep redact true; report-only in CI.
+
+redact = true
+
+[allowlist]
+  description = "Common test and documentation paths, placeholder patterns"
+  # Ignore matches in these file/directory patterns (regex)
+  paths = [
+    ".*(/|\\\\)(tests?|__tests__|__mocks__|fixtures?|samples?|examples?|spec)($|/|\\\\).*",
+    ".*\\.(md|mdx|txt|adoc|rst)$",
+    "^reports/.*",
+    "^docs/.*",
+    "^coverage/.*",
+    "^smoke-results/.*"
+  ]
+  # Ignore matches that look like obvious placeholders or dummy secrets
+  regexes = [
+    "(?i)(dummy|fake|placeholder|example|sample)[-_]?(key|token|secret|password)",
+    "(?i)(changeme|notasecret|no[-_ ]?secret|local[-_ ]?dev)",
+    # Base64 test blobs like 'AAAAAA' repeated
+    "^(?:[A-Za-z0-9+/]{4}){10,}={0,2}$"
+  ]
+

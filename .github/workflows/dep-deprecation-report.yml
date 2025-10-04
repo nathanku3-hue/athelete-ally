@@ -34,6 +34,9 @@ jobs:
       - name: Run dependency report
         run: node scripts/ops/dep-report.mjs
 
+      - name: Summarize dependency report
+        run: node scripts/ops/summary-deps.mjs
+
       - name: Upload dependency artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -161,6 +161,39 @@ async function main() {
     }
   }
   await fs.writeFile(path.join(outBase, `summary.md`), md.join('\n'), 'utf8');
+
+  // Append compact GitHub Job Summary (top non-allowlisted licenses)
+  try {
+    const summaryFile = process.env.GITHUB_STEP_SUMMARY;
+    if (summaryFile) {
+      const licenseCounts = new Map();
+      const offenders = [];
+      for (const r of aggregate) {
+        if (r.error) continue;
+        for (const f of r.findings) {
+          if (f.category === 'ALLOWED') continue;
+          for (const id of f.licenses) {
+            licenseCounts.set(id, (licenseCounts.get(id) || 0) + 1);
+          }
+          if (offenders.length < 10) offenders.push(`${f.pkg} [${f.licenses.join(', ')}] (${f.category})`);
+        }
+      }
+      const top = [...licenseCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const lines = ['\n### License Compliance Summary', `- Targets: ${aggregate.length}`, `- Offenders (first 10):`];
+      if (offenders.length) {
+        for (const o of offenders) lines.push(`  - ${o}`);
+      } else {
+        lines.push('  - None');
+      }
+      if (top.length) {
+        lines.push('- Top non-allowlisted licenses:');
+        for (const [id, c] of top) lines.push(`  - ${id}: ${c}`);
+      }
+      await fs.appendFile(summaryFile, lines.join('\n') + '\n', 'utf8');
+    }
+  } catch {
+    // ignore
+  }
 }
 
 main().catch(err => {
@@ -168,4 +201,3 @@ main().catch(err => {
   console.error(err);
   process.exitCode = 1;
 });
-
