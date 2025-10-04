@@ -57,6 +57,19 @@ jobs:
           npx --no prettier --check "registry/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
           npx --no prettier --check ".github/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || true
 
+      - name: Generate Prisma Clients
+        run: |
+          set -euo pipefail
+          # Generate Prisma clients for all services that use Prisma
+          for service in services/*/; do
+            if [ -f "${service}prisma/schema.prisma" ] || [ -f "${service}prisma/schema-v3.prisma" ]; then
+              echo "Generating Prisma client for $(basename "$service")"
+              cd "$service"
+              npx prisma generate
+              cd - > /dev/null
+            fi
+          done
+
       - name: Build All Hubs
         run: npm run build:all
 
