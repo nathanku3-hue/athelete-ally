@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: boundaries-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -62,8 +62,8 @@ jobs:
           # Run ESLint with error-level boundary rules on changed files only
           # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
           echo "🚨 Running strict boundary checks on changed files..."
-          npm run lint:ci
-            "$(printf "%s" "${CHANGED_FILES}")" \
+          ESLINT=node_modules/.bin/eslint
+          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \\
             --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
             --rule "no-restricted-imports: error" \
             --format=compact
@@ -74,7 +74,8 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p reports/deps
-          npm run lint:ci
+          ESLINT=node_modules/.bin/eslint
+          printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \\
 
       - name: Upload Boundaries Report
         if: always()
