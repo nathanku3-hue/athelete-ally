@@ -112,3 +112,4 @@ cripts -Name start-*.ps1* | Sort-Object
 # Large dependency analysis files
 reports/deps/eslint-boundaries*.json
 
+reports/
