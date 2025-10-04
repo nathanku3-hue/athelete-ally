@@ -1,0 +1,52 @@
+name: Action Lint
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1.7.7
+        with:
+          args: -config-file .actionlint.yml
+
+      - name: Disallow @master actions
+        run: |
+          if grep -RinE '^\s*uses:\s*[^ ]+@master\b' .github/workflows/*.yml; then
+            echo "Found action pinned to @master. Please pin a tag or SHA."
+            exit 1
+          fi
+          echo "No @master action usages found"
+
+      - name: Check for common workflow mistakes
+        run: |
+          echo "🔍 Checking for common workflow issues..."
+
+          # 检查缺少concurrency控制
+          if ! grep -r "concurrency:" .github/workflows/; then
+            echo "⚠️ Some workflows missing concurrency control"
+          fi
+
+          # 检查缺少-T标志的exec调用
+          if grep -r "docker compose.*exec" .github/workflows/ | grep -v "exec -T"; then
+            echo "⚠️ Some exec calls missing -T flag"
+          fi
+
+          # 检查缺少项目清理的compose操作
+          if grep -r "docker compose.*up" .github/workflows/ | grep -v "down.*--remove-orphans"; then
+            echo "⚠️ Some compose operations missing cleanup"
+          fi
+
+          echo "✅ Workflow quality checks completed"

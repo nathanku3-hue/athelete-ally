@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2025-10-03T12:46:50+08:00",
+  "dashboards": [
+    {
+      "file": "monitoring/grafana/dashboards/a1-api-overview__sample.json",
+      "title": "A1 API Overview",
+      "uid": "a1-api-overview",
+      "panelsCount": 0,
+      "checksumSha256": "122bcfdc9229e6cb8fd846b70d071d84aa207cee9dde546e30c102e7fda05389"
+    },
+    {
+      "file": "monitoring/grafana/dashboards/alpha-ops-dashboard.json",
+      "title": "Alpha Ops Dashboard",
+      "uid": "alpha-ops",
+      "panelsCount": 8,
+      "checksumSha256": "86b6a3e2b2a06a51f23eb928d5be7a769ec141a138894e5324f348ebc4b965b4"
+    },
+    {
+      "file": "monitoring/grafana/dashboards/product-analytics-dashboard.json",
+      "title": "Athlete Ally - Product Analytics Dashboard",
+      "uid": "",
+      "panelsCount": 11,
+      "checksumSha256": "aea40c2518554e998575c34190f133edf87934c6ab7d9ba7d7e99d0f2e49b7ac"
+    },
+    {
+      "file": "monitoring/grafana/dashboards/athlete-ally-overview.json",
+      "title": "Athlete Ally System Overview",
+      "uid": "",
+      "panelsCount": 4,
+      "checksumSha256": "2252f096b693d863708c35fd37e9a922ccd42292677d6099099b99331ede119b"
+    }
+  ]
+}

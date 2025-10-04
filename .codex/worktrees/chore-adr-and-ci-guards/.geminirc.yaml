@@ -1,0 +1,5 @@
+# .geminirc.yaml - Project-specific settings for the AI agent
+
+claude-task-master:
+  # This tells the agent where your PRD is located in this project.
+  prd_file_path: 'features.yaml'

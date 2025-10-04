@@ -1,0 +1,46 @@
+# Athlete Ally - Normalize Service Alerts
+
+groups:
+  - name: normalize-service
+    rules:
+      - alert: DLQMessagesDetected
+        expr: sum(rate(dlq_messages_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: normalize
+        annotations:
+          summary: 'DLQ messages detected in normalize service'
+          description:
+            'DLQ messages have been detected for more than 5 minutes. Check message processing
+            errors.'
+
+      - alert: HighConsumerLag
+        expr: nats_jetstream_consumer_num_pending > 1000
+        for: 2m
+        labels:
+          severity: critical
+          service: normalize
+        annotations:
+          summary: 'High consumer lag detected'
+          description: 'Consumer {{ $labels.consumer }} has {{ $value }} pending messages'
+
+      - alert: MessageProcessingErrors
+        expr: sum(rate(normalize_hrv_messages_total{result="error"}[5m])) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: normalize
+        annotations:
+          summary: 'High message processing error rate'
+          description: 'Error rate is {{ $value }} errors/second for the last 5 minutes'
+
+      - alert: ServiceDown
+        expr: up{job="normalize-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: normalize
+        annotations:
+          summary: 'Normalize service is down'
+          description: 'Normalize service has been down for more than 1 minute'

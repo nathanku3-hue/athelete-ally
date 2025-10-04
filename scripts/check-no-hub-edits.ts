@@ -51,7 +51,6 @@ function main() {
       }
     }
   }
-  
   const changed = new Set(diff.split('\n').filter(Boolean));
   const hits = hubGlobs.filter((g) => changed.has(g));
   if (hits.length) {

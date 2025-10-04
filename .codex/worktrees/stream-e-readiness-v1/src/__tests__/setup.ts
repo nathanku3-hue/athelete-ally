@@ -1,0 +1,1 @@
+// minimal test setup\nprocess.env.NODE_ENV = process.env.NODE_ENV || 'test';\n

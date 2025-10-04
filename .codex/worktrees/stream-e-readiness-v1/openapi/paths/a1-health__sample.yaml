@@ -1,0 +1,9 @@
+# Path fragment with x-id for dedupe
+x-id: A1-api-health
+/health:
+  get:
+    operationId: a1Health
+    summary: Health check
+    responses:
+      '200':
+        description: OK

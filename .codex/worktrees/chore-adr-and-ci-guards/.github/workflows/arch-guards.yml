@@ -1,0 +1,53 @@
+name: Arch Guards
+
+on:
+  pull_request:
+  schedule:
+    - cron: '15 7 * * *'
+
+jobs:
+  deps-consistency:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.0
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Dependency consistency (report-only)
+        run: |
+          npx --yes syncpack@12.3.0 list-mismatches || true
+          npx --yes syncpack@12.3.0 lint-semver-ranges || true
+
+  verify-generated:
+    if:
+      ${{ github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name,
+      'allowhubedit') }}
+    runs-on: ubuntu-latest
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.0
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Re-run generators
+        run: |
+          echo "Re-running infra generators (blocking)"
+          npm run build:infra --if-present
+          npm run build:dashboards-index --if-present
+          git diff --patch > generated-diff.patch
+          git diff --exit-code
+      - name: Upload drift artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-diff
+          path: generated-diff.patch
+          retention-days: 7

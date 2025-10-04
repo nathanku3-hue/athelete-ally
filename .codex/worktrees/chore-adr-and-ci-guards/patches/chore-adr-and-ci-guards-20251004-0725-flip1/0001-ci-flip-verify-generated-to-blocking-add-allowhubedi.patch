@@ -1,0 +1,55 @@
+From d52febc8cc8ae8208158c54c9f795a8f11d8ff9a Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 23:53:31 +0800
+Subject: [PATCH] ci: flip verify-generated to blocking; add allowhubedit skip;
+ keep cron; fetch-depth=0
+
+---
+ .github/workflows/arch-guards.yml | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/.github/workflows/arch-guards.yml b/.github/workflows/arch-guards.yml
+index 7a5d4d6..01757d1 100644
+--- a/.github/workflows/arch-guards.yml
++++ b/.github/workflows/arch-guards.yml
+@@ -1,4 +1,4 @@
+-name: Arch Guards (report-only)
++name: Arch Guards
+ 
+ on:
+   pull_request:
+@@ -22,23 +22,26 @@ jobs:
+           npx --yes syncpack@12.3.0 lint-semver-ranges || true
+ 
+   verify-generated:
++    if: ${{ github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'allowhubedit') }}
+     runs-on: ubuntu-latest
+-    continue-on-error: true
+     env:
+       TZ: UTC
+     steps:
+       - uses: actions/checkout@v4
++        with:
++          fetch-depth: 0
+       - uses: actions/setup-node@v4
+         with:
+           node-version: 20.18.0
+           cache: npm
+       - run: npm ci --no-audit --no-fund
+-      - name: Re-run generators (report-only)
++      - name: Re-run generators
+         run: |
+-          echo "Re-running infra generators in report-only mode"
++          echo "Re-running infra generators (blocking)"
+           npm run build:infra --if-present
+-          npm run build:dashboards-index --if-present || true
+-          git diff --patch > generated-diff.patch || true
++          npm run build:dashboards-index --if-present
++          git diff --patch > generated-diff.patch
++          git diff --exit-code
+       - name: Upload drift artifact
+         if: always()
+         uses: actions/upload-artifact@v4
+-- 
+2.43.0
+

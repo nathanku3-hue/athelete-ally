@@ -1,4 +1,8 @@
 {
   "status": "success",
-  "data": "Created packages/telemetry-bootstrap; patch at patches/_telemetry-bootstrap.patch"
+  "data": {
+    "patch": "patches/stream-e_readiness_h0h1_metrics_smoke_docs.patch",
+    "branch": "stream-e/readiness-v1",
+    "notes": "H0-H1 baseline: metrics skeleton + smoke + docs + OpenAPI examples"
+  }
 }

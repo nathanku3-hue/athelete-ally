@@ -1,0 +1,40 @@
+id: stream-e-readiness-latest
+openapi: 3.0.0
+info:
+  title: Insights Readiness Latest
+  version: 1.0.0
+paths:
+  /api/v1/readiness/{userId}/latest:
+    get:
+      summary: Get latest readiness for a user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Latest readiness or incomplete marker
+          content:
+            application/json:
+              examples:
+                complete:
+                  value:
+                    userId: u1
+                    date: '20240101'
+                    score: 85
+                    incomplete: false
+                    components:
+                      hrvScore: 95
+                      sleepScore: 80
+                incomplete:
+                  value:
+                    userId: u1
+                    incomplete: true
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              example:
+                error: internal_error

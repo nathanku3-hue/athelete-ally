@@ -1,0 +1,67 @@
+name: Large Files Guard
+
+on:
+  pull_request:
+    paths:
+      - '**'
+  push:
+    branches: [main]
+
+jobs:
+  large-files-check:
+    name: Check for large tracked files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for large files
+        run: |
+          set -euo pipefail
+
+          # Allowlist for large files that are acceptable
+          ALLOWLIST=(
+            "coverage/"
+            "docs/"
+            "assets/"
+            "images/"
+            "*.png"
+            "*.jpg"
+            "*.jpeg"
+            "*.gif"
+            "*.svg"
+            "*.ico"
+            "*.pdf"
+            "*.zip"
+            "*.tar.gz"
+            "*.tgz"
+            "node_modules/"
+            ".next/"
+            "dist/"
+            "build/"
+            "*.log"
+          )
+
+          echo "🔍 Checking for files larger than 1MB..."
+
+          # Find all tracked files larger than 1MB
+          LARGE_FILES=$(git ls-files | xargs -I {} sh -c "if [ -f \"{}\" ] && [ \$(stat -c%s \"{}\" 2>/dev/null || echo 0) -gt 1048576 ]; then echo \"{}\"; fi" | grep -v '^$' || true)
+
+          if [ -n "$LARGE_FILES" ]; then
+            echo "❌ Found large tracked files:"
+            echo "$LARGE_FILES"
+            echo ""
+            echo "Files larger than 1MB should not be tracked in git."
+            echo "Consider:"
+            echo "  - Moving to artifact storage or releases"
+            echo "  - Adding to .gitignore"
+            echo "  - Using Git LFS for legitimate large files"
+            echo ""
+            echo "Current allowlist:"
+            printf '%s\n' "${ALLOWLIST[@]}"
+            exit 1
+          else
+            echo "✅ No large tracked files found"
+          fi

@@ -1,0 +1,514 @@
+// Protocol Engine Prisma Schema V2
+// Enhanced with Security, Permissions, and Multi-tenancy
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PROTOCOL_DATABASE_URL")
+}
+
+// ===========================================
+// MULTI-TENANCY SUPPORT
+// ===========================================
+
+/// Tenant represents an organization or team
+model Tenant {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Tenant identification
+  name        String   @unique
+  domain      String?  @unique
+  isActive    Boolean  @default(true)
+  
+  // Tenant configuration
+  settings    Json?    // Tenant-specific settings
+  maxUsers    Int      @default(100)
+  maxProtocols Int     @default(1000)
+  
+  // Relations
+  protocols   Protocol[]
+  users       User[]
+  executions  ProtocolExecution[]
+  
+  @@map("tenants")
+}
+
+/// User represents a user within a tenant
+model User {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User identification
+  email       String   @unique
+  name        String?
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // User status
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  
+  // Relations
+  protocols   Protocol[]
+  executions  ProtocolExecution[]
+  permissions ProtocolPermission[]
+  sharedProtocols ProtocolShare[] @relation("ProtocolSharedBy")
+  receivedProtocols ProtocolShare[] @relation("ProtocolSharedWith")
+  
+  @@index([tenantId, isActive])
+  @@index([email])
+  @@map("users")
+}
+
+// ===========================================
+// ENHANCED PROTOCOL MODELS
+// ===========================================
+
+/// A Protocol represents a complete training methodology or system
+model Protocol {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Multi-tenant support
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Protocol identification
+  name        String   @unique
+  version     String   @default("1.0.0")
+  description String?
+  
+  // Protocol metadata
+  category    String   // strength, hypertrophy, powerlifting, bodybuilding, general_fitness
+  difficulty  String   // beginner, intermediate, advanced, elite
+  duration    Int?     // weeks
+  frequency   Int?     // sessions per week
+  
+  // Security and permissions
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  visibility  Visibility @default(PRIVATE)
+  
+  // Protocol configuration
+  isActive    Boolean  @default(true)
+  isPublic    Boolean  @default(false)
+  
+  // Protocol content
+  overview    String?  // Detailed description
+  principles  String[] // Core training principles
+  requirements String[] // Equipment, time, experience requirements
+  
+  // Optional protocol-level configuration & classification
+  parameters  Json?    // Flexible configuration at protocol level
+  adaptations Json?   // User-specific adaptations for the protocol
+  dataClassification DataClassification @default(INTERNAL)
+  
+  // Relations
+  blocks      Block[]
+  templates   ProtocolTemplate[]
+  executions  ProtocolExecution[]
+  permissions ProtocolPermission[]
+  shares      ProtocolShare[]
+  
+  // Indexing
+  @@index([tenantId, isActive])
+  @@index([tenantId, category, difficulty])
+  @@index([ownerId, isActive])
+  @@index([visibility, isPublic])
+  @@map("protocols")
+}
+
+/// A Block represents a specific phase or period within a Protocol
+/// Examples: "Base Building", "Peak Phase", "Deload Week", "Strength Block"
+model Block {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Block identification
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  order       Int      // Order within the protocol
+  
+  // Block configuration
+  duration    Int      // weeks
+  phase       String   // base, build, peak, deload, transition
+  intensity   String   // low, moderate, high, very_high
+  volume      String   // low, moderate, high, very_high
+  
+  // Block parameters
+  parameters  Json?    // Flexible configuration (sets, reps, percentages, etc.)
+  rules       Json?    // Progression rules, deload triggers, etc.
+  
+  // Relations
+  sessions    BlockSession[]
+  progressions BlockProgression[]
+  executions  BlockExecution[]
+  
+  // Indexing
+  @@index([protocolId, order])
+  @@index([phase])
+  @@map("blocks")
+}
+
+/// A BlockSession represents a specific training session within a Block
+model BlockSession {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  blockId     String
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  // Session configuration
+  name        String
+  dayOfWeek   Int      // 1-7 (Monday-Sunday)
+  order       Int      // Order within the block
+  
+  // Session content
+  exercises   Json     // Array of exercise configurations
+  duration    Int?     // Estimated duration in minutes
+  notes       String?
+  
+  // Session parameters
+  intensity   Float?   // 0.0-1.0 scale
+  volume      Float?   // Total volume metric
+  rpe         Float?   // Target RPE
+  
+  @@index([blockId, dayOfWeek, order])
+  @@map("block_sessions")
+}
+
+/// A BlockProgression defines how a Block progresses over time
+model BlockProgression {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  blockId     String
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  // Progression configuration
+  week        Int      // Week within the block
+  parameters  Json     // Week-specific parameters
+  
+  // Progression rules
+  rules       Json?    // Progression logic
+  triggers    Json?    // Conditions for progression
+  
+  @@unique([blockId, week])
+  @@map("block_progressions")
+}
+
+// ===========================================
+// PERMISSIONS & SECURITY
+// ===========================================
+
+/// ProtocolPermission manages fine-grained access control
+model ProtocolPermission {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Resource identification
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  // User and role
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        PermissionRole
+  
+  // Permissions
+  permissions Permission[]
+  
+  // Grant information
+  grantedBy   String
+  grantedAt   DateTime
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  
+  // Indexing
+  @@unique([protocolId, userId])
+  @@index([userId, isActive])
+  @@index([protocolId, role])
+  @@map("protocol_permissions")
+}
+
+/// AuditLog tracks all security-relevant operations
+model AuditLog {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  timestamp   DateTime @default(now()) // Alias for createdAt to match code expectations
+  
+  // Operation details
+  action      String   // CREATE, READ, UPDATE, DELETE, SHARE, etc.
+  resourceType String  // PROTOCOL, BLOCK, SESSION, etc.
+  resourceId  String
+  severity    String   @default("INFO") // INFO, WARNING, ERROR, CRITICAL
+  
+  // User context
+  userId      String
+  tenantId    String
+  
+  // Request context
+  ip          String?
+  userAgent   String?
+  sessionId   String?
+  
+  // Operation details
+  details     Json?    // Additional operation-specific data
+  result      String   // SUCCESS, FAILURE, DENIED
+  
+  // Indexing
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([tenantId, createdAt])
+  @@map("audit_logs")
+}
+
+// ===========================================
+// PROTOCOL TEMPLATES
+// ===========================================
+
+/// A ProtocolTemplate is a pre-configured Protocol with specific parameters
+model ProtocolTemplate {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  // Template configuration
+  name        String
+  description String?
+  
+  // Template parameters (encrypted for sensitive data)
+  parameters  Json     // Template-specific configuration
+  isDefault   Boolean  @default(false)
+  
+  // Usage tracking
+  usageCount  Int      @default(0)
+  
+  @@index([protocolId])
+  @@map("protocol_templates")
+}
+
+// ===========================================
+// PROTOCOL EXECUTIONS
+// ===========================================
+
+/// A ProtocolExecution represents a user's execution of a Protocol
+model ProtocolExecution {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Multi-tenant support
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId  String?  // Optional template used
+  
+  // Execution status
+  status      String   @default("active") // active, paused, completed, abandoned
+  startDate   DateTime
+  endDate     DateTime?
+  
+  // Execution configuration (encrypted for sensitive data)
+  parameters  Json     // User-specific parameters
+  adaptations Json?    // Adaptations made during execution
+  
+  // Data classification
+  dataClassification DataClassification @default(PERSONAL)
+  retentionUntil DateTime?
+  
+  // Progress tracking
+  currentBlockId String?
+  currentWeek    Int     @default(1)
+  progress       Float   @default(0.0) // 0.0-1.0
+  
+  // Relations
+  blockExecutions BlockExecution[]
+  sessions        SessionExecution[]
+  
+  // Indexing
+  @@index([tenantId, userId, status])
+  @@index([protocolId])
+  @@index([dataClassification])
+  @@map("protocol_executions")
+}
+
+/// A BlockExecution represents execution of a specific Block
+model BlockExecution {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  executionId String
+  execution   ProtocolExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  
+  blockId     String
+  block       Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  
+  // Execution status
+  status      String   @default("pending") // pending, active, completed, skipped
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Execution data
+  adaptations Json?    // Block-specific adaptations
+  notes       String?
+  
+  // Progress tracking
+  currentWeek Int      @default(1)
+  progress    Float    @default(0.0)
+  
+  @@index([executionId])
+  @@index([blockId])
+  @@map("block_executions")
+}
+
+/// A SessionExecution represents execution of a specific training session
+model SessionExecution {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  executionId String
+  execution   ProtocolExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  
+  sessionId   String   // Reference to BlockSession
+  
+  // Execution status
+  status      String   @default("scheduled") // scheduled, in_progress, completed, skipped
+  scheduledDate DateTime
+  actualDate  DateTime?
+  
+  // Execution data
+  exercises   Json?    // Actual exercise data
+  adaptations Json?    // Session-specific adaptations
+  notes       String?
+  
+  // Performance metrics
+  duration    Int?     // Actual duration in minutes
+  rpe         Float?   // Actual RPE
+  volume      Float?   // Actual volume
+  
+  @@index([executionId, scheduledDate])
+  @@map("session_executions")
+}
+
+// ===========================================
+// PROTOCOL ANALYTICS
+// ===========================================
+
+/// ProtocolAnalytics tracks performance and usage metrics
+model ProtocolAnalytics {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  userId      String?
+  
+  // Analytics data
+  metrics     Json     // Performance metrics
+  insights    Json?    // AI-generated insights
+  recommendations Json? // Recommendations for improvement
+  
+  // Time period
+  periodStart DateTime
+  periodEnd   DateTime
+  
+  @@index([protocolId, periodStart])
+  @@index([userId])
+  @@map("protocol_analytics")
+}
+
+// ===========================================
+// PROTOCOL SHARING & COLLABORATION
+// ===========================================
+
+/// ProtocolShare represents shared protocols between users
+model ProtocolShare {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  
+  sharedBy    String
+  sharedByUser User    @relation("ProtocolSharedBy", fields: [sharedBy], references: [id], onDelete: Cascade)
+  sharedWith  String
+  sharedWithUser User  @relation("ProtocolSharedWith", fields: [sharedWith], references: [id], onDelete: Cascade)
+  
+  // Share permissions
+  permissions Permission[]
+  expiresAt   DateTime?
+  
+  // Share status
+  isActive    Boolean  @default(true)
+  acceptedAt  DateTime?
+  
+  @@unique([protocolId, sharedWith])
+  @@index([sharedBy])
+  @@index([sharedWith])
+  @@map("protocol_shares")
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum Visibility {
+  PRIVATE
+  TENANT
+  PUBLIC
+}
+
+enum PermissionRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+  GUEST
+}
+
+enum Permission {
+  READ
+  WRITE
+  EXECUTE
+  SHARE
+  DELETE
+  ANALYTICS
+  EXPORT
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  PERSONAL
+  SENSITIVE
+}

@@ -1,0 +1,67 @@
+{
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "db": 0,
+    "maxRetriesPerRequest": null,
+    "retryDelayOnFailover": 100,
+    "enableReadyCheck": false,
+    "lazyConnect": true,
+    "keepAlive": 30000,
+    "connectTimeout": 10000,
+    "commandTimeout": 5000,
+    "enableOfflineQueue": false,
+    "maxMemoryPolicy": "allkeys-lru"
+  },
+  "strategies": {
+    "userProfile": {
+      "key": "user:profile:{userId}",
+      "ttl": 3600,
+      "strategy": "write-through"
+    },
+    "trainingPlan": {
+      "key": "plan:{planId}",
+      "ttl": 1800,
+      "strategy": "write-behind"
+    },
+    "exercises": {
+      "key": "exercises:category:{category}",
+      "ttl": 7200,
+      "strategy": "write-through"
+    },
+    "rpeFeedback": {
+      "key": "rpe:user:{userId}:session:{sessionId}",
+      "ttl": 900,
+      "strategy": "write-through"
+    },
+    "performanceMetrics": {
+      "key": "metrics:user:{userId}:type:{type}",
+      "ttl": 600,
+      "strategy": "write-behind"
+    },
+    "sessionData": {
+      "key": "session:{sessionId}",
+      "ttl": 1800,
+      "strategy": "write-through"
+    }
+  },
+  "warmup": {
+    "preloadData": [
+      "exercises:category:strength",
+      "exercises:category:cardio",
+      "exercises:category:flexibility",
+      "system:config",
+      "system:health"
+    ],
+    "preloadUsers": {
+      "query": "SELECT user_id FROM user_activity WHERE last_active > NOW() - INTERVAL '7 days'",
+      "batchSize": 100
+    }
+  },
+  "monitoring": {
+    "hitRateThreshold": 0.8,
+    "maxMemoryUsage": "512MB",
+    "slowQueryThreshold": 100,
+    "maxConnections": 100
+  }
+}

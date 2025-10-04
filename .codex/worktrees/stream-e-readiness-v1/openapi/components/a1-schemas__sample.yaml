@@ -1,0 +1,8 @@
+# Components fragment with x-id for dedupe
+x-id: A1-api-a1ping-schema
+schemas:
+  A1Ping:
+    type: object
+    properties:
+      ok:
+        type: boolean

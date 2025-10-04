@@ -1,0 +1,54 @@
+{
+  "name": "@athlete-ally/otel-preset",
+  "version": "1.0.0",
+  "description": "OpenTelemetry preset for Athlete Ally services",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/sdk-node": "^0.45.1",
+    "@opentelemetry/resources": "^1.18.1",
+    "@opentelemetry/semantic-conventions": "^1.18.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.40.3"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": "^1.7.0"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": false
+    },
+    "@opentelemetry/exporter-jaeger": {
+      "optional": true
+    },
+    "@opentelemetry/exporter-prometheus": {
+      "optional": true
+    },
+    "@opentelemetry/exporter-otlp-http": {
+      "optional": true
+    },
+    "@opentelemetry/sdk-node": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ]
+}

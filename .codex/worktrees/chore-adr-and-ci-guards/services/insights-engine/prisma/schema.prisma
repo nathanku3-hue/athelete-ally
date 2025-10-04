@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReadinessScore {
+  userId        String
+  date          DateTime @db.Date
+  score         Int       // 0–100
+  hrvDelta      Float
+  trend3d       Float
+  dataFreshness Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@id([userId, date])
+  @@index([userId, date])
+}

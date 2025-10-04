@@ -117,3 +117,5 @@ reports/
 
 # Smoke test artifacts
 smoke-results/
+
+# Supply chain artifacts (artifact-only by default)

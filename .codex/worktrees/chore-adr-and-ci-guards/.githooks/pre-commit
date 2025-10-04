@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CHANGED=$(git diff --cached --name-only --diff-filter=ACM || true)
+if [ -z "$CHANGED" ]; then
+  exit 0
+fi
+
+HAS_WORKFLOW=false
+for f in $CHANGED; do
+  case "$f" in
+    .github/workflows/*.yml) HAS_WORKFLOW=true ;; 
+  esac
+done
+
+if $HAS_WORKFLOW; then
+  echo "🔎 Running actionlint on changed workflows..."
+  if command -v actionlint >/dev/null 2>&1; then
+    actionlint -color || echo "⚠️ actionlint found issues - continuing anyway (CI will validate)"
+  else
+    echo "⚠️ actionlint not available locally, attempting to fetch..."
+    if npx -y node-actionlint@1.2.2 2>/dev/null; then
+      echo "✅ actionlint validation passed"
+    else
+      echo "⚠️ actionlint validation failed - continuing anyway"
+      echo "ℹ️ CI will perform authoritative validation"
+    fi
+  fi
+fi
+
+SHELL_FILES=$(echo "$CHANGED" | grep -E '\\.sh$' || true)
+if [ -n "$SHELL_FILES" ]; then
+  if command -v shellcheck >/dev/null 2>&1; then
+    echo "🔎 Running shellcheck on changed shell scripts..."
+    # shellcheck disable=SC2086
+    shellcheck $SHELL_FILES
+  else
+    echo "ℹ️ shellcheck not installed; skipping shell script lint"
+  fi
+fi
+
+exit 0

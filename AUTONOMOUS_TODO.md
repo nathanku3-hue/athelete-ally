@@ -458,7 +458,14 @@ Integration test documentation includes verification of:
 
 ## 🔄 Active Tasks
 
-(No active tasks - all phases complete)
+### P1 - Stream E: H0–H1 Baseline + Metrics + Smoke Scaffolding
+- 優先級: P1
+- 任務描述: Baseline scan of insights-engine; add Prometheus /metrics with readiness_compute_total, readiness_compute_duration_seconds, http_requests_total; scaffold scripts/smoke-readiness.js and docs/runbook/readiness.md; add OpenAPI examples for latest/range
+- 依賴項: None (single service scope)
+- 狀態: [x] Done
+- 嘗試次數: 1
+- 補丁文件: patches/stream-e_readiness_h0h1_metrics_smoke_docs.patch
+ - 產出與筆記: Added /metrics with Prometheus counters/histogram; smoke script at scripts/smoke-readiness.js; docs at docs/runbook/readiness.md; OpenAPI examples at openapi/paths/e-readiness-*.yaml. JSON smoke summary under reports/readiness/* (untracked)
 
 ---
 

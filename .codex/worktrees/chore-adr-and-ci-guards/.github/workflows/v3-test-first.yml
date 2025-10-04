@@ -1,0 +1,398 @@
+name: V3 Test-First Development Pipeline
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main, develop, feat/v3-*]
+    paths:
+      - 'packages/contracts/**'
+      - 'services/**'
+      - 'apps/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'packages/contracts/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual verification'
+
+jobs:
+  sanity:
+    uses: ./.github/workflows/_sanity-reuse.yml
+
+  # 合同測試
+  contract-tests:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    steps:
+      - name: Checkout (pinned ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+
+        run: npm ci --no-audit --no-fund
+      - name: Run contract tests
+        run: npm run test:contracts -w packages/contracts
+
+      - name: Upload contract test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-results-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
+          path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
+
+  # 數據庫模型測試
+  database-tests:
+    name: Database Model Tests
+    runs-on: ubuntu-latest
+    needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout (pinned ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+
+        run: npm ci --no-audit --no-fund
+      - name: Run database tests
+        run: npm run test:database -w packages/contracts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
+      - name: Upload database test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-test-results-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
+          path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
+
+  # API 端點測試
+  api-tests:
+    name: API Endpoint Tests
+    runs-on: ubuntu-latest
+    needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    steps:
+      - name: Checkout (pinned ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+
+        run: npm ci --no-audit --no-fund
+      - name: Run API tests
+        run: npm run test:api -w packages/contracts
+
+      - name: Upload API test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
+          path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
+
+  # 集成測試
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies (root level only)
+        run: npm ci --no-audit --no-fund
+      - name: Verify tsx availability
+        run: npx tsx --version
+
+      # 预检查端口状态 (Linux兼容)
+      - name: Pre-flight port check (Linux compatible)
+        run: |
+          ss -tulpen | grep -E ':(5432|6379|4223)\b' || echo "Ports available"
+          if ss -tulpen | grep -E ':(5432|6379|4223)\b'; then
+            echo "⚠️ Ports occupied, will use isolated project name"
+          fi
+
+      # 清理旧的Docker容器和网络 (项目范围)
+      - name: Clean up existing containers (project-scoped)
+        run: |
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml down -v --remove-orphans || true
+
+      - name: Verify CI configuration
+        run: |
+          echo "🔍 Rendering final Docker Compose configuration..."
+          docker compose -f ./docker-compose/ci-standalone.yml config > final-config.yml
+
+          echo "📋 Checking for ports configuration..."
+          if grep -q '^\s*ports:' final-config.yml; then
+            echo "❌ Ports still present in CI config:"
+            grep -n '^\s*ports:' final-config.yml
+            exit 1
+          else
+            echo "✅ No ports found in CI config - isolation working"
+          fi
+
+          echo "📋 Final configuration summary:"
+          grep -A 5 -B 2 'redis:\|postgres:\|nats:' final-config.yml
+
+      # 启动隔离的测试基础设施服务
+      - name: Start isolated test services
+        run: |
+          docker compose -p ci_${{ github.run_id }} \
+            -f ./docker-compose/ci-standalone.yml \
+            up -d postgres redis nats
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be healthy..."
+          timeout 60 bash -c 'until docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml ps | grep -q "healthy"; do sleep 2; done' || true
+          echo "All services are healthy"
+
+      - name: Verify services status
+        run: |
+          # 验证基础设施服务是否正常启动
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml ps
+
+      - name: Verify service connectivity
+        run: |
+          echo "🔍 Testing service connectivity..."
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml exec -T redis redis-cli ping || echo "❌ Redis connection failed"
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml exec -T postgres pg_isready -U athlete || echo "❌ PostgreSQL connection failed"
+
+          # 使用curl容器检查NATS连接
+          NET="ci_${{ github.run_id }}_ci-network"
+          docker run --rm --network "$NET" curlimages/curl:8.8.0 -sf http://nats:8222/varz || echo "❌ NATS connection failed"
+
+      - name: Service diagnostics (on failure)
+        if: failure()
+        run: |
+          echo "🔍 Service diagnostics..."
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml ps
+          echo "📋 Service logs:"
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml logs --tail=200
+
+      - name: Run integration tests
+        run: npm run test:integration -w packages/contracts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_db
+          REDIS_URL: redis://redis:6379
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
+          path: packages/contracts/coverage/
+          compression-level: 6
+          overwrite: true
+
+      # 清理测试基础设施服务 (项目范围)
+      - name: Stop test services (project-scoped)
+        if: always()
+        run: |
+          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml down -v --remove-orphans
+
+  # 性能測試
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: sanity
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    steps:
+      - name: Checkout (pinned ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+
+        run: npm ci --no-audit --no-fund
+      - name: Run performance tests
+        run: npm run test:performance -w packages/contracts
+
+      - name: Upload performance test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-test-results-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
+          path: packages/contracts/performance-results/
+          compression-level: 6
+          overwrite: true
+
+  # 測試報告聚合
+  test-report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs: [sanity, contract-tests, database-tests, api-tests, integration-tests]
+    if: always()
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    steps:
+      - name: Checkout (pinned ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+
+        run: npm ci --no-audit --no-fund
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*-test-results-*'
+          merge-multiple: true
+          path: test-results/
+
+      - name: Generate test report
+        working-directory: ${{ github.workspace }}
+        run: node ./scripts/generate-test-report.js
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-test-report-${{ env.ARTIFACT_SUFFIX }}
+          if-no-files-found: ignore
+          path: test-results/
+          compression-level: 6
+          overwrite: true
+
+  # 代碼質量檢查
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    needs: sanity
+    env:
+      ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-na
+    steps:
+      - name: Checkout (pinned ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+          cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
+
+      - name: Install dependencies
+
+        run: npm ci --no-audit --no-fund
+      - name: Run ESLint
+        run: npx turbo run lint
+
+      - name: Run TypeScript check
+        run: npm run type-check -w packages/contracts
+
+      - name: Check test coverage
+        run: |
+          npm run test:coverage -w packages/contracts
+          npm run coverage:check -w packages/contracts

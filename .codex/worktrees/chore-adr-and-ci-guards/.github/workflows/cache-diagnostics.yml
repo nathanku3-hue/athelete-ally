@@ -1,0 +1,83 @@
+name: Cache Diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      verbose:
+        description: 'Enable verbose output'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  cache-diagnostics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Run cache diagnostics script
+        run: |
+          echo "🔍 Running cache diagnostics..."
+
+          if [ -f "scripts/debug-cache-paths.sh" ]; then
+            chmod +x scripts/debug-cache-paths.sh
+            ./scripts/debug-cache-paths.sh
+          else
+            echo "⚠️  Cache diagnostics script not found"
+            echo "Creating basic diagnostics..."
+            
+            # Basic cache path analysis
+            echo "📁 Package lock files found:"
+            LOCKFILES=$(find . -name "package-lock.json" -not -path "./node_modules/*")
+            echo "$LOCKFILES"
+            LOCKFILE_COUNT=$(echo "$LOCKFILES" | wc -l)
+            echo "📊 Total lockfiles: $LOCKFILE_COUNT"
+            
+            echo ""
+            echo "📦 Node modules size:"
+            du -sh node_modules/ 2>/dev/null || echo "No node_modules found"
+            
+            echo ""
+            echo "🔧 Cache configuration:"
+            echo "NODE_VERSION: $NODE_VERSION"
+            echo "CACHE_KEY: ${{ hashFiles('**/package-lock.json') }}"
+          fi
+
+      - name: Print resolved cache dependency path
+        run: |
+          echo "🎯 Resolved cache dependency path:"
+
+          # Simulate the same logic as _sanity-reuse.yml
+          LOCKFILES=$(find . -name "package-lock.json" -not -path "./node_modules/*" | sort | tr '\n' ' ')
+
+          if [ -n "$LOCKFILES" ]; then
+            echo "Found lockfiles: $LOCKFILES"
+            echo "Cache dependency path: $LOCKFILES"
+          else
+            echo "No lockfiles found, using default: package-lock.json"
+            echo "Cache dependency path: package-lock.json"
+          fi
+
+      - name: Cache hit rate analysis
+        if: ${{ inputs.verbose == 'true' }}
+        run: |
+          echo "📊 Cache hit rate analysis (verbose mode)"
+          echo "This would show cache statistics if available"
+          echo "Consider implementing cache metrics collection"
+
+      - name: Environment info
+        run: |
+          echo "🌍 Environment information:"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Available disk space:"
+          df -h

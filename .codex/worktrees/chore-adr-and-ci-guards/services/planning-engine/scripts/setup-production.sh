@@ -1,0 +1,77 @@
+#!/bin/bash
+# 🚀 生产环境配置脚本
+# 用于设置生产环境变量和配置
+
+echo "🚀 Setting up production environment for Planning Engine..."
+
+# 创建生产环境配置文件
+cat > .env.production << EOF
+# Production Environment Configuration
+NODE_ENV=production
+PLANNING_PORT=4102
+
+# Database Configuration
+PLANNING_DATABASE_URL=postgresql://postgres:\${DB_PASSWORD}@\${DB_HOST}:5432/planning_engine_prod
+
+# Redis Configuration
+REDIS_URL=redis://\${REDIS_HOST}:6379
+
+# NATS Configuration
+NATS_URL=nats://\${NATS_HOST}:4223
+
+# OpenAI Configuration
+OPENAI_API_KEY=\${OPENAI_API_KEY}
+
+# JWT Configuration
+JWT_SECRET=\${JWT_SECRET}
+
+# Logging Configuration
+LOG_LEVEL=info
+
+# Rate Limiting Configuration
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Cache Configuration
+CACHE_TTL=3600
+
+# Health Check Configuration
+HEALTH_CHECK_TIMEOUT=5000
+
+# Monitoring Configuration
+PROMETHEUS_ENABLED=true
+METRICS_ENABLED=true
+
+# Security Configuration
+CORS_ORIGIN=\${CORS_ORIGIN}
+TRUST_PROXY=true
+
+# Performance Configuration
+PLAN_CACHE_TTL_SECONDS=3600
+PLAN_GENERATION_MAX_CONCURRENT=3
+PLAN_GENERATION_TIMEOUT_MS=60000
+PLAN_GENERATION_RETRY_DELAY_MS=5000
+
+# Database Performance Configuration
+DB_BATCH_SIZE=100
+DB_CONNECTION_POOL_SIZE=10
+DB_QUERY_TIMEOUT_MS=30000
+
+# Metrics Configuration
+METRICS_PORT=9466
+EOF
+
+echo "✅ Production environment configuration created"
+echo "📝 Please update the following environment variables:"
+echo "   - DB_PASSWORD: Database password"
+echo "   - DB_HOST: Database host"
+echo "   - REDIS_HOST: Redis host"
+echo "   - NATS_HOST: NATS host"
+echo "   - OPENAI_API_KEY: OpenAI API key"
+echo "   - JWT_SECRET: JWT secret key"
+echo "   - CORS_ORIGIN: CORS origin for frontend"
+echo ""
+echo "🔧 To apply the configuration:"
+echo "   export \$(cat .env.production | xargs)"
+echo "   npm run build"
+echo "   npm start"

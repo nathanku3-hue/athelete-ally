@@ -1,0 +1,38 @@
+# docker-compose.ci-minimal.yml - CI最小化配置文件
+# 只包含测试需要的基础设施服务，无端口绑定
+services:
+  redis:
+    image: redis:7-alpine
+    expose:
+      - '6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+    expose:
+      - '5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U athlete']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:2.10-alpine
+    command: ['-js', '-m', '8222']
+    expose:
+      - '4222'
+      - '8222'
+    healthcheck:
+      test: ['CMD', 'nats', 'server', 'info']
+      interval: 10s
+      timeout: 5s
+      retries: 5

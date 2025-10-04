@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  planning-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.optimized
+    ports:
+      - '4102:4102'
+      - '9466:9466' # Metrics port
+    environment:
+      - NODE_ENV=production
+      - PLANNING_PORT=4102
+      - PLANNING_DATABASE_URL=${PLANNING_DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - NATS_URL=${NATS_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=info
+      - PROMETHEUS_ENABLED=true
+      - METRICS_ENABLED=true
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - TRUST_PROXY=true
+    depends_on:
+      - postgres
+      - redis
+      - nats
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4102/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - planning-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=planning_engine_prod
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/schema.prisma:/docker-entrypoint-initdb.d/schema.prisma
+    ports:
+      - '5432:5432'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - planning-network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - '6379:6379'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - planning-network
+
+  nats:
+    image: nats:2.9-alpine
+    command: ['--jetstream', '--store_dir', '/data']
+    volumes:
+      - nats_data:/data
+    ports:
+      - '4223:4222'
+      - '8222:8222' # NATS monitoring
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'nats', 'server', 'check', 'jetstream']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - planning-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - planning-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3000:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana-dashboard.json:/etc/grafana/provisioning/dashboards/planning-engine.json
+    restart: unless-stopped
+    networks:
+      - planning-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  nats_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  planning-network:
+    driver: bridge

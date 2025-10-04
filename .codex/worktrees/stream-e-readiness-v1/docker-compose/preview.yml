@@ -1,0 +1,77 @@
+services:
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - '4223:4222'
+      - '8222:8222'
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=athlete
+      - POSTGRES_PASSWORD=athlete
+      - POSTGRES_DB=athlete
+    ports:
+      - '55432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+
+  ingest:
+    build:
+      context: ..
+      dockerfile: services/ingest-service/Dockerfile
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - PORT=4101
+      - NATS_URL=nats://nats:4223
+    volumes:
+      - ../services/ingest-service:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '4101:4101'
+    depends_on:
+      - nats
+
+  normalize:
+    build:
+      context: ..
+      dockerfile: services/normalize-service/Dockerfile
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - PORT=4102
+      - DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_normalize
+      - NATS_URL=nats://nats:4223
+    volumes:
+      - ../services/normalize-service:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '4102:4102'
+    depends_on:
+      - nats
+      - postgres
+
+  insights-engine:
+    build:
+      context: ..
+      dockerfile: services/insights-engine/Dockerfile
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - PORT=4103
+      - DATABASE_URL=postgresql://athlete:athlete@postgres:5432/athlete_insights
+    volumes:
+      - ../services/insights-engine:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '4103:4103'
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

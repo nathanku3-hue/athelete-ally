@@ -1,0 +1,102 @@
+From e93d03fe5829de6fa82a903ff727e9acfa31e7b3 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 15:14:01 +0800
+Subject: [PATCH 2/2] ci: add nonblocking arch-guards workflow; add syncpack +
+ deps lint scripts (report-only)
+
+---
+ .github/workflows/arch-guards.yml | 48 +++++++++++++++++++++++++++++++
+ package.json                      | 10 +++++--
+ 2 files changed, 55 insertions(+), 3 deletions(-)
+ create mode 100644 .github/workflows/arch-guards.yml
+
+diff --git a/.github/workflows/arch-guards.yml b/.github/workflows/arch-guards.yml
+new file mode 100644
+index 0000000..7a5d4d6
+--- /dev/null
++++ b/.github/workflows/arch-guards.yml
+@@ -0,0 +1,48 @@
++name: Arch Guards (report-only)
++
++on:
++  pull_request:
++  schedule:
++    - cron: "15 7 * * *"
++
++jobs:
++  deps-consistency:
++    runs-on: ubuntu-latest
++    continue-on-error: true
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 20.18.0
++          cache: npm
++      - run: npm ci --no-audit --no-fund
++      - name: Dependency consistency (report-only)
++        run: |
++          npx --yes syncpack@12.3.0 list-mismatches || true
++          npx --yes syncpack@12.3.0 lint-semver-ranges || true
++
++  verify-generated:
++    runs-on: ubuntu-latest
++    continue-on-error: true
++    env:
++      TZ: UTC
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 20.18.0
++          cache: npm
++      - run: npm ci --no-audit --no-fund
++      - name: Re-run generators (report-only)
++        run: |
++          echo "Re-running infra generators in report-only mode"
++          npm run build:infra --if-present
++          npm run build:dashboards-index --if-present || true
++          git diff --patch > generated-diff.patch || true
++      - name: Upload drift artifact
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: generated-diff
++          path: generated-diff.patch
++          retention-days: 7
+diff --git a/package.json b/package.json
+index 6a218ed..4019eec 100644
+--- a/package.json
++++ b/package.json
+@@ -84,7 +84,10 @@
+     "dev:compose": "docker compose up --build",
+     "dev:compose:obs": "docker compose --profile obs up --build",
+     "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
+-    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
++    "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml",
++    "deps:lint": "syncpack list-mismatches && syncpack lint-semver-ranges",
++    "deps:fix": "syncpack format && syncpack fix-mismatches",
++    "verify:generated:report": "node -e \"process.exit(0)\""
+   },
+   "dependencies": {
+     "@radix-ui/react-dialog": "^1.1.15",
+@@ -140,7 +143,8 @@
+     "ts-node": "^10.9.2",
+     "tsx": "^4.16.2",
+     "turbo": "^2.0.3",
+-    "typescript": "^5.9.2"
++    "typescript": "^5.9.2",
++    "syncpack": "^12.3.0"
+   },
+   "overrides": {
+     "@prisma/client": "^5.22.0",
+@@ -155,4 +159,4 @@
+     "services/*",
+     "packages/*"
+   ]
+-}
+\ No newline at end of file
++}
+-- 
+2.43.0
+

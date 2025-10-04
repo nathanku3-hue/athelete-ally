@@ -1,0 +1,61 @@
+groups:
+  - name: sleep-pipeline
+    interval: 1m
+    rules:
+      - alert: SleepDLQRateNonZero
+        expr:
+          rate(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m])
+          > 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: normalize-service
+          env: unknown
+          stream: AA_CORE_HOT
+          durable: normalize-sleep-durable
+          subject: athlete-ally.sleep.raw-received
+        annotations:
+          summary: 'Sleep pipeline DLQ rate > 0'
+          description:
+            'DLQ messages observed in the last 5m. Investigate schema or processing errors.'
+          runbook_url: 'docs/runbook/sleep-troubleshooting.md#dlq-handling'
+
+      - alert: SleepConsumerLagHigh
+        expr:
+          nats_consumer_num_pending{stream="AA_CORE_HOT",consumer="normalize-sleep-durable"} > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: normalize-service
+          env: unknown
+          stream: AA_CORE_HOT
+          durable: normalize-sleep-durable
+          subject: athlete-ally.sleep.raw-received
+        annotations:
+          summary: 'Sleep consumer lag high'
+          description:
+            'Num pending > 100 for 5m. If exporter missing, see TODO in runbook and use Soak script
+            / NATS CLI.'
+          runbook_url: 'docs/runbook/sleep-troubleshooting.md#lag-and-backlog'
+
+      - alert: SleepNoSuccesses5m
+        expr:
+          increase(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m])
+          == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          service: normalize-service
+          env: unknown
+          stream: AA_CORE_HOT
+          durable: normalize-sleep-durable
+          subject: athlete-ally.sleep.raw-received
+        annotations:
+          summary: 'Sleep pipeline produced no successes for 5m'
+          description:
+            'No successful sleep normalizations in the last 5m. Check consumers, NATS, and DB
+            connectivity.'
+          runbook_url: 'docs/runbook/sleep-troubleshooting.md#no-successes'

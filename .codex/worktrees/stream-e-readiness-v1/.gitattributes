@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+# Single-writer hubs prefer integration copy during merges
+/README.md merge=ours
+/docs/README.md merge=ours
+/docs/runbook/index.md merge=ours
+/openapi.yaml merge=ours
+/monitoring/alert_rules.yml merge=ours
+/monitoring/grafana/dashboards/index.json merge=ours
+/CHANGELOG.md merge=ours
+/registry.json merge=ours
+/registry.ts merge=ours
+/infra/index.yaml merge=ours
+/protobuf/registry.yaml merge=ours
+/sql/migrations/catalog.yaml merge=ours
