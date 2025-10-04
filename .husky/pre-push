@@ -1,4 +1,9 @@
 #!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run lint-staged for staged files
+npx --no -- lint-staged
+
 set -eu
 # Prettier shard scope
 npx --no prettier --check "{scripts,openapi,monitoring,docs,registry,.github}/**/*.{md,mdx,yml,yaml,json,ts,tsx,js,cjs,mjs}" || exit 1
