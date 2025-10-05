@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createMetricsApiHandler, createHealthCheckHandler } from '@athlete-ally/shared-types';
 
 // Lock runtime to Node.js and disable caching
 export const runtime = 'nodejs';
@@ -37,17 +36,43 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // Use secure metrics handler
-  const metricsHandler = createMetricsApiHandler();
-  return metricsHandler(request, NextResponse);
+  // Generate basic metrics response
+  const metrics = generateMetrics();
+  return new NextResponse(metrics, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }
+  });
 }
 
 /**
  * Health check endpoint (less restrictive)
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const healthHandler = createHealthCheckHandler();
-  return await healthHandler(request, NextResponse);
+  return new NextResponse('OK', {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain',
+      'Cache-Control': 'no-cache'
+    }
+  });
+}
+
+/**
+ * Generate basic metrics response
+ */
+function generateMetrics(): string {
+  const timestamp = Date.now();
+  return `# HELP athlete_ally_info Application information
+# TYPE athlete_ally_info gauge
+athlete_ally_info{version="0.0.4",environment="${process.env.NODE_ENV || 'development'}"} 1 ${timestamp}
+
+# HELP athlete_ally_uptime_seconds Application uptime in seconds
+# TYPE athlete_ally_uptime_seconds counter
+athlete_ally_uptime_seconds ${Math.floor(process.uptime())} ${timestamp}
+`;
 }
 
 /**

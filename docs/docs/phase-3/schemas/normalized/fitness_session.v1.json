@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://athlete-ally.dev/schemas/normalized/fitness_session.v1.json",
+  "title": "Normalized Fitness Session v1",
+  "type": "object",
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "const": "v1" },
+        "domain": { "type": "string" },
+        "user_id": { "type": "string", "minLength": 1 },
+        "received_at": { "type": "string", "format": "date-time" },
+        "source": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "event_id": { "type": "string" },
+            "delivery_id": { "type": "string" }
+          },
+          "required": ["provider"],
+          "additionalProperties": true
+        }
+      },
+      "required": ["version", "domain", "user_id", "received_at", "source"],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "version": { "type": "string", "const": "v1" },
+    "domain": { "type": "string", "const": "fitness_session" },
+    "user_id": { "type": "string" },
+    "received_at": { "type": "string", "format": "date-time" },
+    "source": { "$ref": "#/$defs/metadata/properties/source" },
+    "session_id": { "type": "string" },
+    "start_time": { "type": "string", "format": "date-time" },
+    "end_time": { "type": "string", "format": "date-time" },
+    "activity_type": { "type": "string" },
+    "calories_kcal": { "type": "number", "minimum": 0 },
+    "distance_m": { "type": "number", "minimum": 0 },
+    "heart_rate_summary": {
+      "type": "object",
+      "properties": {
+        "min": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 },
+        "avg": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["version", "domain", "user_id", "received_at", "source", "session_id", "start_time", "end_time"],
+  "additionalProperties": false
+}

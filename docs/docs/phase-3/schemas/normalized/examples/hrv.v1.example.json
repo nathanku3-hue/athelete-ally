@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "domain": "hrv",
+  "user_id": "user-123",
+  "received_at": "2025-09-27T12:34:56Z",
+  "source": {
+    "provider": "oura",
+    "event_id": "evt-2",
+    "delivery_id": "del-2"
+  },
+  "samples": [
+    { "timestamp": "2025-09-27T12:00:00Z", "rmssd_ms": 48.2 },
+    { "timestamp": "2025-09-27T12:05:00Z", "rmssd_ms": 45.0 }
+  ]
+}

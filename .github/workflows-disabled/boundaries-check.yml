@@ -1,0 +1,86 @@
+name: Boundaries Check (New/Modified Files) - RETIRED
+
+# ⚠️  DEPRECATED: This workflow has been retired
+#
+# This workflow was causing config drift by using inline --rule parameters
+# that overrode our unified ESLint configuration. It has been replaced by
+# the eslint-guardrails.yml workflow which provides:
+# - Consistent config validation
+# - Proper changed-files-only linting
+# - No inline rule overrides
+#
+# Use: .github/workflows/eslint-guardrails.yml instead
+#
+# This file is kept for reference only and should not be moved back to
+# .github/workflows/ as it will cause the same config drift issues.
+
+# DISABLED - No triggers to prevent accidental runs
+on:
+  # RETIRED - Use eslint-guardrails.yml instead
+
+permissions:
+  contents: read
+
+concurrency:
+  group: boundaries-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundaries-check:
+    name: Check Boundaries (New/Modified Files)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (selected ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 2 # Need previous commit for diff
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check boundaries for new/modified files
+        run: |
+          set -euo pipefail
+          echo "?? Checking boundaries for new/modified files..."
+
+          # Get list of changed TypeScript/TSX files (excluding test files)
+          CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' | grep -v -E '(test|spec)\.(ts|tsx)$' | grep -v '__tests__' || true)"
+
+          if [ -z "${CHANGED_FILES:-}" ]; then
+            echo "? No non-test TypeScript files changed, skipping boundary check"
+            exit 0
+          fi
+
+          echo "?? Changed non-test TypeScript files:"
+          echo "${CHANGED_FILES}"
+
+          # Run ESLint with error-level boundary rules on changed files only
+          # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
+          echo "🚨 Running strict boundary checks on changed files..."
+          npm run lint:ci -- --no-error-on-unmatched-pattern --max-warnings=0 \
+            "$(printf "%s" "${CHANGED_FILES}")" \
+            --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\", \"next/*\"] }]" \
+            --rule "no-restricted-imports: error" \
+            --format=compact
+
+          echo "? Boundary checks passed for new/modified files"
+
+      - name: Generate boundaries report
+        continue-on-error: true
+        run: |
+          mkdir -p reports/deps
+          # Generate report using the same boundary rules as the check above
+          npm run lint:ci -- . -f json > reports/deps/eslint-boundaries-strict.json || echo "ESLint boundaries report generated with warnings"
+      - name: Upload Boundaries Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boundaries-report-${{ github.run_id }}
+          path: reports/deps/boundaries-report.json
+          retention-days: 7
