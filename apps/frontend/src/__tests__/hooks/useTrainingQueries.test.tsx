@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { usePlans, usePlan, useCreatePlan } from '@hooks/useTrainingQueries';
+import { usePlans, usePlan, useCreatePlan } from '../../hooks/useTrainingQueries';
 
 describe('useTrainingQueries', () => {
   it('should initialize usePlans with default values', () => {
