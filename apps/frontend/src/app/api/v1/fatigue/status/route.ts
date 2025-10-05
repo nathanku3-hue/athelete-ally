@@ -53,8 +53,11 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json(fatigueStatus);
     
-  } catch (error) {
-    console.error('Failed to fetch fatigue status:', error);
+    } catch (error) {
+      // Log error for debugging (in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch fatigue status:', error);
+      }
     return NextResponse.json(
       { 
         error: 'Failed to fetch fatigue status',
@@ -70,7 +73,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation } = body;
     
-    console.log('Submitting fatigue assessment:', { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation });
+    // Log for debugging (in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Submitting fatigue assessment:', { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation });
+    }
     
     // 在真实实现中，这里会保存用户的疲劳度评估数据
     // 并可能触发AI分析来更新疲劳度状态

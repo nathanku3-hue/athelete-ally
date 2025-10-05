@@ -151,7 +151,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(currentPlan);
     
   } catch (error) {
-    console.error('Failed to fetch current plan:', error);
+    // Log error for debugging (in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to fetch current plan:', error);
+    }
     return NextResponse.json(
       { 
         error: 'Failed to fetch current plan',

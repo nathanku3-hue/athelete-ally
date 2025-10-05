@@ -48,8 +48,11 @@ export default function FatigueAssessmentPage() {
       } else {
         throw new Error('Failed to submit assessment');
       }
-    } catch (error) {
-      console.error('Failed to submit fatigue assessment:', error);
+      } catch (error) {
+        // Log error for debugging (in development)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to submit fatigue assessment:', error);
+        }
       alert('Failed to submit assessment. Please try again.');
     } finally {
       setIsSubmitting(false);

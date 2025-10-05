@@ -181,7 +181,10 @@ export default function TrainingPlanPageV2_Fixed() {
                     setUnit(preferences.unit || 'lbs');
                 }
             } catch (error) {
-                console.error('Failed to fetch user preferences:', error);
+                // Log error for debugging (in development)
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Failed to fetch user preferences:', error);
+                }
                 // 使用默认值，不阻塞页面加载
             }
         };
@@ -196,7 +199,10 @@ export default function TrainingPlanPageV2_Fixed() {
             setError(null);
             
             try {
-                console.log('Fetching plan data from /api/v1/plans/current...');
+                // Log for debugging (in development)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Fetching plan data from /api/v1/plans/current...');
+                }
                 const response = await fetch('/api/v1/plans/current');
                 
                 if (!response.ok) {
@@ -204,11 +210,14 @@ export default function TrainingPlanPageV2_Fixed() {
                 }
                 
                 const planData: WeeklyPlan = await response.json();
-                console.log('Plan data received:', { 
-                    weekNumber: planData.weekNumber, 
-                    theme: planData.theme,
-                    trainingDaysCount: planData.trainingDays.length 
-                });
+                // Log for debugging (in development)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Plan data received:', { 
+                        weekNumber: planData.weekNumber, 
+                        theme: planData.theme,
+                        trainingDaysCount: planData.trainingDays.length 
+                    });
+                }
                 
                 setPlan(planData);
                 
@@ -218,11 +227,17 @@ export default function TrainingPlanPageV2_Fixed() {
                 setSelectedDay(todayPlan?.day || planData.trainingDays[0]?.day || today);
                 
             } catch (error) {
-                console.error('Failed to fetch plan data:', error);
+                // Log error for debugging (in development)
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Failed to fetch plan data:', error);
+                }
                 setError(error instanceof Error ? error.message : 'Failed to load plan');
                 
                 // 降级到模拟数据
-                console.log('Falling back to mock data...');
+                // Log for debugging (in development)
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Falling back to mock data...');
+                }
                 setPlan(MOCK_PLAN_V2);
                 
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
@@ -254,17 +269,26 @@ export default function TrainingPlanPageV2_Fixed() {
             }
             
             const result = await response.json();
-            console.log('User preference updated:', result);
+            // Log for debugging (in development)
+            if (process.env.NODE_ENV === 'development') {
+                console.log('User preference updated:', result);
+            }
             
         } catch (error) {
-            console.error('Failed to save user preference:', error);
+            // Log error for debugging (in development)
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Failed to save user preference:', error);
+            }
             // 即使保存失败，也保持前端状态更新
         }
     };
 
     // 处理修改计划按钮点击
     const handleModifyPlan = () => {
-        console.log('Modify Plan clicked - redirecting to summary page');
+        // Log for debugging (in development)
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Modify Plan clicked - redirecting to summary page');
+        }
         // 跳转到 summary 页面，讓用戶修改現有計劃
         router.push('/onboarding/summary');
     };
