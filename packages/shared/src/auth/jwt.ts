@@ -45,7 +45,7 @@ export class JWTManager {
       const decoded = jwt.verify(token, JWT_SECRET, {
         issuer: 'athlete-ally',
         audience: 'athlete-ally-users'
-      }) as any;
+      }) as JWTPayload;
       
       return JWTPayloadSchema.parse(decoded);
     } catch (error) {
@@ -72,7 +72,7 @@ export class JWTManager {
   /**
    * 从请求中获取用户身份
    */
-  static getUserFromRequest(request: any): JWTPayload {
+  static getUserFromRequest(request: { headers: Record<string, string | string[] | undefined> }): JWTPayload {
     const authHeader = request.headers.authorization || request.headers.Authorization;
     const token = this.extractTokenFromHeader(authHeader);
     return this.verifyToken(token);

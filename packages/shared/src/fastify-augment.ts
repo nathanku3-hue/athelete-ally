@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FastifyRequest as OriginalFastifyRequest, FastifyReply as OriginalFastifyReply } from 'fastify';
 
 declare module 'fastify' {

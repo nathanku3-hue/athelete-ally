@@ -64,7 +64,7 @@ class StructuredLogger {
   /**
    * 外部日志记录接口 - 由应用/服务实现
    */
-  private logToExternalLogger(level: string, message: string): void {
+  private logToExternalLogger(_level: string, _message: string): void {
     // No-op stub - apps/services should implement actual logging
     // This allows packages to export logging interface without direct console usage
   }
