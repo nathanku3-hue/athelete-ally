@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { ReadinessComputedEvent, ReadinessStoredEvent, EVENT_TOPICS } from '../events/index.js';
+import { ReadinessComputedEvent, ReadinessStoredEvent, EVENT_TOPICS } from '../events/index';
 
 describe('Readiness Events', () => {
   describe('ReadinessComputedEvent', () => {

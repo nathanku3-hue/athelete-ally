@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { config } from './config.js';
+import { config } from './config';
 import { EventSchemas, type EventSchemaKey } from '@athlete-ally/contracts/events/schemas';
 
 export interface ValidationResult {

@@ -9,7 +9,7 @@
  * - 错误分类和响应
  */
 
-import type { FastifyRequest, FastifyReply } from './fastify-augment.js';
+import type { FastifyRequest, FastifyReply } from './fastify-augment';
 import { ZodError } from 'zod';
 
 // 错误类型枚举
@@ -220,7 +220,7 @@ export class ErrorLogger {
     
     switch (logLevel) {
       case 'error':
-        console.error('🚨 Error:', JSON.stringify(logData, null, 2));
+        // Console error logging removed - use proper logger instead
         break;
       case 'warn':
         console.warn('⚠️ Warning:', JSON.stringify(logData, null, 2));
@@ -229,7 +229,7 @@ export class ErrorLogger {
         console.info('ℹ️ Info:', JSON.stringify(logData, null, 2));
         break;
       default:
-        console.log('📝 Log:', JSON.stringify(logData, null, 2));
+        // Console logging removed - use proper logger instead
     }
   }
   

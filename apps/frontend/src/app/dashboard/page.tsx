@@ -23,7 +23,7 @@ export default function DashboardPage() {
    * @param score - 用戶選擇的 1-5 分數
    */
   const handleFatigueScoreSubmit = (score: number) => {
-    console.log(`疲勞評分已記錄: ${score}`);
+    // Fatigue score logging removed - use proper state management instead
     
     // 在此處，我們可以將分數與 WorkoutSession 模型關聯，並發送到後端或狀態管理器
     // 例如: updateWorkoutSession(todayWorkoutSessionId, { fatigueScore: score });

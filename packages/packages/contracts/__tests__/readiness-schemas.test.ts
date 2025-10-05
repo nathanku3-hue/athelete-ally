@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { EventSchemas } from '../events/schemas.js';
+import { EventSchemas } from '../events/schemas';
 
 const ajv = new Ajv();
 addFormats(ajv);

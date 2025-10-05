@@ -3,7 +3,7 @@
  * 用于生成测试环境中的有效JWT token
  */
 
-import { JWTManager } from './jwt.js';
+import { JWTManager } from './jwt';
 
 export class JWTTestUtils {
   /**

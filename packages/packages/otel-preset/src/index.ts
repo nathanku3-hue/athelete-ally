@@ -48,7 +48,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
 
   // Check if telemetry is enabled
   if (!enabled) {
-    console.log(`🔇 Telemetry disabled for ${serviceName}`);
+    // Console logging removed - use proper logger instead
     return {
       sdk: undefined as any,
       tracer: trace.getTracer(serviceName, version),
@@ -57,7 +57,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
     };
   }
 
-  console.log(`🔍 Initializing telemetry for ${serviceName} v${version}`);
+  // Console logging removed - use proper logger instead
 
   // Create resource with consistent attributes
   const resource = new Resource({
@@ -116,7 +116,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   const shutdown = async () => {
     try {
       await sdk.shutdown();
-      console.log(`🔇 Telemetry shutdown complete for ${serviceName}`);
+      // Console logging removed - use proper logger instead
     } catch (error) {
       console.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
     }
@@ -126,7 +126,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 
-  console.log(`✅ Telemetry initialized for ${serviceName}`);
+  // Console logging removed - use proper logger instead
   return { sdk, tracer, meter, shutdown };
 }
 
@@ -160,7 +160,7 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
       }
 
     default:
-      console.log('📊 No trace exporter configured');
+      // Console logging removed - use proper logger instead
       return undefined;
   }
 }
@@ -196,7 +196,7 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
       }
 
     default:
-      console.log('📊 No metric exporter configured');
+      // Console logging removed - use proper logger instead
       return undefined;
   }
 }

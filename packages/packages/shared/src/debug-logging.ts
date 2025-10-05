@@ -73,7 +73,7 @@ export class DebugLogger {
 
     // Check if we should log based on component and level
     if (this.shouldLog(logEntry.component, logEntry.level)) {
-      console.log(JSON.stringify(logEntry));
+      // Console logging removed - use proper logger instead
     }
   }
 

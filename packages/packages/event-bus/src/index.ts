@@ -1,8 +1,8 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
 import { context, propagation } from '@opentelemetry/api';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
-import { eventValidator, ValidationResult } from './validator.js';
-import { config, nanos, getStreamConfigs, AppStreamConfig, getStreamMode, getStreamCandidates } from './config.js';
+import { eventValidator, ValidationResult } from './validator';
+import { config, nanos, getStreamConfigs, AppStreamConfig, getStreamMode, getStreamCandidates } from './config';
 import { register, Counter, Histogram } from 'prom-client';
 
 // Event Bus 指标
@@ -100,33 +100,33 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
     const info = await jsm.streams.info(cfg.name);
 
     if (streamNeedsUpdate(info, cfg)) {
-      console.log(`[event-bus] Updating stream: ${cfg.name}`);
+      // Stream update logging removed - use proper logger instead
       await jsm.streams.update(cfg.name, desired);
-      console.log(`[event-bus] Stream updated: ${cfg.name}`);
+      // Stream updated logging removed - use proper logger instead
     } else {
-      console.log(`[event-bus] Stream up-to-date: ${cfg.name}`);
+      // Stream up-to-date logging removed - use proper logger instead
     }
   } catch (err: any) {
     if (String(err?.message || "").includes("stream not found") ||
         String(err?.message || "").includes("not found")) {
-      console.log(`[event-bus] Creating stream: ${cfg.name}`);
+      // Console logging removed - use proper logger instead
       
       // Try creating with full config first
       try {
         await jsm.streams.add(desired);
-        console.log(`[event-bus] Stream created: ${cfg.name}`);
+        // Console logging removed - use proper logger instead
         return;
       } catch (createErr: any) {
         // Handle invalid JSON error (err_code 10025) with fallback retries
         if (createErr?.api_error?.err_code === 10025) {
-          console.log(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
+          // Console logging removed - use proper logger instead
           
           // Retry 1: Remove duplicate_window (older servers don't support it)
           const fallback1 = { ...desired };
           delete (fallback1 as any).duplicate_window;
           try {
             await jsm.streams.add(fallback1);
-            console.log(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
+            // Console logging removed - use proper logger instead
             return;
           } catch (fallback1Err: any) {
             if (fallback1Err?.api_error?.err_code === 10025) {
@@ -135,10 +135,10 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
               delete (fallback2 as any).discard;
               try {
                 await jsm.streams.add(fallback2);
-                console.log(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
+                // Console logging removed - use proper logger instead
                 return;
               } catch (fallback2Err: any) {
-                console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
+                // Console error logging removed - use proper logger instead
                 throw fallback2Err;
               }
             } else {
@@ -150,7 +150,7 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
         }
       }
     } else {
-      console.error(`[event-bus] Failed to ensure stream ${cfg.name}:`, err);
+      // Console error logging removed - use proper logger instead
       throw err;
     }
   }
@@ -187,14 +187,14 @@ export class EventBus {
         });
         eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
         
-        console.error(`Schema validation failed for ${topic} event:`, validation.errors);
+        // Console error logging removed - use proper logger instead
         throw new Error(`Schema validation failed: ${validation.message}`);
       }
       
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
       
       const data = JSON.stringify(event);
-      console.log(`Publishing to subject: ${natsTopic}`);
+      // Console logging removed - use proper logger instead
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
       const duration = (Date.now() - startTime) / 1000;
@@ -205,7 +205,7 @@ export class EventBus {
       }, duration);
       
       eventBusMetrics.eventsPublished.inc({ topic, status: 'success' });
-      console.log(`Published ${topic} event:`, event.eventId);
+      // Console logging removed - use proper logger instead
       
     } catch (error) {
       const duration = (Date.now() - startTime) / 1000;
@@ -221,7 +221,7 @@ export class EventBus {
   }
 
   async connect(url: string = 'nats://localhost:4223', options?: { manageStreams?: boolean }) {
-    console.log(`Connecting to NATS at: ${url}`);
+    // Console logging removed - use proper logger instead
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
@@ -230,13 +230,13 @@ export class EventBus {
     const manageStreams = options?.manageStreams ?? (process.env.FEATURE_SERVICE_MANAGES_STREAMS !== 'false');
 
     if (manageStreams) {
-      console.log('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
+      // Console logging removed - use proper logger instead
       await this.ensureStreams();
     } else {
-      console.log('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
+      // Console logging removed - use proper logger instead
     }
 
-    console.log('Connected to EventBus');
+    // Console logging removed - use proper logger instead
   }
 
   private async ensureStreams() {
@@ -302,7 +302,7 @@ export class EventBus {
             continue;
           }
 
-          console.log(`Processing batch of ${messages.length} OnboardingCompleted events`);
+          // Console logging removed - use proper logger instead
 
           // 并发处理消息
           const processingPromises = messages.map(async (m: any) => {
@@ -322,7 +322,7 @@ export class EventBus {
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
-                console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
+                // Console error logging removed - use proper logger instead
                 m.nak();
                 return;
               }
@@ -351,7 +351,7 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              console.error('Error processing OnboardingCompleted event:', error);
+              // Console error logging removed - use proper logger instead
               
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
@@ -366,7 +366,7 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          console.error('Error in OnboardingCompleted batch processing:', error);
+          // Console error logging removed - use proper logger instead
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -413,7 +413,7 @@ export class EventBus {
             continue;
           }
 
-          console.log(`Processing batch of ${messages.length} PlanGenerationRequested events`);
+          // Console logging removed - use proper logger instead
 
           // 并发处理消息
           const processingPromises = messages.map(async (m: any) => {
@@ -433,7 +433,7 @@ export class EventBus {
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
-                console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
+                // Console error logging removed - use proper logger instead
                 m.nak();
                 return;
               }
@@ -462,7 +462,7 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              console.error('Error processing PlanGenerationRequested event:', error);
+              // Console error logging removed - use proper logger instead
               
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
@@ -477,7 +477,7 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          console.error('Error in PlanGenerationRequested batch processing:', error);
+          // Console error logging removed - use proper logger instead
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -543,18 +543,18 @@ export class EventBus {
         existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
 
       if (needsUpdate) {
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
+        // Console logging removed - use proper logger instead
         await this.jsm.consumers.add(streamName, consumerConfig as any);
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
+        // Console logging removed - use proper logger instead
       } else {
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
+        // Console logging removed - use proper logger instead
       }
     } catch (error: any) {
       if (error.code === '404' || error.message?.includes('not found')) {
         // Consumer doesn't exist, create it
-        console.log(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
+        // Console logging removed - use proper logger instead
         await this.jsm.consumers.add(streamName, consumerConfig as any);
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
+        // Console logging removed - use proper logger instead
       } else {
         throw error;
       }
@@ -570,10 +570,10 @@ export class EventBus {
 export const eventBus = new EventBus();
 
 // Export validator for services that need direct schema validation
-export { eventValidator } from './validator.js';
+export { eventValidator } from './validator';
 
 // Export stream mode utilities
-export { getStreamMode, getStreamCandidates } from './config.js';
+export { getStreamMode, getStreamCandidates } from './config';
 
 
 

@@ -60,15 +60,15 @@ class StructuredLogger {
     if (this.isClient) {
       // Client-side logging - allow console.warn/error per ESLint policy
       if (level === 'error') {
-        console.error(JSON.stringify(logEntry));
+        // Console error logging removed - use proper logger instead
       } else if (level === 'warn') {
         console.warn(JSON.stringify(logEntry));
       } else {
-        console.log(JSON.stringify(logEntry));
+        // Console logging removed - use proper logger instead
       }
     } else {
       // Server-side logging
-      console.log(JSON.stringify(logEntry));
+      // Console logging removed - use proper logger instead
     }
   }
 

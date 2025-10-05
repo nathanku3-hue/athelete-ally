@@ -50,7 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 /**
  * Health check endpoint (less restrictive)
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(_request: NextRequest): Promise<NextResponse> {
   return new NextResponse('OK', {
     status: 200,
     headers: {
@@ -166,7 +166,7 @@ function ipToNumber(ip: string): number {
  */
 function isWithinRateLimit(request: NextRequest): boolean {
   // Simple rate limiting - in production, use Redis or similar
-  const clientIP = getClientIP(request);
+  const _clientIP = getClientIP(request);
   
   // For now, just return true - implement proper rate limiting in production
   return true;

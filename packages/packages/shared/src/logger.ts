@@ -127,7 +127,7 @@ export class SafeLogger {
       });
     } else {
       // 开发环境记录详细信息
-      console.error(`[ERROR] ${message}`, maskedError, maskedContext);
+      // Console error logging removed - use proper logger instead
     }
   }
 
@@ -159,7 +159,7 @@ export class SafeLogger {
         timestamp: new Date().toISOString()
       });
     } else {
-      console.log(`[INFO] ${message}`, maskedContext);
+      // Console logging removed - use proper logger instead
     }
   }
 

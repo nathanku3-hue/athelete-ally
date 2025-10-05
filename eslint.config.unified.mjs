@@ -146,7 +146,14 @@ const eslintConfig = [
     files: ["packages/**/*.{ts,js}"],
     rules: {
       // Import boundaries - packages should be self-contained
-      "import/no-internal-modules": "off", // TODO: Fix pattern matching for relative imports
+      "import/no-internal-modules": ["warn", {
+        allow: [
+          "./**",           // Relative imports within package
+          "../**",          // Parent directory imports
+          "@athlete-ally/**", // Internal monorepo packages
+          "dotenv/config"   // Environment configuration
+        ]
+      }],
 
       // Logging policy - minimal logging in packages
       "no-console": ["error", { 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '../events/index.js';
+import { HRVRawReceivedEvent, HRVNormalizedStoredEvent, EVENT_TOPICS } from '../events/index';
 
 describe('HRV Events', () => {
   describe('HRVRawReceivedEvent', () => {

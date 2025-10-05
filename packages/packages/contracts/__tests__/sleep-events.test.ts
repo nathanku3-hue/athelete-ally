@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '../events/index.js';
+import { SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '../events/index';
 
 describe('Sleep Events', () => {
   it('SleepRawReceivedEvent structure', () => {
