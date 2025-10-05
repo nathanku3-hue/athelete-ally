@@ -1,0 +1,30 @@
+# CODEOWNERS
+
+# Safety DM required for metrics and security-critical files
+apps/frontend/src/app/api/metrics/route.ts @athlete-ally/safety-dm
+packages/shared-types/src/metrics-adapter.ts @athlete-ally/safety-dm
+packages/shared-types/src/server-only.ts @athlete-ally/safety-dm
+packages/shared-types/src/cutover-plan.ts @athlete-ally/safety-dm
+scripts/check-client-bundles.js @athlete-ally/safety-dm
+
+# Feature DM for application feature areas
+apps/frontend/src/app/ @athlete-ally/feature-dm
+apps/frontend/src/components/ @athlete-ally/feature-dm
+apps/frontend/src/lib/ @athlete-ally/feature-dm
+
+# Contract and governance labels for metrics-related changes
+packages/shared-types/src/metrics-adapter.ts @athlete-ally/contracts-team @athlete-ally/governance-team
+apps/frontend/src/app/api/metrics/route.ts @athlete-ally/contracts-team @athlete-ally/governance-team
+packages/shared-types/src/cutover-plan.ts @athlete-ally/contracts-team @athlete-ally/governance-team
+
+# CI and infrastructure
+.github/workflows/ @athlete-ally/ci-team
+.github/workflows/guardrails.yml @athlete-ally/ci-team @athlete-ally/safety-dm
+.github/workflows/contract-check.yml @athlete-ally/ci-team @athlete-ally/contracts-team
+
+# Documentation
+docs/contract-backward-compatibility-runbook.md @athlete-ally/safety-dm @athlete-ally/contracts-team
+docs/ @athlete-ally/docs-team
+
+# Global fallback
+* @athlete-ally/core-team
