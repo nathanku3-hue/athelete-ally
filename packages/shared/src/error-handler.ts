@@ -177,7 +177,7 @@ export class ErrorBuilder {
       type: ErrorType.VALIDATION_ERROR,
       code: 'VALIDATION_FAILED',
       message: 'Request validation failed',
-      details,
+      details: { errors: details },
       severity: ErrorSeverity.LOW,
       timestamp: new Date().toISOString(),
       requestId: request?.id,

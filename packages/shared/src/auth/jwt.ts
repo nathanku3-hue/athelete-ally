@@ -24,6 +24,9 @@ export const JWTPayloadSchema = z.object({
 
 export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
 
+// Header值类型定义
+type HeaderValue = string | string[] | null | undefined;
+
 // JWT 工具类
 export class JWTManager {
   /**
@@ -70,11 +73,51 @@ export class JWTManager {
   }
 
   /**
-   * 从请求中获取用户身份
+   * 安全的header值标准化函数
    */
-  static getUserFromRequest(request: { headers: Record<string, string | string[] | undefined> }): JWTPayload {
-    const authHeader = request.headers.authorization || request.headers.Authorization;
-    const token = this.extractTokenFromHeader(authHeader);
+  private static toHeaderString(value: HeaderValue): string | undefined {
+    if (value == null) return undefined;
+    if (Array.isArray(value)) {
+      const filtered = value.filter((v) => typeof v === 'string' && v.trim().length > 0) as string[];
+      if (filtered.length === 0) return undefined;
+      // Safety: If multiple distinct values appear, reject to avoid ambiguity
+      const uniq = Array.from(new Set(filtered.map((v) => v.trim())));
+      if (uniq.length > 1) return undefined;
+      return uniq[0];
+    }
+    const s = value.trim();
+    return s.length > 0 ? s : undefined;
+  }
+
+  /**
+   * 健壮的Bearer token解析函数
+   */
+  private static extractTokenFromHeaderSafe(raw: string | undefined): string | undefined {
+    if (!raw) return undefined;
+    const m = /^Bearer\s+(.+)$/i.exec(raw.trim());
+    const token = m?.[1]?.trim();
+    return token && token.length > 0 ? token : undefined;
+  }
+
+  /**
+   * 从请求中获取用户身份（支持Next/Express两种header格式）
+   */
+  static getUserFromRequest(request: { headers: any }): JWTPayload | undefined {
+    const headers = request.headers;
+    let rawAuth: HeaderValue;
+
+    // Next/Fetch Headers
+    if (typeof headers?.get === 'function') {
+      rawAuth = headers.get('authorization');
+    } else {
+      // Node/Express IncomingHttpHeaders-like
+      rawAuth = headers?.authorization ?? headers?.Authorization;
+    }
+
+    const authHeader = this.toHeaderString(rawAuth);
+    const token = this.extractTokenFromHeaderSafe(authHeader);
+    if (!token) return undefined;
+
     return this.verifyToken(token);
   }
 }

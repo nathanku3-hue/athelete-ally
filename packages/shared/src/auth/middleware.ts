@@ -16,6 +16,14 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     // 获取用户身份
     const user = JWTManager.getUserFromRequest(request);
     
+    if (!user) {
+      reply.code(401).send({
+        error: 'unauthorized',
+        message: 'Authentication required'
+      });
+      return;
+    }
+    
     // 设置安全上下文
     const requestId = request.id || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     SecurityContextManager.setContext(requestId, user);
