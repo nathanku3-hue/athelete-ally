@@ -53,7 +53,7 @@
     "test:all:workspace": "turbo run test",
     "type-check:all": "turbo run type-check",
     "lint:all": "turbo run lint",
-    "lint:boundaries": "npx eslint . --config config/linting/eslint.config.strict.mjs",
+    "lint:boundaries": "npx eslint . --config eslint.config.unified.mjs",
     "lint:boundaries:changed": "powershell -ExecutionPolicy Bypass -File scripts/check-boundaries-new-files.ps1",
     "test:container": "docker compose -f docker-compose/preview.yml run --rm",
     "preview:check": "npx tsx scripts/check-ports.ts",

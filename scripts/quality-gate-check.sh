@@ -128,7 +128,7 @@ check_build() {
     
     # 检查代码格式
     echo -n "检查代码格式... "
-    if npx eslint . --fix > /dev/null 2>&1; then
+    if npx eslint . --config eslint.config.unified.mjs --fix > /dev/null 2>&1; then
         echo -e "${GREEN}✅ 代码格式检查通过${NC}"
     else
         echo -e "${RED}❌ 代码格式检查失败${NC}"

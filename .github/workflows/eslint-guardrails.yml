@@ -60,8 +60,8 @@ jobs:
         run: |
           # Generate cache key based on ESLint version, plugins, and config hash
           ESLINT_VERSION=$(npx eslint --version | cut -d' ' -f2)
-          CONFIG_HASH=$(sha256sum eslint.config.unified.mjs | cut -d' ' -f1)
-          PACKAGE_HASH=$(sha256sum package-lock.json | cut -d' ' -f1)
+          CONFIG_HASH=$(sha256sum "eslint.config.unified.mjs" | cut -d' ' -f1)
+          PACKAGE_HASH=$(sha256sum "package-lock.json" | cut -d' ' -f1)
 
           CACHE_KEY="eslint-cache-${{ runner.os }}-${ESLINT_VERSION}-${CONFIG_HASH}-${PACKAGE_HASH}"
           echo "cache-key=${CACHE_KEY}" >> $GITHUB_OUTPUT

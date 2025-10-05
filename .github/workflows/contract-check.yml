@@ -29,14 +29,20 @@ jobs:
       - name: Check for emergency bypass
         id: check_bypass
         run: |
-          if [[ "${{ github.event.pull_request.labels.*.name }}" == *"allowcontractdrift"* ]]; then
+          PR_LABELS="${{ github.event.pull_request.labels.*.name }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          PR_BRANCH="${{ github.head_ref }}"
+          
+          if [[ "$PR_LABELS" == *"allowcontractdrift"* ]]; then
             echo "⚠️ Emergency bypass label detected. Skipping contract checks."
             echo "bypass=true" >> $GITHUB_OUTPUT
             echo "::warning::Contract checks bypassed due to allowcontractdrift label. This should be audited and removed after addressing the issue."
-            echo "::notice::Bypass Details: PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}"
-            echo "::notice::Bypass Author: ${{ github.event.pull_request.user.login }}"
+            echo "::notice::Bypass Details: PR #$PR_NUMBER - $PR_TITLE"
+            echo "::notice::Bypass Author: $PR_AUTHOR"
             echo "::notice::Bypass Timestamp: $(date -u)"
-            echo "::notice::Bypass Branch: ${{ github.head_ref }}"
+            echo "::notice::Bypass Branch: $PR_BRANCH"
           else
             echo "bypass=false" >> $GITHUB_OUTPUT
           fi
@@ -128,7 +134,8 @@ jobs:
         run: |
           echo "📊 Contract Check Summary"
           echo "========================"
-          if [[ "${{ steps.check_bypass.outputs.bypass }}" == "true" ]]; then
+          BYPASS_STATUS="${{ steps.check_bypass.outputs.bypass }}"
+          if [[ "$BYPASS_STATUS" == "true" ]]; then
             echo "⚠️ Contract checks BYPASSED due to allowcontractdrift label"
             echo "🔍 This bypass should be audited and removed after addressing the issue"
             echo "📋 Bypass reason: Emergency contract drift allowance"
