@@ -64,7 +64,7 @@ jobs:
           PACKAGE_HASH=$(sha256sum "package-lock.json" | cut -d' ' -f1)
 
           CACHE_KEY="eslint-cache-${{ runner.os }}-${ESLINT_VERSION}-${CONFIG_HASH}-${PACKAGE_HASH}"
-          echo "cache-key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+          echo "cache-key=${CACHE_KEY}" >> "$GITHUB_OUTPUT"
           echo "Generated cache key: ${CACHE_KEY}"
 
       - name: Validate ESLint Config

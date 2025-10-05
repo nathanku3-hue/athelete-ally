@@ -135,14 +135,19 @@ jobs:
           echo "📊 Contract Check Summary"
           echo "========================"
           BYPASS_STATUS="${{ steps.check_bypass.outputs.bypass }}"
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BRANCH="${{ github.head_ref }}"
+          
           if [[ "$BYPASS_STATUS" == "true" ]]; then
             echo "⚠️ Contract checks BYPASSED due to allowcontractdrift label"
             echo "🔍 This bypass should be audited and removed after addressing the issue"
             echo "📋 Bypass reason: Emergency contract drift allowance"
             echo "⏰ Bypass timestamp: $(date)"
-            echo "👤 Bypass author: ${{ github.event.pull_request.user.login }}"
-            echo "🔗 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}"
-            echo "🌿 Branch: ${{ github.head_ref }}"
+            echo "👤 Bypass author: $PR_AUTHOR"
+            echo "🔗 PR: #$PR_NUMBER - $PR_TITLE"
+            echo "🌿 Branch: $PR_BRANCH"
             echo ""
             echo "🚨 AUDIT REQUIRED: This bypass must be reviewed and removed after issue resolution"
           else
