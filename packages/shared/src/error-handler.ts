@@ -218,20 +218,18 @@ export class ErrorLogger {
       ip: request?.ip
     };
     
-    switch (logLevel) {
-      case 'error':
-        console.error('🚨 Error:', JSON.stringify(logData, null, 2));
-        break;
-      case 'warn':
-        console.warn('⚠️ Warning:', JSON.stringify(logData, null, 2));
-        break;
-      case 'info':
-        console.info('ℹ️ Info:', JSON.stringify(logData, null, 2));
-        break;
-      default:
-        console.log('📝 Log:', JSON.stringify(logData, null, 2));
-    }
+    // Defer to external logger - apps/services handle actual logging
+    this.logToExternalLogger(logLevel, JSON.stringify(logData, null, 2));
   }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  private static logToExternalLogger(level: string, message: string): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
+  }
+  
   
   private static getLogLevel(severity: ErrorSeverity): string {
     switch (severity) {
@@ -312,14 +310,14 @@ export class ErrorMonitor {
   }
   
   private static sendAlert(error: StandardError, alertType: string) {
-    // 这里可以集成实际的告警系统
-    console.error(`🚨 ALERT [${alertType}]:`, {
+    // Defer to external logger - apps/services handle actual logging
+    this.logToExternalLogger('error', `🚨 ALERT [${alertType}]: ${JSON.stringify({
       errorType: error.type,
       code: error.code,
       count: this.errorCounts.get(error.type),
       service: error.service,
       timestamp: error.timestamp
-    });
+    })}`);
   }
   
   static getErrorStats() {

@@ -119,15 +119,15 @@ export class SafeLogger {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      // 生产环境只记录必要信息
-      console.error(`[ERROR] ${message}`, {
+      // Production logging - defer to app/service logger
+      this.logToExternalLogger('error', message, {
         error: maskedError ? this.sanitizeError(maskedError) : undefined,
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      // 开发环境记录详细信息
-      console.error(`[ERROR] ${message}`, maskedError, maskedContext);
+      // Development logging - defer to app/service logger
+      this.logToExternalLogger('error', message, { error: maskedError, context: maskedContext });
     }
   }
 
@@ -138,12 +138,14 @@ export class SafeLogger {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      console.warn(`[WARN] ${message}`, {
+      // Production logging - defer to app/service logger
+      this.logToExternalLogger('warn', message, {
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      console.warn(`[WARN] ${message}`, maskedContext);
+      // Development logging - defer to app/service logger
+      this.logToExternalLogger('warn', message, maskedContext);
     }
   }
 

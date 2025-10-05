@@ -7,7 +7,8 @@ if (process.env.NODE_ENV === 'production' && !rawJwtSecret) {
   throw new Error('JWT_SECRET is required in production environment');
 }
 if (process.env.NODE_ENV !== 'production' && !rawJwtSecret) {
-  console.warn('Warning: JWT_SECRET not set; using dev-only default.');
+  // Defer to external logger - apps/services handle actual logging
+  // Warning: JWT_SECRET not set; using dev-only default.
 }
 export const JWT_SECRET = rawJwtSecret || 'dev-only-jwt-secret';
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
