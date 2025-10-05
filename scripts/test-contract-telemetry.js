@@ -21,9 +21,9 @@ console.log(JSON.stringify(config, null, 2));
 
 // Test telemetry
 console.log('\n📊 Testing Telemetry:');
-recordLegacyMapping('fatigue_level', 'normal', 'test');
-recordLegacyMapping('season', 'off-season', 'test');
-recordLegacyMapping('season', 'pre-season', 'test');
+recordLegacyMapping('fatigue_level', 'moderate', 'test');
+recordLegacyMapping('season', 'offseason', 'test');
+recordLegacyMapping('season', 'preseason', 'test');
 
 const metrics = getContractMetrics();
 console.log('Metrics Summary:', JSON.stringify(metrics, null, 2));

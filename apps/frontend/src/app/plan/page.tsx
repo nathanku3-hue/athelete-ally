@@ -80,7 +80,7 @@ const HeaderSkeleton = () => (
     </div>
 );
 
-const StatusDot = ({ status, details }: { status: 'normal' | 'moderate' | 'high'; details: string }) => (
+const StatusDot = ({ status, details }: { status: 'low' | 'moderate' | 'high'; details: string }) => (
     <div className="relative group">
         <div className={`w-3 h-3 rounded-full ${status === 'high' ? 'bg-red-500' : status === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{details}</div>

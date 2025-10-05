@@ -16,7 +16,7 @@ const CONFIG = {
 // 测试数据生成器
 function generateTestRequest(userId, requestId) {
   const proficiencies = ['beginner', 'intermediate', 'advanced'];
-  const seasons = ['offseason', 'pre-season', 'in-season', 'post-season'];
+  const seasons = ['offseason', 'preseason', 'inseason', 'postseason'];
   const equipmentOptions = [
     ['bodyweight'],
     ['bodyweight', 'dumbbells'],

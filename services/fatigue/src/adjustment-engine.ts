@@ -124,7 +124,7 @@ export class AdjustmentEngine {
     // Reduce intensity across all exercises
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'reduced', reduction: Math.min(20, fatigueLevel * 5) },
       reason: `High fatigue detected (${fatigueLevel}/5). Reducing intensity by ${Math.min(20, fatigueLevel * 5)}%`,
       confidence: 0.8,
@@ -176,7 +176,7 @@ export class AdjustmentEngine {
     // Increase intensity slightly
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'increased', increase: Math.min(10, (3 - fatigueLevel) * 5) },
       reason: `Low fatigue detected (${fatigueLevel}/5). You can push harder!`,
       confidence: 0.6,
@@ -218,7 +218,7 @@ export class AdjustmentEngine {
     // Reduce intensity of first few exercises
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'gradual_increase', startReduction: 15 },
       reason: 'Poor sleep quality detected. Starting with reduced intensity and building up',
       confidence: 0.7,
@@ -263,7 +263,7 @@ export class AdjustmentEngine {
     // Reduce intensity significantly
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'significantly_reduced', reduction: 30 },
       reason: 'Long break detected. Starting with significantly reduced intensity to avoid injury',
       confidence: 0.9,

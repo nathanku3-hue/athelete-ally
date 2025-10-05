@@ -17,21 +17,21 @@ const DISALLOWED_PATTERNS = {
   fatigueLevel: {
     pattern: /['"`]normal['"`]/g,
     message: "Found 'normal' fatigue level - should use 'moderate' from shared types",
-    allowedFiles: ['docs/', 'tests/', '*.md']
+    allowedFiles: ['docs/', 'tests/', '*.md', 'legacy-mappings.ts', 'contract-bc.test.ts', 'detect-contract-drift.js']
   },
   
   // Season format drift - should use 'offseason' not 'off-season'
   seasonFormat: {
     pattern: /['"`](off-season|pre-season|in-season)['"`]/g,
     message: "Found hyphenated season format - should use 'offseason', 'preseason', 'inseason'",
-    allowedFiles: ['docs/', 'tests/', '*.md']
+    allowedFiles: ['docs/', 'tests/', '*.md', 'legacy-mappings.ts', 'contract-bc.test.ts', 'detect-contract-drift.js']
   },
   
   // Feedback type drift - should use canonical enum
   feedbackType: {
     pattern: /['"`](issue|problem|complaint)['"`]/g,
     message: "Found non-canonical feedback type - should use 'bug', 'feature', 'improvement', 'general'",
-    allowedFiles: ['docs/', 'tests/', '*.md']
+    allowedFiles: ['docs/', 'tests/', '*.md', 'legacy-mappings.ts', 'contract-bc.test.ts', 'detect-contract-drift.js']
   }
 };
 

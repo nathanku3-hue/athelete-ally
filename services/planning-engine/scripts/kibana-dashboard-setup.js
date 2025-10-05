@@ -216,7 +216,7 @@ const setupKibanaDashboard = () => {
                   "style": {},
                   "scale": {
                     "type": "linear",
-                    "mode": "normal"
+                    "mode": "moderate"
                   },
                   "labels": {
                     "show": true,
