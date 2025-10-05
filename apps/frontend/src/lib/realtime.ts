@@ -19,7 +19,7 @@ interface User {
 
 export class RealtimeManager {
   private socket: Socket | null = null;
-  private listeners: Map<string, Function[]> = new Map();
+  private listeners: Map<string, ((...args: any[]) => void)[]> = new Map();
   private isConnected: boolean = false;
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 5;
@@ -118,14 +118,14 @@ export class RealtimeManager {
     }
   }
 
-  on(event: string, callback: Function): void {
+  on(event: string, callback: (...args: any[]) => void): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
     this.listeners.get(event)!.push(callback);
   }
 
-  off(event: string, callback?: Function): void {
+  off(event: string, callback?: (...args: any[]) => void): void {
     if (callback && this.listeners.has(event)) {
       const callbacks = this.listeners.get(event)!;
       const index = callbacks.indexOf(callback);

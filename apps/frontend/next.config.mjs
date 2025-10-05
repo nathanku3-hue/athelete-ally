@@ -91,7 +91,7 @@ const nextConfig = {
   },
   
   // Webpack配置
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  webpack: (config, { dev, isServer }) => {
     // 生产环境优化
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
