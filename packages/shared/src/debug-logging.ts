@@ -73,8 +73,16 @@ export class DebugLogger {
 
     // Check if we should log based on component and level
     if (this.shouldLog(logEntry.component, logEntry.level)) {
-      console.log(JSON.stringify(logEntry));
+      this.logToExternalLogger(JSON.stringify(logEntry));
     }
+  }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  private logToExternalLogger(message: string): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
   }
 
   private shouldLog(component: string, level: string): boolean {

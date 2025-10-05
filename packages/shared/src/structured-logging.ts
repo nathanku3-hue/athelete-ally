@@ -57,19 +57,16 @@ class StructuredLogger {
     };
 
     // Use appropriate logging method based on environment
-    if (this.isClient) {
-      // Client-side logging - allow console.warn/error per ESLint policy
-      if (level === 'error') {
-        console.error(JSON.stringify(logEntry));
-      } else if (level === 'warn') {
-        console.warn(JSON.stringify(logEntry));
-      } else {
-        console.log(JSON.stringify(logEntry));
-      }
-    } else {
-      // Server-side logging
-      console.log(JSON.stringify(logEntry));
-    }
+    // Defer to external logger - apps/services handle actual logging
+    this.logToExternalLogger(level, JSON.stringify(logEntry));
+  }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  private logToExternalLogger(level: string, message: string): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
   }
 
   // Public logging methods

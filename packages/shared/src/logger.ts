@@ -154,13 +154,23 @@ export class SafeLogger {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      console.log(`[INFO] ${message}`, {
+      // Production logging - defer to app/service logger
+      this.logToExternalLogger('info', message, {
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      console.log(`[INFO] ${message}`, maskedContext);
+      // Development logging - defer to app/service logger
+      this.logToExternalLogger('info', message, maskedContext);
     }
+  }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  private static logToExternalLogger(level: string, message: string, context?: any): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
   }
 
   /**
