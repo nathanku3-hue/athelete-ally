@@ -104,7 +104,8 @@ const eslintConfig = [
           "../lib/onboarding-tracing", // Onboarding tracing
           "../../types/fastify", // Fastify types
           "zustand/middleware", // Zustand middleware
-          "../../../../services/planning-engine/src/llm" // LLM service
+          "../../../../services/planning-engine/src/llm", // LLM service
+          "next/**"         // Allow all Next.js modules
         ] 
       }],
 
@@ -170,7 +171,9 @@ const eslintConfig = [
           "./schemas/**",   // Schemas subdirectory
           "./config/**",    // Config subdirectory
           "./auth/**",      // Auth subdirectory
-          "./security/**"   // Security subdirectory
+          "./security/**",  // Security subdirectory
+          "./src/**",       // Source subdirectory
+          "../src/**"       // Parent src directory
         ]
       }],
 
