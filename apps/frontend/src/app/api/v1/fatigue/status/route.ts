@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
-import { 
+import type { 
   FatigueLevel, 
   FatigueAssessmentInput, 
   FatigueAssessmentResult,
   FatigueStatusResponse,
-  FatigueFactor,
+  FatigueFactor
+} from '@athlete-ally/shared-types';
+import { 
   validateFatigueAssessmentInput,
   validateFatigueAssessmentResult,
   validateFatigueStatusResponse
-} from '@athlete-ally/shared-types';
+} from '@athlete-ally/shared-types/schemas';
 
 export async function GET(request: NextRequest) {
   try {
