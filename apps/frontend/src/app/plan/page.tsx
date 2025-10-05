@@ -34,7 +34,7 @@ interface WeeklyPlan {
   weekNumber: number;
   theme: string;
   volume: 'Low' | 'Mid' | 'High';
-  fatigue: { status: 'normal' | 'moderate' | 'high'; details: string; };
+  fatigue: { status: 'low' | 'moderate' | 'high'; details: string; };
   trainingDays: TrainingDay[];
 }
 

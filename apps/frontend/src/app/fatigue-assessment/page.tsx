@@ -77,10 +77,10 @@ export default function FatigueAssessmentPage() {
           <div className="mb-6">
             <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl ${
               result.level === 'high' ? 'bg-red-600' : 
-              result.level === 'normal' ? 'bg-yellow-600' : 'bg-green-600'
+              result.level === 'moderate' ? 'bg-yellow-600' : 'bg-green-600'
             }`}>
               {result.level === 'high' ? '⚠️' : 
-               result.level === 'normal' ? '⚡' : '✅'}
+               result.level === 'moderate' ? '⚡' : '✅'}
             </div>
             <h1 className="text-2xl font-bold mb-2">Assessment Complete</h1>
             <p className="text-gray-400">Your fatigue level: <span className="font-semibold">{result.level.toUpperCase()}</span></p>

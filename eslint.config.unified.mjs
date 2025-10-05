@@ -8,6 +8,10 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
+// DRY: share Next.js allowlist with scripts and docs
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { ALLOWED_NEXT_PATTERNS } = require('./scripts/eslint-config-constants.js');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -89,22 +93,7 @@ const eslintConfig = [
           "@athlete-ally/**", // Internal monorepo packages
           "@/**",           // Next.js path aliases
           "dotenv/config",  // Environment configuration
-          "next/server",    // Next.js server components
-          "next/navigation", // Next.js navigation hooks
-          "next/image",     // Next.js image component
-          "next/link",      // Next.js link component
-          "next/headers",   // Next.js headers API
-          "next/cache",     // Next.js cache API
-          "next/og",        // Next.js Open Graph
-          "next/intl",      // Next.js internationalization
-          "next/font/google", // Next.js Google fonts
-          "next/font/local",   // Next.js local fonts
-          "../lib/cors",    // CORS utilities
-          "../lib/onboarding-tracing", // Onboarding tracing
-          "../../types/fastify", // Fastify types
-          "zustand/middleware", // Zustand middleware
-          "../../../../services/planning-engine/src/llm", // LLM service
-          "next/**"         // Allow all Next.js modules
+          ...ALLOWED_NEXT_PATTERNS  // Use curated Next.js patterns
         ] 
       }],
 
@@ -138,7 +127,8 @@ const eslintConfig = [
           "../**", 
           "@athlete-ally/**", 
           "dotenv/config",
-          "prisma/**"
+          "prisma/**",
+          ...ALLOWED_NEXT_PATTERNS  // Use curated Next.js patterns
         ] 
       }],
 
@@ -166,13 +156,7 @@ const eslintConfig = [
           "../**",          // Parent directory imports
           "@athlete-ally/**", // Internal monorepo packages
           "dotenv/config",  // Environment configuration
-          "./events/**",    // Events subdirectory
-          "./schemas/**",   // Schemas subdirectory
-          "./config/**",    // Config subdirectory
-          "./auth/**",      // Auth subdirectory
-          "./security/**",  // Security subdirectory
-          "./src/**",       // Source subdirectory
-          "../src/**"       // Parent src directory
+          ...ALLOWED_NEXT_PATTERNS  // Use curated Next.js patterns
         ]
       }],
 

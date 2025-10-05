@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     // 在真实实现中，这里会从数据库获取用户的疲劳度数据
     // 目前使用模拟数据
     const fatigueStatus = {
-      level: 'high' as const, // 'low', 'normal', 'high'
+      level: 'high' as const, // 'low', 'moderate', 'high'
       score: 8.5, // 0-10 scale
       factors: [
         {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       (10 - motivation) * 0.1
     );
     
-    const level = fatigueScore >= 7 ? 'high' : fatigueScore >= 4 ? 'normal' : 'low';
+    const level = fatigueScore >= 7 ? 'high' : fatigueScore >= 4 ? 'moderate' : 'low';
     
     const result = {
       success: true,
