@@ -35,12 +35,6 @@ jobs:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_BRANCH: ${{ github.head_ref }}
         run: |
-          PR_LABELS="$PR_LABELS"
-          PR_TITLE="$PR_TITLE"
-          PR_NUMBER="$PR_NUMBER"
-          PR_AUTHOR="$PR_AUTHOR"
-          PR_BRANCH="$PR_BRANCH"
-          
           if [[ "$PR_LABELS" == *"allowcontractdrift"* ]]; then
             echo "⚠️ Emergency bypass label detected. Skipping contract checks."
             echo "bypass=true" >> "$GITHUB_OUTPUT"
@@ -146,10 +140,6 @@ jobs:
           echo "📊 Contract Check Summary"
           echo "========================"
           BYPASS_STATUS="${{ steps.check_bypass.outputs.bypass }}"
-          PR_AUTHOR="$PR_AUTHOR"
-          PR_NUMBER="$PR_NUMBER"
-          PR_TITLE="$PR_TITLE"
-          PR_BRANCH="$PR_BRANCH"
           
           if [[ "$BYPASS_STATUS" == "true" ]]; then
             echo "⚠️ Contract checks BYPASSED due to allowcontractdrift label"
