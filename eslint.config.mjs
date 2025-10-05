@@ -1,6 +1,8 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
+// DRY: share Next.js allowlist with scripts and docs
+import { ALLOWED_NEXT_PATTERNS } from "./scripts/eslint-config-constants.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -106,8 +108,17 @@ const eslintConfig = [
       
       // Import boundaries - prevent deep internal module imports; prefer package entry points
       // Allow: @athlete-ally packages, Next.js aliases, dotenv, relative imports
-      "import/no-internal-modules": ["warn", { 
-        allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client"] 
+      "import/no-internal-modules": ["warn", {
+        allow: [
+          "./**",
+          "../**",
+          "@athlete-ally/**",
+          "@/**",
+          "dotenv/config",
+          "@prisma/client",
+          "../prisma/generated/client",
+          ...ALLOWED_NEXT_PATTERNS
+        ] 
       }],
 
       // monorepo layer direction: apps -> services -> packages
@@ -133,6 +144,22 @@ const eslintConfig = [
       }]
     }
   },
+
+  // Packages override: stricter logging for libraries
+  {
+    files: ["packages/**/*.{ts,js,tsx,jsx}"],
+    rules: {
+      "no-console": ["error", { "allow": ["warn", "error"] }]
+    }
+  },
+
+  // Services override: allow console logging for debugging
+  {
+    files: ["services/**/*.{ts,js,tsx,jsx}"],
+    rules: {
+      "no-console": "off"
+    }
+  }
 ];
 
 export default eslintConfig;
