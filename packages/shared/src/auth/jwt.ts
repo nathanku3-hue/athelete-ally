@@ -94,8 +94,9 @@ export class JWTManager {
    */
   private static extractTokenFromHeaderSafe(raw: string | undefined): string | undefined {
     if (!raw) return undefined;
-    const m = /^Bearer\s+(.+)$/i.exec(raw.trim());
-    const token = m?.[1]?.trim();
+    const trimmed = raw.trim();
+    const m = /^Bearer\s+([^\s]+)$/i.exec(trimmed);
+    const token = m?.[1];
     return token && token.length > 0 ? token : undefined;
   }
 
@@ -121,7 +122,11 @@ export class JWTManager {
     const token = this.extractTokenFromHeaderSafe(authHeader);
     if (!token) return undefined;
 
-    return this.verifyToken(token);
+    try {
+      return this.verifyToken(token);
+    } catch (error) {
+      return undefined;
+    }
   }
 }
 

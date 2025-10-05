@@ -25,6 +25,9 @@ export interface TrainingSession {
   restBetweenSets: number;
 }
 
+// TODO: Replace unknown types with proper generics by 2025-01-20
+// This is a temporary solution to avoid any types while maintaining type safety.
+// Future improvement: TrainingAdjustment<T> with originalValue: T, adjustedValue: T
 export interface TrainingAdjustment {
   type: 'intensity' | 'volume' | 'exercise_substitution' | 'rest' | 'warmup';
   originalValue: unknown;

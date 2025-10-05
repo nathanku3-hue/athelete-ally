@@ -33,6 +33,18 @@ describe('JWTManager', () => {
         const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
         expect(result).toBeUndefined();
       });
+
+      it('should handle Next.js Headers with empty authorization', () => {
+        const mockHeaders = {
+          get: jest.fn((name: string) => {
+            if (name === 'authorization') return '';
+            return null;
+          }),
+        };
+
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toBeUndefined();
+      });
     });
 
     describe('Node/Express IncomingHttpHeaders support', () => {
@@ -141,8 +153,26 @@ describe('JWTManager', () => {
         expect(result).toEqual(mockPayload);
       });
 
+      it('should parse "BEARER TOKEN" (uppercase)', () => {
+        const mockHeaders = { authorization: 'BEARER valid-token' };
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toEqual(mockPayload);
+      });
+
       it('should parse "  Bearer   TOKEN  " (with extra spaces)', () => {
         const mockHeaders = { authorization: '  Bearer   valid-token  ' };
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toEqual(mockPayload);
+      });
+
+      it('should parse "Bearer\tTOKEN" (with tab)', () => {
+        const mockHeaders = { authorization: 'Bearer\tvalid-token' };
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toEqual(mockPayload);
+      });
+
+      it('should parse "Bearer\nTOKEN" (with newline)', () => {
+        const mockHeaders = { authorization: 'Bearer\nvalid-token' };
         const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
         expect(result).toEqual(mockPayload);
       });
@@ -153,14 +183,32 @@ describe('JWTManager', () => {
         expect(result).toBeUndefined();
       });
 
+      it('should return undefined for "Basic TOKEN" (wrong auth type)', () => {
+        const mockHeaders = { authorization: 'Basic valid-token' };
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toBeUndefined();
+      });
+
       it('should return undefined for "Bearer" (missing token)', () => {
         const mockHeaders = { authorization: 'Bearer' };
         const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
         expect(result).toBeUndefined();
       });
 
+      it('should return undefined for "Bearer " (empty token)', () => {
+        const mockHeaders = { authorization: 'Bearer ' };
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toBeUndefined();
+      });
+
       it('should return undefined for empty string', () => {
         const mockHeaders = { authorization: '' };
+        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+        expect(result).toBeUndefined();
+      });
+
+      it('should return undefined for malformed header', () => {
+        const mockHeaders = { authorization: 'Bearer token1 token2' };
         const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
         expect(result).toBeUndefined();
       });
@@ -199,8 +247,11 @@ describe('JWTManager', () => {
           throw new Error('Invalid token');
         });
 
-        const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
-        expect(result).toBeUndefined();
+        // Should not throw, but return undefined
+        expect(() => {
+          const result = JWTManager.getUserFromRequest({ headers: mockHeaders });
+          expect(result).toBeUndefined();
+        }).not.toThrow();
       });
     });
   });
