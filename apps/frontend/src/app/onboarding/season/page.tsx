@@ -96,9 +96,9 @@ export default function SeasonPage() {
                 <div className="text-center mb-10">
                     <p className="text-blue-400 font-semibold mb-2">Step 3 of 5</p>
                     <h1 className="text-4xl md:text-5xl font-bold mb-3">
-                        What's Your Training Season?
+                        What&apos;s Your Training Season?
                     </h1>
-                    <p className="text-lg text-gray-400">This helps us periodize your training. You can skip this if it doesn't apply.</p>
+                    <p className="text-lg text-gray-400">This helps us periodize your training. You can skip this if it doesn&apos;t apply.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

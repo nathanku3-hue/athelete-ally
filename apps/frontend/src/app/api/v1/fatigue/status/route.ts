@@ -3,7 +3,7 @@ import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching user fatigue status...');
+    // 获取用户疲劳状态
     
     // 在真实实现中，这里会从数据库获取用户的疲劳度数据
     // 目前使用模拟数据
@@ -49,11 +49,7 @@ export async function GET(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 150));
     
-    console.log('Returning fatigue status:', { 
-      level: fatigueStatus.level, 
-      score: fatigueStatus.score,
-      factorsCount: fatigueStatus.factors.length 
-    });
+    // 返回疲劳状态数据
     
     return NextResponse.json(fatigueStatus);
     
@@ -101,12 +97,10 @@ export async function POST(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    console.log('Fatigue assessment result:', result);
-    
     return NextResponse.json(result);
     
   } catch (error) {
-    console.error('Failed to submit fatigue assessment:', error);
+    // 疲劳评估提交失败
     return NextResponse.json(
       { 
         error: 'Failed to submit fatigue assessment',

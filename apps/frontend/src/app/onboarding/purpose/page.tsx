@@ -79,7 +79,7 @@ const NotificationModal = ({ onClose }: { onClose: () => void }) => {
             <div className="bg-gray-800 rounded-lg p-8 max-w-sm w-full text-center shadow-2xl">
                 <h2 className="text-2xl font-bold mb-4">Rehabilitation is Coming Soon</h2>
                 <p className="text-gray-400 mb-6">
-                    We're working with physical therapists to create safe and effective recovery plans. Want to be the first to know when it's ready?
+                    We&apos;re working with physical therapists to create safe and effective recovery plans. Want to be the first to know when it&apos;s ready?
                 </p>
                 
                 {!showEmailInput ? (
@@ -156,7 +156,7 @@ export default function PurposePage() {
             {/* 更新：顯示為 Step 2 of 5 */}
             <p className="text-blue-400 font-semibold mb-2">Step 2 of 5</p>
             <h1 className="text-4xl md:text-5xl font-bold mb-3">
-              What's Your Training Purpose?
+              What&apos;s Your Training Purpose?
             </h1>
             <p className="text-lg text-gray-400">Your goal defines your plan.</p>
         </div>

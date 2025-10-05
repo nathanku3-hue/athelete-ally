@@ -50,7 +50,7 @@ export default function SuccessPage() {
               <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold mt-1">3</div>
               <div>
                 <h3 className="font-semibold">Ready to Train</h3>
-                <p className="text-gray-400 text-sm">You'll receive a notification when your plan is ready</p>
+                <p className="text-gray-400 text-sm">You&apos;ll receive a notification when your plan is ready</p>
               </div>
             </div>
           </div>

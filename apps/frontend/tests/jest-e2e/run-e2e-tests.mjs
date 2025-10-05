@@ -5,9 +5,13 @@
  * 用於運行所有可自動化的端到端測試
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 測試配置
 const TEST_CONFIG = {
@@ -254,11 +258,11 @@ async function main() {
 }
 
 // 如果直接運行此腳本
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-module.exports = {
+export {
   runAllTests,
   runTestSuite,
   checkTestEnvironment,

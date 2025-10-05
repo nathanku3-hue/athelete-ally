@@ -213,7 +213,7 @@ export default function PersonalRecords({ records, onRecordClick }: PersonalReco
 
               {record.notes && (
                 <div className="mt-2 text-sm text-gray-300 italic">
-                  "{record.notes}"
+                  &quot;{record.notes}&quot;
                 </div>
               )}
             </div>

@@ -134,7 +134,7 @@ export default function SummaryPage() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold mb-4 text-white">Welcome to Athlete Ally</h1>
-            <p className="text-gray-400 mb-2">Let's create your personalized training plan</p>
+            <p className="text-gray-400 mb-2">Let&apos;s create your personalized training plan</p>
             <p className="text-sm text-gray-500">Complete the onboarding process to get started</p>
           </div>
           

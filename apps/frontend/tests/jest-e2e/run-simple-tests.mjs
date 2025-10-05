@@ -4,8 +4,12 @@
  * 簡化的 E2E 測試執行腳本
  */
 
-const { execSync } = require('child_process');
-const path = require('path');
+import { execSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 測試套件
 const TEST_SUITES = [
@@ -15,14 +19,14 @@ const TEST_SUITES = [
   'responsive-layout.test.ts'
 ];
 
-console.log('🚀 開始運行 E2E 自動化測試\n');
+// E2E 測試開始
 
 let totalPassed = 0;
 let totalFailed = 0;
 let totalTests = 0;
 
 for (const testFile of TEST_SUITES) {
-  console.log(`正在運行: ${testFile}`);
+  // 正在運行測試文件
   
   try {
     const command = `npx jest "${testFile}" --config="jest.config.js" --silent`;
@@ -46,30 +50,19 @@ for (const testFile of TEST_SUITES) {
     totalFailed += failed;
     totalTests += total;
     
-    if (failed === 0) {
-      console.log(`✅ 通過: ${passed} 個測試\n`);
-    } else {
-      console.log(`❌ 失敗: ${passed} 通過, ${failed} 失敗\n`);
-    }
+    // 測試結果已記錄
     
   } catch (error) {
-    console.log(`❌ 錯誤: ${error.message}\n`);
+    // 測試執行錯誤
     totalFailed++;
   }
 }
 
-console.log('='.repeat(50));
-console.log('📊 測試結果總結');
-console.log('='.repeat(50));
-console.log(`總測試數量: ${totalTests}`);
-console.log(`通過測試: ${totalPassed}`);
-console.log(`失敗測試: ${totalFailed}`);
-console.log(`成功率: ${totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : 0}%`);
+// 測試結果總結
+const successRate = totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : 0;
 
 if (totalFailed === 0) {
-  console.log('\n🎉 所有測試通過！可以繼續 V3 開發');
   process.exit(0);
 } else {
-  console.log('\n⚠️ 有測試失敗，請檢查並修復');
   process.exit(1);
 }
