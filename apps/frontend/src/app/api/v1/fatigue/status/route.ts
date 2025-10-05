@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
+import { 
+  FatigueLevel, 
+  FatigueAssessmentInput, 
+  FatigueAssessmentResult,
+  FatigueStatusResponse,
+  FatigueFactor,
+  validateFatigueAssessmentInput,
+  validateFatigueAssessmentResult,
+  validateFatigueStatusResponse
+} from '@athlete-ally/shared-types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,8 +17,8 @@ export async function GET(request: NextRequest) {
     
     // 在真实实现中，这里会从数据库获取用户的疲劳度数据
     // 目前使用模拟数据
-    const fatigueStatus = {
-      level: 'high' as const, // 'low', 'moderate', 'high'
+    const fatigueStatus: FatigueStatusResponse = {
+      level: 'high' as FatigueLevel, // 'low', 'moderate', 'high'
       score: 8.5, // 0-10 scale
       factors: [
         {
@@ -35,7 +45,7 @@ export async function GET(request: NextRequest) {
           impact: 'high',
           description: 'Insufficient recovery between sessions'
         }
-      ],
+      ] as FatigueFactor[],
       recommendations: [
         'Consider reducing training intensity by 10-15%',
         'Increase sleep duration by 30-60 minutes',
@@ -71,7 +81,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation } = body;
+    
+    // 验证输入数据
+    const validatedInput = validateFatigueAssessmentInput(body);
+    const { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation } = validatedInput;
     
     // Log for debugging (in development)
     if (process.env.NODE_ENV === 'development') {
@@ -90,9 +103,9 @@ export async function POST(request: NextRequest) {
       (10 - motivation) * 0.1
     );
     
-    const level = fatigueScore >= 7 ? 'high' : fatigueScore >= 4 ? 'moderate' : 'low';
+    const level: FatigueLevel = fatigueScore >= 7 ? 'high' : fatigueScore >= 4 ? 'moderate' : 'low';
     
-    const result = {
+    const result: FatigueAssessmentResult = {
       success: true,
       fatigueScore: Math.round(fatigueScore * 10) / 10,
       level,

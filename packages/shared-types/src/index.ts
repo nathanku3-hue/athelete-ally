@@ -131,3 +131,6 @@ export * from './schemas/enhanced-plan';
 export * from './schemas/feedback';
 export * from './schemas/api';
 export * from './schemas/hrv';
+
+// 导出主要的schemas和类型
+export * from './schemas';
