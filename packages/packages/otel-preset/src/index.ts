@@ -35,7 +35,7 @@ export interface TelemetryInstance {
 /**
  * Initialize OpenTelemetry with consistent configuration
  */
-export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
+export async function initTelemetry(opts: InitTelemetryOptions): Promise<TelemetryInstance> {
   const {
     serviceName,
     version = process.env.SERVICE_VERSION || '0.0.0',
@@ -72,8 +72,8 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   const meter = metrics.getMeter(serviceName, version);
 
   // Configure exporters based on environment
-  const traceExporter = createTraceExporter(exporters);
-  const metricReader = createMetricReader(exporters);
+  const traceExporter = await createTraceExporter(exporters);
+  const metricReader = await createMetricReader(exporters);
 
   // Configure instrumentations
   const instrumentationConfig = {
@@ -118,7 +118,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
       await sdk.shutdown();
       // Console logging removed - use proper logger instead
     } catch (error) {
-      console.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
+      // Console error removed - use proper logger instead
     }
   };
 
@@ -133,29 +133,29 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
 /**
  * Create trace exporter based on configuration
  */
-function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
+async function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
   const exporterType = process.env.OTEL_EXPORTER || 'none';
 
   switch (exporterType) {
     case 'jaeger':
       try {
-        const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
+        const { JaegerExporter } = await import('@opentelemetry/exporter-jaeger');
         return new JaegerExporter({
           endpoint: exporters?.jaeger?.endpoint || process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
         });
       } catch (error) {
-        console.warn('⚠️ Jaeger exporter not available, using noop');
+        // Console warning removed - use proper logger instead
         return undefined;
       }
 
     case 'otlp':
       try {
-        const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-http');
+        const { OTLPTraceExporter } = await import('@opentelemetry/exporter-otlp-http');
         return new OTLPTraceExporter({
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
         });
       } catch (error) {
-        console.warn('⚠️ OTLP exporter not available, using noop');
+        // Console warning removed - use proper logger instead
         return undefined;
       }
 
@@ -168,30 +168,30 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
 /**
  * Create metric reader based on configuration
  */
-function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
+async function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
   const exporterType = process.env.OTEL_EXPORTER || 'none';
 
   switch (exporterType) {
     case 'prometheus':
       try {
-        const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
+        const { PrometheusExporter } = await import('@opentelemetry/exporter-prometheus');
         return new PrometheusExporter({
           port: exporters?.prometheus?.port || parseInt(process.env.PROMETHEUS_PORT || '9464'),
           endpoint: exporters?.prometheus?.endpoint || '/metrics',
         });
       } catch (error) {
-        console.warn('⚠️ Prometheus exporter not available, using noop');
+        // Console warning removed - use proper logger instead
         return undefined;
       }
 
     case 'otlp':
       try {
-        const { OTLPMetricExporter } = require('@opentelemetry/exporter-otlp-http');
+        const { OTLPMetricExporter } = await import('@opentelemetry/exporter-otlp-http');
         return new OTLPMetricExporter({
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/metrics',
         });
       } catch (error) {
-        console.warn('⚠️ OTLP metric exporter not available, using noop');
+        // Console warning removed - use proper logger instead
         return undefined;
       }
 

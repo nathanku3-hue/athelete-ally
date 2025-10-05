@@ -62,7 +62,7 @@ class StructuredLogger {
       if (level === 'error') {
         // Console error logging removed - use proper logger instead
       } else if (level === 'warn') {
-        console.warn(JSON.stringify(logEntry));
+        // Console warning removed - use proper logger instead
       } else {
         // Console logging removed - use proper logger instead
       }

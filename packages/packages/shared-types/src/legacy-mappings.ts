@@ -27,7 +27,7 @@ export function mapLegacyFatigueLevel(level: string): FatigueLevel {
         recordLegacyMapping('fatigue_level', 'normal', config.environment);
       }
       
-      console.warn('⚠️ Deprecated: "normal" fatigue level detected. Use "moderate" instead. This mapping will be removed in v2.0.0');
+      // Console warning removed - use proper logger instead
       return 'moderate';
     case 'low':
     case 'moderate':
@@ -54,21 +54,21 @@ export function mapLegacySeason(season: string): Season {
         const config = getContractConfig();
         recordLegacyMapping('season', 'off-season', config.environment);
       }
-      console.warn('⚠️ Deprecated: "off-season" detected. Use "offseason" instead. This mapping will be removed in v2.0.0');
+      // Console warning removed - use proper logger instead
       return 'offseason';
     case 'pre-season':
       if (isTelemetryEnabled()) {
         const config = getContractConfig();
         recordLegacyMapping('season', 'pre-season', config.environment);
       }
-      console.warn('⚠️ Deprecated: "pre-season" detected. Use "preseason" instead. This mapping will be removed in v2.0.0');
+      // Console warning removed - use proper logger instead
       return 'preseason';
     case 'in-season':
       if (isTelemetryEnabled()) {
         const config = getContractConfig();
         recordLegacyMapping('season', 'in-season', config.environment);
       }
-      console.warn('⚠️ Deprecated: "in-season" detected. Use "inseason" instead. This mapping will be removed in v2.0.0');
+      // Console warning removed - use proper logger instead
       return 'inseason';
     case 'offseason':
     case 'preseason':

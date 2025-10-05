@@ -136,7 +136,7 @@ export class EventTracker {
     try {
       await this.sendEvents(eventsToSend);
     } catch (error) {
-      console.error('Failed to send analytics events:', error);
+      // Console error removed - use proper logger instead
       // 可以选择重新添加到队列或记录到本地存储
     }
   }

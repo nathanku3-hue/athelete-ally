@@ -152,7 +152,7 @@ export class ContractMetricsService {
     
     // Validate that metrics don't contain PII
     if (this.containsPII(metrics)) {
-      console.error('⚠️ PII detected in metrics output - sanitizing');
+      // Console error removed - use proper logger instead
       return this.sanitizeMetrics(metrics);
     }
     

@@ -55,7 +55,7 @@ class ContractConfigManager {
   private shouldAllowLegacyInStrictMode(): boolean {
     // In strict mode, you might want to check deployment date, etc.
     // For now, we'll allow it but log warnings
-    console.warn('⚠️ Contract strict mode active - legacy mappings should be minimal');
+    // Console warning removed - use proper logger instead
     return true; // Still allow but with warnings
   }
   

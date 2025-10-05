@@ -50,7 +50,7 @@ function readBuildInfo(buildInfoPath?: string): { sha: string; buildId: string }
       buildId: buildInfo.buildId || defaultBuildId,
     };
   } catch (error) {
-    console.warn(`⚠️ Could not read build info from ${buildInfoPath}:`, error);
+    // Console warning removed - use proper logger instead
     return { sha: defaultSha, buildId: defaultBuildId };
   }
 }

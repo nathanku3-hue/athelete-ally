@@ -24,7 +24,7 @@ describe('HRV Event Schemas', () => {
       const isValid = validate(validEvent);
       expect(isValid).toBe(true);
       if (!isValid) {
-        console.log('Validation errors:', validate.errors);
+        // Console logging removed - use proper logger instead
       }
     });
 

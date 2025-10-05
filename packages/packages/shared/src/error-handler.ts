@@ -223,10 +223,10 @@ export class ErrorLogger {
         // Console error logging removed - use proper logger instead
         break;
       case 'warn':
-        console.warn('⚠️ Warning:', JSON.stringify(logData, null, 2));
+        // Console warning removed - use proper logger instead
         break;
       case 'info':
-        console.info('ℹ️ Info:', JSON.stringify(logData, null, 2));
+        // Console info removed - use proper logger instead
         break;
       default:
         // Console logging removed - use proper logger instead

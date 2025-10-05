@@ -90,7 +90,16 @@ const eslintConfig = [
           "@athlete-ally/**", // Internal monorepo packages
           "@/**",           // Next.js path aliases
           "dotenv/config",  // Environment configuration
-          ...ALLOWED_NEXT_PATTERNS  // Next.js built-in modules (from constants)
+          "next/server",    // Next.js server components
+          "next/navigation", // Next.js navigation hooks
+          "next/image",     // Next.js image component
+          "next/link",      // Next.js link component
+          "next/headers",   // Next.js headers API
+          "next/cache",     // Next.js cache API
+          "next/og",        // Next.js Open Graph
+          "next/intl",      // Next.js internationalization
+          "next/font/google", // Next.js Google fonts
+          "next/font/local"   // Next.js local fonts
         ] 
       }],
 
@@ -151,7 +160,12 @@ const eslintConfig = [
           "./**",           // Relative imports within package
           "../**",          // Parent directory imports
           "@athlete-ally/**", // Internal monorepo packages
-          "dotenv/config"   // Environment configuration
+          "dotenv/config",  // Environment configuration
+          "./events/**",    // Events subdirectory
+          "./schemas/**",   // Schemas subdirectory
+          "./config/**",    // Config subdirectory
+          "./auth/**",      // Auth subdirectory
+          "./security/**"   // Security subdirectory
         ]
       }],
 

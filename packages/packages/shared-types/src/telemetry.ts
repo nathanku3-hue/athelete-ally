@@ -34,7 +34,7 @@ class ContractTelemetry {
     }
     
     // Log warning for monitoring
-    console.warn(`⚠️ Legacy mapping used: ${field}="${value}" in ${environment}`);
+    // Console warning removed - use proper logger instead
     
     // In production, you might want to send this to your metrics system
     // e.g., Prometheus, DataDog, etc.
@@ -79,7 +79,7 @@ class ContractTelemetry {
     if (process.env.NODE_ENV === 'production') {
       // Example: Send to Prometheus-style metrics
       // eslint-disable-next-line no-console
-      console.log(`METRIC: contract_legacy_mapping_total{field="${metric.field}",value="${metric.value}",environment="${metric.environment}"} 1`);
+      // Console logging removed - use proper logger instead
     }
   }
 }

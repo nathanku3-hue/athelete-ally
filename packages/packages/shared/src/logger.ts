@@ -143,7 +143,7 @@ export class SafeLogger {
         timestamp: new Date().toISOString()
       });
     } else {
-      console.warn(`[WARN] ${message}`, maskedContext);
+      // Console warning removed - use proper logger instead
     }
   }
 

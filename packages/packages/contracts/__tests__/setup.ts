@@ -3,7 +3,7 @@ import { beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
 
 // 全局測試設置
 beforeAll(async () => {
-  console.log('🚀 開始 V3 功能集測試套件');
+  // Console logging removed - use proper logger instead
   
   // 設置測試數據庫連接
   // await setupTestDatabase();
@@ -13,7 +13,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  console.log('✅ V3 功能集測試套件完成');
+  // Console logging removed - use proper logger instead
   
   // 清理測試數據庫
   // await cleanupTestDatabase();

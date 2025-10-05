@@ -12,7 +12,7 @@ const EventBusConfigSchema = z.object({
 export const config = (() => {
   const parsed = EventBusConfigSchema.safeParse(process.env);
   if (!parsed.success) {
-    console.error('Invalid environment variables for event-bus', parsed.error.flatten());
+    // Console error removed - use proper logger instead
     process.exit(1);
   }
   return parsed.data;

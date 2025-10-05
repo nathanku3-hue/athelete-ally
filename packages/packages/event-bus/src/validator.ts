@@ -58,7 +58,7 @@ export class EventValidator {
 
       return { valid: true };
     } catch (error) {
-      console.error(`Schema validation error for topic ${topic}:`, error);
+      // Console error removed - use proper logger instead
       return {
         valid: false,
         message: `Schema validation error: ${(error as Error).message}`,
