@@ -225,11 +225,12 @@ export class ErrorLogger {
   /**
    * 外部日志记录接口 - 由应用/服务实现
    */
-  private static logToExternalLogger(level: string, message: string): void {
+  public static logToExternalLogger(level: string, message: string): void {
     // No-op stub - apps/services should implement actual logging
     // This allows packages to export logging interface without direct console usage
   }
   
+
   
   private static getLogLevel(severity: ErrorSeverity): string {
     switch (severity) {
@@ -311,7 +312,7 @@ export class ErrorMonitor {
   
   private static sendAlert(error: StandardError, alertType: string) {
     // Defer to external logger - apps/services handle actual logging
-    this.logToExternalLogger('error', `🚨 ALERT [${alertType}]: ${JSON.stringify({
+    ErrorMonitor.logToExternalLogger('error', `🚨 ALERT [${alertType}]: ${JSON.stringify({
       errorType: error.type,
       code: error.code,
       count: this.errorCounts.get(error.type),
@@ -331,6 +332,14 @@ export class ErrorMonitor {
   static reset() {
     this.errorCounts.clear();
     this.lastReset = Date.now();
+  }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  public static logToExternalLogger(level: string, message: string): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
   }
 }
 
