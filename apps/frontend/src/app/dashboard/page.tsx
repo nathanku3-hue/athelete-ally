@@ -56,7 +56,7 @@ export default function DashboardPage() {
             onClick={handleStartWorkoutClick}
             className="w-full px-8 py-4 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg"
           >
-            Start Today's Workout
+            Start Today&apos;s Workout
           </button>
         </div>
       </div>

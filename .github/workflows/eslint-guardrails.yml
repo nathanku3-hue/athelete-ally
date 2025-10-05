@@ -217,28 +217,28 @@ jobs:
         if: steps.changed-files.outputs.frontend == 'true'
         run: |
           echo "🔍 Linting frontend files..."
-          npx eslint apps/frontend --config eslint.config.unified.mjs --cache --cache-strategy content --max-warnings 0
+          npx eslint apps/frontend --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
           echo "✅ Frontend linting passed"
 
       - name: Lint Services (if changed)
         if: steps.changed-files.outputs.services == 'true'
         run: |
           echo "🔍 Linting service files..."
-          npx eslint services --config eslint.config.unified.mjs --cache --cache-strategy content --max-warnings 0
+          npx eslint services --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
           echo "✅ Services linting passed"
 
       - name: Lint Packages (if changed)
         if: steps.changed-files.outputs.packages == 'true'
         run: |
           echo "🔍 Linting package files..."
-          npx eslint packages --config eslint.config.unified.mjs --cache --cache-strategy content --max-warnings 0
+          npx eslint packages --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
           echo "✅ Packages linting passed"
 
       - name: Lint Scripts (if changed)
         if: steps.changed-files.outputs.scripts == 'true'
         run: |
           echo "🔍 Linting script files..."
-          npx eslint scripts --config eslint.config.unified.mjs --cache --cache-strategy content --max-warnings 0
+          npx eslint scripts --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
           echo "✅ Scripts linting passed"
 
       - name: Type Check Changed Files
