@@ -1,6 +1,11 @@
+import { createNextHealthHandler } from '@athlete-ally/health-schema';
+
+const healthHandler = createNextHealthHandler({
+  serviceName: 'frontend',
+  version: process.env.npm_package_version || '1.0.0',
+  environment: process.env.NODE_ENV || 'development',
+});
+
 export async function GET() {
-  return new Response(
-    JSON.stringify({ ok: true, status: 'healthy' }),
-    { headers: { 'content-type': 'application/json; charset=utf-8' } }
-  );
+  return healthHandler();
 }
