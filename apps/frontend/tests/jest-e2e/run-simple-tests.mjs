@@ -40,26 +40,26 @@ for (const testFile of TEST_SUITES) {
     // 解析測試結果
     const passedMatches = output.match(/Tests:\s+(\d+)\s+passed/g);
     const failedMatches = output.match(/Tests:\s+\d+\s+passed,\s+(\d+)\s+failed/g);
-    const totalMatches = output.match(/Tests:\s+(\d+)\s+passed(?:,\s+\d+\s+failed)?/g);
-    
-    const passed = passedMatches ? parseInt(passedMatches[0].match(/(\d+)/)[1]) : 0;
-    const failed = failedMatches ? parseInt(failedMatches[0].match(/(\d+)/)[1]) : 0;
-    const total = passed + failed;
-    
-    totalPassed += passed;
-    totalFailed += failed;
-    totalTests += total;
+          const _totalMatches = output.match(/Tests:\s+(\d+)\s+passed(?:,\s+\d+\s+failed)?/g);
+
+          const passed = passedMatches ? parseInt(passedMatches[0].match(/(\d+)/)[1]) : 0;
+          const failed = failedMatches ? parseInt(failedMatches[0].match(/(\d+)/)[1]) : 0;
+          const total = passed + failed;
+
+          totalPassed += passed;
+          totalFailed += failed;
+          totalTests += total;
     
     // 測試結果已記錄
     
-  } catch (error) {
+  } catch (_error) {
     // 測試執行錯誤
     totalFailed++;
   }
 }
 
 // 測試結果總結
-const successRate = totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : 0;
+const _successRate = totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : 0;
 
 if (totalFailed === 0) {
   process.exit(0);

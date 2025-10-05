@@ -94,7 +94,7 @@ function checkTestEnvironment() {
   try {
     execSync('npx jest --version', { stdio: 'pipe' });
     log('Jest 已安裝', 'green');
-  } catch (error) {
+  } catch (_error) {
     log('Jest 未安裝，正在安裝...', 'yellow');
     execSync('npm install --save-dev jest @types/jest ts-jest', { stdio: 'inherit' });
   }
