@@ -99,7 +99,12 @@ const eslintConfig = [
           "next/og",        // Next.js Open Graph
           "next/intl",      // Next.js internationalization
           "next/font/google", // Next.js Google fonts
-          "next/font/local"   // Next.js local fonts
+          "next/font/local",   // Next.js local fonts
+          "../lib/cors",    // CORS utilities
+          "../lib/onboarding-tracing", // Onboarding tracing
+          "../../types/fastify", // Fastify types
+          "zustand/middleware", // Zustand middleware
+          "../../../../services/planning-engine/src/llm" // LLM service
         ] 
       }],
 
