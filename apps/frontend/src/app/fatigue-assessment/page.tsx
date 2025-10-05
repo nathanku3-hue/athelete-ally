@@ -21,7 +21,7 @@ export default function FatigueAssessmentPage() {
     motivation: 5,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<unknown>(null);
 
   const handleSliderChange = (field: keyof FatigueAssessmentData, value: number) => {
     setAssessmentData(prev => ({
@@ -73,21 +73,22 @@ export default function FatigueAssessmentPage() {
     return 'Good';
   };
 
-  if (result) {
+  if (result && typeof result === 'object' && result !== null && 'level' in result && 'fatigueScore' in result) {
+    const fatigueResult = result as { level: string; fatigueScore: number; recommendations?: string[] };
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-gray-800 rounded-lg p-6 text-center">
           <div className="mb-6">
             <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl ${
-              result.level === 'high' ? 'bg-red-600' : 
-              result.level === 'moderate' ? 'bg-yellow-600' : 'bg-green-600'
+              fatigueResult.level === 'high' ? 'bg-red-600' : 
+              fatigueResult.level === 'moderate' ? 'bg-yellow-600' : 'bg-green-600'
             }`}>
-              {result.level === 'high' ? '⚠️' : 
-               result.level === 'moderate' ? '⚡' : '✅'}
+              {fatigueResult.level === 'high' ? '⚠️' : 
+               fatigueResult.level === 'moderate' ? '⚡' : '✅'}
             </div>
             <h1 className="text-2xl font-bold mb-2">Assessment Complete</h1>
-            <p className="text-gray-400">Your fatigue level: <span className="font-semibold">{result.level.toUpperCase()}</span></p>
-            <p className="text-2xl font-bold mt-2">{result.fatigueScore}/10</p>
+            <p className="text-gray-400">Your fatigue level: <span className="font-semibold">{fatigueResult.level.toUpperCase()}</span></p>
+            <p className="text-2xl font-bold mt-2">{fatigueResult.fatigueScore}/10</p>
           </div>
           
           <div className="mb-6 text-left">

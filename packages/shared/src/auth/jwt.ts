@@ -102,16 +102,19 @@ export class JWTManager {
   /**
    * 从请求中获取用户身份（支持Next/Express两种header格式）
    */
-  static getUserFromRequest(request: { headers: any }): JWTPayload | undefined {
+  static getUserFromRequest(request: { headers: unknown }): JWTPayload | undefined {
     const headers = request.headers;
     let rawAuth: HeaderValue;
 
     // Next/Fetch Headers
-    if (typeof headers?.get === 'function') {
+    if (headers && typeof headers === 'object' && 'get' in headers && typeof headers.get === 'function') {
       rawAuth = headers.get('authorization');
-    } else {
+    } else if (headers && typeof headers === 'object') {
       // Node/Express IncomingHttpHeaders-like
-      rawAuth = headers?.authorization ?? headers?.Authorization;
+      const headersObj = headers as Record<string, HeaderValue>;
+      rawAuth = headersObj.authorization ?? headersObj.Authorization;
+    } else {
+      rawAuth = undefined;
     }
 
     const authHeader = this.toHeaderString(rawAuth);

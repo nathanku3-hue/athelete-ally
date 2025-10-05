@@ -70,7 +70,9 @@ const NotificationModal = ({ onClose }: { onClose: () => void }) => {
     
     const handleEmailSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Email submitted for notification.");
+        if (process.env.NODE_ENV === 'development') {
+            console.log("Email submitted for notification.");
+        }
         onClose(); // 提交後關閉彈窗
     };
 

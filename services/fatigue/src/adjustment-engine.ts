@@ -27,8 +27,8 @@ export interface TrainingSession {
 
 export interface TrainingAdjustment {
   type: 'intensity' | 'volume' | 'exercise_substitution' | 'rest' | 'warmup';
-  originalValue: any;
-  adjustedValue: any;
+  originalValue: unknown;
+  adjustedValue: unknown;
   reason: string;
   confidence: number;
   exerciseId?: string;
