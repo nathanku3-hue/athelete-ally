@@ -57,13 +57,11 @@ jobs:
           echo "📁 Changed non-test TypeScript files:"
           echo "${CHANGED_FILES}"
           
-          # Run ESLint with error-level boundary rules on changed files only
-          # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
-          echo "🚨 Running strict boundary checks on changed files..."
+          # Run ESLint using unified config (respects ALLOWED_NEXT_PATTERNS and configured severities)
+          echo "🚨 Running boundary checks on changed files using unified config..."
           ESLINT=node_modules/.bin/eslint
           printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \
-            --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
-            --rule "no-restricted-imports: error" \
+            --config eslint.config.unified.mjs \
             --format=compact
           
           echo "✅ Boundary checks passed for new/modified files"
@@ -72,11 +70,10 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p reports/deps
-          # Generate report using the same boundary rules as the check above
+          # Generate report using unified config
           ESLINT=node_modules/.bin/eslint
           printf "%s" "${CHANGED_FILES}" | xargs $ESLINT \
-            --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
-            --rule "no-restricted-imports: error" \
+            --config eslint.config.unified.mjs \
             --format=json > reports/deps/boundaries-report.json || true
       - name: Upload Boundaries Report
         if: always()
