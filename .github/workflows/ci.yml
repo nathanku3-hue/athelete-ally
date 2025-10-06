@@ -265,12 +265,20 @@ jobs:
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: Build shared packages
-        run: npm run build:packages
+        run: |
+          echo "🔧 Building shared packages..."
+          npm run build:packages
+          echo "✅ Shared packages built successfully"
+          echo "📁 Checking health-schema dist directory..."
+          ls -la packages/health-schema/dist/ || echo "❌ health-schema dist directory not found"
 
       - name: Type check (force no stale cache)
         env:
           TURBO_FORCE: "true"
-        run: npx turbo run type-check
+        run: |
+          echo "🔍 Running TypeScript type check..."
+          npx turbo run type-check
+          echo "✅ TypeScript type check completed"
 
       - name: Validate configuration
         run: |
