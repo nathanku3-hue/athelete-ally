@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 // 模拟用户认证中间件（生产环境应使用JWT）
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   // 从请求头获取用户信息
   const userId = req.headers['x-user-id'] as string;
   const tenantId = req.headers['x-tenant-id'] as string;
@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 // 健康检查端点
-app.get('/health', async (req, res) => {
+app.get('/health', async (_req, res) => {
   try {
     // 检查数据库连接
     await prisma.$queryRaw`SELECT 1`;
@@ -196,7 +196,7 @@ app.use('*', (req, res) => {
 });
 
 // 错误处理中间件
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled error:', error);
   
   // 记录错误到审计日志

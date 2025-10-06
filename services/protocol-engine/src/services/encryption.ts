@@ -74,8 +74,8 @@ export class EncryptionService {
   decryptSensitiveData(encryptedData: EncryptedData): any {
     try {
       const encrypted = encryptedData.encrypted;
-      const iv = Buffer.from(encryptedData.iv, 'hex');
-      
+      const _iv = Buffer.from(encryptedData.iv, 'hex');
+
       const decipher = crypto.createDecipher(this.config.algorithm, this.encryptionKey);
       
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');

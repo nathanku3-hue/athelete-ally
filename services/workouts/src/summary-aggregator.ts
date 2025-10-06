@@ -1,7 +1,7 @@
 // 摘要数据聚合器 - 用于生成仪表盘所需的预计算数据
 import { prisma } from './db.js';
 import { eventBus } from '@athlete-ally/event-bus';
-import { PlanGeneratedEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
+import { PlanGeneratedEvent } from '@athlete-ally/contracts';
 
 export interface UserSummaryData {
   userId: string;
@@ -214,7 +214,7 @@ export class SummaryAggregator {
     return newPRs;
   }
 
-  private async getFatigueData(userId: string, weekStart: Date, weekEnd: Date) {
+  private async getFatigueData(_userId: string, _weekStart: Date, _weekEnd: Date) {
     // 这里应该查询疲劳服务的数据
     // 暂时返回模拟数据
     return {

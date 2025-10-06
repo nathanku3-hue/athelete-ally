@@ -48,11 +48,9 @@ describe('E2E: Onboarding -> Plan Generation -> Status', () => {
     try {
       const health = await get(`${BASE_URL}/api/health`);
       if (health.status !== 200) {
-        // @ts-expect-error - Jest's skip via pending
         pending(`BFF health not ready: status=${health.status}`);
       }
     } catch (err) {
-      // @ts-expect-error - Jest's skip via pending
       pending(`BFF not reachable at ${BASE_URL}: ${String(err)}`);
     }
 
