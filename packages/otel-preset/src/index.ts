@@ -3,7 +3,7 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { trace, metrics } from '@opentelemetry/api';
-import type { Tracer, Meter, Span } from '@opentelemetry/api';
+import type { Tracer, Meter, AttributeValue } from '@opentelemetry/api';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -214,7 +214,8 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
 export function createBusinessSpan(tracer: Tracer, name: string, attributes: Record<string, unknown> = {}) {
   const span = tracer.startSpan(name);
   Object.entries(attributes).forEach(([key, value]) => {
-    span.setAttribute(key, value);
+    // Cast to AttributeValue - assumes caller provides valid primitive types
+    span.setAttribute(key, value as AttributeValue);
   });
   return span;
 }
