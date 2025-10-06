@@ -279,30 +279,23 @@ jobs:
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
       - name: Lint Entire Codebase
+        continue-on-error: true
         run: |
-          echo "🔍 Running baseline linting (non-blocking)..."
-          npx eslint . --config eslint.config.unified.mjs --cache --max-warnings 50
-          echo "✅ Baseline linting completed"
+          echo "🔍 Running baseline linting (non-blocking, report-only)..."
+          # Produce a JSON report for artifact/history; never fail the step
+          npx eslint . --config eslint.config.unified.mjs --cache --format json -o baseline-lint.json || true
 
-      - name: Generate Lint Report
-        if: always()
-        run: |
-          echo "📊 Generating lint report..."
-          npx eslint . --config eslint.config.unified.mjs --format json --output-file eslint-report.json || true
+          # Print a quick summary to logs
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('baseline-lint.json','utf8'));let e=0,w=0;for(const f of r){e+=f.errorCount;w+=f.warningCount}console.log('📊 Baseline summary: errors='+e+' warnings='+w)"
 
-          # Count issues by type
-          if [ -f "eslint-report.json" ]; then
-            echo "📋 Lint Report Summary:"
-            jq -r '. | length' eslint-report.json | head -1
-            echo "Total issues found"
-          fi
+          echo "✅ Baseline linting completed (report-only)"
 
-      - name: Upload Lint Report
+      - name: Upload Baseline Lint Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: eslint-baseline-report-${{ github.run_id }}
-          path: eslint-report.json
+          name: baseline-lint-${{ github.run_id }}
+          path: baseline-lint.json
           retention-days: 7
 
   bypass-notice:
