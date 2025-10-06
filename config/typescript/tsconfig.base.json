@@ -27,6 +27,7 @@
       "@lib/*": ["./apps/frontend/src/lib/*"],
       "@hooks/*": ["./apps/frontend/src/hooks/*"],
       "@athlete-ally/*": ["./packages/*/src"],
+      "@athlete-ally/health-schema": ["./packages/health-schema/dist"],
       "@athlete-ally/event-bus": ["./packages/event-bus/src"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
       "@athlete-ally/contracts": ["./packages/contracts"],
