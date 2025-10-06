@@ -1,16 +1,16 @@
 {
   "extends": "../../config/typescript/tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "../..",
-    "noEmit": true,
+    "noEmit": false,
     "declaration": false,
     "declarationMap": false,
-    "strict": false
+    "sourceMap": true,
+    "outDir": "dist",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "paths": {}
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "node_modules",
     "dist",

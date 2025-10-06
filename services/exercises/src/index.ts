@@ -301,7 +301,7 @@ server.post('/exercises/:id/rate', async (request, reply) => {
 });
 
 // Get exercise categories
-server.get('/categories', async (request, reply) => {
+server.get('/categories', async (_request, reply) => {
   try {
     const categories = await prisma.exerciseCategory.findMany({
       orderBy: { order: 'asc' },
@@ -315,7 +315,7 @@ server.get('/categories', async (request, reply) => {
 });
 
 // Get popular exercises
-server.get('/exercises/popular', async (request, reply) => {
+server.get('/exercises/popular', async (_request, reply) => {
   try {
     const exercises = await prisma.exercise.findMany({
       where: { isActive: true },
