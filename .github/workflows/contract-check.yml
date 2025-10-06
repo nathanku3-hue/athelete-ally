@@ -56,7 +56,15 @@ jobs:
 
       - name: Install dependencies
         if: steps.check_bypass.outputs.bypass == 'false'
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+      - name: Build health-schema
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔧 Building health-schema..."
+          npx turbo run build --filter=@athlete-ally/health-schema --no-daemon
+          test -f packages/health-schema/dist/index.js
+          test -f packages/health-schema/dist/index.d.ts
 
       - name: Type check
         if: steps.check_bypass.outputs.bypass == 'false'
