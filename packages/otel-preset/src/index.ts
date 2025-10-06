@@ -2,7 +2,10 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { trace, metrics } from '@opentelemetry/api';
+import { trace, metrics, Tracer, Meter, Span } from '@opentelemetry/api';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 export interface TelemetryExporters {
   jaeger?: { endpoint?: string };
@@ -26,9 +29,9 @@ export interface InitTelemetryOptions {
 }
 
 export interface TelemetryInstance {
-  sdk: NodeSDK;
-  tracer: any;
-  meter: any;
+  sdk?: NodeSDK;
+  tracer: Tracer;
+  meter: Meter;
   shutdown: () => Promise<void>;
 }
 
@@ -48,16 +51,16 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
 
   // Check if telemetry is enabled
   if (!enabled) {
-    console.log(`🔇 Telemetry disabled for ${serviceName}`);
+    console.warn(`🔇 Telemetry disabled for ${serviceName}`);
     return {
-      sdk: undefined as any,
+      sdk: undefined,
       tracer: trace.getTracer(serviceName, version),
       meter: metrics.getMeter(serviceName, version),
       shutdown: async () => {}
     };
   }
 
-  console.log(`🔍 Initializing telemetry for ${serviceName} v${version}`);
+  console.warn(`🔍 Initializing telemetry for ${serviceName} v${version}`);
 
   // Create resource with consistent attributes
   const resource = new Resource({
@@ -82,15 +85,17 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
     },
     '@opentelemetry/instrumentation-http': {
       enabled: instrumentations.http ?? true,
-      requestHook: (span: any, request: any) => {
+      requestHook: (span: unknown, request: unknown) => {
         const getHeader = (name: string) => {
-          if ('getHeader' in request && typeof request.getHeader === 'function') {
+          if (request && typeof request === 'object' && 'getHeader' in request && typeof request.getHeader === 'function') {
             return request.getHeader(name);
           }
           return undefined;
         };
-        span.setAttribute('http.user_agent', getHeader('user-agent') || 'unknown');
-        span.setAttribute('http.content_type', getHeader('content-type') || 'unknown');
+        if (span && typeof span === 'object' && 'setAttribute' in span && typeof span.setAttribute === 'function') {
+          span.setAttribute('http.user_agent', getHeader('user-agent') || 'unknown');
+          span.setAttribute('http.content_type', getHeader('content-type') || 'unknown');
+        }
       },
     },
     '@opentelemetry/instrumentation-express': {
@@ -116,7 +121,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   const shutdown = async () => {
     try {
       await sdk.shutdown();
-      console.log(`🔇 Telemetry shutdown complete for ${serviceName}`);
+      console.warn(`🔇 Telemetry shutdown complete for ${serviceName}`);
     } catch (error) {
       console.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
     }
@@ -126,7 +131,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 
-  console.log(`✅ Telemetry initialized for ${serviceName}`);
+  console.warn(`✅ Telemetry initialized for ${serviceName}`);
   return { sdk, tracer, meter, shutdown };
 }
 
@@ -160,7 +165,7 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
       }
 
     default:
-      console.log('📊 No trace exporter configured');
+      console.warn('📊 No trace exporter configured');
       return undefined;
   }
 }
@@ -196,7 +201,7 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
       }
 
     default:
-      console.log('📊 No metric exporter configured');
+      console.warn('📊 No metric exporter configured');
       return undefined;
   }
 }
@@ -205,7 +210,7 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
 /**
  * Create business span helper
  */
-export function createBusinessSpan(tracer: any, name: string, attributes: Record<string, any> = {}) {
+export function createBusinessSpan(tracer: Tracer, name: string, attributes: Record<string, unknown> = {}) {
   const span = tracer.startSpan(name);
   Object.entries(attributes).forEach(([key, value]) => {
     span.setAttribute(key, value);
@@ -216,7 +221,7 @@ export function createBusinessSpan(tracer: any, name: string, attributes: Record
 /**
  * Create business metrics helper
  */
-export function createBusinessMetrics(meter: any, serviceName: string) {
+export function createBusinessMetrics(meter: Meter, serviceName: string) {
   return {
     apiRequests: meter.createCounter(`${serviceName}_api_requests_total`, {
       description: 'Total number of API requests',
@@ -231,4 +236,5 @@ export function createBusinessMetrics(meter: any, serviceName: string) {
   };
 }
 
-export default { initTelemetry, createBusinessSpan, createBusinessMetrics };
+const otelPreset = { initTelemetry, createBusinessSpan, createBusinessMetrics };
+export default otelPreset;

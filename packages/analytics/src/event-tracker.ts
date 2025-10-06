@@ -7,7 +7,7 @@ export interface BaseEvent {
   userId: string;
   timestamp: Date;
   sessionId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UserLifecycleEvent extends BaseEvent {
@@ -33,7 +33,7 @@ export interface PlanGenerationEvent extends BaseEvent {
   planId: string;
   generationTime?: number;
   planComplexity?: number;
-  userPreferences?: Record<string, any>;
+  userPreferences?: Record<string, unknown>;
 }
 
 export interface FeatureUsageEvent extends BaseEvent {
@@ -46,7 +46,7 @@ export interface FeatureUsageEvent extends BaseEvent {
 
 export interface CustomEvent extends BaseEvent {
   eventType: string;
-  eventData: Record<string, any>;
+  eventData: Record<string, unknown>;
 }
 
 export type AnalyticsEvent = 

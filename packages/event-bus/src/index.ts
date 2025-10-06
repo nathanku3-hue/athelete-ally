@@ -66,7 +66,10 @@ function sameSet(a: string[], b: string[]): boolean {
 }
 
 /** Determine if stream needs update (subjects/retention/replicas/etc.) */
-export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): boolean {
+export function streamNeedsUpdate(existing: unknown, desired: AppStreamConfig): boolean {
+  if (!existing || typeof existing !== 'object' || !('config' in existing)) {
+    return true;
+  }
   const ex = existing.config;
   const d = desired;
 
@@ -83,7 +86,7 @@ export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): bool
 }
 
 /** Ensure stream exists with desired config (update-if-different) */
-export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void> {
+export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig): Promise<void> {
   // Build strict config with only supported fields
   const desired = {
     name: cfg.name,
@@ -100,44 +103,44 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
     const info = await jsm.streams.info(cfg.name);
 
     if (streamNeedsUpdate(info, cfg)) {
-      console.log(`[event-bus] Updating stream: ${cfg.name}`);
+      console.warn(`[event-bus] Updating stream: ${cfg.name}`);
       await jsm.streams.update(cfg.name, desired);
-      console.log(`[event-bus] Stream updated: ${cfg.name}`);
+      console.warn(`[event-bus] Stream updated: ${cfg.name}`);
     } else {
-      console.log(`[event-bus] Stream up-to-date: ${cfg.name}`);
+      console.warn(`[event-bus] Stream up-to-date: ${cfg.name}`);
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (String(err?.message || "").includes("stream not found") ||
         String(err?.message || "").includes("not found")) {
-      console.log(`[event-bus] Creating stream: ${cfg.name}`);
+      console.warn(`[event-bus] Creating stream: ${cfg.name}`);
       
       // Try creating with full config first
       try {
         await jsm.streams.add(desired);
-        console.log(`[event-bus] Stream created: ${cfg.name}`);
+        console.warn(`[event-bus] Stream created: ${cfg.name}`);
         return;
-      } catch (createErr: any) {
+      } catch (createErr: unknown) {
         // Handle invalid JSON error (err_code 10025) with fallback retries
         if (createErr?.api_error?.err_code === 10025) {
-          console.log(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
+          console.warn(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
           
           // Retry 1: Remove duplicate_window (older servers don't support it)
           const fallback1 = { ...desired };
-          delete (fallback1 as any).duplicate_window;
+          delete (fallback1 as unknown).duplicate_window;
           try {
             await jsm.streams.add(fallback1);
-            console.log(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
+            console.warn(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
             return;
-          } catch (fallback1Err: any) {
+          } catch (fallback1Err: unknown) {
             if (fallback1Err?.api_error?.err_code === 10025) {
               // Retry 2: Remove discard (last resort)
               const fallback2 = { ...fallback1 };
-              delete (fallback2 as any).discard;
+              delete (fallback2 as unknown).discard;
               try {
                 await jsm.streams.add(fallback2);
-                console.log(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
+                console.warn(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
                 return;
-              } catch (fallback2Err: any) {
+              } catch (fallback2Err: unknown) {
                 console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
                 throw fallback2Err;
               }
@@ -157,7 +160,7 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
 }
 
 /** Ensure all configured streams exist */
-export async function ensureAllStreams(jsm: any): Promise<void> {
+export async function ensureAllStreams(jsm: JetStreamManager): Promise<void> {
   const configs = getStreamConfigs();
   for (const cfg of configs) {
     await ensureStream(jsm, cfg);
@@ -170,7 +173,7 @@ export class EventBus {
   private jsm: JetStreamManager | null = null;
 
   // 通用发布方法
-  private async publishEvent(topic: string, event: any, natsTopic: string) {
+  private async publishEvent(topic: string, event: unknown, natsTopic: string) {
     if (!this.js) throw new Error('JetStream not initialized');
     
     const startTime = Date.now();
@@ -194,7 +197,7 @@ export class EventBus {
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
       
       const data = JSON.stringify(event);
-      console.log(`Publishing to subject: ${natsTopic}`);
+      console.warn(`Publishing to subject: ${natsTopic}`);
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
       const duration = (Date.now() - startTime) / 1000;
@@ -205,7 +208,7 @@ export class EventBus {
       }, duration);
       
       eventBusMetrics.eventsPublished.inc({ topic, status: 'success' });
-      console.log(`Published ${topic} event:`, event.eventId);
+      console.warn(`Published ${topic} event:`, event.eventId);
       
     } catch (error) {
       const duration = (Date.now() - startTime) / 1000;
@@ -221,7 +224,7 @@ export class EventBus {
   }
 
   async connect(url: string = 'nats://localhost:4223', options?: { manageStreams?: boolean }) {
-    console.log(`Connecting to NATS at: ${url}`);
+    console.warn(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
@@ -230,13 +233,13 @@ export class EventBus {
     const manageStreams = options?.manageStreams ?? (process.env.FEATURE_SERVICE_MANAGES_STREAMS !== 'false');
 
     if (manageStreams) {
-      console.log('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
+      console.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
     } else {
-      console.log('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
+      console.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
     }
 
-    console.log('Connected to EventBus');
+    console.warn('Connected to EventBus');
   }
 
   private async ensureStreams() {
@@ -285,7 +288,7 @@ export class EventBus {
       durable: 'planning-engine-onboarding-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    } as unknown);
 
     const topic = 'onboarding_completed';
 
@@ -294,7 +297,7 @@ export class EventBus {
       while (true) {
         try {
           // 批量拉取消息
-          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
+          const messages = await (psub as unknown).fetch({ max: 10, expires: 1000 });
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -302,10 +305,10 @@ export class EventBus {
             continue;
           }
 
-          console.log(`Processing batch of ${messages.length} OnboardingCompleted events`);
+          console.warn(`Processing batch of ${messages.length} OnboardingCompleted events`);
 
           // 并发处理消息
-          const processingPromises = messages.map(async (m: any) => {
+          const processingPromises = messages.map(async (m: unknown) => {
             const startTime = Date.now();
             
             try {
@@ -374,17 +377,19 @@ export class EventBus {
     })();
   }
 
-  private shouldRetry(error: any): boolean {
+  private shouldRetry(error: unknown): boolean {
     // 临时错误可以重试
-    if (error.code === 'TIMEOUT' || error.code === 'CONNECTION_ERROR') {
-      return true;
+    if (error && typeof error === 'object' && 'code' in error) {
+      if (error.code === 'TIMEOUT' || error.code === 'CONNECTION_ERROR') {
+        return true;
+      }
+
+      // 业务逻辑错误不重试
+      if (error.code === 'VALIDATION_ERROR' || error.code === 'BUSINESS_LOGIC_ERROR') {
+        return false;
+      }
     }
-    
-    // 业务逻辑错误不重试
-    if (error.code === 'VALIDATION_ERROR' || error.code === 'BUSINESS_LOGIC_ERROR') {
-      return false;
-    }
-    
+
     // 默认重试
     return true;
   }
@@ -396,7 +401,7 @@ export class EventBus {
       durable: 'planning-engine-plan-gen-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    } as unknown);
 
     const topic = 'plan_generation_requested';
 
@@ -405,7 +410,7 @@ export class EventBus {
       while (true) {
         try {
           // 批量拉取消息
-          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
+          const messages = await (psub as unknown).fetch({ max: 10, expires: 1000 });
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -413,10 +418,10 @@ export class EventBus {
             continue;
           }
 
-          console.log(`Processing batch of ${messages.length} PlanGenerationRequested events`);
+          console.warn(`Processing batch of ${messages.length} PlanGenerationRequested events`);
 
           // 并发处理消息
-          const processingPromises = messages.map(async (m: any) => {
+          const processingPromises = messages.map(async (m: unknown) => {
             const startTime = Date.now();
             
             try {
@@ -543,18 +548,22 @@ export class EventBus {
         existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
 
       if (needsUpdate) {
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
-        await this.jsm.consumers.add(streamName, consumerConfig as any);
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
+        await this.jsm.consumers.add(streamName, consumerConfig as unknown);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
       } else {
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
       }
-    } catch (error: any) {
-      if (error.code === '404' || error.message?.includes('not found')) {
+    } catch (error: unknown) {
+      const is404 = error && typeof error === 'object' && 'code' in error && error.code === '404';
+      const isNotFound = error && typeof error === 'object' && 'message' in error &&
+                         typeof error.message === 'string' && error.message.includes('not found');
+
+      if (is404 || isNotFound) {
         // Consumer doesn't exist, create it
-        console.log(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
-        await this.jsm.consumers.add(streamName, consumerConfig as any);
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
+        console.warn(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
+        await this.jsm.consumers.add(streamName, consumerConfig as unknown);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
       } else {
         throw error;
       }
