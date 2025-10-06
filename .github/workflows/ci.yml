@@ -270,14 +270,7 @@ jobs:
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: Build shared packages
-        run: |
-          set -euo pipefail
-          echo "🔨 Building shared packages before service tests..."
-          npm run build -w packages/contracts
-          npm run build -w packages/event-bus
-          npm run build -w packages/protocol-types
-          npm run build -w packages/shared-types
-          echo "✅ Shared packages built successfully"
+        run: npm run build:packages
 
 
       - name: Validate configuration
@@ -884,8 +877,8 @@ jobs:
 
 
         run: npm ci --no-audit --no-fund
-      - name: Build health-schema package
-        run: npm run build -w packages/health-schema
+      - name: Build shared packages
+        run: npm run build:packages
       - name: Build frontend
         run: npm run build:frontend
 
