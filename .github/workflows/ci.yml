@@ -264,8 +264,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "🔧 Building health-schema"
-          npm run build -w @athlete-ally/health-schema
+          echo "🔧 Building health-schema with turbo"
+          npx turbo run build --filter=@athlete-ally/health-schema --no-daemon
           echo "📁 Verifying dist"
           test -f packages/health-schema/dist/index.js
           test -f packages/health-schema/dist/index.d.ts
