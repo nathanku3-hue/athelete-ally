@@ -40,7 +40,7 @@ function stripJsonComments(s){
 }
 
 function readJson(file){
-  try { const raw = fs.readFileSync(file,'utf8'); return JSON.parse(stripJsonComments(raw)); } catch(e){ return null; }
+  try { const raw = fs.readFileSync(file,'utf8'); return JSON.parse(stripJsonComments(raw)); } catch{ return null; }
 }
 
 const repoRoot = process.cwd();

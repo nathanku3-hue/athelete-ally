@@ -8,7 +8,7 @@
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { exec as _exec, spawn } from 'node:child_process';
+import { exec as _exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const exec = promisify(_exec);
@@ -113,17 +113,14 @@ async function gatherDeprecatedFromOutdated(cwd, outdated) {
   const entries = Object.entries(outdated || {});
   const results = [];
   const limit = 6;
-  let active = 0;
   let idx = 0;
   const next = () => {
     if (idx >= entries.length) return Promise.resolve();
     const [name, info] = entries[idx++];
-    active++;
     return npmViewDeprecated(name, info.current, cwd)
       .then(msg => {
         if (msg) results.push({ name, version: info.current, message: msg });
-      })
-      .finally(() => { active--; });
+      });
   };
   const workers = Array.from({ length: Math.min(limit, entries.length) }, () => (async function run() { while (idx < entries.length) { await next(); } })());
   await Promise.all(workers);

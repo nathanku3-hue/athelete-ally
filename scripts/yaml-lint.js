@@ -10,7 +10,8 @@ for (const f of files) {
   try {
     const txt = fs.readFileSync(f, 'utf8');
     if (parser) {
-      parser.parse ? parser.parse(txt) : parser.load(txt);
+      const parsed = parser.parse ? parser.parse(txt) : parser.load(txt);
+      void parsed; // Validate by parsing
       console.log(`OK: ${f}`);
     } else {
       // Fallback: minimal check for required keys

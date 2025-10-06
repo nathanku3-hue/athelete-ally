@@ -22,7 +22,7 @@ function checkNodeVersion() {
   
   try {
     expectedVersion = fs.readFileSync(nvmrcPath, 'utf8').trim();
-  } catch (error) {
+  } catch {
     console.warn('⚠️  Warning: Could not read .nvmrc file');
     return;
   }
