@@ -53,7 +53,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
       - name: Generate Cache Key
         id: cache-key
@@ -194,7 +194,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
       - name: Get Changed Files
         id: changed-files
@@ -241,6 +241,15 @@ jobs:
           npx eslint scripts --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
           echo "✅ Scripts linting passed"
 
+      - name: Build workspace packages
+        if:
+          steps.changed-files.outputs.frontend == 'true' || steps.changed-files.outputs.services ==
+          'true' || steps.changed-files.outputs.packages == 'true'
+        run: |
+          echo "🔧 Building workspace packages for type-check..."
+          npx turbo run build --filter='@athlete-ally/*' --no-daemon
+          echo "✅ Workspace packages built"
+
       - name: Type Check Changed Files
         if:
           steps.changed-files.outputs.frontend == 'true' || steps.changed-files.outputs.services ==
@@ -267,7 +276,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
       - name: Lint Entire Codebase
         run: |
