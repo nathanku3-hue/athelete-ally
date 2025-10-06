@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 const nextConfig = {
   // 基础配置
   reactStrictMode: true,
@@ -92,6 +95,12 @@ const nextConfig = {
   
   // Webpack配置
   webpack: (config, { dev, isServer }) => {
+    // 添加别名解析
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@athlete-ally/health-schema': require.resolve('@athlete-ally/health-schema'),
+    };
+    
     // 生产环境优化
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
