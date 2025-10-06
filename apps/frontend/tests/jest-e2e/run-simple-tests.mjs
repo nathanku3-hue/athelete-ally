@@ -21,45 +21,35 @@ const TEST_SUITES = [
 
 // E2E 測試開始
 
-let totalPassed = 0;
 let totalFailed = 0;
-let totalTests = 0;
 
 for (const testFile of TEST_SUITES) {
   // 正在運行測試文件
-  
+
   try {
     const command = `npx jest "${testFile}" --config="jest.config.js" --silent`;
-    
-    const output = execSync(command, { 
+
+    const output = execSync(command, {
       encoding: 'utf8',
       timeout: 60000,
       cwd: __dirname  // 在測試目錄下運行
     });
-    
+
     // 解析測試結果
-    const passedMatches = output.match(/Tests:\s+(\d+)\s+passed/g);
     const failedMatches = output.match(/Tests:\s+\d+\s+passed,\s+(\d+)\s+failed/g);
-          const _totalMatches = output.match(/Tests:\s+(\d+)\s+passed(?:,\s+\d+\s+failed)?/g);
+    const failed = failedMatches ? parseInt(failedMatches[0].match(/(\d+)/)[1]) : 0;
 
-          const passed = passedMatches ? parseInt(passedMatches[0].match(/(\d+)/)[1]) : 0;
-          const failed = failedMatches ? parseInt(failedMatches[0].match(/(\d+)/)[1]) : 0;
-          const total = passed + failed;
+    totalFailed += failed;
 
-          totalPassed += passed;
-          totalFailed += failed;
-          totalTests += total;
-    
     // 測試結果已記錄
-    
-  } catch (_error) {
+
+  } catch {
     // 測試執行錯誤
     totalFailed++;
   }
 }
 
 // 測試結果總結
-const _successRate = totalTests > 0 ? ((totalPassed / totalTests) * 100).toFixed(1) : 0;
 
 if (totalFailed === 0) {
   process.exit(0);
