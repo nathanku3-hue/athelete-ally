@@ -196,6 +196,16 @@ const eslintConfig = [
     },
   },
 
+  // CommonJS files (.cjs) - allow require() imports
+  // Must come before test files to apply to test .cjs files too
+  {
+    files: ["**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "import/no-commonjs": "off",
+    },
+  },
+
   // Test files configuration
   {
     files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}", "**/*.spec.{ts,tsx,js,jsx}"],
