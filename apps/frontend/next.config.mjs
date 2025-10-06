@@ -137,6 +137,9 @@ const nextConfig = {
     externalDir: true, // monorepo-friendly
   },
   
+  // 转译包配置
+  transpilePackages: ['@athlete-ally/health-schema'],
+  
   // 服务器外部包
   serverExternalPackages: ['@prisma/client'],
 };
