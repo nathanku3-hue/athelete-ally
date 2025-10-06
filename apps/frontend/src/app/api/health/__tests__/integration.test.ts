@@ -3,13 +3,11 @@
  * Tests the standardized health response from /api/health
  */
 
-import { NextRequest } from 'next/server';
 import { GET } from '../route';
 
 describe('/api/health integration', () => {
   it('should return standardized health response', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     
     expect(response.status).toBe(200);
     

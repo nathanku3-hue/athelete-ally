@@ -131,8 +131,10 @@ export function createFastifyHealthHandler(options: HealthCheckOptions) {
  * Next.js API route handler
  */
 export function createNextHealthHandler(options: HealthCheckOptions) {
-  return async () => {
+  return async (): Promise<Response> => {
     const health = createHealthResponse(options);
+    
+    // Always return a proper Response object for Next.js compatibility
     return new Response(JSON.stringify(health), {
       status: health.ok ? 200 : 503,
       headers: { 'content-type': 'application/json; charset=utf-8' },
