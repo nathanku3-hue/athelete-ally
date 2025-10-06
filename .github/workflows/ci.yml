@@ -265,6 +265,7 @@ jobs:
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: Build shared packages
+        shell: bash
         run: |
           set -euo pipefail
           echo "🔧 Building health-schema"
@@ -275,9 +276,7 @@ jobs:
           node -e "console.log(require.resolve('@athlete-ally/health-schema/package.json'))"
 
       - name: Type check (no daemon, no stale cache)
-        run: |
-          set -euo pipefail
-          npx turbo run type-check --no-daemon --continue=false
+        run: npx turbo run type-check --no-daemon --continue=false
 
       - name: Validate configuration
         run: |
