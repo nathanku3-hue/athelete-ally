@@ -125,11 +125,11 @@ jobs:
         run: |
           echo "🔍 Verifying shared type imports..."
 
-          # Check that API routes import from shared types (exclude health endpoints and tests)
+          # Check that API routes import from shared types (exclude infrastructure endpoints and tests)
           for file in apps/frontend/src/app/api/**/*.ts; do
             if [[ -f "$file" ]]; then
-              # Skip health endpoints (use health-schema) and test files
-              if [[ "$file" == *"/health/"* ]] || [[ "$file" == *".test.ts" ]] || [[ "$file" == *"__tests__"* ]]; then
+              # Skip infrastructure endpoints (health, metrics) and test files
+              if [[ "$file" == *"/health/"* ]] || [[ "$file" == *"/metrics/"* ]] || [[ "$file" == *".test.ts" ]] || [[ "$file" == *"__tests__"* ]]; then
                 continue
               fi
               if ! grep -q "@athlete-ally/shared-types" "$file"; then
