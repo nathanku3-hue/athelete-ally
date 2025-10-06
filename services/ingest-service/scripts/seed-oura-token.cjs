@@ -10,7 +10,6 @@ const { Client } = require('pg');
 
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 16;
-const TAG_LENGTH = 16;
 
 function encryptToken(token, key) {
   const iv = crypto.randomBytes(IV_LENGTH);

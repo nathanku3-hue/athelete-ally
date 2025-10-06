@@ -101,7 +101,7 @@ async function sendHrvIngest() {
           // Store ingest ID for assertion script
           process.env.E2E_INGEST_ID = responseData.ingestId;
         }
-      } catch (parseError) {
+      } catch {
         console.log('Could not parse response for ingest ID');
       }
     } else {
