@@ -42,14 +42,6 @@ const eslintConfig = [
       "@next/next/no-script-component-in-head": "off",
     },
   },
-  // CommonJS files (.cjs) - allow require() imports
-  {
-    files: ["**/*.cjs"],
-    rules: {
-      "@typescript-eslint/no-require-imports": "off",
-      "import/no-commonjs": "off",
-    },
-  },
   // Test files configuration - relaxed rules for testing environment
   {
     files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}"],
@@ -169,6 +161,16 @@ const eslintConfig = [
     rules: {
       "no-console": "off"
     }
+  },
+
+  // CommonJS files (.cjs) - allow require() imports
+  // Must be last to override all previous configs
+  {
+    files: ["**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "import/no-commonjs": "off",
+    },
   }
 ];
 
