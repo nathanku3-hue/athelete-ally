@@ -884,6 +884,8 @@ jobs:
 
 
         run: npm ci --no-audit --no-fund
+      - name: Build health-schema package
+        run: npm run build -w packages/health-schema
       - name: Build frontend
         run: npm run build
 
