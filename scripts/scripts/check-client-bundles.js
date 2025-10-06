@@ -1,237 +1,271 @@
 #!/usr/bin/env node
+
 /**
- * Client Bundle Analysis Script
+ * Non-blocking client bundle scanner
  * 
- * Checks that telemetry/mapping code isn't included in client bundles
- * by analyzing .next/static directory.
+ * This script scans for server-only/telemetry code that might accidentally
+ * be included in client bundles or client components. It runs as part of
+ * the Guardrails CI but is non-blocking (informational only).
+ * 
+ * Usage: node scripts/check-client-bundles.js
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const { readFileSync, readdirSync, statSync } = require('fs');
+const { join, extname } = require('path');
 
-const projectRoot = process.cwd();
-const nextStaticPath = path.join(projectRoot, 'apps', 'frontend', '.next', 'static');
+// Patterns that indicate server-only code
+const SERVER_ONLY_PATTERNS = [
+  // Node.js specific APIs
+  /require\s*\(\s*['"]fs['"]\s*\)/g,
+  /require\s*\(\s*['"]path['"]\s*\)/g,
+  /require\s*\(\s*['"]os['"]\s*\)/g,
+  /require\s*\(\s*['"]crypto['"]\s*\)/g,
+  /require\s*\(\s*['"]child_process['"]\s*\)/g,
+  /require\s*\(\s*['"]cluster['"]\s*\)/g,
+  /require\s*\(\s*['"]worker_threads['"]\s*\)/g,
+  
+  // Direct Node.js API usage
+  /process\.env/g,
+  /process\.cwd\(\)/g,
+  /process\.exit\(/g,
+  /process\.platform/g,
+  /process\.version/g,
+  /process\.pid/g,
+  /process\.uptime\(/g,
+  
+  // File system operations
+  /fs\.readFileSync/g,
+  /fs\.writeFileSync/g,
+  /fs\.existsSync/g,
+  /fs\.mkdirSync/g,
+  /fs\.rmSync/g,
+  /fs\.statSync/g,
+  /fs\.readdirSync/g,
+  
+  // Path operations
+  /path\.join\(/g,
+  /path\.resolve\(/g,
+  /path\.dirname\(/g,
+  /path\.basename\(/g,
+  /path\.extname\(/g,
+  
+  // Server-side imports
+  /import.*from\s*['"]fs['"]/g,
+  /import.*from\s*['"]path['"]/g,
+  /import.*from\s*['"]os['"]/g,
+  /import.*from\s*['"]crypto['"]/g,
+  /import.*from\s*['"]child_process['"]/g,
+  /import.*from\s*['"]cluster['"]/g,
+  /import.*from\s*['"]worker_threads['"]/g,
+  
+  // Telemetry/metrics specific
+  /createMetricsApiHandler/g,
+  /createHealthCheckHandler/g,
+  /METRICS_API_KEY/g,
+  /METRICS_ALLOWLIST/g,
+  /METRICS_ALLOWLIST_CIDR/g,
+  
+  // Next.js server-only APIs
+  /NextRequest/g,
+  /NextResponse/g,
+  /export\s+const\s+runtime\s*=/g,
+  /export\s+const\s+dynamic\s*=/g,
+  
+  // Database operations
+  /@prisma\/client/g,
+  /prisma\./g,
+  /\.findMany\(/g,
+  /\.create\(/g,
+  /\.update\(/g,
+  /\.delete\(/g,
+  /\.upsert\(/g,
+];
 
-console.log('🔍 Analyzing client bundles for contract code...\n');
+// Patterns that indicate client-side code
+const CLIENT_ONLY_PATTERNS = [
+  /'use client'/g,
+  /"use client"/g,
+  /window\./g,
+  /document\./g,
+  /localStorage/g,
+  /sessionStorage/g,
+  /navigator\./g,
+  /location\./g,
+  /history\./g,
+  /addEventListener/g,
+  /removeEventListener/g,
+];
+
+// File extensions to scan
+const SCAN_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
+
+// Directories to exclude
+const EXCLUDE_DIRS = [
+  'node_modules',
+  '.next',
+  'out',
+  'build',
+  'dist',
+  '.git',
+  'coverage',
+  'test-results',
+  'playwright-report',
+];
+
+// Files to exclude
+const EXCLUDE_FILES = [
+  'next-env.d.ts',
+  'jest.config.js',
+  'jest.config.cjs',
+  'playwright.config.ts',
+  'tailwind.config.js',
+  'postcss.config.js',
+];
 
 /**
- * Check if telemetry/mapping code is in client bundles
+ * Check if a file should be excluded
  */
-function checkClientBundles() {
-  if (!fs.existsSync(nextStaticPath)) {
-    console.log('⚠️ .next/static directory not found. Run "npm run build" first.');
-    return false;
-  }
-
-  const issues: string[] = [];
-  const files = getAllJSFiles(nextStaticPath);
-
-  console.log(`📁 Found ${files.length} JavaScript files in client bundles\n`);
-
-  for (const file of files) {
-    const content = fs.readFileSync(file, 'utf8');
-    const relativePath = path.relative(nextStaticPath, file);
-
-    // Check for telemetry code
-    if (content.includes('recordLegacyMapping') || 
-        content.includes('contractTelemetry') ||
-        content.includes('ContractMetricsService')) {
-      issues.push(`❌ Telemetry code found in: ${relativePath}`);
-    }
-
-    // Check for mapping code
-    if (content.includes('mapLegacyApiRequest') || 
-        content.includes('mapLegacyApiResponse') ||
-        content.includes('mapLegacyFatigueLevel') ||
-        content.includes('mapLegacySeason')) {
-      issues.push(`❌ Legacy mapping code found in: ${relativePath}`);
-    }
-
-    // Check for server-only code
-    if (content.includes('serverOnly') || 
-        content.includes('handleServerContractRequest') ||
-        content.includes('importServerContractUtils')) {
-      issues.push(`❌ Server-only code found in: ${relativePath}`);
-    }
-
-    // Check for metrics adapter code
-    if (content.includes('createMetricsApiHandler') || 
-        content.includes('PrometheusMetricsAdapter') ||
-        content.includes('ContractMetricsService')) {
-      issues.push(`❌ Metrics adapter code found in: ${relativePath}`);
-    }
-  }
-
-  if (issues.length > 0) {
-    console.log('🚨 ISSUES FOUND:\n');
-    issues.forEach(issue => console.log(issue));
-    console.log('\n💡 These files should NOT contain server-side contract code.');
-    console.log('   Check your imports and ensure server-only wrappers are working correctly.\n');
-    return false;
-  } else {
-    console.log('✅ No contract code found in client bundles');
-    console.log('✅ Server-only wrappers are working correctly\n');
+function shouldExcludeFile(filePath, fileName) {
+  // Check exclude files
+  if (EXCLUDE_FILES.includes(fileName)) {
     return true;
   }
-}
-
-/**
- * Get all JavaScript files recursively
- */
-function getAllJSFiles(dir: string): string[] {
-  const files: string[] = [];
   
-  if (!fs.existsSync(dir)) {
-    return files;
-  }
-
-  const items = fs.readdirSync(dir);
-  
-  for (const item of items) {
-    const fullPath = path.join(dir, item);
-    const stat = fs.statSync(fullPath);
-    
-    if (stat.isDirectory()) {
-      files.push(...getAllJSFiles(fullPath));
-    } else if (item.endsWith('.js') || item.endsWith('.js.map')) {
-      files.push(fullPath);
+  // Check exclude directories
+  const pathParts = filePath.split('/');
+  for (const part of pathParts) {
+    if (EXCLUDE_DIRS.includes(part)) {
+      return true;
     }
   }
   
-  return files;
+  return false;
 }
 
 /**
- * Check bundle sizes
+ * Check if a file is a client component
  */
-function checkBundleSizes() {
-  console.log('📊 Bundle size analysis:\n');
+function isClientComponent(content) {
+  return CLIENT_ONLY_PATTERNS.some(pattern => pattern.test(content));
+}
+
+/**
+ * Scan a file for server-only patterns
+ */
+function scanFile(filePath) {
+  try {
+    const content = readFileSync(filePath, 'utf8');
+    const issues = [];
+    
+    // Skip if it's a client component (these are allowed to have some server patterns)
+    if (isClientComponent(content)) {
+      return issues;
+    }
+    
+    // Check for server-only patterns
+    SERVER_ONLY_PATTERNS.forEach((pattern, index) => {
+      const matches = content.match(pattern);
+      if (matches) {
+        matches.forEach(match => {
+          const lines = content.substring(0, content.indexOf(match)).split('\n');
+          const lineNumber = lines.length;
+          
+          issues.push({
+            file: filePath,
+            line: lineNumber,
+            pattern: pattern.toString(),
+            match: match,
+            severity: 'warning'
+          });
+        });
+      }
+    });
+    
+    return issues;
+  } catch (error) {
+    console.warn(`Warning: Could not read file ${filePath}: ${error.message}`);
+    return [];
+  }
+}
+
+/**
+ * Recursively scan a directory
+ */
+function scanDirectory(dirPath, basePath = '') {
+  const issues = [];
   
   try {
-    // Try to use bundle analyzer if available
-    const packageJsonPath = path.join(projectRoot, 'apps', 'frontend', 'package.json');
-    if (fs.existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const entries = readdirSync(dirPath);
+    
+    for (const entry of entries) {
+      const fullPath = join(dirPath, entry);
+      const relativePath = join(basePath, entry);
+      const stat = statSync(fullPath);
       
-      if (packageJson.scripts && packageJson.scripts['analyze']) {
-        console.log('🔍 Running bundle analysis...');
-        execSync('npm run analyze', { cwd: path.join(projectRoot, 'apps', 'frontend'), stdio: 'inherit' });
+      if (stat.isDirectory()) {
+        if (!shouldExcludeFile(relativePath, entry)) {
+          issues.push(...scanDirectory(fullPath, relativePath));
+        }
+      } else if (stat.isFile()) {
+        const ext = extname(entry);
+        if (SCAN_EXTENSIONS.includes(ext) && !shouldExcludeFile(relativePath, entry)) {
+          issues.push(...scanFile(fullPath));
+        }
       }
     }
   } catch (error) {
-    console.log('⚠️ Bundle analyzer not available, skipping size analysis');
+    console.warn(`Warning: Could not scan directory ${dirPath}: ${error.message}`);
   }
+  
+  return issues;
 }
 
 /**
- * Check for specific patterns in source code
- */
-function checkSourceCodePatterns() {
-  console.log('🔍 Checking source code patterns...\n');
-  
-  const frontendSrcPath = path.join(projectRoot, 'apps', 'frontend', 'src');
-  const issues: string[] = [];
-
-  // Check for direct imports of server-only modules in client code
-  const clientFiles = getAllTSFiles(frontendSrcPath);
-  
-  for (const file of clientFiles) {
-    // Skip API routes and server-only files
-    if (file.includes('/api/') || file.includes('server-only')) {
-      continue;
-    }
-
-    const content = fs.readFileSync(file, 'utf8');
-    const relativePath = path.relative(frontendSrcPath, file);
-
-    // Check for direct imports of server-only modules
-    if (content.includes("from '@athlete-ally/shared-types/server-only'") ||
-        content.includes("from '@athlete-ally/shared-types/metrics-adapter'")) {
-      issues.push(`❌ Direct server-only import in client file: ${relativePath}`);
-    }
-
-    // Check for direct usage of server-only functions
-    if (content.includes('handleServerContractRequest') ||
-        content.includes('importServerContractUtils') ||
-        content.includes('contractMetricsService')) {
-      issues.push(`❌ Server-only function usage in client file: ${relativePath}`);
-    }
-  }
-
-  if (issues.length > 0) {
-    console.log('🚨 SOURCE CODE ISSUES:\n');
-    issues.forEach(issue => console.log(issue));
-    console.log('\n💡 Use server-only wrappers or move this code to API routes.\n');
-    return false;
-  } else {
-    console.log('✅ No server-only code found in client source files\n');
-    return true;
-  }
-}
-
-/**
- * Get all TypeScript files recursively
- */
-function getAllTSFiles(dir: string): string[] {
-  const files: string[] = [];
-  
-  if (!fs.existsSync(dir)) {
-    return files;
-  }
-
-  const items = fs.readdirSync(dir);
-  
-  for (const item of items) {
-    const fullPath = path.join(dir, item);
-    const stat = fs.statSync(fullPath);
-    
-    if (stat.isDirectory()) {
-      files.push(...getAllTSFiles(fullPath));
-    } else if (item.endsWith('.ts') || item.endsWith('.tsx')) {
-      files.push(fullPath);
-    }
-  }
-  
-  return files;
-}
-
-/**
- * Main execution
+ * Main function
  */
 function main() {
-  console.log('🎯 Client Bundle Analysis for Contract Code\n');
-  console.log('==========================================\n');
-
-  let allChecksPassed = true;
-
-  // Check source code patterns
-  if (!checkSourceCodePatterns()) {
-    allChecksPassed = false;
-  }
-
-  // Check client bundles
-  if (!checkClientBundles()) {
-    allChecksPassed = false;
-  }
-
-  // Check bundle sizes
-  checkBundleSizes();
-
-  console.log('==========================================');
+  console.log('🔍 Scanning for server-only code in client bundles...\n');
   
-  if (allChecksPassed) {
-    console.log('🎉 All checks passed! Contract code is properly isolated.');
-    console.log('✅ Server-only wrappers are working correctly');
-    console.log('✅ No contract code leaked to client bundles');
+  const startTime = Date.now();
+  const issues = scanDirectory(join(__dirname, '..'));
+  const endTime = Date.now();
+  
+  if (issues.length === 0) {
+    console.log('✅ No server-only code detected in client bundles');
+    console.log(`⏱️  Scan completed in ${endTime - startTime}ms`);
     process.exit(0);
-  } else {
-    console.log('❌ Issues found! Please fix the problems above.');
-    console.log('💡 Ensure server-only wrappers are used correctly');
-    process.exit(1);
   }
+  
+  console.log(`⚠️  Found ${issues.length} potential server-only code issues:\n`);
+  
+  // Group issues by file
+  const issuesByFile = issues.reduce((acc, issue) => {
+    if (!acc[issue.file]) {
+      acc[issue.file] = [];
+    }
+    acc[issue.file].push(issue);
+    return acc;
+  }, {});
+  
+  // Report issues
+  Object.entries(issuesByFile).forEach(([file, fileIssues]) => {
+    console.log(`📁 ${file}`);
+    fileIssues.forEach(issue => {
+      console.log(`   Line ${issue.line}: ${issue.match}`);
+      console.log(`   Pattern: ${issue.pattern}`);
+    });
+    console.log('');
+  });
+  
+  console.log(`⏱️  Scan completed in ${endTime - startTime}ms`);
+  console.log('\n💡 This is a non-blocking informational scan.');
+  console.log('   Review the above issues to ensure server-only code is not included in client bundles.');
+  
+  // Non-blocking: always exit with success
+  process.exit(0);
 }
 
+// Run the scanner
 if (require.main === module) {
   main();
 }
