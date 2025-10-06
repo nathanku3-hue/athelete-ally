@@ -111,7 +111,7 @@ export function createUnhealthyHealthResponse(options: HealthCheckOptions, reaso
  * Express.js health endpoint handler
  */
 export function createExpressHealthHandler(options: HealthCheckOptions) {
-  return (_req: any, res: any) => {
+  return (_req: unknown, res: { status: (code: number) => { json: (data: HealthResponse) => void } }) => {
     const health = createHealthResponse(options);
     res.status(health.ok ? 200 : 503).json(health);
   };
@@ -121,7 +121,7 @@ export function createExpressHealthHandler(options: HealthCheckOptions) {
  * Fastify health endpoint handler
  */
 export function createFastifyHealthHandler(options: HealthCheckOptions) {
-  return async (_request: any, reply: any) => {
+  return async (_request: unknown, reply: { status: (code: number) => { send: (data: HealthResponse) => void } }) => {
     const health = createHealthResponse(options);
     reply.status(health.ok ? 200 : 503).send(health);
   };
@@ -143,20 +143,21 @@ export function createNextHealthHandler(options: HealthCheckOptions) {
 /**
  * Validate health response schema
  */
-export function validateHealthResponse(response: any): response is HealthResponse {
+export function validateHealthResponse(response: unknown): response is HealthResponse {
   return (
+    response !== null &&
     typeof response === 'object' &&
-    typeof response.ok === 'boolean' &&
-    ['healthy', 'degraded', 'unhealthy'].includes(response.status) &&
-    typeof response.sha === 'string' &&
-    typeof response.buildId === 'string' &&
-    typeof response.service === 'string' &&
-    typeof response.uptimeSec === 'number' &&
-    typeof response.timestamp === 'string'
+    typeof (response as Record<string, unknown>).ok === 'boolean' &&
+    ['healthy', 'degraded', 'unhealthy'].includes((response as Record<string, unknown>).status as string) &&
+    typeof (response as Record<string, unknown>).sha === 'string' &&
+    typeof (response as Record<string, unknown>).buildId === 'string' &&
+    typeof (response as Record<string, unknown>).service === 'string' &&
+    typeof (response as Record<string, unknown>).uptimeSec === 'number' &&
+    typeof (response as Record<string, unknown>).timestamp === 'string'
   );
 }
 
-export default {
+const healthSchema = {
   createHealthResponse,
   createDegradedHealthResponse,
   createUnhealthyHealthResponse,
@@ -165,3 +166,5 @@ export default {
   createNextHealthHandler,
   validateHealthResponse,
 };
+
+export default healthSchema;
