@@ -887,7 +887,7 @@ jobs:
       - name: Build health-schema package
         run: npm run build -w packages/health-schema
       - name: Build frontend
-        run: npm run build
+        run: npm run build:frontend
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
