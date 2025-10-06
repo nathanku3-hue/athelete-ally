@@ -23,8 +23,7 @@
     "typescript": "^5.0.0"
   },
   "files": [
-    "dist/**/*",
-    "README.md"
+    "dist"
   ],
   "sideEffects": false
 }
