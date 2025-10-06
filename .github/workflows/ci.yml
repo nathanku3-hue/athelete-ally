@@ -134,11 +134,6 @@ jobs:
           compression-level: 6
           overwrite: true
 
-      - name: Type check (force no stale cache)
-        env:
-          TURBO_FORCE: "true"
-        run: npx turbo run type-check
-
       - name: Upload Prisma client dirs (debug)
         if: failure()
         uses: actions/upload-artifact@v4
@@ -272,6 +267,10 @@ jobs:
       - name: Build shared packages
         run: npm run build:packages
 
+      - name: Type check (force no stale cache)
+        env:
+          TURBO_FORCE: "true"
+        run: npx turbo run type-check
 
       - name: Validate configuration
         run: |
