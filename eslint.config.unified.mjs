@@ -168,16 +168,17 @@ const eslintConfig = [
         ]
       }],
 
-      // Logging policy - warn for packages (legacy code)
-      "no-console": "warn",
+      // Logging policy - minimal logging in packages
+      "no-console": ["error", {
+        allow: ["warn", "error"]
+      }],
 
-      // TypeScript rules - warn for packages (baseline)
+      // TypeScript rules - strict for packages
       "@typescript-eslint/no-unused-vars": "off", // Handled by TS
-      "@typescript-eslint/no-explicit-any": "warn", // Legacy code baseline
-      "@typescript-eslint/no-require-imports": "warn", // Allow dynamic requires
+      "@typescript-eslint/no-explicit-any": "error",
 
       // Package specific
-      "import/no-anonymous-default-export": "warn", // Legacy code
+      "import/no-anonymous-default-export": "error",
     },
   },
 
