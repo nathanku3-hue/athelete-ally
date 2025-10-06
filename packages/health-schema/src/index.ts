@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import { join } from 'path';
 
 export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
 
@@ -112,7 +111,7 @@ export function createUnhealthyHealthResponse(options: HealthCheckOptions, reaso
  * Express.js health endpoint handler
  */
 export function createExpressHealthHandler(options: HealthCheckOptions) {
-  return (req: any, res: any) => {
+  return (_req: any, res: any) => {
     const health = createHealthResponse(options);
     res.status(health.ok ? 200 : 503).json(health);
   };
@@ -122,7 +121,7 @@ export function createExpressHealthHandler(options: HealthCheckOptions) {
  * Fastify health endpoint handler
  */
 export function createFastifyHealthHandler(options: HealthCheckOptions) {
-  return async (request: any, reply: any) => {
+  return async (_request: any, reply: any) => {
     const health = createHealthResponse(options);
     reply.status(health.ok ? 200 : 503).send(health);
   };
