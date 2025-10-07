@@ -156,7 +156,7 @@ export class AsyncPlanGenerator {
     this.isProcessing = true;
 
     while (this.taskQueue.length > 0) {
-      const _task = this.taskQueue.shift();
+      const task = this.taskQueue.shift();
       if (!task) break;
 
       // 检查并发限制

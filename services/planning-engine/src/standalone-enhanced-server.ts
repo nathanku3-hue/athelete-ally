@@ -284,7 +284,7 @@ server.post('/api/v1/plans/enhanced/generate', {
       }
     }
   }
-}, async (request, _reply) => {
+}, async (request, reply) => {
   try {
     const { userId, preferences } = request.body as any;
     
@@ -392,7 +392,7 @@ server.post('/api/v1/plans/feedback/rpe', {
       }
     }
   }
-}, async (request, _reply) => {
+}, async (request, reply) => {
   try {
     const feedback = request.body as any;
     
@@ -483,7 +483,7 @@ server.post('/api/v1/plans/feedback/performance', {
       }
     }
   }
-}, async (request, _reply) => {
+}, async (request, reply) => {
   try {
     const metrics = request.body as any;
     
@@ -552,7 +552,7 @@ server.get('/api/v1/plans/:planId/adaptations', {
       }
     }
   }
-}, async (request, _reply) => {
+}, async (request, reply) => {
   try {
     const { planId } = request.params as any;
 
