@@ -92,7 +92,10 @@
     "lint:ci": "eslint . -f compact",
     "deps:lint": "syncpack list-mismatches && syncpack lint-semver-ranges",
     "deps:fix": "syncpack format && syncpack fix-mismatches",
-    "verify:generated:report": "node -e \"process.exit(0)\""
+    "verify:generated:report": "node -e \"process.exit(0)\"",
+    "scan:client-bundle": "tsx scripts/scan-client-bundle.ts",
+    "scan:console": "tsx scripts/scan-console-packages.ts",
+    "codemod:logger": "tsx scripts/migrate-console-to-logger.ts"
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [
