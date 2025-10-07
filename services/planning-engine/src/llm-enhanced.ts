@@ -332,7 +332,7 @@ function generateMockEnhancedPlan(request: EnhancedPlanGenerationRequest): Enhan
 
 function generateMockMicrocycles(trainingIntent: TrainingIntent) {
   const microcycles = [];
-  for (let week = 1; week <= 12; week++) {
+  for (let _week = 1; week <= 12; week++) {
     microcycles.push({
       weekNumber: week,
       name: `Week ${week}`,
@@ -350,7 +350,7 @@ function generateMockSessions(trainingIntent: TrainingIntent, week: number) {
   const sessions = [];
   const daysPerWeek = trainingIntent.timeConstraints.availableDays;
   
-  for (let day = 1; day <= daysPerWeek; day++) {
+  for (let _day = 1; day <= daysPerWeek; day++) {
     sessions.push({
       dayOfWeek: day,
       name: `Training Session ${day}`,

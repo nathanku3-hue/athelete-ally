@@ -8,10 +8,10 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-import { Prisma } from '../prisma/generated/client';
-import { OnboardingCompletedEvent, PlanGenerationRequestedEvent, PlanGeneratedEvent } from '@athlete-ally/contracts';
+// import { Prisma } from '../prisma/generated/client';
+import { OnboardingCompletedEvent, PlanGenerationRequestedEvent } from '@athlete-ally/contracts';
 import { toPlanGenerationRequest, toPlanGenerationRequestFromRequested } from './validation/plan-request.js';
-import { businessMetrics, tracePlanGeneration, traceLLMCall, traceDatabaseOperation } from './telemetry.js';
+import { businessMetrics, tracePlanGeneration } from './telemetry.js';
 import { eventProcessor } from './events/processor.js';
 import { eventPublisher } from './events/publisher.js';
 import { concurrencyController } from './concurrency/controller.js';
@@ -23,7 +23,7 @@ import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
 import apiDocsRoutes from './routes/api-docs.js';
 // Error handling and performance monitoring integrated into server hooks
 // 使用统一的shared包组件
-import { SecureIdGenerator, authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { register } from 'prom-client';
 
 // 定义类型（从 index.ts 移动过来）
@@ -363,7 +363,7 @@ server.get('/concurrency/status', async (request, reply) => {
 });
 
 // 获取队列状态端点
-server.get('/queue/status', async (request, reply) => {
+server.get('/queue/status', async (_request, reply) => {
   try {
     const queueStatus = asyncPlanGenerator.getQueueStatus();
     const dbMetrics = await databaseOptimizer.getPerformanceMetrics();
@@ -380,7 +380,7 @@ server.get('/queue/status', async (request, reply) => {
 });
 
 // 清理缓存端点
-server.post('/cache/cleanup', async (request, reply) => {
+server.post('/cache/cleanup', async (_request, reply) => {
   try {
     await asyncPlanGenerator.cleanupCache();
     const cleanupResult = await databaseOptimizer.cleanupExpiredData();

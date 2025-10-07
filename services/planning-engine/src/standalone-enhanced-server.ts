@@ -70,7 +70,7 @@ server.get('/health', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   return {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -100,7 +100,7 @@ server.get('/health/detailed', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   const memoryUsage = process.memoryUsage();
   
   return {
@@ -156,7 +156,7 @@ server.get('/health/ready', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   return {
     status: 'ready',
     message: 'Service is ready to accept requests'
@@ -178,7 +178,7 @@ server.get('/health/live', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   return {
     status: 'alive',
     message: 'Service is alive'
@@ -197,7 +197,7 @@ server.get('/metrics', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   const memoryUsage = process.memoryUsage();
   
   return {
@@ -284,7 +284,7 @@ server.post('/api/v1/plans/enhanced/generate', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   try {
     const { userId, preferences } = request.body as any;
     
@@ -392,7 +392,7 @@ server.post('/api/v1/plans/feedback/rpe', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   try {
     const feedback = request.body as any;
     
@@ -483,7 +483,7 @@ server.post('/api/v1/plans/feedback/performance', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   try {
     const metrics = request.body as any;
     
@@ -552,7 +552,7 @@ server.get('/api/v1/plans/:planId/adaptations', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (request, _reply) => {
   try {
     const { planId } = request.params as any;
     
@@ -639,7 +639,7 @@ server.post('/api/v1/plans/:planId/adaptations/apply', {
   try {
     const { planId } = request.params as any;
     const { adaptations } = request.body as any;
-    
+
     // 模拟调整应用
     const result = {
       planId,

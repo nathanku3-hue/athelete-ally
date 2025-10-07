@@ -314,7 +314,7 @@ export class HealthChecker {
 // 健康检查路由
 export function setupHealthRoutes(fastify: FastifyInstance, healthChecker: HealthChecker) {
   // 基础健康检查
-  fastify.get('/health', async (request, reply) => {
+  fastify.get('/health', async (_request, reply) => {
     healthChecker.recordRequest();
     
     try {
@@ -336,7 +336,7 @@ export function setupHealthRoutes(fastify: FastifyInstance, healthChecker: Healt
   });
 
   // 详细健康检查
-  fastify.get('/health/detailed', async (request, reply) => {
+  fastify.get('/health/detailed', async (_request, reply) => {
     healthChecker.recordRequest();
     
     try {
@@ -374,7 +374,7 @@ export function setupHealthRoutes(fastify: FastifyInstance, healthChecker: Healt
   });
 
   // 就绪检查
-  fastify.get('/health/ready', async (request, reply) => {
+  fastify.get('/health/ready', async (_request, reply) => {
     healthChecker.recordRequest();
     
     try {
@@ -410,7 +410,7 @@ export function setupHealthRoutes(fastify: FastifyInstance, healthChecker: Healt
   });
 
   // 存活检查
-  fastify.get('/health/live', async (request, reply) => {
+  fastify.get('/health/live', async (_request, reply) => {
     healthChecker.recordRequest();
     
     return reply.status(200).send({

@@ -4,7 +4,7 @@ import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
-import { Prisma } from '../../prisma/generated/client/index.js';
+// import { Prisma } from '../../prisma/generated/client/index.js';
 // 使用统一的日志记录
 // 使用console进行日志记录，避免循环依赖
 
@@ -156,7 +156,7 @@ export class AsyncPlanGenerator {
     this.isProcessing = true;
 
     while (this.taskQueue.length > 0) {
-      const task = this.taskQueue.shift();
+      const _task = this.taskQueue.shift();
       if (!task) break;
 
       // 检查并发限制

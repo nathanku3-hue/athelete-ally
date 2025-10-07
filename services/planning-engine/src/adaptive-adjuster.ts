@@ -10,7 +10,7 @@
  * - 恢复状态评估
  */
 
-import { EnhancedTrainingPlan, EnhancedSessionSchema } from './llm-enhanced.js';
+import { EnhancedTrainingPlan } from './llm-enhanced.js';
 import { z } from 'zod';
 
 export interface RPEFeedback {

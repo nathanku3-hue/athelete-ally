@@ -69,7 +69,7 @@ export class PerformanceMonitor {
     });
 
     // 性能指标端点
-    fastify.get('/api/metrics/performance', async (request, reply) => {
+    fastify.get('/api/metrics/performance', async (_request, reply) => {
       const performanceData = {
         uptime: Date.now() - this.startTime,
         routes: Object.fromEntries(this.metrics),
@@ -82,7 +82,7 @@ export class PerformanceMonitor {
     });
 
     // 实时性能监控端点
-    fastify.get('/api/metrics/realtime', async (request, reply) => {
+    fastify.get('/api/metrics/realtime', async (_request, reply) => {
       const realtimeData = {
         timestamp: new Date().toISOString(),
         activeRequests: this.requestTimes.size,
@@ -94,7 +94,7 @@ export class PerformanceMonitor {
     });
 
     // 性能健康检查
-    fastify.get('/api/metrics/health', async (request, reply) => {
+    fastify.get('/api/metrics/health', async (_request, reply) => {
       const health = this.getPerformanceHealth();
       const statusCode = health.status === 'healthy' ? 200 : 503;
       
