@@ -132,7 +132,13 @@ const eslintConfig = [
         ]
       }]
     }
-  },
+  },  ,
+  // Packages: enforce no-console=error
+  {
+    files: ["packages/**/*.{ts,tsx,js,jsx}"],
+    rules: { "no-console": "error" }
+  }
 ];
 
 export default eslintConfig;
+
