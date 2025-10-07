@@ -4,5 +4,12 @@
   "compilerOptions": {
     "noUnusedLocals": false,
     "noUnusedParameters": false
-  }
+  },
+  "include": [
+    "../../apps/**/*.ts",
+    "../../apps/**/*.tsx",
+    "../../services/**/*.ts",
+    "../../packages/**/*.ts",
+    "../../scripts/**/*.ts"
+  ]
 }
