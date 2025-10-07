@@ -1,0 +1,30 @@
+{
+  "name": "@athlete-ally/logger",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./browser": {
+      "types": "./src/adapters/browser.ts",
+      "default": "./src/adapters/browser.ts"
+    },
+    "./server": {
+      "types": "./src/adapters/node.ts",
+      "default": "./src/adapters/node.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint -c ../../eslint.config.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
