@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '../../prisma/generated/client';
 import { ReadinessTodaySchema, ReadinessRangeSchema, ReadinessDriver } from '@athlete-ally/shared-types';
 
@@ -68,8 +68,8 @@ export async function readinessRoutes(fastify: FastifyInstance) {
       };
 
       // Validate response with Zod schema
-      const validatedResponse = ReadinessTodaySchema.parse(response);
-      
+      ReadinessTodaySchema.parse(response);
+
       return reply.code(200).send(response);
 
     } catch (error: any) {
@@ -138,8 +138,8 @@ export async function readinessRoutes(fastify: FastifyInstance) {
       }));
 
       // Validate response with Zod schema
-      const validatedResponse = ReadinessRangeSchema.parse(response);
-      
+      ReadinessRangeSchema.parse(response);
+
       return reply.code(200).send(response);
 
     } catch (error: any) {
@@ -149,7 +149,7 @@ export async function readinessRoutes(fastify: FastifyInstance) {
   });
 
   // Health check endpoint
-  fastify.get('/health', async (request, reply) => {
+  fastify.get('/health', async (_request, reply) => {
     try {
       // Test database connection
       await prisma.$queryRaw`SELECT 1`;
@@ -172,7 +172,7 @@ export async function readinessRoutes(fastify: FastifyInstance) {
   });
 
   // Metrics endpoint (placeholder)
-  fastify.get('/metrics', async (request, reply) => {
+  fastify.get('/metrics', async (_request, reply) => {
     reply.type('text/plain');
     return '# metrics placeholder\n';
   });

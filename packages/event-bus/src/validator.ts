@@ -11,7 +11,7 @@ export interface ValidationResult {
 
 export class EventValidator {
   private ajv: Ajv;
-  private schemaCache: Map<string, any> = new Map();
+  private schemaCache: Map<string, unknown> = new Map();
   private cacheHits = 0;
   private cacheMisses = 0;
 
@@ -30,7 +30,7 @@ export class EventValidator {
     addFormats(this.ajv);
   }
 
-  async validateEvent(topic: string, event: any): Promise<ValidationResult> {
+  async validateEvent(topic: string, event: unknown): Promise<ValidationResult> {
     if (!config.ENABLE_SCHEMA_VALIDATION) {
       return { valid: true };
     }
@@ -67,7 +67,7 @@ export class EventValidator {
     }
   }
 
-  private async getSchema(topic: string): Promise<any> {
+  private async getSchema(topic: string): Promise<unknown> {
     const cacheKey = `schema:${topic}`;
     
     // 检查缓存
@@ -96,7 +96,7 @@ export class EventValidator {
     return schema;
   }
 
-  private getTopicSchema(topic: string): any {
+  private getTopicSchema(topic: string): unknown {
     // 使用contracts包中的schema定义作为单一事实源
     const schemaKey = topic as EventSchemaKey;
     return EventSchemas[schemaKey] || null;

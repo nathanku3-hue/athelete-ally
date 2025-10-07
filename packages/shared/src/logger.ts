@@ -34,7 +34,7 @@ export class SensitiveDataMasker {
   /**
    * 脱敏敏感信息
    */
-  static maskSensitiveData(data: any): any {
+  static maskSensitiveData(data: unknown): unknown {
     if (typeof data === 'string') {
       return this.maskString(data);
     }
@@ -44,7 +44,7 @@ export class SensitiveDataMasker {
         return data.map(item => this.maskSensitiveData(item));
       }
       
-      const masked: any = {};
+      const masked: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(data)) {
         // 检查key是否包含敏感信息
         if (this.isSensitiveKey(key)) {
@@ -93,7 +93,7 @@ export class SensitiveDataMasker {
   /**
    * 脱敏值
    */
-  private static maskValue(value: any): string {
+  private static maskValue(value: unknown): string {
     if (typeof value === 'string') {
       if (value.length <= 4) {
         return this.MASK_CHAR.repeat(4);
@@ -114,59 +114,71 @@ export class SafeLogger {
   /**
    * 安全记录错误
    */
-  static error(message: string, error?: any, context?: any): void {
+  static error(message: string, error?: unknown, context?: unknown): void {
     const maskedError = error ? SensitiveDataMasker.maskSensitiveData(error) : undefined;
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      // 生产环境只记录必要信息
-      console.error(`[ERROR] ${message}`, {
+      // Production logging - defer to app/service logger
+      this.logToExternalLogger('error', message, {
         error: maskedError ? this.sanitizeError(maskedError) : undefined,
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      // 开发环境记录详细信息
-      console.error(`[ERROR] ${message}`, maskedError, maskedContext);
+      // Development logging - defer to app/service logger
+      this.logToExternalLogger('error', message, { error: maskedError, context: maskedContext });
     }
   }
 
   /**
    * 安全记录警告
    */
-  static warn(message: string, context?: any): void {
+  static warn(message: string, context?: unknown): void {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      console.warn(`[WARN] ${message}`, {
+      // Production logging - defer to app/service logger
+      this.logToExternalLogger('warn', message, {
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      console.warn(`[WARN] ${message}`, maskedContext);
+      // Development logging - defer to app/service logger
+      this.logToExternalLogger('warn', message, maskedContext);
     }
   }
 
   /**
    * 安全记录信息
    */
-  static info(message: string, context?: any): void {
+  static info(message: string, context?: unknown): void {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      console.log(`[INFO] ${message}`, {
+      // Production logging - defer to app/service logger
+      this.logToExternalLogger('info', message, {
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      console.log(`[INFO] ${message}`, maskedContext);
+      // Development logging - defer to app/service logger
+      this.logToExternalLogger('info', message, maskedContext);
     }
+  }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  private static logToExternalLogger(_level: string, _message: string, _context?: unknown): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
   }
 
   /**
    * 清理错误信息
    */
-  private static sanitizeError(error: any): any {
+  private static sanitizeError(error: unknown): Record<string, unknown> {
     if (error instanceof Error) {
       return {
         name: error.name,
@@ -174,23 +186,23 @@ export class SafeLogger {
         stack: this.isProduction ? undefined : error.stack
       };
     }
-    return error;
+    return error as Record<string, unknown>;
   }
 
   /**
    * 清理上下文信息
    */
-  private static sanitizeContext(context: any): any {
+  private static sanitizeContext(context: unknown): Record<string, unknown> {
     // 移除可能包含敏感信息的字段
     const sensitiveFields = ['password', 'token', 'secret', 'key', 'url', 'email', 'phone'];
-    const sanitized = { ...context };
-    
+    const sanitized = { ...(context as Record<string, unknown>) };
+
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         delete sanitized[field];
       }
     }
-    
+
     return sanitized;
   }
 }

@@ -34,7 +34,7 @@ export class CollaborationManager {
   private users = new Map<string, User>();
   private cursors = new Map<string, CursorPosition>();
   private selections = new Map<string, Selection>();
-  private eventHandlers = new Map<string, Function[]>();
+  private eventHandlers = new Map<string, ((...args: any[]) => void)[]>();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -206,14 +206,14 @@ export class CollaborationManager {
   }
 
   // 事件监听
-  on(event: string, handler: Function): void {
+  on(event: string, handler: (...args: any[]) => void): void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, []);
     }
     this.eventHandlers.get(event)!.push(handler);
   }
 
-  off(event: string, handler: Function): void {
+  off(event: string, handler: (...args: any[]) => void): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
       const index = handlers.indexOf(handler);

@@ -36,7 +36,7 @@ export interface TrainingPlan {
  * 
  * @todo 实现真实的LLM集成
  */
-export async function generateTrainingPlan(request: TrainingPlanRequest): Promise<TrainingPlan> {
+export async function generateTrainingPlan(_request: TrainingPlanRequest): Promise<TrainingPlan> {
   // TODO: 实现真实的LLM集成
   throw new Error('LLM integration not implemented yet');
 }

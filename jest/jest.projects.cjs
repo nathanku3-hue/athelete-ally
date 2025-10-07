@@ -24,5 +24,6 @@ module.exports = {
   maxWorkers: process.env.CI === 'true' ? 1 : '50%',
   // runInBand is handled by CLI, not config
   cache: true,
-  verbose: process.env.CI === 'true'
+  // Ensure proper test environment setup
+  testEnvironment: 'node'
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,8 +71,8 @@ export function AdvancedSearch({
           <Input
             placeholder={placeholder}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
             className="pl-10"
           />
         </div>
@@ -120,7 +120,7 @@ export function AdvancedSearch({
                 <button
                   // Provide an accessible name so tests and screen readers can find the control
                   aria-label="移除"
-                  onClick={() => removeFilter(key)}
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => removeFilter(key)}
                   className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
@@ -153,7 +153,7 @@ export function AdvancedSearch({
                 {filter.type === 'select' && filter.options && (
                   <select
                     value={activeFilters[filter.key] || ''}
-                    onChange={(e) => updateFilter(filter.key, e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateFilter(filter.key, e.target.value)}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   >
                     <option value="">全部</option>
@@ -172,7 +172,7 @@ export function AdvancedSearch({
                         <input
                           type="checkbox"
                           checked={activeFilters[filter.key]?.includes(option.value) || false}
-                          onChange={(e) => {
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const currentValues = activeFilters[filter.key] || [];
                             const newValues = e.target.checked
                               ? [...currentValues, option.value]
@@ -193,7 +193,7 @@ export function AdvancedSearch({
                       type="number"
                       placeholder="最小值"
                       value={activeFilters[filter.key]?.min || ''}
-                      onChange={(e) => updateFilter(filter.key, {
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateFilter(filter.key, {
                         ...activeFilters[filter.key],
                         min: e.target.value ? Number(e.target.value) : undefined,
                       })}
@@ -205,7 +205,7 @@ export function AdvancedSearch({
                       type="number"
                       placeholder="最大值"
                       value={activeFilters[filter.key]?.max || ''}
-                      onChange={(e) => updateFilter(filter.key, {
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateFilter(filter.key, {
                         ...activeFilters[filter.key],
                         max: e.target.value ? Number(e.target.value) : undefined,
                       })}

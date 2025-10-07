@@ -103,7 +103,7 @@ export default function FeedbackPage() {
           <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Thank You!</h1>
           <p className="text-gray-400 mb-6">
-            Your feedback has been submitted successfully. We'll review it and get back to you soon.
+            Your feedback has been submitted successfully. We&apos;ll review it and get back to you soon.
           </p>
           <button
             onClick={() => setIsSubmitted(false)}
@@ -257,7 +257,7 @@ export default function FeedbackPage() {
             <h3 className="text-lg font-semibold mb-4">Contact Information (Optional)</h3>
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                Email (if you'd like us to follow up)
+                Email (if you&apos;d like us to follow up)
               </label>
               <input
                 type="email"
@@ -295,8 +295,8 @@ export default function FeedbackPage() {
         <div className="mt-8 bg-blue-600/20 border border-blue-500/30 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-2 text-blue-400">Beta Testing Program</h3>
           <p className="text-blue-300 text-sm">
-            You're part of our beta testing program! Your feedback is incredibly valuable to us. 
-            We'll review all feedback and use it to improve the product. Thank you for helping us build something amazing!
+            You&apos;re part of our beta testing program! Your feedback is incredibly valuable to us. 
+            We&apos;ll review all feedback and use it to improve the product. Thank you for helping us build something amazing!
           </p>
         </div>
       </div>

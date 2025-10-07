@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Target, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, Target, AlertCircle } from 'lucide-react';
 
 interface CompetitionDatePickerProps {
   value: string;
@@ -16,13 +16,11 @@ export default function CompetitionDatePicker({
   seasonPhase,
   className = ''
 }: CompetitionDatePickerProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(value || '');
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
     onChange(date);
-    setIsOpen(false);
   };
 
   const getDateRecommendations = (phase: string) => {

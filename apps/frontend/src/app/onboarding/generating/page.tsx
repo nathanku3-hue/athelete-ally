@@ -152,7 +152,7 @@ function GeneratingContent() {
         {/* What's happening section */}
         {currentStatus.status === 'processing' && (
           <div className="mb-8 p-6 bg-gray-800 rounded-lg text-left">
-            <h3 className="text-lg font-semibold mb-4 text-center">What's happening?</h3>
+            <h3 className="text-lg font-semibold mb-4 text-center">What&apos;s happening?</h3>
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold mt-1">1</div>

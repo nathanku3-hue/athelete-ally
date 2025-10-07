@@ -140,7 +140,7 @@ describe('Planning Engine Performance Tests', () => {
       const request = {
         userId: 'test-user-2',
         proficiency: 'beginner',
-        season: 'pre-season',
+        season: 'preseason',
         availabilityDays: 4,
         weeklyGoalDays: 4,
         equipment: ['barbell', 'plates'],

@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCorsOptions, addCorsHeaders } from '@/lib/cors';
+import type { 
+  FatigueLevel, 
+  FatigueAssessmentInput, 
+  FatigueAssessmentResult,
+  FatigueStatusResponse,
+  FatigueFactor
+} from '@athlete-ally/shared-types';
+import { 
+  validateFatigueAssessmentInput,
+  validateFatigueAssessmentResult,
+  validateFatigueStatusResponse
+} from '@athlete-ally/shared-types/schemas';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching user fatigue status...');
+    // 获取用户疲劳状态
     
     // 在真实实现中，这里会从数据库获取用户的疲劳度数据
     // 目前使用模拟数据
-    const fatigueStatus = {
-      level: 'high' as const, // 'low', 'normal', 'high'
+    const fatigueStatus: FatigueStatusResponse = {
+      level: 'high' as FatigueLevel, // 'low', 'moderate', 'high'
       score: 8.5, // 0-10 scale
       factors: [
         {
@@ -35,7 +47,7 @@ export async function GET(request: NextRequest) {
           impact: 'high',
           description: 'Insufficient recovery between sessions'
         }
-      ],
+      ] as FatigueFactor[],
       recommendations: [
         'Consider reducing training intensity by 10-15%',
         'Increase sleep duration by 30-60 minutes',
@@ -49,16 +61,15 @@ export async function GET(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 150));
     
-    console.log('Returning fatigue status:', { 
-      level: fatigueStatus.level, 
-      score: fatigueStatus.score,
-      factorsCount: fatigueStatus.factors.length 
-    });
+    // 返回疲劳状态数据
     
     return NextResponse.json(fatigueStatus);
     
-  } catch (error) {
-    console.error('Failed to fetch fatigue status:', error);
+    } catch (error) {
+      // Log error for debugging (in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch fatigue status:', error);
+      }
     return NextResponse.json(
       { 
         error: 'Failed to fetch fatigue status',
@@ -72,9 +83,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation } = body;
     
-    console.log('Submitting fatigue assessment:', { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation });
+    // 验证输入数据
+    const validatedInput = validateFatigueAssessmentInput(body);
+    const { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation } = validatedInput;
+    
+    // Log for debugging (in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Submitting fatigue assessment:', { sleepQuality, stressLevel, muscleSoreness, energyLevel, motivation });
+    }
     
     // 在真实实现中，这里会保存用户的疲劳度评估数据
     // 并可能触发AI分析来更新疲劳度状态
@@ -88,9 +105,9 @@ export async function POST(request: NextRequest) {
       (10 - motivation) * 0.1
     );
     
-    const level = fatigueScore >= 7 ? 'high' : fatigueScore >= 4 ? 'normal' : 'low';
+    const level: FatigueLevel = fatigueScore >= 7 ? 'high' : fatigueScore >= 4 ? 'moderate' : 'low';
     
-    const result = {
+    const result: FatigueAssessmentResult = {
       success: true,
       fatigueScore: Math.round(fatigueScore * 10) / 10,
       level,
@@ -101,12 +118,10 @@ export async function POST(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    console.log('Fatigue assessment result:', result);
-    
     return NextResponse.json(result);
     
   } catch (error) {
-    console.error('Failed to submit fatigue assessment:', error);
+    // 疲劳评估提交失败
     return NextResponse.json(
       { 
         error: 'Failed to submit fatigue assessment',

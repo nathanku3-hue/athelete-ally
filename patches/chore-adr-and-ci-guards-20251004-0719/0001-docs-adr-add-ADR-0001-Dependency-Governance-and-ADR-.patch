@@ -1,0 +1,63 @@
+From 5387bdffe0f59c8d042576b03e706ca92ede7612 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 15:13:55 +0800
+Subject: [PATCH 1/2] docs(adr): add ADR-0001 (Dependency Governance) and
+ ADR-0002 (Deterministic Generators)
+
+---
+ docs/adr/ADR-0001-deps-governance.md          | 18 ++++++++++++++++++
+ docs/adr/ADR-0002-deterministic-generators.md | 17 +++++++++++++++++
+ 2 files changed, 35 insertions(+)
+ create mode 100644 docs/adr/ADR-0001-deps-governance.md
+ create mode 100644 docs/adr/ADR-0002-deterministic-generators.md
+
+diff --git a/docs/adr/ADR-0001-deps-governance.md b/docs/adr/ADR-0001-deps-governance.md
+new file mode 100644
+index 0000000..0c674cf
+--- /dev/null
++++ b/docs/adr/ADR-0001-deps-governance.md
+@@ -0,0 +1,18 @@
++# ADR-0001: Dependency Governance (Stacks & Cohesive Upgrades)
++
++- Status: Accepted
++- Date: 2025-10-04
++- Context
++  - Major stacks (OpenTelemetry, NATS, Fastify, Jest) drifted; ad-hoc overrides introduced.
++  - CI breakages from peer conflicts; difficult to upgrade coherently.
++- Decision
++  - Establish stack BOMs at root; pin families coherently across workspaces.
++  - Use Renovate (or Dependabot) to group stack updates into single PRs.
++  - Use syncpack to enforce consistent ranges across packages.
++  - Overrides allowed only as tactical pins; removed after cohesive upgrade.
++- Consequences
++  - Add CI jobs: deps-consistency (report-only), later blocking.
++  - Document upgrade cadence and rollbacks.
++- Rollout
++  - Week 01: Introduce Renovate config; add syncpack and CI report-only job.
++  - Week 12: Cohesive OTel upgrade; remove temporary overrides; drop legacy-peer-deps from CI.
+diff --git a/docs/adr/ADR-0002-deterministic-generators.md b/docs/adr/ADR-0002-deterministic-generators.md
+new file mode 100644
+index 0000000..cb37206
+--- /dev/null
++++ b/docs/adr/ADR-0002-deterministic-generators.md
+@@ -0,0 +1,17 @@
++# ADR-0002: Deterministic Generators in CI
++
++- Status: Accepted
++- Date: 2025-10-04
++- Context
++  - Generated outputs (dashboards index, openapi/alerts/docs/registry) cause noise if non-deterministic.
++- Decision
++  - All generators must produce byte-stable output (TZ=UTC, stable sort, no now()).
++  - CI will re-run generators and fail on drift (after initial report-only period).
++- Consequences
++  - Add verify-generated CI job (report-only now, blocking later).
++- Implementation Notes
++  - dashboards index: stable sort; generatedAt = max git commit timestamp; sha256 of raw bytes.
++  - Normalize line endings; avoid locale/timezone variance; OS-agnostic.
++- Rollout
++  - Week 01: Add report-only job with artifacts on diff.
++  - Week 12: Flip to blocking (git diff --exit-code) once baseline stable.
+-- 
+2.43.0
+

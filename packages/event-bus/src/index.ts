@@ -1,8 +1,7 @@
 import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
-import { context, propagation } from '@opentelemetry/api';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
-import { eventValidator, ValidationResult } from './validator.js';
-import { config, nanos, getStreamConfigs, AppStreamConfig, getStreamMode, getStreamCandidates } from './config.js';
+import { eventValidator } from './validator.js';
+import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
 
 // Event Bus 指标
@@ -66,11 +65,14 @@ function sameSet(a: string[], b: string[]): boolean {
 }
 
 /** Determine if stream needs update (subjects/retention/replicas/etc.) */
-export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): boolean {
-  const ex = existing.config;
+export function streamNeedsUpdate(existing: unknown, desired: AppStreamConfig): boolean {
+  if (!existing || typeof existing !== 'object' || !('config' in existing)) {
+    return true;
+  }
+  const ex = existing.config as Record<string, unknown>;
   const d = desired;
 
-  const subjectsChanged = !sameSet(ex.subjects ?? [], d.subjects);
+  const subjectsChanged = !sameSet((ex.subjects ?? []) as string[], d.subjects);
   const ageChanged = Number(ex.max_age ?? 0) !== nanos(d.maxAgeMs);
   const replChanged = Number(ex.num_replicas ?? 1) !== d.replicas;
   const storageChanged = (ex.storage ?? "file") !== (d.storage ?? "file");
@@ -83,15 +85,15 @@ export function streamNeedsUpdate(existing: any, desired: AppStreamConfig): bool
 }
 
 /** Ensure stream exists with desired config (update-if-different) */
-export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void> {
+export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig): Promise<void> {
   // Build strict config with only supported fields
   const desired = {
     name: cfg.name,
     subjects: cfg.subjects,
-    retention: "limits",
+    retention: "limits" as const,
     max_age: nanos(cfg.maxAgeMs),
-    storage: cfg.storage ?? "file",
-    discard: cfg.discard ?? "old",
+    storage: (cfg.storage ?? "file") as "file" | "memory",
+    discard: (cfg.discard ?? "old") as "old" | "new",
     duplicate_window: nanos(cfg.duplicateWindowMs ?? 120_000),
     replicas: cfg.replicas,
   };
@@ -100,44 +102,47 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
     const info = await jsm.streams.info(cfg.name);
 
     if (streamNeedsUpdate(info, cfg)) {
-      console.log(`[event-bus] Updating stream: ${cfg.name}`);
-      await jsm.streams.update(cfg.name, desired);
-      console.log(`[event-bus] Stream updated: ${cfg.name}`);
+      console.warn(`[event-bus] Updating stream: ${cfg.name}`);
+      await jsm.streams.update(cfg.name, desired as never);
+      console.warn(`[event-bus] Stream updated: ${cfg.name}`);
     } else {
-      console.log(`[event-bus] Stream up-to-date: ${cfg.name}`);
+      console.warn(`[event-bus] Stream up-to-date: ${cfg.name}`);
     }
-  } catch (err: any) {
-    if (String(err?.message || "").includes("stream not found") ||
-        String(err?.message || "").includes("not found")) {
-      console.log(`[event-bus] Creating stream: ${cfg.name}`);
-      
+  } catch (err: unknown) {
+    const errObj = err as { message?: string };
+    if (String(errObj.message || "").includes("stream not found") ||
+        String(errObj.message || "").includes("not found")) {
+      console.warn(`[event-bus] Creating stream: ${cfg.name}`);
+
       // Try creating with full config first
       try {
-        await jsm.streams.add(desired);
-        console.log(`[event-bus] Stream created: ${cfg.name}`);
+        await jsm.streams.add(desired as never);
+        console.warn(`[event-bus] Stream created: ${cfg.name}`);
         return;
-      } catch (createErr: any) {
+      } catch (createErr: unknown) {
         // Handle invalid JSON error (err_code 10025) with fallback retries
-        if (createErr?.api_error?.err_code === 10025) {
-          console.log(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
-          
+        const createErrObj = createErr as { api_error?: { err_code?: number } };
+        if (createErrObj.api_error?.err_code === 10025) {
+          console.warn(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
+
           // Retry 1: Remove duplicate_window (older servers don't support it)
           const fallback1 = { ...desired };
-          delete (fallback1 as any).duplicate_window;
+          delete (fallback1 as Record<string, unknown>).duplicate_window;
           try {
-            await jsm.streams.add(fallback1);
-            console.log(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
+            await jsm.streams.add(fallback1 as never);
+            console.warn(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
             return;
-          } catch (fallback1Err: any) {
-            if (fallback1Err?.api_error?.err_code === 10025) {
+          } catch (fallback1Err: unknown) {
+            const fallback1ErrObj = fallback1Err as { api_error?: { err_code?: number } };
+            if (fallback1ErrObj.api_error?.err_code === 10025) {
               // Retry 2: Remove discard (last resort)
               const fallback2 = { ...fallback1 };
-              delete (fallback2 as any).discard;
+              delete (fallback2 as Record<string, unknown>).discard;
               try {
-                await jsm.streams.add(fallback2);
-                console.log(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
+                await jsm.streams.add(fallback2 as never);
+                console.warn(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
                 return;
-              } catch (fallback2Err: any) {
+              } catch (fallback2Err: unknown) {
                 console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
                 throw fallback2Err;
               }
@@ -157,7 +162,7 @@ export async function ensureStream(jsm: any, cfg: AppStreamConfig): Promise<void
 }
 
 /** Ensure all configured streams exist */
-export async function ensureAllStreams(jsm: any): Promise<void> {
+export async function ensureAllStreams(jsm: JetStreamManager): Promise<void> {
   const configs = getStreamConfigs();
   for (const cfg of configs) {
     await ensureStream(jsm, cfg);
@@ -170,7 +175,7 @@ export class EventBus {
   private jsm: JetStreamManager | null = null;
 
   // 通用发布方法
-  private async publishEvent(topic: string, event: any, natsTopic: string) {
+  private async publishEvent(topic: string, event: unknown, natsTopic: string) {
     if (!this.js) throw new Error('JetStream not initialized');
     
     const startTime = Date.now();
@@ -194,7 +199,7 @@ export class EventBus {
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
       
       const data = JSON.stringify(event);
-      console.log(`Publishing to subject: ${natsTopic}`);
+      console.warn(`Publishing to subject: ${natsTopic}`);
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
       const duration = (Date.now() - startTime) / 1000;
@@ -205,7 +210,7 @@ export class EventBus {
       }, duration);
       
       eventBusMetrics.eventsPublished.inc({ topic, status: 'success' });
-      console.log(`Published ${topic} event:`, event.eventId);
+      console.warn(`Published ${topic} event:`, (event as { eventId?: string }).eventId);
       
     } catch (error) {
       const duration = (Date.now() - startTime) / 1000;
@@ -221,7 +226,7 @@ export class EventBus {
   }
 
   async connect(url: string = 'nats://localhost:4223', options?: { manageStreams?: boolean }) {
-    console.log(`Connecting to NATS at: ${url}`);
+    console.warn(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
@@ -230,13 +235,13 @@ export class EventBus {
     const manageStreams = options?.manageStreams ?? (process.env.FEATURE_SERVICE_MANAGES_STREAMS !== 'false');
 
     if (manageStreams) {
-      console.log('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
+      console.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
     } else {
-      console.log('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
+      console.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
     }
 
-    console.log('Connected to EventBus');
+    console.warn('Connected to EventBus');
   }
 
   private async ensureStreams() {
@@ -285,7 +290,7 @@ export class EventBus {
       durable: 'planning-engine-onboarding-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    } as never);
 
     const topic = 'onboarding_completed';
 
@@ -294,7 +299,7 @@ export class EventBus {
       while (true) {
         try {
           // 批量拉取消息
-          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
+          const messages = await (psub as unknown as { fetch: (opts: { max: number; expires: number }) => Promise<unknown[]> }).fetch({ max: 10, expires: 1000 });
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -302,14 +307,15 @@ export class EventBus {
             continue;
           }
 
-          console.log(`Processing batch of ${messages.length} OnboardingCompleted events`);
+          console.warn(`Processing batch of ${messages.length} OnboardingCompleted events`);
 
           // 并发处理消息
-          const processingPromises = messages.map(async (m: any) => {
+          const processingPromises = messages.map(async (m: unknown) => {
+            const msg = m as { data: Uint8Array; ack: () => void; nak: () => void };
             const startTime = Date.now();
-            
+
             try {
-              const eventData = JSON.parse(new TextDecoder().decode(m.data));
+              const eventData = JSON.parse(new TextDecoder().decode(msg.data));
               
               // Schema 校验
               const validation = await eventValidator.validateEvent(topic, eventData);
@@ -323,7 +329,7 @@ export class EventBus {
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
                 console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
-                m.nak();
+                msg.nak();
                 return;
               }
               
@@ -331,16 +337,16 @@ export class EventBus {
               
               const event = eventData as OnboardingCompletedEvent;
               await callback(event);
-              
+
               const duration = (Date.now() - startTime) / 1000;
               eventBusMetrics.eventProcessingDuration.observe({
                 topic,
                 operation: 'consume',
                 status: 'success'
               }, duration);
-              
+
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-              m.ack();
+              msg.ack();
               
             } catch (error) {
               const duration = (Date.now() - startTime) / 1000;
@@ -352,12 +358,12 @@ export class EventBus {
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
               console.error('Error processing OnboardingCompleted event:', error);
-              
+
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
-                m.nak();
+                msg.nak();
               } else {
-                m.ack(); // 永久失败，确认消息
+                msg.ack(); // 永久失败，确认消息
               }
             }
           });
@@ -374,17 +380,19 @@ export class EventBus {
     })();
   }
 
-  private shouldRetry(error: any): boolean {
+  private shouldRetry(error: unknown): boolean {
     // 临时错误可以重试
-    if (error.code === 'TIMEOUT' || error.code === 'CONNECTION_ERROR') {
-      return true;
+    if (error && typeof error === 'object' && 'code' in error) {
+      if (error.code === 'TIMEOUT' || error.code === 'CONNECTION_ERROR') {
+        return true;
+      }
+
+      // 业务逻辑错误不重试
+      if (error.code === 'VALIDATION_ERROR' || error.code === 'BUSINESS_LOGIC_ERROR') {
+        return false;
+      }
     }
-    
-    // 业务逻辑错误不重试
-    if (error.code === 'VALIDATION_ERROR' || error.code === 'BUSINESS_LOGIC_ERROR') {
-      return false;
-    }
-    
+
     // 默认重试
     return true;
   }
@@ -396,7 +404,7 @@ export class EventBus {
       durable: 'planning-engine-plan-gen-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    } as never);
 
     const topic = 'plan_generation_requested';
 
@@ -405,7 +413,7 @@ export class EventBus {
       while (true) {
         try {
           // 批量拉取消息
-          const messages = await (psub as any).fetch({ max: 10, expires: 1000 });
+          const messages = await (psub as unknown as { fetch: (opts: { max: number; expires: number }) => Promise<unknown[]> }).fetch({ max: 10, expires: 1000 });
           
           if (messages.length === 0) {
             // 没有消息时短暂休眠
@@ -413,14 +421,15 @@ export class EventBus {
             continue;
           }
 
-          console.log(`Processing batch of ${messages.length} PlanGenerationRequested events`);
+          console.warn(`Processing batch of ${messages.length} PlanGenerationRequested events`);
 
           // 并发处理消息
-          const processingPromises = messages.map(async (m: any) => {
+          const processingPromises = messages.map(async (m: unknown) => {
+            const msg = m as { data: Uint8Array; ack: () => void; nak: () => void };
             const startTime = Date.now();
-            
+
             try {
-              const eventData = JSON.parse(new TextDecoder().decode(m.data));
+              const eventData = JSON.parse(new TextDecoder().decode(msg.data));
               
               // Schema 校验
               const validation = await eventValidator.validateEvent(topic, eventData);
@@ -434,7 +443,7 @@ export class EventBus {
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
                 console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
-                m.nak();
+                msg.nak();
                 return;
               }
               
@@ -442,16 +451,16 @@ export class EventBus {
               
               const event = eventData as PlanGenerationRequestedEvent;
               await callback(event);
-              
+
               const duration = (Date.now() - startTime) / 1000;
               eventBusMetrics.eventProcessingDuration.observe({
                 topic,
                 operation: 'consume',
                 status: 'success'
               }, duration);
-              
+
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-              m.ack();
+              msg.ack();
               
             } catch (error) {
               const duration = (Date.now() - startTime) / 1000;
@@ -463,12 +472,12 @@ export class EventBus {
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
               console.error('Error processing PlanGenerationRequested event:', error);
-              
+
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
-                m.nak();
+                msg.nak();
               } else {
-                m.ack(); // 永久失败，确认消息
+                msg.ack(); // 永久失败，确认消息
               }
             }
           });
@@ -543,18 +552,22 @@ export class EventBus {
         existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
 
       if (needsUpdate) {
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
-        await this.jsm.consumers.add(streamName, consumerConfig as any);
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
+        await this.jsm.consumers.add(streamName, consumerConfig as never);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
       } else {
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
       }
-    } catch (error: any) {
-      if (error.code === '404' || error.message?.includes('not found')) {
+    } catch (error: unknown) {
+      const is404 = error && typeof error === 'object' && 'code' in error && error.code === '404';
+      const isNotFound = error && typeof error === 'object' && 'message' in error &&
+                         typeof error.message === 'string' && error.message.includes('not found');
+
+      if (is404 || isNotFound) {
         // Consumer doesn't exist, create it
-        console.log(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
-        await this.jsm.consumers.add(streamName, consumerConfig as any);
-        console.log(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
+        console.warn(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
+        await this.jsm.consumers.add(streamName, consumerConfig as never);
+        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
       } else {
         throw error;
       }

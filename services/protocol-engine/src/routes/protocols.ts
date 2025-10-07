@@ -1,7 +1,7 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { PrismaClient } from '../../prisma/generated/client';
 import { permissionService, Permission } from '../services/permissions';
-import { encryptionService, DataClassification } from '../services/encryption';
+import { encryptionService } from '../services/encryption';
 import { auditService, AuditAction, AuditSeverity } from '../services/audit';
 import { requirePermission, requireOwnership, AuthenticatedRequest } from '../middleware/permissions';
 

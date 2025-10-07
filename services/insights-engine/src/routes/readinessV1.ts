@@ -1,9 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { toYyyyMmDd, startOfUtcDay } from '../utils/date';
-import { PrismaClient } from '../../prisma/generated/client';
+import { PrismaClient } from '../../prisma/generated/client/index.js';
 import { PrismaRepo } from '../repo';
 import { computeAndUpsertReadiness } from '../readinessV1';
-import crypto from 'crypto';
 
 // Minimal metrics via a lightweight counters; we can swap to prom-client later
 const metrics = {

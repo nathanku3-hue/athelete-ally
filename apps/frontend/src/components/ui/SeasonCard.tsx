@@ -77,7 +77,7 @@ export default function SeasonCard({
       <div className="space-y-2 mb-4">
         <h4 className="text-sm font-semibold text-gray-300">关键要点</h4>
         <ul className="text-sm text-gray-400 space-y-1">
-          {phase.keyPoints.map((point, index) => (
+          {phase.keyPoints.map((point: string, index: number) => (
             <li key={index} className="flex items-start">
               <span className="text-blue-400 mr-2 mt-0.5">•</span>
               <span>{point}</span>
@@ -90,7 +90,7 @@ export default function SeasonCard({
       <div className="space-y-2">
         <h4 className="text-sm font-semibold text-gray-300">阶段特点</h4>
         <ul className="text-sm text-gray-400 space-y-1">
-          {phase.characteristics.map((char, index) => (
+          {phase.characteristics.map((char: string, index: number) => (
             <li key={index} className="flex items-start">
               <span className="text-green-400 mr-2 mt-0.5">✓</span>
               <span>{char}</span>

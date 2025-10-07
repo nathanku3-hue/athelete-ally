@@ -100,7 +100,9 @@ export default function SummaryPage() {
   // 如果没有数据，创建测试数据
   React.useEffect(() => {
     if (!hasAnyData && !isLoading) {
-      console.log('Summary page - no onboarding data found, creating test data');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Summary page - no onboarding data found, creating test data');
+      }
       const testData = {
         userId: 'test_user_123',
         currentStep: 5,
@@ -116,7 +118,9 @@ export default function SummaryPage() {
         fixedSchedules: []
       };
       
-      console.log('Summary page - created test data:', testData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Summary page - created test data:', testData);
+      }
       updateData(testData);
     }
   }, [hasAnyData, isLoading, updateData]);
@@ -134,7 +138,7 @@ export default function SummaryPage() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold mb-4 text-white">Welcome to Athlete Ally</h1>
-            <p className="text-gray-400 mb-2">Let's create your personalized training plan</p>
+            <p className="text-gray-400 mb-2">Let&apos;s create your personalized training plan</p>
             <p className="text-sm text-gray-500">Complete the onboarding process to get started</p>
           </div>
           

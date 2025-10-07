@@ -35,7 +35,7 @@ export const getStreamMode = (): StreamMode => {
 
   // Log mode for debugging (can be disabled with LOG_MODE=false)
   if (process.env.LOG_MODE !== 'false') {
-    console.log(`[event-bus] Stream mode: ${mode} (EVENT_STREAM_MODE="${process.env.EVENT_STREAM_MODE || '(unset)'}")`);
+    console.warn(`[event-bus] Stream mode: ${mode} (EVENT_STREAM_MODE="${process.env.EVENT_STREAM_MODE || '(unset)'}")`);
   }
 
   return mode;

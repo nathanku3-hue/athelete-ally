@@ -63,13 +63,13 @@ export class PerformanceMonitor {
     });
 
     // 错误处理
-    fastify.addHook('onError', async (request: FastifyRequest, reply: FastifyReply, error: Error) => {
+    fastify.addHook('onError', async (request: FastifyRequest, _reply: FastifyReply, _error: Error) => {
       const route = request.routerPath || request.url;
       this.recordError(route);
     });
 
     // 性能指标端点
-    fastify.get('/api/metrics/performance', async (request, reply) => {
+    fastify.get('/api/metrics/performance', async (_request, reply) => {
       const performanceData = {
         uptime: Date.now() - this.startTime,
         routes: Object.fromEntries(this.metrics),
@@ -82,7 +82,7 @@ export class PerformanceMonitor {
     });
 
     // 实时性能监控端点
-    fastify.get('/api/metrics/realtime', async (request, reply) => {
+    fastify.get('/api/metrics/realtime', async (_request, reply) => {
       const realtimeData = {
         timestamp: new Date().toISOString(),
         activeRequests: this.requestTimes.size,
@@ -94,7 +94,7 @@ export class PerformanceMonitor {
     });
 
     // 性能健康检查
-    fastify.get('/api/metrics/health', async (request, reply) => {
+    fastify.get('/api/metrics/health', async (_request, reply) => {
       const health = this.getPerformanceHealth();
       const statusCode = health.status === 'healthy' ? 200 : 503;
       
@@ -102,7 +102,7 @@ export class PerformanceMonitor {
     });
   }
 
-  private generateRequestId(request: FastifyRequest): string {
+  private generateRequestId(_request: FastifyRequest): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 

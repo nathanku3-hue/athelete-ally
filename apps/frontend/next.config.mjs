@@ -91,7 +91,7 @@ const nextConfig = {
   },
   
   // Webpack配置
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  webpack: (config, { dev, isServer }) => {
     // 生产环境优化
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
@@ -134,7 +134,11 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    externalDir: true, // monorepo-friendly
   },
+  
+  // 转译包配置
+  transpilePackages: ['@athlete-ally/health-schema'],
   
   // 服务器外部包
   serverExternalPackages: ['@prisma/client'],

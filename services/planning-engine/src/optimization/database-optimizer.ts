@@ -5,22 +5,22 @@ import { config } from '../config.js';
 // 使用console进行日志记录，避免循环依赖
 import { TrainingPlan } from '../llm.js';
 
-// 批量操作接口
-interface BatchOperation<T> {
-  operation: 'create' | 'update' | 'delete';
-  data: T;
-  table: string;
-}
+// 批量操作接口 (currently unused but may be needed in future)
+// interface BatchOperation<T> {
+//   operation: 'create' | 'update' | 'delete';
+//   data: T;
+//   table: string;
+// }
 
 // 数据库优化器
 export class DatabaseOptimizer {
   private batchSize: number;
-  private connectionPoolSize: number;
+  // private connectionPoolSize: number; // Unused currently
   private queryTimeout: number;
 
   constructor() {
     this.batchSize = config.DB_BATCH_SIZE;
-    this.connectionPoolSize = config.DB_CONNECTION_POOL_SIZE;
+    // this.connectionPoolSize = config.DB_CONNECTION_POOL_SIZE; // Unused currently
     this.queryTimeout = config.DB_QUERY_TIMEOUT_MS;
   }
 

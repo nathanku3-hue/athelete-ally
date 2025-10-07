@@ -1,0 +1,118 @@
+name: Debug Artifact Collection
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main, 'stream-*', 'chore-*', 'feat-*']
+  workflow_dispatch:
+    inputs:
+      debug_type:
+        description: 'Type of debug run'
+        required: true
+        default: 'general'
+        type: choice
+        options:
+          - general
+          - ci-failure
+          - nats-infrastructure
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  collect-debug-artifacts:
+    name: Collect Debug Artifacts
+    runs-on: ubuntu-latest
+    if:
+      ${{ github.event.workflow_run.conclusion == 'failure' || github.event_name ==
+      'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install NATS CLI (if needed)
+        run: |
+          if [ "${{ github.event.inputs.debug_type }}" = "nats-infrastructure" ]; then
+            curl -L https://github.com/nats-io/natscli/releases/latest/download/nats-ubuntu-amd64.zip -o nats.zip
+            unzip nats.zip
+            sudo mv nats /usr/local/bin/
+            nats --version
+          fi
+
+      - name: Run General Debug Collection
+        if:
+          ${{ github.event.inputs.debug_type == 'general' || github.event.inputs.debug_type == '' }}
+        run: |
+          ./scripts/debug-run.sh
+        continue-on-error: true
+
+      - name: Run CI Failure Debug Collection
+        if: ${{ github.event.inputs.debug_type == 'ci-failure' }}
+        run: |
+          ./scripts/debug-ci-failure.sh
+        continue-on-error: true
+
+      - name: Run NATS Infrastructure Debug Collection
+        if: ${{ github.event.inputs.debug_type == 'nats-infrastructure' }}
+        run: |
+          ./scripts/debug-nats-infrastructure.sh
+        continue-on-error: true
+
+      - name: Upload Debug Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name:
+            debug-artifacts-${{ github.run_id }}-${{ github.event.inputs.debug_type || 'general' }}
+          path: |
+            debug-artifacts/
+            debug-env-report.txt
+            debug-run-*.tar.gz
+            nats-debug-*.tar.gz
+          retention-days: 30
+
+      - name: Generate Debug Summary
+        if: always()
+        run: |
+          {
+            echo "## Debug Run Summary"
+            echo ""
+            echo "**Debug Type:** ${{ github.event.inputs.debug_type || 'general' }}"
+            echo "**Trigger:** ${{ github.event_name }}"
+            echo "**Git SHA:** ${{ github.sha }}"
+            echo "**Branch:** ${{ github.ref_name }}"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -d "debug-artifacts" ]; then
+            {
+              echo "**Artifacts Collected:**"
+              echo '```'
+              ls -la debug-artifacts/
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ -f "debug-env-report.txt" ]; then
+            {
+              echo "**Environment Report:**"
+              echo '```'
+              head -10 debug-env-report.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

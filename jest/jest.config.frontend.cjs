@@ -8,7 +8,8 @@ module.exports = {
   testMatch: [
     '**/__tests__/**/*.test.tsx',
     '**/__tests__/**/*.test.ts',
-    '**/tests/**/*.test.ts'
+    '**/tests/**/*.test.ts',
+    '**/contracts/**/*.test.ts'
   ],
   testPathIgnorePatterns: [
     // Exclude Playwright E2E tests from Jest runs

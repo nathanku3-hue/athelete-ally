@@ -43,13 +43,13 @@ export function useRealtime(serverUrl?: string) {
     }
   };
 
-  const on = (event: string, callback: Function) => {
+  const on = (event: string, callback: (...args: any[]) => void) => {
     if (realtimeRef.current) {
       realtimeRef.current.on(event, callback);
     }
   };
 
-  const off = (event: string, callback?: Function) => {
+  const off = (event: string, callback?: (...args: any[]) => void) => {
     if (realtimeRef.current) {
       realtimeRef.current.off(event, callback);
     }

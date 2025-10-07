@@ -6,9 +6,9 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 
 // Placeholder data for season options
 const seasonOptions = [
-    { id: 'off-season', title: 'Off-Season', description: 'Building foundational strength and skills.' },
-    { id: 'pre-season', title: 'Pre-Season', description: 'Ramping up intensity and sport-specific training.' },
-    { id: 'in-season', title: 'In-Season', description: 'Maintaining performance and managing fatigue.' },
+    { id: 'offseason', title: 'Off-Season', description: 'Building foundational strength and skills.' },
+    { id: 'preseason', title: 'Pre-Season', description: 'Ramping up intensity and sport-specific training.' },
+    { id: 'inseason', title: 'In-Season', description: 'Maintaining performance and managing fatigue.' },
 ];
 
 // Month options
@@ -69,8 +69,8 @@ export default function SeasonPage() {
             // 准备要更新的数据
             const updateDataPayload: any = { season: trainingSeason };
             
-            // Handle competition date for pre-season and off-season
-            if ((trainingSeason === 'pre-season' || trainingSeason === 'off-season') && year && month) {
+            // Handle competition date for preseason and offseason
+            if ((trainingSeason === 'preseason' || trainingSeason === 'offseason') && year && month) {
                 const competitionDate = day 
                     ? new Date(year, month - 1, day).toISOString()
                     : new Date(year, month - 1, 1).toISOString(); // Default to 1st of month if no day selected
@@ -96,9 +96,9 @@ export default function SeasonPage() {
                 <div className="text-center mb-10">
                     <p className="text-blue-400 font-semibold mb-2">Step 3 of 5</p>
                     <h1 className="text-4xl md:text-5xl font-bold mb-3">
-                        What's Your Training Season?
+                        What&apos;s Your Training Season?
                     </h1>
-                    <p className="text-lg text-gray-400">This helps us periodize your training. You can skip this if it doesn't apply.</p>
+                    <p className="text-lg text-gray-400">This helps us periodize your training. You can skip this if it doesn&apos;t apply.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -118,8 +118,8 @@ export default function SeasonPage() {
                     ))}
                 </div>
 
-                {/* Competition date selection for pre-season and off-season */}
-                {(trainingSeason === 'pre-season' || trainingSeason === 'off-season') && (
+                {/* Competition date selection for preseason and offseason */}
+                {(trainingSeason === 'preseason' || trainingSeason === 'offseason') && (
                     <div className="mt-8 p-6 bg-gray-800 rounded-lg">
                         <label className="block text-lg font-semibold mb-4">
                             When is your competition? (Optional)
@@ -203,7 +203,7 @@ export default function SeasonPage() {
                     </button>
                     <button
                         onClick={handleContinue}
-                        disabled={!trainingSeason || ((trainingSeason === 'pre-season' || trainingSeason === 'off-season') && isContinueDisabled)}
+                        disabled={!trainingSeason || ((trainingSeason === 'preseason' || trainingSeason === 'offseason') && isContinueDisabled)}
                         className="px-8 py-3 bg-blue-600 text-white rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-transform transform hover:scale-105"
                     >
                         Continue &rarr;

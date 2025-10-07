@@ -7,7 +7,8 @@ if (process.env.NODE_ENV === 'production' && !rawJwtSecret) {
   throw new Error('JWT_SECRET is required in production environment');
 }
 if (process.env.NODE_ENV !== 'production' && !rawJwtSecret) {
-  console.warn('Warning: JWT_SECRET not set; using dev-only default.');
+  // Defer to external logger - apps/services handle actual logging
+  // Warning: JWT_SECRET not set; using dev-only default.
 }
 export const JWT_SECRET = rawJwtSecret || 'dev-only-jwt-secret';
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
@@ -22,6 +23,9 @@ export const JWTPayloadSchema = z.object({
 });
 
 export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
+
+// Header值类型定义
+type HeaderValue = string | string[] | null | undefined;
 
 // JWT 工具类
 export class JWTManager {
@@ -44,7 +48,7 @@ export class JWTManager {
       const decoded = jwt.verify(token, JWT_SECRET, {
         issuer: 'athlete-ally',
         audience: 'athlete-ally-users'
-      }) as any;
+      }) as JWTPayload;
       
       return JWTPayloadSchema.parse(decoded);
     } catch (error) {
@@ -69,12 +73,60 @@ export class JWTManager {
   }
 
   /**
-   * 从请求中获取用户身份
+   * 安全的header值标准化函数
    */
-  static getUserFromRequest(request: any): JWTPayload {
-    const authHeader = request.headers.authorization || request.headers.Authorization;
-    const token = this.extractTokenFromHeader(authHeader);
-    return this.verifyToken(token);
+  private static toHeaderString(value: HeaderValue): string | undefined {
+    if (value == null) return undefined;
+    if (Array.isArray(value)) {
+      const filtered = value.filter((v) => typeof v === 'string' && v.trim().length > 0) as string[];
+      if (filtered.length === 0) return undefined;
+      // Safety: If multiple distinct values appear, reject to avoid ambiguity
+      const uniq = Array.from(new Set(filtered.map((v) => v.trim())));
+      if (uniq.length > 1) return undefined;
+      return uniq[0];
+    }
+    const s = value.trim();
+    return s.length > 0 ? s : undefined;
+  }
+
+  /**
+   * 健壮的Bearer token解析函数
+   */
+  private static extractTokenFromHeaderSafe(raw: string | undefined): string | undefined {
+    if (!raw) return undefined;
+    const trimmed = raw.trim();
+    const m = /^Bearer\s+([^\s]+)$/i.exec(trimmed);
+    const token = m?.[1];
+    return token && token.length > 0 ? token : undefined;
+  }
+
+  /**
+   * 从请求中获取用户身份（支持Next/Express两种header格式）
+   */
+  static getUserFromRequest(request: { headers: unknown }): JWTPayload | undefined {
+    const headers = request.headers;
+    let rawAuth: HeaderValue;
+
+    // Next/Fetch Headers
+    if (headers && typeof headers === 'object' && 'get' in headers && typeof headers.get === 'function') {
+      rawAuth = headers.get('authorization');
+    } else if (headers && typeof headers === 'object') {
+      // Node/Express IncomingHttpHeaders-like
+      const headersObj = headers as Record<string, HeaderValue>;
+      rawAuth = headersObj.authorization ?? headersObj.Authorization;
+    } else {
+      rawAuth = undefined;
+    }
+
+    const authHeader = this.toHeaderString(rawAuth);
+    const token = this.extractTokenFromHeaderSafe(authHeader);
+    if (!token) return undefined;
+
+    try {
+      return this.verifyToken(token);
+    } catch (error) {
+      return undefined;
+    }
   }
 }
 

@@ -1,8 +1,6 @@
-import { FastifyRequest as OriginalFastifyRequest, FastifyReply as OriginalFastifyReply } from 'fastify';
-
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: { userId: string; [k: string]: unknown };
+    user?: { userId?: string; [k: string]: unknown };
     requestId?: string;
     rawBody?: string;
   }

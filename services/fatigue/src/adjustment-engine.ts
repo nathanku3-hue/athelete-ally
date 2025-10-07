@@ -25,10 +25,13 @@ export interface TrainingSession {
   restBetweenSets: number;
 }
 
+// TODO: Replace unknown types with proper generics by 2025-01-20
+// This is a temporary solution to avoid any types while maintaining type safety.
+// Future improvement: TrainingAdjustment<T> with originalValue: T, adjustedValue: T
 export interface TrainingAdjustment {
   type: 'intensity' | 'volume' | 'exercise_substitution' | 'rest' | 'warmup';
-  originalValue: any;
-  adjustedValue: any;
+  originalValue: unknown;
+  adjustedValue: unknown;
   reason: string;
   confidence: number;
   exerciseId?: string;
@@ -124,7 +127,7 @@ export class AdjustmentEngine {
     // Reduce intensity across all exercises
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'reduced', reduction: Math.min(20, fatigueLevel * 5) },
       reason: `High fatigue detected (${fatigueLevel}/5). Reducing intensity by ${Math.min(20, fatigueLevel * 5)}%`,
       confidence: 0.8,
@@ -176,7 +179,7 @@ export class AdjustmentEngine {
     // Increase intensity slightly
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'increased', increase: Math.min(10, (3 - fatigueLevel) * 5) },
       reason: `Low fatigue detected (${fatigueLevel}/5). You can push harder!`,
       confidence: 0.6,
@@ -201,8 +204,8 @@ export class AdjustmentEngine {
   }
 
   private generateSleepQualityAdjustments(
-    fatigueData: FatigueData,
-    session: TrainingSession
+    _fatigueData: FatigueData,
+    _session: TrainingSession
   ): TrainingAdjustment[] {
     const adjustments: TrainingAdjustment[] = [];
 
@@ -218,7 +221,7 @@ export class AdjustmentEngine {
     // Reduce intensity of first few exercises
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'gradual_increase', startReduction: 15 },
       reason: 'Poor sleep quality detected. Starting with reduced intensity and building up',
       confidence: 0.7,
@@ -228,8 +231,8 @@ export class AdjustmentEngine {
   }
 
   private generateStressAdjustments(
-    fatigueData: FatigueData,
-    session: TrainingSession
+    _fatigueData: FatigueData,
+    _session: TrainingSession
   ): TrainingAdjustment[] {
     const adjustments: TrainingAdjustment[] = [];
 
@@ -255,15 +258,15 @@ export class AdjustmentEngine {
   }
 
   private generateReturnAdjustments(
-    fatigueData: FatigueData,
-    session: TrainingSession
+    _fatigueData: FatigueData,
+    _session: TrainingSession
   ): TrainingAdjustment[] {
     const adjustments: TrainingAdjustment[] = [];
 
     // Reduce intensity significantly
     adjustments.push({
       type: 'intensity',
-      originalValue: { intensity: 'normal' },
+      originalValue: { intensity: 'moderate' },
       adjustedValue: { intensity: 'significantly_reduced', reduction: 30 },
       reason: 'Long break detected. Starting with significantly reduced intensity to avoid injury',
       confidence: 0.9,
@@ -307,8 +310,8 @@ export class AdjustmentEngine {
       data: {
         userId,
         adjustmentType: adjustment.type,
-        originalValue: adjustment.originalValue,
-        adjustedValue: adjustment.adjustedValue,
+        originalValue: adjustment.originalValue as never,
+        adjustedValue: adjustment.adjustedValue as never,
         reason: adjustment.reason,
         confidence: adjustment.confidence,
         fatigueLevel,

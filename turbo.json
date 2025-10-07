@@ -15,7 +15,8 @@
       "dependsOn": ["^build"]
     },
     "type-check": {
-      "dependsOn": ["^prisma:generate", "prisma:generate"]
+      "dependsOn": ["^build", "^prisma:generate", "prisma:generate"],
+      "outputs": []
     },
     "test": {
       "dependsOn": ["^build"]

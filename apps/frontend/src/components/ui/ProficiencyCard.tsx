@@ -74,7 +74,7 @@ export default function ProficiencyCard({
           <span>關鍵特徵</span>
         </h4>
         <ul className="text-sm text-gray-400 space-y-1">
-          {level.keyPoints.map((point, index) => (
+          {level.keyPoints.map((point: string, index: number) => (
             <li key={index} className="flex items-start">
               <span className="text-blue-400 mr-2 mt-0.5">•</span>
               <span>{point}</span>
@@ -90,7 +90,7 @@ export default function ProficiencyCard({
           <span>訓練特點</span>
         </h4>
         <ul className="text-sm text-gray-400 space-y-1">
-          {level.characteristics.map((char, index) => (
+          {level.characteristics.map((char: string, index: number) => (
             <li key={index} className="flex items-start">
               <span className="text-green-400 mr-2 mt-0.5">✓</span>
               <span>{char}</span>

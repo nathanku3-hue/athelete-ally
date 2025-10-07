@@ -2,7 +2,7 @@ import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
-import { EVENT_TOPICS, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent } from '@athlete-ally/contracts';
+import { EVENT_TOPICS, HRVNormalizedStoredEvent, SleepNormalizedStoredEvent } from '@athlete-ally/contracts';
 import { eventValidator } from '@athlete-ally/event-bus';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { getMetricsRegistry } from '@athlete-ally/shared';
@@ -851,7 +851,7 @@ async function processSleepData(payload: { userId: string; date: string; duratio
 }
 
 // Health check endpoint
-httpServer.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
+httpServer.get('/health', async (_request: FastifyRequest, reply: FastifyReply) => {
   try {
     // Check database connection
     await prisma.$queryRaw`SELECT 1`;
@@ -879,7 +879,7 @@ httpServer.get('/health', async (request: FastifyRequest, reply: FastifyReply) =
 });
 
 // Metrics endpoint
-httpServer.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
+httpServer.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
   reply.type(register.contentType);
   return register.metrics();
 });
