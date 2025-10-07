@@ -204,8 +204,8 @@ export class AdjustmentEngine {
   }
 
   private generateSleepQualityAdjustments(
-    fatigueData: FatigueData,
-    session: TrainingSession
+    _fatigueData: FatigueData,
+    _session: TrainingSession
   ): TrainingAdjustment[] {
     const adjustments: TrainingAdjustment[] = [];
 
@@ -231,8 +231,8 @@ export class AdjustmentEngine {
   }
 
   private generateStressAdjustments(
-    fatigueData: FatigueData,
-    session: TrainingSession
+    _fatigueData: FatigueData,
+    _session: TrainingSession
   ): TrainingAdjustment[] {
     const adjustments: TrainingAdjustment[] = [];
 
@@ -258,8 +258,8 @@ export class AdjustmentEngine {
   }
 
   private generateReturnAdjustments(
-    fatigueData: FatigueData,
-    session: TrainingSession
+    _fatigueData: FatigueData,
+    _session: TrainingSession
   ): TrainingAdjustment[] {
     const adjustments: TrainingAdjustment[] = [];
 
@@ -310,8 +310,8 @@ export class AdjustmentEngine {
       data: {
         userId,
         adjustmentType: adjustment.type,
-        originalValue: adjustment.originalValue,
-        adjustedValue: adjustment.adjustedValue,
+        originalValue: adjustment.originalValue as never,
+        adjustedValue: adjustment.adjustedValue as never,
         reason: adjustment.reason,
         confidence: adjustment.confidence,
         fatigueLevel,
