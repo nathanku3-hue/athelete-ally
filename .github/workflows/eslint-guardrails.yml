@@ -1,0 +1,80 @@
+name: ESLint Guardrails (Budgets)
+
+on:
+  pull_request:
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - 'eslint.config.*'
+      - 'lint-budget.json'
+      - 'scripts/lint-budget-*'
+      - '.github/workflows/eslint-guardrails.yml'
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: eslint-budgets-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    name: Lint Baseline (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: npm
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-lint)
+        run: npx turbo run build --no-daemon
+      - name: Print ESLint Meta
+        run: node scripts/ci/print-eslint-meta.mjs
+      - name: Generate baseline report
+        run: node scripts/lint-budget-baseline.mjs
+      - name: Upload baseline artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-baseline-${{ github.run_id }}
+          path: reports/lint/lint-baseline.json
+          retention-days: 7
+
+  delta:
+    name: Lint Delta (changed-files blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: npm
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-lint)
+        run: npx turbo run build --no-daemon
+      - name: Print ESLint Meta
+        run: node scripts/ci/print-eslint-meta.mjs
+      - name: Check lint budget delta
+        run: node scripts/lint-budget-check.mjs
+      - name: Upload delta artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-delta-${{ github.run_id }}
+          path: reports/lint/lint-delta.json
+          retention-days: 7
+

@@ -71,10 +71,12 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
-
-
-        run: npm ci --no-audit --no-fund
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Print ESLint Meta
+        run: node scripts/ci/print-eslint-meta.mjs
+      - name: Build (pre-lint/type-check)
+        run: npx turbo run build --no-daemon
       - name: Cache Prisma engines
         uses: actions/cache@v4
         with:
@@ -111,6 +113,9 @@ jobs:
             fi
           done
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
+
+      - name: Enforce Prisma scripts (prebuild/predev)
+        run: node scripts/ci/prisma-enforce.mjs
 
       - name: Verify tsx availability
         run: npx tsx --version
@@ -235,10 +240,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
-
-
-        run: npm ci --no-audit --no-fund
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-lint/type-check)
+        run: npx turbo run build --no-daemon
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -423,10 +428,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
-
-
-        run: npm ci --no-audit --no-fund
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build all packages (pre-tests)
+        run: npx turbo run build --no-daemon
       - name: Validate OpenAPI contracts
         run: |
           # ?? OpenAPI ??
@@ -485,10 +490,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
-
-
-        run: npm ci --no-audit --no-fund
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-e2e)
+        run: npx turbo run build --no-daemon
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -559,10 +564,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
-
-
-        run: npm ci --no-audit --no-fund
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build packages (pre-smoke)
+        run: npx turbo run build --no-daemon
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
@@ -1034,4 +1039,3 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validate normalized examples against JSON Schemas
         run: npm run validate:schemas
-
