@@ -15,3 +15,4 @@ describe('sanitize', () => {
     expect((context as any).secret).toBeUndefined();
   });
 });
+

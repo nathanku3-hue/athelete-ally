@@ -12,7 +12,7 @@ function makeReq(body: any, headers: Record<string,string> = {}) {
 
 describe('/api/logs', () => {
   const OLD_ENV = process.env;
-  beforeAll(() => { jest.spyOn(console, 'log').mockImplementation(() => {} as any); });
+  beforeAll(() => { jest.spyOn(console, 'log').mockImplementation(() => {}); });
   afterAll(() => { (console.log as any).mockRestore?.(); });
   beforeEach(() => { jest.resetModules(); process.env = { ...OLD_ENV, NODE_ENV: 'production', LOGS_API_KEY: 'k' }; });
   afterEach(() => { process.env = OLD_ENV; });
@@ -38,3 +38,4 @@ describe('/api/logs', () => {
     expect(res.status).toBe(400);
   });
 });
+
