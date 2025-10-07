@@ -38,7 +38,7 @@ The monorepo has accumulated 300+ unused variable/parameter violations across th
 ## Implementation
 
 ```json
-// config/typescript/tsconfig.ci.json
+// config/typescript/tsconfig.ci.json (reserved for future use)
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
@@ -50,9 +50,13 @@ The monorepo has accumulated 300+ unused variable/parameter violations across th
 
 ```yaml
 # .github/workflows/eslint-guardrails.yml
-- name: Type Check Changed Files
-  run: npx tsc --noEmit --project config/typescript/tsconfig.ci.json
+# Type-checking is performed via turbo build step
+# Each workspace uses its own tsconfig with appropriate path mappings
+- name: Build workspace packages
+  run: npx turbo run build --filter='@athlete-ally/*' --no-daemon
 ```
+
+**Note**: Monorepo-wide `tsc --noEmit` check is not feasible due to conflicting path mappings across workspaces (e.g., `@/` resolves differently in frontend vs services). Instead, type-checking is enforced via each package's build step, which uses the package's own tsconfig.
 
 ## Rollback Plan
 
