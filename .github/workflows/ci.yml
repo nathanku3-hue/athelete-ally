@@ -71,8 +71,12 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
+      - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Print ESLint Meta
+        run: node scripts/ci/print-eslint-meta.mjs
+      - name: Build (pre-lint/type-check)
+        run: npx turbo run build --no-daemon
       - name: Cache Prisma engines
         uses: actions/cache@v4
         with:
@@ -110,6 +114,9 @@ jobs:
           done
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
+      - name: Enforce Prisma scripts (prebuild/predev)
+        run: node scripts/ci/prisma-enforce.mjs
+
       - name: Verify tsx availability
         run: npx tsx --version
 
@@ -131,6 +138,11 @@ jobs:
           retention-days: 7
           compression-level: 6
           overwrite: true
+
+      - name: Type check (force no stale cache)
+        env:
+          TURBO_FORCE: "true"
+        run: npx turbo run type-check
 
       - name: Upload Prisma client dirs (debug)
         if: failure()
@@ -228,8 +240,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
+      - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-lint/type-check)
+        run: npx turbo run build --no-daemon
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -261,18 +275,15 @@ jobs:
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
       - name: Build shared packages
-        shell: bash
         run: |
           set -euo pipefail
-          echo "🔧 Building health-schema with turbo"
-          npx turbo run build --filter=@athlete-ally/health-schema --no-daemon
-          echo "📁 Verifying dist"
-          test -f packages/health-schema/dist/index.js
-          test -f packages/health-schema/dist/index.d.ts
-          node -e "console.log(require.resolve('@athlete-ally/health-schema/package.json'))"
+          echo "🔨 Building shared packages before service tests..."
+          npm run build -w packages/contracts
+          npm run build -w packages/event-bus
+          npm run build -w packages/protocol-types
+          npm run build -w packages/shared-types
+          echo "✅ Shared packages built successfully"
 
-      - name: Type check (no daemon, no stale cache)
-        run: npx turbo run type-check --no-daemon --continue=never
 
       - name: Validate configuration
         run: |
@@ -417,8 +428,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
+      - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build all packages (pre-tests)
+        run: npx turbo run build --no-daemon
       - name: Validate OpenAPI contracts
         run: |
           # ?? OpenAPI ??
@@ -477,8 +490,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
+      - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-e2e)
+        run: npx turbo run build --no-daemon
       - name: Generate Prisma clients (all services)
         run: |
           set -euo pipefail
@@ -549,8 +564,10 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
-      - name: Install dependencies
+      - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build packages (pre-smoke)
+        run: npx turbo run build --no-daemon
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
@@ -709,7 +726,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+
+        run: npm ci --no-audit --no-fund
       - name: Run security audit
         run: npm audit --audit-level=high
 
@@ -778,7 +797,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+
+        run: npm ci --no-audit --no-fund
       - name: Run performance tests
         run: npx turbo run test:performance --filter="...[origin/main]" || echo "No performance tests found"
 
@@ -808,7 +829,9 @@ jobs:
             services/**/package-lock.json
 
       - name: Install dependencies
-        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+
+        run: npm ci --no-audit --no-fund
       - name: Download test artifacts
         if: ${{ needs.test.outputs.has_artifacts == 'true' }}
         uses: actions/download-artifact@v4
@@ -863,11 +886,11 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
-        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
-      - name: Build shared packages
-        run: npm run build:packages
+
+
+        run: npm ci --no-audit --no-fund
       - name: Build frontend
-        run: npm run build:frontend
+        run: npm run build
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -965,7 +988,9 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
       - name: Install dependencies
-        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+
+        run: npm ci --no-audit --no-fund
       - name: Build packages
         run: |
           npm run build -w packages/otel-preset
@@ -1009,7 +1034,8 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+
+        run: npm ci --no-audit --no-fund
       - name: Validate normalized examples against JSON Schemas
         run: npm run validate:schemas
-

@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   boundaries:
-    name: "Boundaries: Zero New Violations"
+    name: Boundaries: Scan and Enforce
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -34,7 +34,6 @@ jobs:
         id: summary
         env:
           ESLINT_USE_FLAT_CONFIG: 'true'
-          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
         run: |
           node scripts/boundaries-pr-summary.mjs
 
@@ -50,6 +49,5 @@ jobs:
         if: always()
         env:
           ESLINT_USE_FLAT_CONFIG: 'true'
-          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
         run: |
           node scripts/boundaries-enforce-zero-new.mjs

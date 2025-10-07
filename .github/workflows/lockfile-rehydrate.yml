@@ -29,7 +29,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: npm ci (try authoritative)
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
         continue-on-error: true
 
       - name: npm install --workspaces (rehydrate on failure)
@@ -37,7 +37,7 @@ jobs:
         run: npm install --workspaces --no-audit --no-fund
 
       - name: Validate with npm ci
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
 
       - name: Commit lockfile if changed
         run: |
