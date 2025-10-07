@@ -6,6 +6,7 @@
     "declarationMap": false,
     "sourceMap": true,
     "outDir": "dist",
+    "baseUrl": "../..",
     "moduleResolution": "bundler",
     "strict": false,
     "paths": {}
