@@ -256,7 +256,7 @@ jobs:
           'true' || steps.changed-files.outputs.packages == 'true'
         run: |
           echo "🔍 Type checking changed files..."
-          npx tsc --noEmit --project tsconfig.base.json
+          npx tsc --noEmit --project config/typescript/tsconfig.ci.json
           echo "✅ Type checking passed"
 
   lint-baseline:
