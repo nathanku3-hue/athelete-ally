@@ -80,9 +80,9 @@ async function connectEventBus() {
 }
 
 // Health check endpoint
-fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
-  return { 
-    status: 'healthy', 
+fastify.get('/health', async (_request: FastifyRequest, _reply: FastifyReply) => {
+  return {
+    status: 'healthy',
     service: 'ingest',
     timestamp: new Date().toISOString(),
     eventBus: eventBus ? 'connected' : 'disconnected'
@@ -90,7 +90,7 @@ fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
 });
 
 // Metrics endpoint
-fastify.get('/metrics', async (request: FastifyRequest, reply: FastifyReply) => {
+fastify.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
   reply.type(register.contentType);
   return register.metrics();
 });

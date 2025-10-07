@@ -33,11 +33,11 @@ export function verifySignature(opts: { secret: string; rawBody: string; headerS
 class TTLCache {
   private store = new Map<string, number>();
   private readonly ttlMs: number;
-  private readonly janitor: NodeJS.Timeout;
 
   constructor(ttlSeconds: number) {
     this.ttlMs = Math.max(1, ttlSeconds) * 1000;
-    this.janitor = setInterval(() => this.sweep(), Math.min(this.ttlMs, 60_000)).unref();
+    // Start background sweep interval (unref'd so it doesn't keep process alive)
+    setInterval(() => this.sweep(), Math.min(this.ttlMs, 60_000)).unref();
   }
 
   has(key: string): boolean {
