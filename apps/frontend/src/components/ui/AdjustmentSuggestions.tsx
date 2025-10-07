@@ -1,16 +1,12 @@
 "use client";
 
 import { useState } from 'react';
-import { 
-  TrendingDown, 
-  TrendingUp, 
-  RotateCcw, 
-  Zap, 
-  Clock, 
-  CheckCircle, 
-  XCircle,
+import {
+  TrendingUp,
+  RotateCcw,
+  Zap,
+  Clock,
   ThumbsUp,
-  ThumbsDown,
   MessageSquare
 } from 'lucide-react';
 
