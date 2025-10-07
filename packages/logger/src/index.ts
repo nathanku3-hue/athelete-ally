@@ -16,8 +16,11 @@ export function createLogger(adapter: LogAdapter, opts: CreateLoggerOptions = {}
   const moduleName = opts.module || 'unknown';
   const sampler = { info: 0.1, debug: 0.0, ...(opts.sampler || {}) };
   function shouldSample(level: LogLevel): boolean { if (env !== 'production') return true; if (level === 'error' || level === 'warn') return true; if (level === 'info') return Math.random() < sampler.info; if (level === 'debug') return Math.random() < sampler.debug; return true; }
-  function emit(level: LogLevel, msg: string|Error, ctx?: LogContext, errMaybe?: Error) { const err = (msg instanceof Error) ? msg : errMaybe; const text = (msg instanceof Error) ? (msg.message || String(msg)) : String(msg); const event = baseEvent(level, service, moduleName, env, text, ctx, err || undefined); if (!shouldSample(level)) { event.sampled=false; return; } event.sampled=true; try { void adapter.emit(event); } catch {} }
-  return { debug: (m,c) => emit('debug', m, c), info: (m,c) => emit('info', m, c), warn: (m,c) => emit('warn', m, c), error: (m,c) => emit('error', m, c, m instanceof Error ? m : undefined) };
+  function emit(level: LogLevel, msg: string|Error, ctx?: LogContext, errMaybe?: Error) {
+    const err = (msg instanceof Error) ? msg : errMaybe; const text = (msg instanceof Error) ? (msg.message || String(msg)) : String(msg);
+    const event = baseEvent(level, service, moduleName, env, text, ctx, err || undefined); if (!shouldSample(level)) { event.sampled = false; return; } event.sampled = true; try { void adapter.emit(event); } catch (_e) { }
+  }
+  return { debug: (m, c) => emit('debug', m, c), info: (m, c) => emit('info', m, c), warn: (m, c) => emit('warn', m, c), error: (m, c) => emit('error', m, c, m instanceof Error ? m : undefined) };
 }
 export type { LogContext };
 export { sanitizeText, filterAndSanitizeContext };

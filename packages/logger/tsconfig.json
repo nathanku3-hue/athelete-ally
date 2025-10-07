@@ -1,9 +1,8 @@
 {
-  "extends": "../../config/typescript/tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": false,
     "declaration": false,
-    "declarationMap": false,
     "outDir": "dist",
     "rootDir": "src",
     "module": "ESNext",
@@ -13,8 +12,7 @@
     "verbatimModuleSyntax": true,
     "types": ["node"],
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "baseUrl": "../.."
+    "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"]
 }
