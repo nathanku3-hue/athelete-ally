@@ -186,7 +186,7 @@ export class SafeLogger {
         stack: this.isProduction ? undefined : error.stack
       };
     }
-    return error;
+    return error as Record<string, unknown>;
   }
 
   /**
@@ -195,14 +195,14 @@ export class SafeLogger {
   private static sanitizeContext(context: unknown): Record<string, unknown> {
     // 移除可能包含敏感信息的字段
     const sensitiveFields = ['password', 'token', 'secret', 'key', 'url', 'email', 'phone'];
-    const sanitized = { ...context };
-    
+    const sanitized = { ...(context as Record<string, unknown>) };
+
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         delete sanitized[field];
       }
     }
-    
+
     return sanitized;
   }
 }

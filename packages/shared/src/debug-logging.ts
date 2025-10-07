@@ -24,6 +24,8 @@ export interface LogContext {
   isClient?: boolean;
 }
 
+export type DebugLogContext = LogContext;
+
 export interface DebugConfig {
   NATS_LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
   DB_LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';

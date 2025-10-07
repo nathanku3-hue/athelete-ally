@@ -133,6 +133,3 @@ class LogUtils {
 // Export singleton instances
 export const logger = new StructuredLogger();
 export const logUtils = new LogUtils();
-
-// Export types for use in other modules
-export type { LogContext, LogLevel, LogComponent };
