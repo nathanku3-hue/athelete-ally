@@ -63,7 +63,7 @@ export class PerformanceMonitor {
     });
 
     // 错误处理
-    fastify.addHook('onError', async (request: FastifyRequest, reply: FastifyReply, error: Error) => {
+    fastify.addHook('onError', async (request: FastifyRequest, _reply: FastifyReply, _error: Error) => {
       const route = request.routerPath || request.url;
       this.recordError(route);
     });
@@ -102,7 +102,7 @@ export class PerformanceMonitor {
     });
   }
 
-  private generateRequestId(request: FastifyRequest): string {
+  private generateRequestId(_request: FastifyRequest): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 

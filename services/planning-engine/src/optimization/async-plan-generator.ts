@@ -188,13 +188,13 @@ export class AsyncPlanGenerator {
       // 使用并发控制器执行生成
       await this.concurrencyController.execute(
         'plan_generation',
-        { 
+        {
           data: request,
           retries: 0,
           maxRetries: 3,
           createdAt: new Date()
         },
-        async (task) => {
+        async (_task) => {
           await this.generateAndSavePlan(jobId, request);
         }
       );

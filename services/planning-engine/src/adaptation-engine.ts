@@ -117,7 +117,7 @@ export class AdaptationEngine {
   async generateAdaptation(
     currentPlan: any,
     analysis: PerformanceAnalysis,
-    userProfile: any
+    _userProfile: any
   ): Promise<AdaptationResult[]> {
     const adaptations: AdaptationResult[] = [];
 
@@ -340,9 +340,9 @@ export class AdaptationEngine {
   /**
    * 创建恢复性调整
    */
-  private createRecoveryAdaptation(currentPlan: any, fatigueLevel: number): AdaptationResult {
-    const _intensityReduction = Math.min(0.3, fatigueLevel * 0.05);
-    const _volumeReduction = Math.min(0.4, fatigueLevel * 0.06);
+  private createRecoveryAdaptation(_currentPlan: any, fatigueLevel: number): AdaptationResult {
+    // const _intensityReduction = Math.min(0.3, fatigueLevel * 0.05);
+    // const _volumeReduction = Math.min(0.4, fatigueLevel * 0.06);
 
     return {
       type: 'recovery',
@@ -365,7 +365,7 @@ export class AdaptationEngine {
   /**
    * 创建强度降低调整
    */
-  private createIntensityReduction(currentPlan: any, trend: string): AdaptationResult {
+  private createIntensityReduction(_currentPlan: any, trend: string): AdaptationResult {
     return {
       type: 'intensity_reduction',
       changes: {
@@ -387,7 +387,7 @@ export class AdaptationEngine {
   /**
    * 创建训练量降低调整
    */
-  private createVolumeReduction(currentPlan: any, trend: string): AdaptationResult {
+  private createVolumeReduction(_currentPlan: any, trend: string): AdaptationResult {
     return {
       type: 'volume_reduction',
       changes: {
@@ -409,7 +409,7 @@ export class AdaptationEngine {
   /**
    * 创建风险缓解调整
    */
-  private createRiskMitigationAdaptation(currentPlan: any, riskFactors: string[]): AdaptationResult {
+  private createRiskMitigationAdaptation(_currentPlan: any, riskFactors: string[]): AdaptationResult {
     return {
       type: 'progression_modification',
       changes: {
@@ -431,7 +431,7 @@ export class AdaptationEngine {
   /**
    * 创建机会利用调整
    */
-  private createOpportunityAdaptation(currentPlan: any, opportunities: string[]): AdaptationResult {
+  private createOpportunityAdaptation(_currentPlan: any, opportunities: string[]): AdaptationResult {
     return {
       type: 'progression_modification',
       changes: {
@@ -480,7 +480,7 @@ export class AdaptationEngine {
   /**
    * 应用恢复性调整
    */
-  private applyRecoveryAdaptation(plan: any, adaptation: AdaptationResult): any {
+  private applyRecoveryAdaptation(plan: any, _adaptation: AdaptationResult): any {
     return {
       ...plan,
       intensity: Math.max(0.5, plan.intensity * 0.8),
@@ -492,7 +492,7 @@ export class AdaptationEngine {
   /**
    * 应用强度降低调整
    */
-  private applyIntensityReduction(plan: any, adaptation: AdaptationResult): any {
+  private applyIntensityReduction(plan: any, _adaptation: AdaptationResult): any {
     return {
       ...plan,
       intensity: Math.max(0.6, plan.intensity * 0.9),
@@ -502,7 +502,7 @@ export class AdaptationEngine {
   /**
    * 应用训练量降低调整
    */
-  private applyVolumeReduction(plan: any, adaptation: AdaptationResult): any {
+  private applyVolumeReduction(plan: any, _adaptation: AdaptationResult): any {
     return {
       ...plan,
       volume: Math.max(0.7, plan.volume * 0.85),
@@ -512,7 +512,7 @@ export class AdaptationEngine {
   /**
    * 应用频率调整
    */
-  private applyFrequencyAdjustment(plan: any, adaptation: AdaptationResult): any {
+  private applyFrequencyAdjustment(plan: any, _adaptation: AdaptationResult): any {
     // 实现频率调整逻辑
     return plan;
   }
@@ -520,7 +520,7 @@ export class AdaptationEngine {
   /**
    * 应用运动替代调整
    */
-  private applyExerciseSubstitution(plan: any, adaptation: AdaptationResult): any {
+  private applyExerciseSubstitution(plan: any, _adaptation: AdaptationResult): any {
     // 实现运动替代逻辑
     return plan;
   }
@@ -528,7 +528,7 @@ export class AdaptationEngine {
   /**
    * 应用进度修改调整
    */
-  private applyProgressionModification(plan: any, adaptation: AdaptationResult): any {
+  private applyProgressionModification(plan: any, _adaptation: AdaptationResult): any {
     // 实现进度修改逻辑
     return plan;
   }

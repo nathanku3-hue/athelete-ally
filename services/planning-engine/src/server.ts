@@ -8,7 +8,7 @@ import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { prisma } from './db.js';
 import { generateTrainingPlan } from './llm.js';
-// import { Prisma } from '../prisma/generated/client';
+// import { Prisma } from '../prisma/generated/client'; // Unused
 import { OnboardingCompletedEvent, PlanGenerationRequestedEvent } from '@athlete-ally/contracts';
 import { toPlanGenerationRequest, toPlanGenerationRequestFromRequested } from './validation/plan-request.js';
 import { businessMetrics, tracePlanGeneration } from './telemetry.js';
@@ -173,7 +173,7 @@ async function handlePlanGenerationRequested(task: Task<PlanGenerationRequestedE
   
   try {
     // 创建PlanJob记录
-    const planJob = await prisma.planJob.create({
+    await prisma.planJob.create({
       data: {
         jobId: event.jobId,
         userId: event.userId,
@@ -346,7 +346,7 @@ server.post('/generate', async (request, reply) => {
 });
 
 // 添加 Prometheus 指标端点
-server.get('/metrics', async (request, reply) => {
+server.get('/metrics', async (_request, reply) => {
   reply.type('text/plain');
   return register.metrics();
 });
@@ -354,7 +354,7 @@ server.get('/metrics', async (request, reply) => {
 // 健康检查端点已移至 health.ts 中的 setupHealthRoutes
 
 // 添加并发状态端点
-server.get('/concurrency/status', async (request, reply) => {
+server.get('/concurrency/status', async (_request, _reply) => {
   const status = concurrencyController.getStatus();
   return {
     ...status,

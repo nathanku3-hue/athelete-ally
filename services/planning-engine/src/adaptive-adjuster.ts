@@ -11,7 +11,7 @@
  */
 
 import { EnhancedTrainingPlan } from './llm-enhanced.js';
-import { z } from 'zod';
+// import { z } from 'zod'; // Unused import
 
 export interface RPEFeedback {
   sessionId: string;
@@ -55,7 +55,7 @@ export class AdaptivePlanAdjuster {
   }
 
   // 分析并生成调整建议
-  analyzeAndAdjust(plan: EnhancedTrainingPlan): AdaptiveAdjustment[] {
+  analyzeAndAdjust(_plan: EnhancedTrainingPlan): AdaptiveAdjustment[] {
     const adjustments: AdaptiveAdjustment[] = [];
     
     // 分析RPE趋势

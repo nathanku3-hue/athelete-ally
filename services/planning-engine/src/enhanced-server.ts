@@ -78,7 +78,7 @@ server.get('/metrics', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (_request, reply) => {
   const metrics = {
     http_requests_total: 0,
     http_request_duration_seconds: 0,
@@ -457,7 +457,7 @@ server.get('/api/v1/plans/:planId/adaptations', {
 }, async (request, reply) => {
   try {
     const { planId } = request.params as any;
-    
+
     // 模拟适应性调整建议
     const adaptations = {
       planId,
