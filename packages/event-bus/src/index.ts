@@ -3,6 +3,10 @@ import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEv
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+
+const log = createLogger(nodeAdapter, { module: 'event-bus', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
 
 // Event Bus 指标
 export const eventBusMetrics = {
@@ -328,7 +332,7 @@ export class EventBus {
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
-                console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
+                log.error(`Schema validation failed for received OnboardingCompleted event: ${JSON.stringify(validation.errors)}`);
                 msg.nak();
                 return;
               }
@@ -357,8 +361,8 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              console.error('Error processing OnboardingCompleted event:', error);
-
+              log.error(`Error processing OnboardingCompleted event: ${JSON.stringify(error)}`);
+              
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
                 msg.nak();
@@ -372,7 +376,7 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          console.error('Error in OnboardingCompleted batch processing:', error);
+          log.error(`Error in OnboardingCompleted batch processing: ${JSON.stringify(error)}`);
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -442,7 +446,7 @@ export class EventBus {
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
-                console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
+                log.error(`Schema validation failed for received PlanGenerationRequested event: ${JSON.stringify(validation.errors)}`);
                 msg.nak();
                 return;
               }
@@ -471,8 +475,8 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              console.error('Error processing PlanGenerationRequested event:', error);
-
+              log.error(`Error processing PlanGenerationRequested event: ${JSON.stringify(error)}`);
+              
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
                 msg.nak();
@@ -486,7 +490,7 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          console.error('Error in PlanGenerationRequested batch processing:', error);
+          log.error(`Error in PlanGenerationRequested batch processing: ${JSON.stringify(error)}`);
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -587,6 +591,7 @@ export { eventValidator } from './validator.js';
 
 // Export stream mode utilities
 export { getStreamMode, getStreamCandidates } from './config.js';
+
 
 
 
