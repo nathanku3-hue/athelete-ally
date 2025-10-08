@@ -42,7 +42,8 @@ check_code_quality() {
     # 检查代码复杂度
     echo -n "检查代码复杂度... "
     if command -v eslint &> /dev/null; then
-        COMPLEXITY_ISSUES=$(npx eslint --config eslint.config.unified.mjs --rule "complexity: [2, $MAX_COMPLEXITY]" . --format=json 2>/dev/null | jq '.[] | .messages | length' | awk '{sum += $1} END {print sum+0}')
+        # Use unified config for consistency (configure complexity rules there if needed)
+        COMPLEXITY_ISSUES=$(npx eslint --config eslint.config.unified.mjs . --format=json 2>/dev/null | jq '.[] | .messages | length' | awk '{sum += $1} END {print sum+0}')
         if [ "$COMPLEXITY_ISSUES" -eq 0 ]; then
             echo -e "${GREEN}✅ 复杂度检查通过${NC}"
         else

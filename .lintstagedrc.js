@@ -6,13 +6,13 @@
  */
 
 module.exports = {
-  // TypeScript/TSX files: apply strict boundaries to new/modified files
+  // TypeScript/TSX files: use unified config for consistency
   '**/*.{ts,tsx}': [
     'eslint --fix --config eslint.config.unified.mjs',
     'git add'
   ],
-  
-  // JavaScript files: apply basic linting
+
+  // JavaScript files: use unified config for consistency
   '**/*.{js,jsx}': [
     'eslint --fix --config eslint.config.unified.mjs',
     'git add'

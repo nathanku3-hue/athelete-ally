@@ -86,6 +86,11 @@ const eslintConfig = [
     ignores: ['**/__tests__/**', '**/tests/**', '**/*.spec.*', '**/*.test.*'],
     rules: { 'no-console': 'warn' },
   },
+  // Services: allow console for server-side logging
+  {
+    files: ['services/**/*.{ts,tsx,js,jsx}'],
+    rules: { 'no-console': 'off' },
+  },
   // Boundaries pilot (warn) for selected packages
   {
     files: [

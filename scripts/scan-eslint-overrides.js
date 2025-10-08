@@ -12,7 +12,13 @@ const path = require('path');
 // Directories and files to scan
 const SCAN_TARGETS = [
   { path: '.github/workflows/', type: 'workflow', exclude: ['workflows-disabled', 'eslint-guardrails.yml', 'verify-eslint-config*.yml'] },
-  { path: 'scripts/', type: 'script', exclude: ['verify-eslint-config*.js', 'eslint-config-constants.js', 'scan-eslint-overrides.js'] },
+  { path: 'scripts/', type: 'script', exclude: [
+    'verify-eslint-config*.js',
+    'eslint-config-constants.js',
+    'scan-eslint-overrides.js',
+    'boundaries-*.mjs',      // Boundaries scripts use CONFIG_FILE env variable by design
+    'lint-budget-*.mjs'      // Lint budget scripts use CONFIG_FILE env variable by design
+  ] },
   { path: '.lintstagedrc.js', type: 'config' },
   { path: 'package.json', type: 'config' }
 ];
