@@ -62,7 +62,7 @@ const SENTINEL_FILES = {
     tier: 'service',
     expectedRules: {
       'import/no-internal-modules': 'warn',
-      'no-console': 'off'
+      'no-console': 'warn'
     }
   },
   'services/fatigue/src/index.ts': {
@@ -70,7 +70,7 @@ const SENTINEL_FILES = {
     tier: 'service',
     expectedRules: {
       'import/no-internal-modules': 'warn',
-      'no-console': 'off'
+      'no-console': 'warn'
     }
   }
 };

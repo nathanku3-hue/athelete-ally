@@ -4,11 +4,7 @@
     "baseUrl": "../..",
     "outDir": "./dist",
     "rootDir": "./src",
-    "noEmit": false,
-    "paths": {
-      "@athlete-ally/logger": ["packages/logger/src/index.ts"],
-      "@athlete-ally/logger/server": ["packages/logger/src/adapters/node.ts"]
-    }
+    "noEmit": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
