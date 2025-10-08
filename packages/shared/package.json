@@ -15,8 +15,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc --noEmit",
-    "lint": "eslint -c ../../eslint.config.mjs src",
-    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
+    "lint": "eslint -c ../../eslint.config.unified.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
