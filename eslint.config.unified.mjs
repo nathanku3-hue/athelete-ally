@@ -38,7 +38,7 @@ const eslintConfig = [
   },
   // Test files configuration - relaxed rules for testing environment
   {
-    files: ['**/__tests__/**/*.{ts,tsx,js,jsx}', '**/*.test.{ts,tsx,js,jsx}'],
+    files: ['**/__tests__/**/*.{ts,tsx,js,jsx}', '**/*.test.{ts,tsx,js,jsx}', '**/tests/**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
       globals: {
         jest: true, node: true, describe: true, it: true, expect: true,
