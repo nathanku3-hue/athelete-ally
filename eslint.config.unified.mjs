@@ -19,7 +19,6 @@ const eslintConfig = [
       'dist/**', '**/dist/**',
       'coverage/**', '**/coverage/**',
       'next-env.d.ts', '**/next-env.d.ts',
-      'scripts/**',
       '**/prisma/generated/**',
     ],
   },
@@ -90,6 +89,18 @@ const eslintConfig = [
   {
     files: ['services/**/*.{ts,tsx,js,jsx}'],
     rules: { 'no-console': 'off' },
+  },
+  // Scripts: relaxed rules for build/CI scripts
+  {
+    files: ['scripts/**/*.{ts,js,mjs,cjs}'],
+    rules: {
+      'no-console': 'off',
+      'import/no-internal-modules': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'import/no-commonjs': 'off',
+    },
   },
   // Boundaries pilot (warn) for selected packages
   {
