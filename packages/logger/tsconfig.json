@@ -5,7 +5,7 @@
     "declaration": false,
     "declarationMap": false,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": "src",`r`n    "baseUrl": "../..",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2022",
@@ -24,3 +24,4 @@
     "src/**/*.ts"
   ]
 }
+
