@@ -32,11 +32,10 @@ class ContractTelemetry {
     if (this.metrics.length > this.maxMetrics) {
       this.metrics = this.metrics.slice(-this.maxMetrics);
     }
-
+    
     // Log warning for monitoring
-    // eslint-disable-next-line no-console
     console.warn(`⚠️ Legacy mapping used: ${field}="${value}" in ${environment}`);
-
+    
     // In production, you might want to send this to your metrics system
     // e.g., Prometheus, DataDog, etc.
     this.sendToMetricsSystem(metric);

@@ -12,7 +12,6 @@ const EventBusConfigSchema = z.object({
 export const config = (() => {
   const parsed = EventBusConfigSchema.safeParse(process.env);
   if (!parsed.success) {
-    // eslint-disable-next-line no-console
     console.error('Invalid environment variables for event-bus', parsed.error.flatten());
     process.exit(1);
   }
@@ -36,7 +35,6 @@ export const getStreamMode = (): StreamMode => {
 
   // Log mode for debugging (can be disabled with LOG_MODE=false)
   if (process.env.LOG_MODE !== 'false') {
-    // eslint-disable-next-line no-console
     console.warn(`[event-bus] Stream mode: ${mode} (EVENT_STREAM_MODE="${process.env.EVENT_STREAM_MODE || '(unset)'}")`);
   }
 

@@ -58,7 +58,6 @@ export class EventValidator {
 
       return { valid: true };
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error(`Schema validation error for topic ${topic}:`, error);
       return {
         valid: false,

@@ -102,33 +102,27 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
     const info = await jsm.streams.info(cfg.name);
 
     if (streamNeedsUpdate(info, cfg)) {
-      // eslint-disable-next-line no-console
       console.warn(`[event-bus] Updating stream: ${cfg.name}`);
       await jsm.streams.update(cfg.name, desired as never);
-      // eslint-disable-next-line no-console
       console.warn(`[event-bus] Stream updated: ${cfg.name}`);
     } else {
-      // eslint-disable-next-line no-console
       console.warn(`[event-bus] Stream up-to-date: ${cfg.name}`);
     }
   } catch (err: unknown) {
     const errObj = err as { message?: string };
     if (String(errObj.message || "").includes("stream not found") ||
         String(errObj.message || "").includes("not found")) {
-      // eslint-disable-next-line no-console
       console.warn(`[event-bus] Creating stream: ${cfg.name}`);
 
       // Try creating with full config first
       try {
         await jsm.streams.add(desired as never);
-        // eslint-disable-next-line no-console
         console.warn(`[event-bus] Stream created: ${cfg.name}`);
         return;
       } catch (createErr: unknown) {
         // Handle invalid JSON error (err_code 10025) with fallback retries
         const createErrObj = createErr as { api_error?: { err_code?: number } };
         if (createErrObj.api_error?.err_code === 10025) {
-          // eslint-disable-next-line no-console
           console.warn(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
 
           // Retry 1: Remove duplicate_window (older servers don't support it)
@@ -136,7 +130,6 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
           delete (fallback1 as Record<string, unknown>).duplicate_window;
           try {
             await jsm.streams.add(fallback1 as never);
-            // eslint-disable-next-line no-console
             console.warn(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
             return;
           } catch (fallback1Err: unknown) {
@@ -147,11 +140,9 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
               delete (fallback2 as Record<string, unknown>).discard;
               try {
                 await jsm.streams.add(fallback2 as never);
-                // eslint-disable-next-line no-console
                 console.warn(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
                 return;
               } catch (fallback2Err: unknown) {
-                // eslint-disable-next-line no-console
                 console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
                 throw fallback2Err;
               }
@@ -164,7 +155,6 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
         }
       }
     } else {
-      // eslint-disable-next-line no-console
       console.error(`[event-bus] Failed to ensure stream ${cfg.name}:`, err);
       throw err;
     }
@@ -201,16 +191,14 @@ export class EventBus {
           error_type: 'validation_failed' 
         });
         eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-
-        // eslint-disable-next-line no-console
+        
         console.error(`Schema validation failed for ${topic} event:`, validation.errors);
         throw new Error(`Schema validation failed: ${validation.message}`);
       }
       
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
-
+      
       const data = JSON.stringify(event);
-      // eslint-disable-next-line no-console
       console.warn(`Publishing to subject: ${natsTopic}`);
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
@@ -220,11 +208,10 @@ export class EventBus {
         operation: 'publish',
         status: 'success'
       }, duration);
-
+      
       eventBusMetrics.eventsPublished.inc({ topic, status: 'success' });
-      // eslint-disable-next-line no-console
       console.warn(`Published ${topic} event:`, (event as { eventId?: string }).eventId);
-
+      
     } catch (error) {
       const duration = (Date.now() - startTime) / 1000;
       eventBusMetrics.eventProcessingDuration.observe({
@@ -239,7 +226,6 @@ export class EventBus {
   }
 
   async connect(url: string = 'nats://localhost:4223', options?: { manageStreams?: boolean }) {
-    // eslint-disable-next-line no-console
     console.warn(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
@@ -249,15 +235,12 @@ export class EventBus {
     const manageStreams = options?.manageStreams ?? (process.env.FEATURE_SERVICE_MANAGES_STREAMS !== 'false');
 
     if (manageStreams) {
-      // eslint-disable-next-line no-console
       console.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
     } else {
-      // eslint-disable-next-line no-console
       console.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
     }
 
-    // eslint-disable-next-line no-console
     console.warn('Connected to EventBus');
   }
 
@@ -324,7 +307,6 @@ export class EventBus {
             continue;
           }
 
-          // eslint-disable-next-line no-console
           console.warn(`Processing batch of ${messages.length} OnboardingCompleted events`);
 
           // 并发处理消息
@@ -345,8 +327,7 @@ export class EventBus {
                   error_type: 'validation_failed' 
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-
-                // eslint-disable-next-line no-console
+                
                 console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
                 msg.nak();
                 return;
@@ -374,9 +355,8 @@ export class EventBus {
                 operation: 'consume',
                 status: 'error'
               }, duration);
-
+              
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              // eslint-disable-next-line no-console
               console.error('Error processing OnboardingCompleted event:', error);
 
               // 根据错误类型决定是否重试
@@ -390,9 +370,8 @@ export class EventBus {
 
           // 等待所有消息处理完成
           await Promise.allSettled(processingPromises);
-
+          
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('Error in OnboardingCompleted batch processing:', error);
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -442,7 +421,6 @@ export class EventBus {
             continue;
           }
 
-          // eslint-disable-next-line no-console
           console.warn(`Processing batch of ${messages.length} PlanGenerationRequested events`);
 
           // 并发处理消息
@@ -463,8 +441,7 @@ export class EventBus {
                   error_type: 'validation_failed' 
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-
-                // eslint-disable-next-line no-console
+                
                 console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
                 msg.nak();
                 return;
@@ -492,9 +469,8 @@ export class EventBus {
                 operation: 'consume',
                 status: 'error'
               }, duration);
-
+              
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              // eslint-disable-next-line no-console
               console.error('Error processing PlanGenerationRequested event:', error);
 
               // 根据错误类型决定是否重试
@@ -508,9 +484,8 @@ export class EventBus {
 
           // 等待所有消息处理完成
           await Promise.allSettled(processingPromises);
-
+          
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('Error in PlanGenerationRequested batch processing:', error);
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -577,13 +552,10 @@ export class EventBus {
         existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
 
       if (needsUpdate) {
-        // eslint-disable-next-line no-console
         console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
         await this.jsm.consumers.add(streamName, consumerConfig as never);
-        // eslint-disable-next-line no-console
         console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
       } else {
-        // eslint-disable-next-line no-console
         console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
       }
     } catch (error: unknown) {
@@ -593,10 +565,8 @@ export class EventBus {
 
       if (is404 || isNotFound) {
         // Consumer doesn't exist, create it
-        // eslint-disable-next-line no-console
         console.warn(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
         await this.jsm.consumers.add(streamName, consumerConfig as never);
-        // eslint-disable-next-line no-console
         console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
       } else {
         throw error;

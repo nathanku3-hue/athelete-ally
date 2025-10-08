@@ -26,8 +26,7 @@ export function mapLegacyFatigueLevel(level: string): FatigueLevel {
         const config = getContractConfig();
         recordLegacyMapping('fatigue_level', 'normal', config.environment);
       }
-
-      // eslint-disable-next-line no-console
+      
       console.warn('⚠️ Deprecated: "normal" fatigue level detected. Use "moderate" instead. This mapping will be removed in v2.0.0');
       return 'moderate';
     case 'low':
@@ -55,7 +54,6 @@ export function mapLegacySeason(season: string): Season {
         const config = getContractConfig();
         recordLegacyMapping('season', 'off-season', config.environment);
       }
-      // eslint-disable-next-line no-console
       console.warn('⚠️ Deprecated: "off-season" detected. Use "offseason" instead. This mapping will be removed in v2.0.0');
       return 'offseason';
     case 'pre-season':
@@ -63,7 +61,6 @@ export function mapLegacySeason(season: string): Season {
         const config = getContractConfig();
         recordLegacyMapping('season', 'pre-season', config.environment);
       }
-      // eslint-disable-next-line no-console
       console.warn('⚠️ Deprecated: "pre-season" detected. Use "preseason" instead. This mapping will be removed in v2.0.0');
       return 'preseason';
     case 'in-season':
@@ -71,7 +68,6 @@ export function mapLegacySeason(season: string): Season {
         const config = getContractConfig();
         recordLegacyMapping('season', 'in-season', config.environment);
       }
-      // eslint-disable-next-line no-console
       console.warn('⚠️ Deprecated: "in-season" detected. Use "inseason" instead. This mapping will be removed in v2.0.0');
       return 'inseason';
     case 'offseason':
