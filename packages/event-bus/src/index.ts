@@ -196,7 +196,7 @@ export class EventBus {
         });
         eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
         
-        console.error(`Schema validation failed for ${topic} event:`, validation.errors);
+        log.error(`Schema validation failed for ${topic} event: ${JSON.stringify(validation.errors)}`);
         throw new Error(`Schema validation failed: ${validation.message}`);
       }
       
