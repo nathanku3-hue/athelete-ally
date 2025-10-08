@@ -12,7 +12,8 @@ const SKIP_GLOBS = [
   '!packages/**/lib/**',
   '!packages/shared-types/**',
   '!packages/health-schema/**',
-  '!packages/analytics/**'
+  '!packages/analytics/**',
+  '!packages/logger/**'
 ];
 
 async function processFile(file: string) {
@@ -58,4 +59,5 @@ async function main() {
 }
 
 main().catch((e) => { console.error(e); process.exit(2); });
+
 
