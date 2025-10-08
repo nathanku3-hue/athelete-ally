@@ -15,3 +15,4 @@ describe('sanitize', () => {
   });
 });
 
+\nimport type {} from 'jest';\n
