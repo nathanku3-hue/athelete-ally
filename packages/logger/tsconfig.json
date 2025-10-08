@@ -5,23 +5,16 @@
     "declaration": false,
     "declarationMap": false,
     "outDir": "dist",
-    "rootDir": "src",`r`n    "baseUrl": "../..",
+    "rootDir": "src",
+    "baseUrl": "../..",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2022",
-    "lib": [
-      "ES2022",
-      "DOM"
-    ],
+    "lib": ["ES2022", "DOM"],
     "verbatimModuleSyntax": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }
-
