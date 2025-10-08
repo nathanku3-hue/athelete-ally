@@ -19,7 +19,7 @@ const eslintConfig = [
       "**/.next/**",
       "out/**",
       "**/out/**",
-      "build/**",\n      "**/dist/**",\n      "**/lib/**",
+      "build/**",
       "**/build/**",
       "next-env.d.ts",
       "scripts/**",
@@ -161,4 +161,3 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
-

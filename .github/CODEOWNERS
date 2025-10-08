@@ -28,7 +28,3 @@
 /infra/index.yaml                               @org/core
 /protobuf/registry.yaml                         @org/core
 /sql/migrations/catalog.yaml                    @org/core
-# Logging and logs API (Safety review)
-/packages/logger/** @org/safety
-/apps/frontend/src/app/api/logs/** @org/safety
-

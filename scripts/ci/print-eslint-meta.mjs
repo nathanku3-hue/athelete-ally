@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Prints ESLint meta (versions and config hash) to both stdout and $GITHUB_STEP_SUMMARY
+// Prints ESLint meta (versions and config hash) to both stdout and 
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -27,13 +27,12 @@ function getVersion(modName) {
   const pkg = findPkgJson(modName);
   if (!pkg) return null;
   const j = readJSON(pkg);
-  return j?.version || null;
+  return (j && j.version) ? j.version : null;
 }
 
 function hashFile(file) {
   try {
-    const content = fs.readFileSync(file, 'utf8')
-      .replace(/\r\n/g, '\n');
+    const content = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
     const h = crypto.createHash('sha256').update(content, 'utf8').digest('hex');
     return h;
   } catch {
@@ -41,6 +40,7 @@ function hashFile(file) {
   }
 }
 
+const CONFIG_FILE = 'eslint.config.unified.mjs';
 const meta = {
   eslint: getVersion('eslint'),
   plugins: {
@@ -50,24 +50,25 @@ const meta = {
     '@typescript-eslint/parser': getVersion('@typescript-eslint/parser'),
     'eslint-config-next': getVersion('eslint-config-next'),
   },
-  configHash: hashFile(path.join(process.cwd(), 'eslint.config.mjs')),
+  typescript: getVersion('typescript'),
+  configFile: CONFIG_FILE,
+  configHash: hashFile(path.join(process.cwd(), CONFIG_FILE)),
 };
 
-const lines = [
-  'ESLint Meta:',
-  `- eslint: ${meta.eslint ?? 'unknown'}`,
-  `- plugins/import: ${meta.plugins['eslint-plugin-import'] ?? 'missing'}`,
-  `- plugins/boundaries: ${meta.plugins['eslint-plugin-boundaries'] ?? 'missing'}`,
-  `- plugins/@typescript-eslint: ${meta.plugins['@typescript-eslint/eslint-plugin'] ?? 'missing'}`,
-  `- parser/@typescript-eslint: ${meta.plugins['@typescript-eslint/parser'] ?? 'missing'}`,
-  `- config: eslint.config.mjs sha256=${meta.configHash ?? 'n/a'}`,
-];
+const lines = [];
+lines.push('ESLint Meta:');
+lines.push('- eslint: ' + (meta.eslint || 'unknown'));
+lines.push('- plugins/import: ' + (meta.plugins['eslint-plugin-import'] || 'missing'));
+lines.push('- plugins/boundaries: ' + (meta.plugins['eslint-plugin-boundaries'] || 'missing'));
+lines.push('- plugins/@typescript-eslint: ' + (meta.plugins['@typescript-eslint/eslint-plugin'] || 'missing'));
+lines.push('- parser/@typescript-eslint: ' + (meta.plugins['@typescript-eslint/parser'] || 'missing'));
+lines.push('- eslint-config-next: ' + (meta.plugins['eslint-config-next'] || 'missing'));
+lines.push('- typescript: ' + (meta.typescript || 'unknown'));
+lines.push('- config (' + meta.configFile + '): sha256=' + (meta.configHash || 'n/a'));
 
 const summary = lines.join('\n');
 console.log(summary);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
-  try {
-    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
-  } catch {}
+  try { fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n'); } catch {}
 }

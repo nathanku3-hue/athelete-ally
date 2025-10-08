@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Verify each service with prisma/schema.prisma has prisma:generate, prebuild, predev that run generate.
 import fs from 'fs';
 import path from 'path';
 
@@ -32,25 +33,21 @@ const offenders = [];
 for (const svc of services) {
   if (!hasPrismaSchema(svc)) continue;
   const pkg = readPkgJson(svc);
-  if (!pkg) { offenders.push({ service: svc, reason: 'missing package.json' }); continue; }
+  if (!pkg) { offenders.push({ service: svc, missing: ['package.json'] }); continue; }
   const scripts = pkg.scripts || {};
-  const ok = {
-    prismaGenerate: typeof scripts['prisma:generate'] === 'string' && scriptRunsGenerate(scripts['prisma:generate']),
-    prebuild: typeof scripts['prebuild'] === 'string' && scriptRunsGenerate(scripts['prebuild']),
-    predev: typeof scripts['predev'] === 'string' && scriptRunsGenerate(scripts['predev']),
-  };
-  if (!ok.prismaGenerate || !ok.prebuild || !ok.predev) {
-    offenders.push({ service: svc, ok });
-  }
+  const missing = [];
+  if (!(typeof scripts['prisma:generate'] === 'string' && scriptRunsGenerate(scripts['prisma:generate']))) missing.push('prisma:generate');
+  if (!(typeof scripts['prebuild'] === 'string' && scriptRunsGenerate(scripts['prebuild']))) missing.push('prebuild (must run prisma generate)');
+  if (!(typeof scripts['predev'] === 'string' && scriptRunsGenerate(scripts['predev']))) missing.push('predev (must run prisma generate)');
+  if (missing.length) offenders.push({ service: svc, missing });
 }
 
 if (offenders.length) {
   console.log('Prisma enforcement failed for services:');
-  for (const o of offenders) {
-    console.log(`- ${o.service}:`, JSON.stringify(o.ok || o.reason));
-  }
+  offenders.forEach(o => {
+    console.log('- ' + o.service + ': missing ' + o.missing.join(', '));
+  });
   process.exit(1);
 }
 
 console.log('All Prisma-enabled services have required scripts.');
-
