@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import boundaries from "eslint-plugin-boundaries";
 
-const __filename = fileURLToPath(import.meta.url);
+`nimport boundaries from 'eslint-plugin-boundaries';`nconst __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
@@ -19,7 +19,7 @@ const eslintConfig = [
       "**/.next/**",
       "out/**",
       "**/out/**",
-      "build/**",
+      "build/**",\n      "**/dist/**",\n      "**/lib/**",
       "**/build/**",
       "next-env.d.ts",
       "scripts/**",
@@ -137,6 +137,28 @@ const eslintConfig = [
       "boundaries/no-unknown": "warn"
     }
   }
+,  // Boundaries pilot (warn) for selected packages
+  {
+    files: [
+      "packages/shared-types/**/*.{ts,tsx,js,jsx}",
+      "packages/shared/**/*.{ts,tsx,js,jsx}",
+      "packages/event-bus/**/*.{ts,tsx,js,jsx}"
+    ],
+    plugins: { boundaries },
+    settings: {
+      "boundaries/elements": [
+        { type: "packages", pattern: "packages/*" },
+        { type: "apps", pattern: "apps/*" },
+        { type: "services", pattern: "services/*" }
+      ],
+      "boundaries/ignore": ["**/__tests__/**", "**/*.test.*"]
+    },
+    rules: {
+      "boundaries/entry-point": "warn",
+      "boundaries/no-unknown": "warn"
+    }
+  }
 ];
 
 export default eslintConfig;
+
