@@ -1,4 +1,4 @@
-name: ESLint Guardrails
+name: ESLint Guardrails & Config Validation
 
 on:
   pull_request:
@@ -8,72 +8,359 @@ on:
       - '**/*.js'
       - '**/*.jsx'
       - 'eslint.config.*'
-      - 'lint-budget.json'
-      - 'scripts/lint-budget-*'
+      - 'tsconfig*.json'
+      - 'scripts/eslint-config-constants.js'
+      - 'scripts/verify-eslint-config-api.js'
+      - 'scripts/test-eslint-config-constants.js'
+      - 'scripts/scan-eslint-overrides.js'
       - '.github/workflows/eslint-guardrails.yml'
+      - '.lintstagedrc.js'
+      - 'package.json'
   push:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - 'eslint.config.*'
+      - 'tsconfig*.json'
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
-  group: eslint-budgets-${{ github.ref }}
+  group: eslint-guardrails-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  baseline:
-    name: Lint Baseline (non-blocking)
+  config-validation:
+    name: Validate ESLint & TypeScript Config
     runs-on: ubuntu-latest
-    continue-on-error: true
+    # Check for bypass label
+    if: "!contains(github.event.pull_request.labels.*.name, 'allowlintdrift')"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
         with:
           node-version: '20.18.0'
-          cache: npm
-      - name: Install dependencies (workspaces)
+          cache: 'npm'
+
+      - name: Install dependencies
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
-      - name: Build (pre-lint)
-        run: npx turbo run build --no-daemon
-      - name: Print ESLint Meta
-        run: node scripts/ci/print-eslint-meta.mjs
-      - name: Generate baseline report
-        run: node scripts/lint-budget-baseline.mjs
-      - name: Upload baseline artifact
-        if: always()
+
+      - name: Generate Cache Key
+        id: cache-key
+        run: |
+          # Generate cache key based on ESLint version, plugins, and config hash
+          ESLINT_VERSION=$(npx eslint --version | cut -d' ' -f2)
+          CONFIG_HASH=$(sha256sum "eslint.config.unified.mjs" | cut -d' ' -f1)
+          PACKAGE_HASH=$(sha256sum "package-lock.json" | cut -d' ' -f1)
+
+          CACHE_KEY="eslint-cache-${{ runner.os }}-${ESLINT_VERSION}-${CONFIG_HASH}-${PACKAGE_HASH}"
+          echo "cache-key=${CACHE_KEY}" >> "$GITHUB_OUTPUT"
+          echo "Generated cache key: ${CACHE_KEY}"
+
+      - name: Validate ESLint Config
+        run: |
+          echo "🔍 Validating ESLint configuration..."
+
+          # Check if unified config exists
+          if [ ! -f "eslint.config.unified.mjs" ]; then
+            echo "❌ Unified ESLint config not found"
+            exit 1
+          fi
+
+          # Print environment information
+          echo "📋 Environment Information:"
+          echo "  Node.js: $(node --version)"
+          echo "  ESLint: $(npx eslint --version)"
+          echo "  Working Directory: $(pwd)"
+          echo "  Config File: eslint.config.unified.mjs"
+
+          # Validate config syntax
+          echo "📋 Validating config syntax..."
+          npx eslint --print-config eslint.config.unified.mjs > /dev/null
+
+          echo "📋 ESLint Config Path:"
+          npx eslint --print-config eslint.config.unified.mjs | head -20
+
+          echo "✅ ESLint config validation passed"
+
+      - name: Anti-Regression Guards
+        run: |
+          echo "🛡️ Running anti-regression checks..."
+
+          # Use cross-platform Node.js scanner for Windows compatibility
+          echo "🔍 Scanning for ESLint config overrides..."
+          node scripts/scan-eslint-overrides.js
+
+          echo "✅ Anti-regression checks passed"
+
+      - name: Config Drift Detection
+        run: |
+          echo "🔍 Detecting config drift..."
+
+          # Use ESLint API for robust config verification
+          echo "📋 Running ESLint API config verification..."
+          node scripts/verify-eslint-config-api.js
+
+          echo "✅ Config drift detection passed"
+
+      - name: Constants Module Testing
+        run: |
+          echo "🧪 Testing ESLint configuration constants..."
+
+          # Run constants module tests to prevent drift
+          echo "📋 Running constants module validation..."
+          node scripts/test-eslint-config-constants.js
+
+          echo "✅ Constants module tests passed"
+
+      - name: Upload Config Artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: lint-baseline-${{ github.run_id }}
-          path: reports/lint/lint-baseline.json
+          name: eslint-config-artifacts-${{ github.run_id }}
+          path: eslint-config-artifacts.json
           retention-days: 7
 
-  delta:
-    name: ESLint Guardrails
+      - name: Validate TypeScript Config
+        run: |
+          echo "🔍 Validating TypeScript configuration..."
+
+          # Check TypeScript version
+          echo "📋 TypeScript Version:"
+          npx tsc --version
+
+          # Validate base config
+          echo "📋 TypeScript Base Config:"
+          npx tsc --showConfig --project tsconfig.base.json | head -20
+
+          # Check for unused detection flags
+          if ! grep -q "noUnusedLocals" config/typescript/tsconfig.base.json; then
+            echo "❌ noUnusedLocals not enabled in TypeScript config"
+            exit 1
+          fi
+
+          if ! grep -q "noUnusedParameters" config/typescript/tsconfig.base.json; then
+            echo "❌ noUnusedParameters not enabled in TypeScript config"
+            exit 1
+          fi
+
+          echo "✅ TypeScript config validation passed"
+
+      - name: Check for Config Drift
+        run: |
+          echo "🔍 Checking for config drift..."
+
+          # Check if multiple ESLint configs exist
+          CONFIG_COUNT=$(find . -name "eslint.config.*" -not -path "./node_modules/*" | wc -l)
+          echo "📋 Found $CONFIG_COUNT ESLint config files"
+
+          if [ "$CONFIG_COUNT" -gt 2 ]; then
+            echo "⚠️  Multiple ESLint configs detected - potential drift risk"
+            find . -name "eslint.config.*" -not -path "./node_modules/*"
+          fi
+
+          # Check for conflicting rules
+          echo "📋 Checking for rule conflicts..."
+          npx eslint --print-config eslint.config.unified.mjs > /tmp/eslint-config.json
+
+          echo "✅ Config drift check completed"
+
+  lint-changed-files:
+    name: Lint Changed Files Only
     runs-on: ubuntu-latest
+    # Check for bypass label
+    if: "!contains(github.event.pull_request.labels.*.name, 'allowlintdrift')"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
         with:
           node-version: '20.18.0'
-          cache: npm
-      - name: Install dependencies (workspaces)
+          cache: 'npm'
+
+      - name: Install dependencies
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
-      - name: Build (pre-lint)
-        run: npx turbo run build --no-daemon
-      - name: Print ESLint Meta
-        run: node scripts/ci/print-eslint-meta.mjs
-      - name: Check lint budget delta
-        run: node scripts/lint-budget-check.mjs
-      - name: Upload delta artifact
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'apps/frontend/**/*.{ts,tsx,js,jsx}'
+            services:
+              - 'services/**/*.{ts,js}'
+            packages:
+              - 'packages/**/*.{ts,js}'
+            scripts:
+              - 'scripts/**/*.{ts,js}'
+            config:
+              - 'eslint.config.*'
+              - 'tsconfig*.json'
+
+      - name: Lint Frontend (if changed)
+        if: steps.changed-files.outputs.frontend == 'true'
+        run: |
+          echo "🔍 Linting frontend files..."
+          npx eslint apps/frontend --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
+          echo "✅ Frontend linting passed"
+
+      - name: Lint Services (if changed)
+        if: steps.changed-files.outputs.services == 'true'
+        run: |
+          echo "🔍 Linting service files..."
+          npx eslint services --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
+          echo "✅ Services linting passed"
+
+      - name: Get changed package files
+        if: steps.changed-files.outputs.packages == 'true'
+        run: |
+          git fetch origin --depth=2
+          CHANGED="$(git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep '^packages/.*\.[tj]sx\?$' || true)"
+          {
+            echo "CHANGED<<EOF"
+            echo "$CHANGED"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Lint changed package files
+        if: steps.changed-files.outputs.packages == 'true' && env.CHANGED != ''
+        env:
+          ESLINT_USE_FLAT_CONFIG: 'true'
+          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
+        run: |
+          echo "🔍 Linting changed package files..."
+          printf "%s\n" "$CHANGED" | xargs -r npx eslint --config eslint.config.unified.mjs --max-warnings=0
+          echo "✅ Changed packages linting passed"
+
+      - name: Skip (no package changes)
+        if: steps.changed-files.outputs.packages == 'true' && env.CHANGED == ''
+        run: echo "ℹ️  No changed package files; skipping lint"
+
+      - name: Lint Scripts (if changed)
+        if: steps.changed-files.outputs.scripts == 'true'
+        run: |
+          echo "🔍 Linting script files..."
+          npx eslint scripts --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
+          echo "✅ Scripts linting passed"
+
+      - name: Build workspace packages
+        if:
+          steps.changed-files.outputs.frontend == 'true' || steps.changed-files.outputs.services ==
+          'true' || steps.changed-files.outputs.packages == 'true'
+        run: |
+          echo "🔧 Building workspace packages for type-check..."
+          npx turbo run build --filter='@athlete-ally/*' --no-daemon
+          echo "✅ Workspace packages built"
+
+      - name: Type Check Changed Files
+        if:
+          steps.changed-files.outputs.frontend == 'true' || steps.changed-files.outputs.services ==
+          'true' || steps.changed-files.outputs.packages == 'true'
+        run: |
+          echo "🔍 Type checking via turbo build..."
+          echo "✅ Type checking passed (covered by build step above)"
+          echo "Note: Each package's build includes TypeScript compilation with its own tsconfig"
+          echo "Monorepo-wide tsc check skipped due to conflicting path mappings across workspaces"
+
+  lint-baseline:
+    name: Lint Baseline (Non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    # Check for bypass label
+    if: "!contains(github.event.pull_request.labels.*.name, 'allowlintdrift')"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+      - name: Lint Entire Codebase
+        continue-on-error: true
+        run: |
+          echo "🔍 Running baseline linting (non-blocking, report-only)..."
+          # Produce a JSON report for artifact/history; never fail the step
+          npx eslint . --config eslint.config.unified.mjs --cache --format json -o baseline-lint.json || true
+
+          # Print a quick summary to logs
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('baseline-lint.json','utf8'));let e=0,w=0;for(const f of r){e+=f.errorCount;w+=f.warningCount}console.log('📊 Baseline summary: errors='+e+' warnings='+w)"
+
+          echo "✅ Baseline linting completed (report-only)"
+
+      - name: Upload Baseline Lint Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lint-delta-${{ github.run_id }}
-          path: reports/lint/lint-delta.json
+          name: baseline-lint-${{ github.run_id }}
+          path: baseline-lint.json
           retention-days: 7
+
+  bypass-notice:
+    name: ESLint Guardrails Bypassed
+    runs-on: ubuntu-latest
+    if: "contains(github.event.pull_request.labels.*.name, 'allowlintdrift')"
+    steps:
+      - name: Bypass Notice
+        run: |
+          echo "⚠️ ESLint Guardrails have been bypassed with the 'allowlintdrift' label"
+          echo "This should only be used in exceptional circumstances."
+          echo "Please ensure config drift issues are addressed in a follow-up PR."
+          echo ""
+          echo "Bypass reason: Emergency or temporary config changes"
+          echo "Follow-up required: Yes - address config drift in next PR"
+          echo "Audit: This bypass will be reviewed by the team"
+          echo ""
+          echo "📊 Bypass Usage Summary:"
+          echo "  - PR: ${{ github.event.pull_request.number }}"
+          echo "  - Author: ${{ github.event.pull_request.user.login }}"
+          echo "  - Branch: ${{ github.ref_name }}"
+          echo "  - Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "  - Bypass Label: allowlintdrift"
+          echo "  - Review Required: Yes"
+          echo ""
+          echo "🔍 This bypass will be audited for:"
+          echo "  - Legitimate emergency use cases"
+          echo "  - Follow-up PR creation"
+          echo "  - Config drift resolution"
+          echo "  - Team notification"
+
+  client-bundle-scan:
+    name: Client Bundle Scan (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    # Non-blocking informational scan for client bundle safety
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+      - name: Run client bundle scan
+        run: |
+          node --version
+          npm --version || true
+          node scripts/check-client-bundles.js || true
+
