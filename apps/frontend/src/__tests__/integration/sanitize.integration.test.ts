@@ -22,8 +22,7 @@ describe('sanitize', () => {
   it('filters context keys to allowlist', () => {
     const { context } = filterAndSanitizeContext({ field: 'f', value: 'john@example.com', secret: 'x' } as any);
     expect(context).toBeDefined();
-    expect((context as any).field).toBe('[REDACTED]');
-    // @ts-expect-error secret should be dropped
-    expect((context as any).secret).toBeUndefined();
+    expect((context as any).field).toBe('[REDACTED]');\n    expect((context as any).secret).toBeUndefined();
   });
 });
+
