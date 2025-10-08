@@ -4,7 +4,7 @@ module.exports = {
   rootDir: '..',
   ...base,
   testEnvironment: 'jsdom',
-  modulePathIgnorePatterns: ['<rootDir>/.next', '<rootDir>/apps/frontend/.next', '<rootDir>/**/dist', '<rootDir>/**/out', '<rootDir>/**/coverage'],
+  modulePathIgnorePatterns: ['/.next/', '/apps/frontend/.next/', '/dist/', '/out/', '/coverage/'],
   roots: ['<rootDir>/apps/frontend'],
   testMatch: [
     '**/__tests__/**/*.test.tsx',
@@ -49,4 +49,5 @@ module.exports = {
   // Increase timeout for CI environment
   testTimeout: 15000
 };
+
 
