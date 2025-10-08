@@ -9,6 +9,7 @@ async function main() {
     '!packages/**/dist/**',
     '!packages/**/build/**',
     '!packages/**/lib/**',
+    '!packages/**/coverage/**',
     '!packages/**/__tests__/**',
   ]);
   const hits: { file: string; line: number; kind: string }[] = [];
@@ -24,3 +25,4 @@ async function main() {
 }
 
 main().catch((e) => { console.error(e); process.exit(2); });
+
