@@ -287,8 +287,8 @@ describe('RPE Trigger Logic E2E Tests', () => {
 // 輔助函數
 // 全局變量用於模擬狀態
 let currentSetData: any = {};
-let exerciseSetCounts: { [key: string]: number } = {}; // 追蹤每個動作的總組數
-let exerciseTotalSets: { [key: string]: number } = {}; // 追蹤每個動作的計劃總組數
+const exerciseSetCounts: { [key: string]: number } = {}; // 追蹤每個動作的總組數
+const exerciseTotalSets: { [key: string]: number } = {}; // 追蹤每個動作的計劃總組數
 
 async function completeExerciseSet(userId: string, sessionId: string, setData: any) {
   // 模擬完成訓練組
