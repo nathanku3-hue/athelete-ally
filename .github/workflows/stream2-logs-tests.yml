@@ -74,11 +74,13 @@ jobs:
       - name: Step Summary
         if: always()
         run: |
-          echo "## Stream 2 Logs Tests Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Test Results:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Sanitize Tests: ✅ Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Logs Endpoint Tests: ✅ Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Browser Adapter Sanity: ✅ Completed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note:** This is a non-blocking job for Stream 2 validation." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Stream 2 Logs Tests Summary"
+            echo ""
+            echo "**Test Results:**"
+            echo "- Sanitize Tests: ✅ Completed"
+            echo "- Logs Endpoint Tests: ✅ Completed"
+            echo "- Browser Adapter Sanity: ✅ Completed"
+            echo ""
+            echo "**Note:** This is a non-blocking job for Stream 2 validation."
+          } >> "$GITHUB_STEP_SUMMARY"

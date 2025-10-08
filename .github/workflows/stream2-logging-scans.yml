@@ -53,9 +53,11 @@ jobs:
           fi
           
           echo "Console: removed $REMOVED, remaining $REMAINING, allowlist $ALLOWLIST"
-          echo "removed=$REMOVED" >> $GITHUB_OUTPUT
-          echo "remaining=$REMAINING" >> $GITHUB_OUTPUT
-          echo "allowlist=$ALLOWLIST" >> $GITHUB_OUTPUT
+          {
+            echo "removed=$REMOVED"
+            echo "remaining=$REMAINING"
+            echo "allowlist=$ALLOWLIST"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Client Bundle Scan
         run: |
@@ -81,11 +83,13 @@ jobs:
       - name: Step Summary
         if: always()
         run: |
-          echo "## Stream 2 Logging Scans Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Console Scan Results:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Removed: ${{ steps.console_scan.outputs.removed }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Remaining: ${{ steps.console_scan.outputs.remaining }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Allowlist: ${{ steps.console_scan.outputs.allowlist }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Client Bundle Scan:** ✅ No server-only imports detected" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Stream 2 Logging Scans Summary"
+            echo ""
+            echo "**Console Scan Results:**"
+            echo "- Removed: ${{ steps.console_scan.outputs.removed }}"
+            echo "- Remaining: ${{ steps.console_scan.outputs.remaining }}"
+            echo "- Allowlist: ${{ steps.console_scan.outputs.allowlist }}"
+            echo ""
+            echo "**Client Bundle Scan:** ✅ No server-only imports detected"
+          } >> "$GITHUB_STEP_SUMMARY"
