@@ -1,3 +1,6 @@
+import { createLogger } from '@athlete-ally/logger';
+import browserAdapter from '@athlete-ally/logger/browser';
+const log = createLogger(browserAdapter, { module: 'event-tracker', service: 'frontend' });
 /**
  * 事件追踪系统
  * 用于捕获和分析用户行为数据
@@ -136,7 +139,7 @@ export class EventTracker {
     try {
       await this.sendEvents(eventsToSend);
     } catch (error) {
-      console.error('Failed to send analytics events:', error);
+      log.error('Failed to send analytics events:', error);
       // 可以选择重新添加到队列或记录到本地存储
     }
   }
@@ -330,3 +333,4 @@ export const eventTracker = new EventTracker(
 );
 
 export const realTimeMetrics = new RealTimeMetrics(eventTracker);
+

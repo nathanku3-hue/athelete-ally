@@ -1,3 +1,8 @@
+import { createLogger } from '@athlete-ally/logger';
+import browserAdapter from '@athlete-ally/logger/browser';
+import nodeAdapter from '@athlete-ally/logger/server';
+const __adapter = (typeof window !== 'undefined') ? browserAdapter : nodeAdapter;
+const __log = createLogger(__adapter, { module: 'health-schema', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -50,7 +55,7 @@ function readBuildInfo(buildInfoPath?: string): { sha: string; buildId: string }
       buildId: buildInfo.buildId || defaultBuildId,
     };
   } catch (error) {
-    console.warn(`⚠️ Could not read build info from ${buildInfoPath}:`, error);
+    __log.warn(`⚠️ Could not read build info from ${buildInfoPath}:`, error);
     return { sha: defaultSha, buildId: defaultBuildId };
   }
 }
@@ -166,3 +171,4 @@ export default {
   createNextHealthHandler,
   validateHealthResponse,
 };
+
