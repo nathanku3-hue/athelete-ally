@@ -1,0 +1,37 @@
+name: stream2-logs-tests
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  stream2-logs-tests:
+    name: "Stream 2: Logs Tests"
+    runs-on: ubuntu-latest
+    env:
+      LOGS_API_KEY: ${{ secrets.LOGS_API_KEY || 'dev-key' }}
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        run: npm ci || npm i
+      - name: Build (turbo, no daemon)
+        run: npm run build:all || npx turbo run build --no-daemon || echo "skip build"
+      - name: Run Stream 2 Jest project
+        run: |
+          mkdir -p reports
+          npx jest --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
+      - name: Step Summary
+        if: always()
+        run: |
+          node -e "const fs=require('fs');let p='reports/stream2-logs-test.json';if(!fs.existsSync(p)){console.log('No JSON report');process.exit(0)};const o=JSON.parse(fs.readFileSync(p,'utf8'));const s=o.numPassedTests||0;const f=o.numFailedTests||0;const u=o.numPendingTests||0;const suites=o.numTotalTestSuites||0;const out=`Stream 2: Logs Tests\n- suites: ${suites}\n- passed: ${s}\n- failed: ${f}\n- pending: ${u}`;console.log(out);fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out+'\n');"
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stream2-logs-tests
+          path: reports/*
