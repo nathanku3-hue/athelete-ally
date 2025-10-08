@@ -47,7 +47,7 @@ const SENTINEL_FILES = {
       'no-console': 'error'
     }
   },
-  'packages/shared-types/src/schemas.ts': {
+  'packages/shared-types/src/schemas/api.ts': {
     type: 'Package',
     tier: 'package',
     expectedRules: {
