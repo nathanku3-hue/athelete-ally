@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/logs/route';
 
-describe.skip('/api/logs', () => {
+describe('/api/logs', () => {
   function makeReq(body: any, headers: Record<string,string> = {}) {
     const req = new Request('http://localhost/api/logs', {
       method: 'POST',
@@ -37,3 +37,4 @@ describe.skip('/api/logs', () => {
     expect(res.status).toBe(400);
   });
 });
+
