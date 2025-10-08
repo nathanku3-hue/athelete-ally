@@ -49,6 +49,7 @@ function readBuildInfo(buildInfoPath?: string): { sha: string; buildId: string }
       buildId: buildInfo.buildId || defaultBuildId,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.warn(`⚠️ Could not read build info from ${buildInfoPath}:`, error);
     return { sha: defaultSha, buildId: defaultBuildId };
   }

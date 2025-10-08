@@ -52,6 +52,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
 
   // Check if telemetry is enabled
   if (!enabled) {
+    // eslint-disable-next-line no-console
     console.warn(`🔇 Telemetry disabled for ${serviceName}`);
     return {
       sdk: undefined,
@@ -61,6 +62,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
     };
   }
 
+  // eslint-disable-next-line no-console
   console.warn(`🔍 Initializing telemetry for ${serviceName} v${version}`);
 
   // Create resource with consistent attributes
@@ -122,8 +124,10 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   const shutdown = async () => {
     try {
       await sdk.shutdown();
+      // eslint-disable-next-line no-console
       console.warn(`🔇 Telemetry shutdown complete for ${serviceName}`);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
     }
   };
@@ -132,6 +136,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 
+  // eslint-disable-next-line no-console
   console.warn(`✅ Telemetry initialized for ${serviceName}`);
   return { sdk, tracer, meter, shutdown };
 }
@@ -150,6 +155,7 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
           endpoint: exporters?.jaeger?.endpoint || process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('⚠️ Jaeger exporter not available, using noop');
         return undefined;
       }
@@ -161,11 +167,13 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('⚠️ OTLP exporter not available, using noop');
         return undefined;
       }
 
     default:
+      // eslint-disable-next-line no-console
       console.warn('📊 No trace exporter configured');
       return undefined;
   }
@@ -186,6 +194,7 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
           endpoint: exporters?.prometheus?.endpoint || '/metrics',
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('⚠️ Prometheus exporter not available, using noop');
         return undefined;
       }
@@ -197,11 +206,13 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/metrics',
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('⚠️ OTLP metric exporter not available, using noop');
         return undefined;
       }
 
     default:
+      // eslint-disable-next-line no-console
       console.warn('📊 No metric exporter configured');
       return undefined;
   }
