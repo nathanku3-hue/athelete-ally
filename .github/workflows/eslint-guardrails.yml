@@ -227,12 +227,30 @@ jobs:
           npx eslint services --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
           echo "✅ Services linting passed"
 
-      - name: Lint Packages (if changed)
+      - name: Get changed package files
         if: steps.changed-files.outputs.packages == 'true'
         run: |
-          echo "🔍 Linting package files..."
-          npx eslint packages --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
-          echo "✅ Packages linting passed"
+          git fetch origin --depth=2
+          CHANGED="$(git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep '^packages/.*\.[tj]sx\?$' || true)"
+          {
+            echo "CHANGED<<EOF"
+            echo "$CHANGED"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Lint changed package files
+        if: steps.changed-files.outputs.packages == 'true' && env.CHANGED != ''
+        env:
+          ESLINT_USE_FLAT_CONFIG: 'true'
+          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
+        run: |
+          echo "🔍 Linting changed package files..."
+          printf "%s\n" "$CHANGED" | xargs -r npx eslint --config eslint.config.unified.mjs --max-warnings=0
+          echo "✅ Changed packages linting passed"
+
+      - name: Skip (no package changes)
+        if: steps.changed-files.outputs.packages == 'true' && env.CHANGED == ''
+        run: echo "ℹ️  No changed package files; skipping lint"
 
       - name: Lint Scripts (if changed)
         if: steps.changed-files.outputs.scripts == 'true'
