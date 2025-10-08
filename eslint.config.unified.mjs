@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Unified ESLint Configuration - Single Source of Truth
  * 
@@ -14,6 +15,14 @@ const require = createRequire(import.meta.url);
 const { ALLOWED_NEXT_PATTERNS } = require('./scripts/eslint-config-constants.js');
 
 const __filename = fileURLToPath(import.meta.url);
+=======
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+import boundaries from "eslint-plugin-boundaries";
+
+`nimport boundaries from 'eslint-plugin-boundaries';`nconst __filename = fileURLToPath(import.meta.url);
+>>>>>>> 2670d3c (chore(stream1): boundaries pilot (warn): unified config, baseline, CI workflow and reporting)
 const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
@@ -21,14 +30,19 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+<<<<<<< HEAD
   // Base configuration for all files
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   
   // Global ignores
+=======
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+>>>>>>> 2670d3c (chore(stream1): boundaries pilot (warn): unified config, baseline, CI workflow and reporting)
   {
     ignores: [
       "node_modules/**",
       ".next/**",
+<<<<<<< HEAD
       "out/**",
       "build/**",
       "dist/**",
@@ -209,6 +223,42 @@ const eslintConfig = [
   // Test files configuration
   {
     files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}", "**/*.spec.{ts,tsx,js,jsx}"],
+=======
+      "**/.next/**",
+      "out/**",
+      "**/out/**",
+      "build/**",
+      "**/build/**",
+      "next-env.d.ts",
+      "scripts/**",
+      "**/prisma/generated/**",
+    ],
+  },
+  // Global overrides for Next.js rules that assume "pages" directory
+  {
+    rules: {
+      "@next/next/no-html-link-for-pages": "off",
+    },
+  },
+  // Frontend-specific configuration
+  {
+    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      // Next.js App Router specific rules
+      "@next/next/no-page-custom-font": "off",
+      "@next/next/no-html-link-for-pages": "off",
+      "@next/next/no-img-element": "warn",
+      "@next/next/no-sync-scripts": "error",
+      "@next/next/no-title-in-document-head": "off",
+      // Disable pages directory warnings for App Router
+      "@next/next/no-head-element": "off",
+      "@next/next/no-script-component-in-head": "off",
+    },
+  },
+  // Test files configuration - relaxed rules for testing environment
+  {
+    files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}"],
+>>>>>>> 2670d3c (chore(stream1): boundaries pilot (warn): unified config, baseline, CI workflow and reporting)
     languageOptions: {
       globals: {
         jest: true,
@@ -237,12 +287,16 @@ const eslintConfig = [
       }
     },
     rules: {
+<<<<<<< HEAD
       // Relaxed rules for tests
+=======
+>>>>>>> 2670d3c (chore(stream1): boundaries pilot (warn): unified config, baseline, CI workflow and reporting)
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-require-imports": "off",
       "import/no-commonjs": "off",
       "import/no-internal-modules": "off",
+<<<<<<< HEAD
       "no-console": "off",
       
       // Prevent use of Vitest APIs in a Jest project
@@ -262,3 +316,84 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
+=======
+      "no-restricted-imports": [
+        "error",
+        { "paths": [ { "name": "vitest", "message": "Use Jest APIs instead of Vitest. Import from '@jest/globals' if needed." } ] }
+      ],
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-console": "warn",
+      "prefer-const": "warn",
+      "no-var": "error",
+      "import/no-internal-modules": ["warn", { 
+        allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client"] 
+      }],
+      "no-restricted-imports": ["warn", {
+        patterns: [
+          { group: ["packages/*/src/**"], message: "Import from package entrypoint (no deep src/*)." },
+          { group: ["apps/*/src/**"], message: "Do not import app internals across workspaces." },
+          { group: ["services/**"], message: "Apps should not directly import from services. Use shared packages or API calls instead." },
+          { group: ["apps/**"], message: "Services should not import from apps. This violates architectural boundaries." }
+        ]
+      }]
+    }
+  },
+  // Packages: enforce no-console=error
+  {
+    files: ["packages/**/*.{ts,tsx,js,jsx}"],
+    rules: { "no-console": "error" }
+  },
+  // Boundaries pilot (warn) for selected packages
+  {
+    files: [
+      "packages/shared-types/**/*.{ts,tsx,js,jsx}",
+      "packages/shared/**/*.{ts,tsx,js,jsx}",
+      "packages/event-bus/**/*.{ts,tsx,js,jsx}"
+    ],
+    plugins: { boundaries },
+    settings: {
+      "boundaries/elements": [
+        { type: "packages", pattern: "packages/*" },
+        { type: "apps", pattern: "apps/*" },
+        { type: "services", pattern: "services/*" }
+      ],
+      "boundaries/ignore": ["**/__tests__/**", "**/*.test.*"]
+    },
+    rules: {
+      "boundaries/entry-point": "warn",
+      "boundaries/no-unknown": "warn"
+    }
+  }
+,  // Boundaries pilot (warn) for selected packages
+  {
+    files: [
+      "packages/shared-types/**/*.{ts,tsx,js,jsx}",
+      "packages/shared/**/*.{ts,tsx,js,jsx}",
+      "packages/event-bus/**/*.{ts,tsx,js,jsx}"
+    ],
+    plugins: { boundaries },
+    settings: {
+      "boundaries/elements": [
+        { type: "packages", pattern: "packages/*" },
+        { type: "apps", pattern: "apps/*" },
+        { type: "services", pattern: "services/*" }
+      ],
+      "boundaries/ignore": ["**/__tests__/**", "**/*.test.*"]
+    },
+    rules: {
+      "boundaries/entry-point": "warn",
+      "boundaries/no-unknown": "warn"
+    }
+  }
+];
+
+export default eslintConfig;
+
+>>>>>>> 2670d3c (chore(stream1): boundaries pilot (warn): unified config, baseline, CI workflow and reporting)
