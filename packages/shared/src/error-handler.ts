@@ -1,3 +1,6 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+const log = createLogger(nodeAdapter, { module: 'error-handler', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
 /**
  * 🛡️ 统一错误处理中间件
  * 作者: 后端团队
@@ -225,9 +228,19 @@ export class ErrorLogger {
       ip: request?.ip
     };
     
-    // Defer to external logger - apps/services handle actual logging
-    this.logToExternalLogger(logLevel, JSON.stringify(logData, null, 2));
-  }
+    switch (logLevel) {
+      case 'error':
+        log.error(`🚨 Error: ${JSON.stringify(logData, null, 2)}`);
+        break;
+      case 'warn':
+        log.warn(`⚠️ Warning: ${JSON.stringify(logData, null, 2)}`);
+        break;
+      case 'info':
+        log.info(`ℹ️ Info: ${JSON.stringify(logData, null, 2)}`);
+        break;
+      default:
+        log.info(`📝 Log: ${JSON.stringify(logData, null, 2)}`);
+    }  }
 
   /**
    * 外部日志记录接口 - 由应用/服务实现
@@ -388,3 +401,4 @@ export function createEnhancedErrorHandler() {
     reply.status(statusCode).send(response);
   };
 }
+
