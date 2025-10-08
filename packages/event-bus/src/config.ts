@@ -1,4 +1,7 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
 import { z } from 'zod';
+const log = createLogger(nodeAdapter, { module: 'config' });
 
 const EventBusConfigSchema = z.object({
   NATS_URL: z.string().url().default('nats://localhost:4223'),
@@ -12,7 +15,7 @@ const EventBusConfigSchema = z.object({
 export const config = (() => {
   const parsed = EventBusConfigSchema.safeParse(process.env);
   if (!parsed.success) {
-    console.error('Invalid environment variables for event-bus', parsed.error.flatten());
+    log.error('Invalid environment variables for event-bus', parsed.error.flatten());
     process.exit(1);
   }
   return parsed.data;
@@ -35,7 +38,7 @@ export const getStreamMode = (): StreamMode => {
 
   // Log mode for debugging (can be disabled with LOG_MODE=false)
   if (process.env.LOG_MODE !== 'false') {
-    console.log(`[event-bus] Stream mode: ${mode} (EVENT_STREAM_MODE="${process.env.EVENT_STREAM_MODE || '(unset)'}")`);
+    log.info(`[event-bus] Stream mode: ${mode} (EVENT_STREAM_MODE="${process.env.EVENT_STREAM_MODE || '(unset)'}")`);
   }
 
   return mode;

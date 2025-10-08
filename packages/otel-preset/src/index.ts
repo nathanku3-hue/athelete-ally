@@ -1,8 +1,11 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { trace, metrics } from '@opentelemetry/api';
+const log = createLogger(nodeAdapter, { module: 'index' });
 
 export interface TelemetryExporters {
   jaeger?: { endpoint?: string };
@@ -48,7 +51,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
 
   // Check if telemetry is enabled
   if (!enabled) {
-    console.log(`🔇 Telemetry disabled for ${serviceName}`);
+    log.info(`🔇 Telemetry disabled for ${serviceName}`);
     return {
       sdk: undefined as any,
       tracer: trace.getTracer(serviceName, version),
@@ -57,7 +60,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
     };
   }
 
-  console.log(`🔍 Initializing telemetry for ${serviceName} v${version}`);
+  log.info(`🔍 Initializing telemetry for ${serviceName} v${version}`);
 
   // Create resource with consistent attributes
   const resource = new Resource({
@@ -116,9 +119,9 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   const shutdown = async () => {
     try {
       await sdk.shutdown();
-      console.log(`🔇 Telemetry shutdown complete for ${serviceName}`);
+      log.info(`🔇 Telemetry shutdown complete for ${serviceName}`);
     } catch (error) {
-      console.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
+      log.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
     }
   };
 
@@ -126,7 +129,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 
-  console.log(`✅ Telemetry initialized for ${serviceName}`);
+  log.info(`✅ Telemetry initialized for ${serviceName}`);
   return { sdk, tracer, meter, shutdown };
 }
 
@@ -144,7 +147,7 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
           endpoint: exporters?.jaeger?.endpoint || process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
         });
       } catch (error) {
-        console.warn('⚠️ Jaeger exporter not available, using noop');
+        log.warn('⚠️ Jaeger exporter not available, using noop');
         return undefined;
       }
 
@@ -155,12 +158,12 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
         });
       } catch (error) {
-        console.warn('⚠️ OTLP exporter not available, using noop');
+        log.warn('⚠️ OTLP exporter not available, using noop');
         return undefined;
       }
 
     default:
-      console.log('📊 No trace exporter configured');
+      log.info('📊 No trace exporter configured');
       return undefined;
   }
 }
@@ -180,7 +183,7 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
           endpoint: exporters?.prometheus?.endpoint || '/metrics',
         });
       } catch (error) {
-        console.warn('⚠️ Prometheus exporter not available, using noop');
+        log.warn('⚠️ Prometheus exporter not available, using noop');
         return undefined;
       }
 
@@ -191,12 +194,12 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/metrics',
         });
       } catch (error) {
-        console.warn('⚠️ OTLP metric exporter not available, using noop');
+        log.warn('⚠️ OTLP metric exporter not available, using noop');
         return undefined;
       }
 
     default:
-      console.log('📊 No metric exporter configured');
+      log.info('📊 No metric exporter configured');
       return undefined;
   }
 }

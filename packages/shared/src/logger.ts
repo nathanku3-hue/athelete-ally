@@ -1,3 +1,6 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+const log = createLogger(nodeAdapter, { module: 'logger' });
 // 敏感信息脱敏工具
 export class SensitiveDataMasker {
   private static readonly SENSITIVE_PATTERNS = [
@@ -120,14 +123,14 @@ export class SafeLogger {
     
     if (this.isProduction) {
       // 生产环境只记录必要信息
-      console.error(`[ERROR] ${message}`, {
+      log.error(`[ERROR] ${message}`, {
         error: maskedError ? this.sanitizeError(maskedError) : undefined,
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
       // 开发环境记录详细信息
-      console.error(`[ERROR] ${message}`, maskedError, maskedContext);
+      log.error(`[ERROR] ${message}`, maskedError, maskedContext);
     }
   }
 
@@ -138,12 +141,12 @@ export class SafeLogger {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      console.warn(`[WARN] ${message}`, {
+      log.warn(`[WARN] ${message}`, {
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      console.warn(`[WARN] ${message}`, maskedContext);
+      log.warn(`[WARN] ${message}`, maskedContext);
     }
   }
 
@@ -154,12 +157,12 @@ export class SafeLogger {
     const maskedContext = context ? SensitiveDataMasker.maskSensitiveData(context) : undefined;
     
     if (this.isProduction) {
-      console.log(`[INFO] ${message}`, {
+      log.info(`[INFO] ${message}`, {
         context: maskedContext ? this.sanitizeContext(maskedContext) : undefined,
         timestamp: new Date().toISOString()
       });
     } else {
-      console.log(`[INFO] ${message}`, maskedContext);
+      log.info(`[INFO] ${message}`, maskedContext);
     }
   }
 

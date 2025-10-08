@@ -1,3 +1,6 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+const log = createLogger(nodeAdapter, { module: 'error-handler' });
 /**
  * 🛡️ 统一错误处理中间件
  * 作者: 后端团队
@@ -220,16 +223,16 @@ export class ErrorLogger {
     
     switch (logLevel) {
       case 'error':
-        console.error('🚨 Error:', JSON.stringify(logData, null, 2));
+        log.error('🚨 Error:', JSON.stringify(logData, null, 2));
         break;
       case 'warn':
-        console.warn('⚠️ Warning:', JSON.stringify(logData, null, 2));
+        log.warn('⚠️ Warning:', JSON.stringify(logData, null, 2));
         break;
       case 'info':
-        console.info('ℹ️ Info:', JSON.stringify(logData, null, 2));
+        log.info('ℹ️ Info:', JSON.stringify(logData, null, 2));
         break;
       default:
-        console.log('📝 Log:', JSON.stringify(logData, null, 2));
+        log.info('📝 Log:', JSON.stringify(logData, null, 2));
     }
   }
   
@@ -313,7 +316,7 @@ export class ErrorMonitor {
   
   private static sendAlert(error: StandardError, alertType: string) {
     // 这里可以集成实际的告警系统
-    console.error(`🚨 ALERT [${alertType}]:`, {
+    log.error(`🚨 ALERT [${alertType}]:`, {
       errorType: error.type,
       code: error.code,
       count: this.errorCounts.get(error.type),

@@ -1,5 +1,8 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+const log = createLogger(nodeAdapter, { module: 'jwt' });
 
 // JWT 配置
 const rawJwtSecret = process.env.JWT_SECRET;
@@ -7,7 +10,7 @@ if (process.env.NODE_ENV === 'production' && !rawJwtSecret) {
   throw new Error('JWT_SECRET is required in production environment');
 }
 if (process.env.NODE_ENV !== 'production' && !rawJwtSecret) {
-  console.warn('Warning: JWT_SECRET not set; using dev-only default.');
+  log.warn('Warning: JWT_SECRET not set; using dev-only default.');
 }
 export const JWT_SECRET = rawJwtSecret || 'dev-only-jwt-secret';
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';

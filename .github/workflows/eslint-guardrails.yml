@@ -1,4 +1,4 @@
-name: ESLint Guardrails (Budgets)
+name: ESLint Guardrails
 
 on:
   pull_request:
@@ -52,7 +52,7 @@ jobs:
           retention-days: 7
 
   delta:
-    name: Lint Delta (changed-files blocking)
+    name: ESLint Guardrails
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,4 +77,3 @@ jobs:
           name: lint-delta-${{ github.run_id }}
           path: reports/lint/lint-delta.json
           retention-days: 7
-
