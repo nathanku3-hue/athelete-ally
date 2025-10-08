@@ -49,7 +49,7 @@ module.exports = {
 
   // Module resolution mapping (order matters - specific before generic)
   moduleNameMapper: {
-    // @athlete-ally packages (specific mappings first)
+    // @athlete-ally packages (specific mappings first)\n    '^@athlete-ally/logger
     '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
     '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
@@ -92,3 +92,47 @@ module.exports = {
   
   // Test configuration - removed deprecated options for Jest 29.7.0 compatibility
 };
+: '<rootDir>/packages/logger/src',
+    '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
+    '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
+    '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
+    '^@athlete-ally/contracts/events/(.*)$': '<rootDir>/packages/contracts/events/$1',
+    '^@athlete-ally/contracts/(.*)$': '<rootDir>/packages/contracts/$1',
+    '^@athlete-ally/(.*)$': '<rootDir>/packages/$1/src',
+    
+    // Legacy test data shims
+    '^\\.\\.\\/helpers\\/test-data$': '<rootDir>/apps/frontend/tests/_stubs/test-data.ts',
+    
+    // Specific db.js mappings (precedence over generic ESM rule)
+    '^services/planning-engine/src/db\\.js$': '<rootDir>/services/planning-engine/src/db.ts',
+    
+    // ESM compatibility (.js imports in TypeScript) - must be last
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    
+    // TypeScript path mappings from tsconfig
+    ...(pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' }))
+  },
+
+  // Transform configuration
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+        module: 'esnext',
+        moduleResolution: 'node',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+        baseUrl: '.',
+        paths: compilerOptions.paths || {}
+      }
+    }],
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  },
+  
+  // Enable ESM support for Jest
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'],
+  
+  // Test configuration - removed deprecated options for Jest 29.7.0 compatibility
+};
+
