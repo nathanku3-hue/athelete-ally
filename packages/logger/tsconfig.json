@@ -12,7 +12,8 @@
     "verbatimModuleSyntax": true,
     "types": ["node"],
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": "../.."
   },
   "include": ["src/**/*.ts"]
 }
