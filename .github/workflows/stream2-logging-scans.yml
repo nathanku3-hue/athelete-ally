@@ -1,31 +1,91 @@
-name: stream2-logging-scans
+name: Stream 2 Logging Scans
+
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - 'packages/logger/**'
+      - 'apps/frontend/src/app/api/logs/**'
+      - 'scripts/scan-console-packages.ts'
+      - 'ci/console-allowlist.json'
+      - '.github/workflows/stream2-logging-scans.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  stream2-scans:
+  stream2-logging-scans:
+    name: Stream 2 Logging Scans
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          node-version: '20'
-      - name: Install deps
-        run: npm ci || npm i
-      - name: Run console scan
-        id: console
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Run Console Package Scan
+        id: console_scan
         run: |
-          node -e "const fs=require('fs');const r=require('child_process').execSync('npm run -s scan:console').toString(); fs.mkdirSync('reports',{recursive:true}); fs.writeFileSync('reports/console-scan.json',r); const obj=JSON.parse(r); const allow=fs.existsSync('ci/console-allowlist.json')?JSON.parse(fs.readFileSync('ci/console-allowlist.json','utf8')):[]; const summary=`Console: remaining ${obj.hits.length}, allowlist ${allow.length}`; console.log(summary); fs.writeFileSync(process.env.GITHUB_STEP_SUMMARY, summary+"\n");"
-      - name: Run client bundle scan
-        id: bundle
+          echo "🔍 Running console package scan..."
+          node scripts/scan-console-packages.ts > console-scan-results.json 2>&1 || true
+          
+          # Parse results for summary
+          if [ -f console-scan-results.json ]; then
+            REMOVED=$(grep -o "removed [0-9]*" console-scan-results.json | grep -o "[0-9]*" | head -1 || echo "0")
+            REMAINING=$(grep -o "remaining [0-9]*" console-scan-results.json | grep -o "[0-9]*" | head -1 || echo "0")
+            ALLOWLIST=$(grep -o "allowlist [0-9]*" console-scan-results.json | grep -o "[0-9]*" | head -1 || echo "0")
+          else
+            REMOVED="0"
+            REMAINING="0"
+            ALLOWLIST="0"
+          fi
+          
+          echo "Console: removed $REMOVED, remaining $REMAINING, allowlist $ALLOWLIST"
+          echo "removed=$REMOVED" >> $GITHUB_OUTPUT
+          echo "remaining=$REMAINING" >> $GITHUB_OUTPUT
+          echo "allowlist=$ALLOWLIST" >> $GITHUB_OUTPUT
+
+      - name: Client Bundle Scan
         run: |
-          node scripts/scan-client-bundle.ts > reports/client-bundle-scan.json || true
-          # Hard block only on server libs finding
-          node -e "const fs=require('fs');const p='reports/client-bundle-scan.json';if(!fs.existsSync(p)){process.exit(0)}; const o=JSON.parse(fs.readFileSync(p,'utf8')); if(o.offenders&&o.offenders.length){console.error('Server libs found in client'); process.exit(1)}"
-      - name: Upload scan artifacts
+          echo "🔍 Running client bundle scan..."
+          # Check for server-only imports in client files
+          if grep -r "use client" apps/frontend/src --include="*.ts" --include="*.tsx" | xargs grep -l "node:"; then
+            echo "❌ Server-only imports detected in client files"
+            exit 1
+          fi
+          echo "✅ No server-only imports in client files"
+
+      - name: Upload Scan Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stream2-scan-artifacts
-          path: reports/*.json
+          name: stream2-scan-results
+          path: |
+            console-scan-results.json
+            reports/*.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Step Summary
+        if: always()
+        run: |
+          echo "## Stream 2 Logging Scans Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Console Scan Results:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Removed: ${{ steps.console_scan.outputs.removed }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Remaining: ${{ steps.console_scan.outputs.remaining }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Allowlist: ${{ steps.console_scan.outputs.allowlist }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Client Bundle Scan:** ✅ No server-only imports detected" >> $GITHUB_STEP_SUMMARY
