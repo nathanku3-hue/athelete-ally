@@ -3,7 +3,7 @@ const base = require('./jest.config.base.cjs');
 module.exports = {
   rootDir: '..',
   ...base,
-  testEnvironment: 'jsdom',,
+  testEnvironment: 'jsdom',
   modulePathIgnorePatterns: ['<rootDir>/.next', '<rootDir>/apps/frontend/.next', '<rootDir>/**/dist', '<rootDir>/**/out', '<rootDir>/**/coverage'],
   roots: ['<rootDir>/apps/frontend'],
   testMatch: [
@@ -48,3 +48,4 @@ module.exports = {
   // Increase timeout for CI environment
   testTimeout: 15000
 };
+
