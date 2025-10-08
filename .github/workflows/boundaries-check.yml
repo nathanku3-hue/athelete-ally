@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   boundaries:
-    name: Boundaries: Scan and Enforce
+    name: Boundaries: Zero New Violations
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
