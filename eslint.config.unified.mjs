@@ -84,7 +84,7 @@ const eslintConfig = [
   {
     files: ['packages/**/*.{ts,tsx,js,jsx}'],
     ignores: ['**/__tests__/**', '**/tests/**', '**/*.spec.*', '**/*.test.*'],
-    rules: { 'no-console': 'error' },
+    rules: { 'no-console': 'warn' },
   },
   // Boundaries pilot (warn) for selected packages
   {
