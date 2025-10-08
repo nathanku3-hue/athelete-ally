@@ -87,7 +87,16 @@
         "./services/*/src"
       ],
       "@athlete-ally/apps/*": [
-        "./apps/*/src"
+      "./apps/*/src"
+      ],
+      "@athlete-ally/logger": [
+        "./packages/logger/src/index.ts"
+      ],
+      "@athlete-ally/logger/server": [
+        "./packages/logger/src/adapters/node.ts"
+      ],
+      "@athlete-ally/logger/browser": [
+        "./packages/logger/src/adapters/browser.ts"
       ]
     }
   },
@@ -98,3 +107,4 @@
     ".next"
   ]
 }
+
