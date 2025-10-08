@@ -6,7 +6,11 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": "../.."
+    "baseUrl": "../..",
+    "paths": {
+      "@athlete-ally/logger": ["packages/logger/src/index.ts"],
+      "@athlete-ally/logger/server": ["packages/logger/src/server.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]

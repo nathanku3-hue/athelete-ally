@@ -1,3 +1,8 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+
+const log = createLogger(nodeAdapter, { module: 'shared-logger', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
+
 // 敏感信息脱敏工具
 export class SensitiveDataMasker {
   private static readonly SENSITIVE_PATTERNS = [
@@ -126,8 +131,8 @@ export class SafeLogger {
         timestamp: new Date().toISOString()
       });
     } else {
-      // Development logging - defer to app/service logger
-      this.logToExternalLogger('error', message, { error: maskedError, context: maskedContext });
+      // Development logging - use single context object (error, context)
+      log.error(`[ERROR] ${message}`, { error: maskedError, context: maskedContext });
     }
   }
 
