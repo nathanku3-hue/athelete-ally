@@ -20,7 +20,7 @@ jobs:
       - name: Run client bundle scan
         id: bundle
         run: |
-          node scripts/scan-client-bundle.ts > reports/client-bundle-scan.json || true
+          npx tsx scripts/scan-client-bundle.ts > reports/client-bundle-scan.json || true
           # Hard block only on server libs finding
           node -e "const fs=require('fs');const p='reports/client-bundle-scan.json';if(!fs.existsSync(p)){process.exit(0)}; const o=JSON.parse(fs.readFileSync(p,'utf8')); if(o.offenders&&o.offenders.length){console.error('Server libs found in client'); process.exit(1)}"
       - name: Upload scan artifacts

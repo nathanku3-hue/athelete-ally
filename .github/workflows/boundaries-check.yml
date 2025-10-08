@@ -32,7 +32,9 @@ jobs:
 
       - name: Scan + PR Summary (pilot warn)
         id: summary
-        env:`n          ESLINT_USE_FLAT_CONFIG: 'true'`n          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
+        env:
+          ESLINT_USE_FLAT_CONFIG: 'true'
+          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
         run: |
           node scripts/boundaries-pr-summary.mjs
 
