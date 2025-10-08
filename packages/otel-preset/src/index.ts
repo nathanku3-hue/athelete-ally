@@ -241,11 +241,5 @@ export function createBusinessMetrics(meter: Meter, serviceName: string) {
   };
 }
 
-<<<<<<< HEAD
-const otelPreset = { initTelemetry, createBusinessSpan, createBusinessMetrics };
-export default otelPreset;
-=======
 export default { initTelemetry, createBusinessSpan, createBusinessMetrics };
-
->>>>>>> 7dbfd9d (fix(stream2): embed error in message for otel-preset shutdown log (typing-safe))
 

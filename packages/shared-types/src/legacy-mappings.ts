@@ -8,6 +8,10 @@
 import { FatigueLevel, Season } from './index';
 import { recordLegacyMapping } from './telemetry';
 import { shouldApplyLegacyMapping, isTelemetryEnabled, getContractConfig } from './config';
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+
+const log = createLogger(nodeAdapter, { module: 'shared-types-legacy', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
 
 /**
  * Maps legacy fatigue level 'normal' to canonical 'moderate'
@@ -27,7 +31,7 @@ export function mapLegacyFatigueLevel(level: string): FatigueLevel {
         recordLegacyMapping('fatigue_level', 'normal', config.environment);
       }
       
-      console.warn('⚠️ Deprecated: "normal" fatigue level detected. Use "moderate" instead. This mapping will be removed in v2.0.0');
+      log.warn('⚠️ Deprecated: "normal" fatigue level detected. Use "moderate" instead. This mapping will be removed in v2.0.0');
       return 'moderate';
     case 'low':
     case 'moderate':
@@ -54,21 +58,21 @@ export function mapLegacySeason(season: string): Season {
         const config = getContractConfig();
         recordLegacyMapping('season', 'off-season', config.environment);
       }
-      console.warn('⚠️ Deprecated: "off-season" detected. Use "offseason" instead. This mapping will be removed in v2.0.0');
+      log.warn('⚠️ Deprecated: "off-season" detected. Use "offseason" instead. This mapping will be removed in v2.0.0');
       return 'offseason';
     case 'pre-season':
       if (isTelemetryEnabled()) {
         const config = getContractConfig();
         recordLegacyMapping('season', 'pre-season', config.environment);
       }
-      console.warn('⚠️ Deprecated: "pre-season" detected. Use "preseason" instead. This mapping will be removed in v2.0.0');
+      log.warn('⚠️ Deprecated: "pre-season" detected. Use "preseason" instead. This mapping will be removed in v2.0.0');
       return 'preseason';
     case 'in-season':
       if (isTelemetryEnabled()) {
         const config = getContractConfig();
         recordLegacyMapping('season', 'in-season', config.environment);
       }
-      console.warn('⚠️ Deprecated: "in-season" detected. Use "inseason" instead. This mapping will be removed in v2.0.0');
+      log.warn('⚠️ Deprecated: "in-season" detected. Use "inseason" instead. This mapping will be removed in v2.0.0');
       return 'inseason';
     case 'offseason':
     case 'preseason':

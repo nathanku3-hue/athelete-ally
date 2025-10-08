@@ -9,7 +9,7 @@
     "baseUrl": "../..",
     "paths": {
       "@athlete-ally/logger": ["packages/logger/src/index.ts"],
-      "@athlete-ally/logger/server": ["packages/logger/src/server.ts"]
+      "@athlete-ally/logger/server": ["packages/logger/src/adapters/node.ts"]
     }
   },
   "include": ["src/**/*"],
