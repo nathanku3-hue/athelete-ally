@@ -127,7 +127,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
       await sdk.shutdown();
       log.info(`🔇 Telemetry shutdown complete for ${serviceName}`);
     } catch (error) {
-      log.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
+      log.error(`❌ Error shutting down telemetry for ${serviceName}: ${String(error)}`);
     }
   };
 
