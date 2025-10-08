@@ -3,6 +3,11 @@ import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
 import boundaries from 'eslint-plugin-boundaries';
 
+// Import DRY constants for Next.js patterns
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { ALLOWED_NEXT_PATTERNS } = require('./scripts/eslint-config-constants.js');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -67,7 +72,7 @@ const eslintConfig = [
       'prefer-const': 'warn',
       'no-var': 'error',
       'import/no-internal-modules': ['warn', {
-        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client'],
+        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client', ...ALLOWED_NEXT_PATTERNS],
       }],
       'no-restricted-imports': ['warn', {
         patterns: [
@@ -83,7 +88,7 @@ const eslintConfig = [
   {
     files: ['packages/**/*.{ts,tsx,js,jsx}'],
     ignores: ['**/__tests__/**', '**/tests/**', '**/*.spec.*', '**/*.test.*'],
-    rules: { 'no-console': 'warn' },
+    rules: { 'no-console': 'error' },
   },
   // Services: allow console for server-side logging
   {
