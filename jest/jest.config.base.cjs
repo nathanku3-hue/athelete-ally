@@ -94,3 +94,4 @@ module.exports = {
   // Test configuration - removed deprecated options for Jest 29.7.0 compatibility
 };
 
+
