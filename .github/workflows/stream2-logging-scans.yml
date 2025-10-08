@@ -16,7 +16,7 @@ jobs:
       - name: Run console scan
         id: console
         run: |
-          node -e "const fs=require('fs');const r=require('child_process').execSync('npm run -s scan:console').toString(); fs.mkdirSync('reports',{recursive:true}); fs.writeFileSync('reports/console-scan.json',r); const obj=JSON.parse(r); const allow=fs.existsSync('ci/console-allowlist.json')?JSON.parse(fs.readFileSync('ci/console-allowlist.json','utf8')):[]; const allowed=new Set(allow.map(e=>e.file)); const remaining=(obj.hits||[]).filter(h=>!allowed.has(h.file)).length; const summary=`Console: remaining ${remaining}, allowlist ${allow.length}`; console.log(summary); fs.writeFileSync(process.env.GITHUB_STEP_SUMMARY, summary+"\n");"
+          node -e "const fs=require('fs');const r=require('child_process').execSync('npm run -s scan:console').toString(); fs.mkdirSync('reports',{recursive:true}); fs.writeFileSync('reports/console-scan.json',r); const obj=JSON.parse(r); const allow=fs.existsSync('ci/console-allowlist.json')?JSON.parse(fs.readFileSync('ci/console-allowlist.json','utf8')):[]; const allowed=new Set(allow.map(e=>e.file)); const remaining=(obj.hits||[]).filter(h=>!allowed.has(h.file)).length; const summary=\`Console: remaining \${remaining}, allowlist \${allow.length}\`; console.log(summary); fs.writeFileSync(process.env.GITHUB_STEP_SUMMARY, summary+'\n');"
       - name: Run client bundle scan
         id: bundle
         run: |

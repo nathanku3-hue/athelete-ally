@@ -28,7 +28,7 @@ jobs:
       - name: Step Summary
         if: always()
         run: |
-          node -e "const fs=require('fs');let p='reports/stream2-logs-test.json';if(!fs.existsSync(p)){console.log('No JSON report');process.exit(0)};const o=JSON.parse(fs.readFileSync(p,'utf8'));const s=o.numPassedTests||0;const f=o.numFailedTests||0;const u=o.numPendingTests||0;const suites=o.numTotalTestSuites||0;const out=`Stream 2: Logs Tests\n- suites: ${suites}\n- passed: ${s}\n- failed: ${f}\n- pending: ${u}`;console.log(out);fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out+'\n');"
+          node -e "const fs=require('fs');let p='reports/stream2-logs-test.json';if(!fs.existsSync(p)){console.log('No JSON report');process.exit(0)};const o=JSON.parse(fs.readFileSync(p,'utf8'));const s=o.numPassedTests||0;const f=o.numFailedTests||0;const u=o.numPendingTests||0;const suites=o.numTotalTestSuites||0;const out=\`Stream 2: Logs Tests\n- suites: \${suites}\n- passed: \${s}\n- failed: \${f}\n- pending: \${u}\`;console.log(out);fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out+'\n');"
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
