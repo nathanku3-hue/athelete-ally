@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import boundaries from "eslint-plugin-boundaries";
 
-`nimport boundaries from 'eslint-plugin-boundaries';`nconst __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
