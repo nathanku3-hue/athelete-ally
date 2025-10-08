@@ -29,3 +29,28 @@ log.info('view mounted', { route: '/home' });
 ## Env
 - `LOGS_API_KEY` (required in prod)
 - `LOGS_HASH_SALT` (rotate every 90d)
+
+## Choosing an adapter
+- Browser (default): import browser adapter for client-side code. This avoids bundling Node core modules and keeps DX simple.
+- Node/server: import the server adapter for services or Next.js API routes to emit one-line JSON to stdout.
+- Adaptive wrapper (optional): if a shared package might run in both environments, detect `typeof window` at runtime and choose browser vs server adapter accordingly. Keep this logic in server-only paths for client bundles.
+
+Examples
+```ts
+// Browser
+import { createLogger } from '@athlete-ally/logger';
+import browserAdapter from '@athlete-ally/logger/browser';
+export const log = createLogger(browserAdapter, { module: 'ui', service: 'frontend' });
+
+// Server
+import { createLogger } from '@athlete-ally/logger';
+import serverAdapter from '@athlete-ally/logger/server';
+export const log = createLogger(serverAdapter, { module: 'worker', service: 'service' });
+
+// Adaptive (package)
+import { createLogger } from '@athlete-ally/logger';
+import browserAdapter from '@athlete-ally/logger/browser';
+import serverAdapter from '@athlete-ally/logger/server';
+const adapter = (typeof window !== 'undefined') ? browserAdapter : serverAdapter;
+export const log = createLogger(adapter, { module: 'shared', service: 'package' });
+```
