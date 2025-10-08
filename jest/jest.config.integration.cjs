@@ -3,7 +3,7 @@ const base = require('./jest.config.base.cjs');
 module.exports = {
   rootDir: '..',
   ...base,
-  testEnvironment: 'node',,
+  testEnvironment: 'node',
   modulePathIgnorePatterns: ['<rootDir>/.next', '<rootDir>/**/dist', '<rootDir>/**/out', '<rootDir>/**/coverage'],
   roots: ['<rootDir>'],
   testMatch: [
@@ -20,3 +20,4 @@ module.exports = {
   // Allow empty test runs to pass (for CI stability)
   passWithNoTests: true
 };
+
