@@ -61,7 +61,7 @@ export class EventValidator {
 
       return { valid: true };
     } catch (error) {
-      log.error(`Schema validation error for topic ${topic}:`, error);
+      log.error(`Schema validation error for topic ${topic}: ${String(error)}`);
       return {
         valid: false,
         message: `Schema validation error: ${(error as Error).message}`,
