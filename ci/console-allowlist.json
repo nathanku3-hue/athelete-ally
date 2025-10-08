@@ -1,0 +1,4 @@
+{
+  "file": "packages/logger/src/adapters/node.ts",
+  "reason": "stdout JSON emitter by design"
+}
