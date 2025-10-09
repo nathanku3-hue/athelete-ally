@@ -267,12 +267,12 @@ jobs:
         if: steps.changed-files.outputs.packages == 'true' && env.CHANGED == ''
         run: echo "ℹ️  No changed package files; skipping lint"
 
-      - name: Lint Scripts (if changed)
+      - name: Skip Scripts Linting (explicitly ignored)
         if: steps.changed-files.outputs.scripts == 'true'
         run: |
-          echo "🔍 Linting script files..."
-          npx eslint scripts --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
-          echo "✅ Scripts linting passed"
+          echo "ℹ️  Scripts directory is explicitly ignored in eslint.config.unified.mjs"
+          echo "    scripts/** is in the ignores array (line 22)"
+          echo "    Skipping ESLint for scripts files as per configuration"
 
       - name: Build workspace packages
         if:
