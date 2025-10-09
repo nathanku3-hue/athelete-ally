@@ -22,7 +22,20 @@ jobs:
       - name: Run Stream 2 Jest project
         run: |
           mkdir -p reports
-          npm run test:stream2 -- --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
+          # Find jest binary - try root first, then workspaces
+          if [ -f "node_modules/jest/bin/jest.js" ]; then
+            JEST_BIN="node_modules/jest/bin/jest.js"
+          else
+            JEST_BIN=$(find apps/*/node_modules services/*/node_modules packages/*/node_modules -name "jest.js" -path "*/jest/bin/jest.js" 2>/dev/null | head -1)
+          fi
+
+          if [ -z "$JEST_BIN" ]; then
+            echo "Error: Jest binary not found in root or any workspace"
+            exit 1
+          fi
+
+          echo "Using jest at: $JEST_BIN"
+          node "$JEST_BIN" --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary
