@@ -23,32 +23,38 @@ jobs:
         run: |
           mkdir -p reports
 
-          # Find jest binary - try multiple locations
-          # 1. Main jest package
-          if [ -f "node_modules/jest/bin/jest.js" ]; then
-            JEST_BIN="node_modules/jest/bin/jest.js"
-          # 2. jest-cli package (older installations)
-          elif [ -f "node_modules/jest-cli/bin/jest.js" ]; then
-            JEST_BIN="node_modules/jest-cli/bin/jest.js"
-          # 3. Use jest via require from node (works with @jest packages)
-          elif [ -f "node_modules/@jest/core/package.json" ]; then
-            echo "Using @jest/core via node require"
-            node -e "require('@jest/core').runCLI({config: 'jest/projects.stream2.cjs', runInBand: true, colors: true, json: true, outputFile: 'reports/stream2-logs-test.json', reporters: ['default', 'jest-junit']}, ['.']).then(result => process.exit(result.results.success ? 0 : 1))"
-            exit $?
-          # 4. Search workspaces as last resort
-          else
-            JEST_BIN=$(find apps/*/node_modules services/*/node_modules -name "jest.js" -path "*/jest/bin/jest.js" 2>/dev/null | head -1)
-          fi
+          # Use @jest/core API directly (jest binary not installed as peer dependency)
+          echo "Running tests via @jest/core API..."
+          node -e "
+            const { runCLI } = require('@jest/core');
+            const fs = require('fs');
 
-          if [ -z "$JEST_BIN" ]; then
-            echo "Error: Jest binary not found in any location"
-            echo "Installed @jest packages:"
-            ls -d node_modules/@jest* 2>/dev/null || echo "No @jest packages found"
-            exit 1
-          fi
+            runCLI(
+              {
+                config: 'jest/projects.stream2.cjs',
+                runInBand: true,
+                colors: true,
+                json: true,
+                outputFile: 'reports/stream2-logs-test.json',
+                reporters: ['default', 'jest-junit']
+              },
+              [process.cwd()]
+            ).then(result => {
+              // Write JSON report for step summary
+              fs.writeFileSync(
+                'reports/stream2-logs-test.json',
+                JSON.stringify(result, null, 2)
+              );
 
-          echo "Using jest at: $JEST_BIN"
-          node "$JEST_BIN" --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
+              console.log('Test run completed');
+              console.log('Passed:', result.results.numPassedTests);
+              console.log('Failed:', result.results.numFailedTests);
+              process.exit(result.results.success ? 0 : 1);
+            }).catch(err => {
+              console.error('Jest execution failed:', err);
+              process.exit(1);
+            });
+          "
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary
