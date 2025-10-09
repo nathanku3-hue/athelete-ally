@@ -175,6 +175,7 @@ export class SafeLogger {
   /**
    * 外部日志记录接口 - 由应用/服务实现
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub for apps/services to implement
   private static logToExternalLogger(_level: string, _message: string, _context?: unknown): void {
     // No-op stub - apps/services should implement actual logging
     // This allows packages to export logging interface without direct console usage

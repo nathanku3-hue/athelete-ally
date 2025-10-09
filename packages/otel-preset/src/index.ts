@@ -152,7 +152,8 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
         return new JaegerExporter({
           endpoint: exporters?.jaeger?.endpoint || process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
         });
-      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
         log.info('⚠️ Jaeger exporter not available, using noop');
         return undefined;
       }
@@ -163,7 +164,8 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
         return new OTLPTraceExporter({
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
         });
-      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
         log.info('⚠️ OTLP exporter not available, using noop');
         return undefined;
       }
@@ -188,7 +190,8 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
           port: exporters?.prometheus?.port || parseInt(process.env.PROMETHEUS_PORT || '9464'),
           endpoint: exporters?.prometheus?.endpoint || '/metrics',
         });
-      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
         log.info('⚠️ Prometheus exporter not available, using noop');
         return undefined;
       }
@@ -199,7 +202,8 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
         return new OTLPMetricExporter({
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/metrics',
         });
-      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
         log.info('⚠️ OTLP metric exporter not available, using noop');
         return undefined;
       }
@@ -241,5 +245,6 @@ export function createBusinessMetrics(meter: Meter, serviceName: string) {
   };
 }
 
-export default { initTelemetry, createBusinessSpan, createBusinessMetrics };
+const otelPreset = { initTelemetry, createBusinessSpan, createBusinessMetrics };
+export default otelPreset;
 

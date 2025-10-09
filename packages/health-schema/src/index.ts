@@ -46,14 +46,14 @@ export function createHealthResponse(options: HealthCheckOptions): HealthRespons
   return { ok: true, status: 'healthy', sha, buildId, service: serviceName, uptimeSec, timestamp: new Date().toISOString(), version, environment };
 }
 
-export function createDegradedHealthResponse(options: HealthCheckOptions, reason?: string): HealthResponse {
+export function createDegradedHealthResponse(options: HealthCheckOptions, reason?: string): HealthResponse & { reason?: string } {
   const response = createHealthResponse(options);
-  return { ...response, ok: false, status: 'degraded', ...(reason && { reason }) } as any;
+  return { ...response, ok: false, status: 'degraded', ...(reason && { reason }) };
 }
 
-export function createUnhealthyHealthResponse(options: HealthCheckOptions, reason?: string): HealthResponse {
+export function createUnhealthyHealthResponse(options: HealthCheckOptions, reason?: string): HealthResponse & { reason?: string } {
   const response = createHealthResponse(options);
-  return { ...response, ok: false, status: 'unhealthy', ...(reason && { reason }) } as any;
+  return { ...response, ok: false, status: 'unhealthy', ...(reason && { reason }) };
 }
 
 export function createExpressHealthHandler(options: HealthCheckOptions) {
