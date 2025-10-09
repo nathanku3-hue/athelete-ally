@@ -21,8 +21,10 @@ jobs:
         run: npm run build:all || npx turbo run build --no-daemon || echo "skip build"
       - name: Install test dependencies (workaround peer dependency issue)
         run: |
-          # npm refuses to install jest - manually download and extract AFTER build
-          # (build might clean node_modules)
+          # Install ts-jest FIRST (npm might clean node_modules)
+          npm install --no-save ts-jest@29.4.4 babel-jest@29.7.0 jest-environment-jsdom@29.7.0
+
+          # Then manually download jest LAST so it persists
           echo "Downloading jest from npm registry..."
           mkdir -p node_modules/jest
           curl -fsSL https://registry.npmjs.org/jest/-/jest-29.7.0.tgz -o /tmp/jest.tgz
@@ -30,9 +32,6 @@ jobs:
           tar -xzf /tmp/jest.tgz -C node_modules/jest --strip-components=1
           echo "Verifying jest installation..."
           ls -la node_modules/jest/bin/
-
-          # Install ts-jest and dependencies that npm CAN install
-          npm install --no-save ts-jest@29.4.4 babel-jest@29.7.0 jest-environment-jsdom@29.7.0
       - name: Run Stream 2 Jest project
         run: |
           mkdir -p reports
