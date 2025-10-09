@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '20'
       - name: Install deps
-        run: npm ci || npm i
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build (turbo, no daemon)
         run: npm run build:all || npx turbo run build --no-daemon || echo "skip build"
       - name: Run Stream 2 Jest project
