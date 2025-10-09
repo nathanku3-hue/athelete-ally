@@ -22,7 +22,11 @@ jobs:
           # npm refuses to install jest - manually download and extract
           echo "Downloading jest from npm registry..."
           mkdir -p node_modules/jest
-          curl -L https://registry.npmjs.org/jest/-/jest-29.7.0.tgz | tar xz --strip-components=1 -C node_modules/jest
+          curl -fsSL https://registry.npmjs.org/jest/-/jest-29.7.0.tgz -o /tmp/jest.tgz
+          echo "Extracting jest tarball..."
+          tar -xzf /tmp/jest.tgz -C node_modules/jest --strip-components=1
+          echo "Verifying jest installation..."
+          ls -la node_modules/jest/bin/
 
           # Install ts-jest and dependencies that npm CAN install
           npm install --no-save ts-jest@29.4.4 babel-jest@29.7.0 jest-environment-jsdom@29.7.0
