@@ -42,9 +42,9 @@ jobs:
           ls -d node_modules/jest || echo "No jest package"
           ls node_modules/jest/bin/ || echo "No jest bin directory"
 
-          # Use node to run jest directly
+          # Use node to run jest directly with NODE_PATH for module resolution
           echo "Running tests with jest..."
-          node node_modules/jest/bin/jest.js --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
+          NODE_PATH="$(pwd)/node_modules" node node_modules/jest/bin/jest.js --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary
