@@ -22,15 +22,24 @@ jobs:
       - name: Run Stream 2 Jest project
         run: |
           mkdir -p reports
+
+          # Debug: Show where jest is actually installed
+          echo "Searching for jest installation..."
+          find node_modules -name "jest" -type d | head -10
+          echo "---"
+          find . -name "jest.js" -path "*/bin/jest.js" | head -10
+
           # Find jest binary - try root first, then workspaces
           if [ -f "node_modules/jest/bin/jest.js" ]; then
             JEST_BIN="node_modules/jest/bin/jest.js"
           else
-            JEST_BIN=$(find apps/*/node_modules services/*/node_modules packages/*/node_modules -name "jest.js" -path "*/jest/bin/jest.js" 2>/dev/null | head -1)
+            JEST_BIN=$(find . -name "jest.js" -path "*/jest/bin/jest.js" 2>/dev/null | head -1)
           fi
 
           if [ -z "$JEST_BIN" ]; then
-            echo "Error: Jest binary not found in root or any workspace"
+            echo "Error: Jest binary not found"
+            echo "Listing installed packages:"
+            ls -la node_modules/ | grep jest || echo "No jest packages found"
             exit 1
           fi
 
