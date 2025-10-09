@@ -18,10 +18,12 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@athlete-ally/logger": ["../../packages/logger/src/index.ts"],
+      "@athlete-ally/logger/server": ["../../packages/logger/src/adapters/node.ts"],
+      "@athlete-ally/logger/browser": ["../../packages/logger/src/adapters/browser.ts"],
       "@athlete-ally/*": ["../../packages/*"],
       "@packages/*": ["../../packages/*"],
       "@services/*": ["../../services/*"],

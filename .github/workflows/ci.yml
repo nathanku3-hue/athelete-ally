@@ -590,7 +590,7 @@ jobs:
           echo "Node version: $(node -v)"
           echo "Jest version: $(npx jest --version)"
           # Use orchestrator config with controlled concurrency
-          JEST_MAX_WORKERS=1 npx jest --config jest/jest.projects.cjs --runInBand --passWithNoTests --reporters=default --reporters=jest-junit
+          JEST_MAX_WORKERS=1 npm exec jest -- --config jest/jest.projects.cjs --runInBand --passWithNoTests --reporters=default --reporters=jest-junit
           echo "? Orchestrator tests completed!"
 
       - name: Ensure test results directory exists
@@ -953,7 +953,7 @@ jobs:
 
       - name: Run single frontend spec (jsdom)
         run: |
-          npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+          npm exec jest -- apps/frontend/src/__tests__/components/PlanCard.test.tsx \
             --runInBand --verbose --detectOpenHandles --forceExit | tee frontend-smoke-log.txt
 
       - name: Upload smoke log
