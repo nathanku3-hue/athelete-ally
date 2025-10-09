@@ -25,38 +25,9 @@ jobs:
         run: |
           mkdir -p reports
 
-          # Use @jest/core API directly (jest binary not installed as peer dependency)
-          echo "Running tests via @jest/core API..."
-          node -e "
-            const { runCLI } = require('@jest/core');
-            const fs = require('fs');
-
-            runCLI(
-              {
-                config: 'jest/projects.stream2.cjs',
-                runInBand: true,
-                colors: true,
-                json: true,
-                outputFile: 'reports/stream2-logs-test.json',
-                reporters: ['default', 'jest-junit']
-              },
-              [process.cwd()]
-            ).then(result => {
-              // Write JSON report for step summary
-              fs.writeFileSync(
-                'reports/stream2-logs-test.json',
-                JSON.stringify(result, null, 2)
-              );
-
-              console.log('Test run completed');
-              console.log('Passed:', result.results.numPassedTests);
-              console.log('Failed:', result.results.numFailedTests);
-              process.exit(result.results.success ? 0 : 1);
-            }).catch(err => {
-              console.error('Jest execution failed:', err);
-              process.exit(1);
-            });
-          "
+          # Use npx to run jest with exact version
+          echo "Running tests via npx jest..."
+          npx --yes jest@29.7.0 --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary
