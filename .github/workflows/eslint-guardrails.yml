@@ -213,12 +213,27 @@ jobs:
               - 'eslint.config.*'
               - 'tsconfig*.json'
 
-      - name: Lint Frontend (if changed)
+      - name: Get changed frontend files
         if: steps.changed-files.outputs.frontend == 'true'
         run: |
-          echo "🔍 Linting frontend files..."
-          npx eslint apps/frontend --config eslint.config.unified.mjs --cache --cache-strategy content --quiet
-          echo "✅ Frontend linting passed"
+          git fetch origin --depth=2
+          CHANGED_FRONTEND="$(git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep '^apps/frontend/.*\.[tj]sx\?$' || true)"
+          {
+            echo "CHANGED_FRONTEND<<EOF"
+            echo "$CHANGED_FRONTEND"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Lint changed frontend files
+        if: steps.changed-files.outputs.frontend == 'true' && env.CHANGED_FRONTEND != ''
+        run: |
+          echo "🔍 Linting changed frontend files..."
+          printf "%s\n" "$CHANGED_FRONTEND" | xargs -r npx eslint --config eslint.config.unified.mjs --max-warnings=0
+          echo "✅ Changed frontend files linting passed"
+
+      - name: Skip (no frontend changes)
+        if: steps.changed-files.outputs.frontend == 'true' && env.CHANGED_FRONTEND == ''
+        run: echo "ℹ️  No changed frontend files; skipping lint"
 
       - name: Lint Services (if changed)
         if: steps.changed-files.outputs.services == 'true'
