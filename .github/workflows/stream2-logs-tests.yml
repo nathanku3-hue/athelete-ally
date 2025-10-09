@@ -17,8 +17,8 @@ jobs:
           node-version: '20'
       - name: Install deps
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
-      - name: Install jest (workaround peer dependency issue)
-        run: npm install --no-save --force jest@29.7.0
+      - name: Install test dependencies (workaround peer dependency issue)
+        run: npm install --no-save ts-jest@29.4.4 babel-jest@29.7.0 jest-environment-jsdom@29.7.0
       - name: Build (turbo, no daemon)
         run: npm run build:all || npx turbo run build --no-daemon || echo "skip build"
       - name: Run Stream 2 Jest project
