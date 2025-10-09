@@ -23,23 +23,27 @@ jobs:
         run: |
           mkdir -p reports
 
-          # Debug: Show where jest is actually installed
-          echo "Searching for jest installation..."
-          find node_modules -name "jest" -type d | head -10
-          echo "---"
-          find . -name "jest.js" -path "*/bin/jest.js" | head -10
-
-          # Find jest binary - try root first, then workspaces
+          # Find jest binary - try multiple locations
+          # 1. Main jest package
           if [ -f "node_modules/jest/bin/jest.js" ]; then
             JEST_BIN="node_modules/jest/bin/jest.js"
+          # 2. jest-cli package (older installations)
+          elif [ -f "node_modules/jest-cli/bin/jest.js" ]; then
+            JEST_BIN="node_modules/jest-cli/bin/jest.js"
+          # 3. Use jest via require from node (works with @jest packages)
+          elif [ -f "node_modules/@jest/core/package.json" ]; then
+            echo "Using @jest/core via node require"
+            node -e "require('@jest/core').runCLI({config: 'jest/projects.stream2.cjs', runInBand: true, colors: true, json: true, outputFile: 'reports/stream2-logs-test.json', reporters: ['default', 'jest-junit']}, ['.']).then(result => process.exit(result.results.success ? 0 : 1))"
+            exit $?
+          # 4. Search workspaces as last resort
           else
-            JEST_BIN=$(find . -name "jest.js" -path "*/jest/bin/jest.js" 2>/dev/null | head -1)
+            JEST_BIN=$(find apps/*/node_modules services/*/node_modules -name "jest.js" -path "*/jest/bin/jest.js" 2>/dev/null | head -1)
           fi
 
           if [ -z "$JEST_BIN" ]; then
-            echo "Error: Jest binary not found"
-            echo "Listing installed packages:"
-            ls -la node_modules/ | grep jest || echo "No jest packages found"
+            echo "Error: Jest binary not found in any location"
+            echo "Installed @jest packages:"
+            ls -d node_modules/@jest* 2>/dev/null || echo "No @jest packages found"
             exit 1
           fi
 
