@@ -19,11 +19,10 @@ jobs:
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Install test dependencies (workaround peer dependency issue)
         run: |
-          # Temporarily remove package-lock.json to bypass peer dependency restrictions
-          mv package-lock.json package-lock.json.bak
-          npm install --no-save ts-jest@29.4.4 babel-jest@29.7.0 jest-environment-jsdom@29.7.0 jest@29.7.0 @jest/core@29.7.0 @types/jest@29.5.14
-          # Restore package-lock.json
-          mv package-lock.json.bak package-lock.json
+          # npm refuses to install jest due to peer dependency constraints
+          # Use yarn as workaround - it doesn't have the same peer dep restrictions
+          npm install -g yarn
+          yarn add --dev --ignore-workspace-root-check jest@29.7.0 ts-jest@29.4.4 babel-jest@29.7.0 @jest/core@29.7.0 @types/jest@29.5.14 jest-environment-jsdom@29.7.0
       - name: Build (turbo, no daemon)
         run: npm run build:all || npx turbo run build --no-daemon || echo "skip build"
       - name: Run Stream 2 Jest project
