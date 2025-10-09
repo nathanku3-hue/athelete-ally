@@ -23,7 +23,7 @@
     "type-check": "tsc --noEmit",
     "prisma:generate": "bash ./scripts/generate-prisma-clients.sh",
     "test": "jest --config jest/jest.projects.cjs",
-    "test:stream2": "jest --config jest/projects.stream2.cjs",
+    "test:stream2": "npx --no-install jest --config jest/projects.stream2.cjs",
     "test:projects": "jest --config jest/jest.projects.cjs",
     "test:frontend": "jest --config jest/jest.config.frontend.cjs",
     "test:services": "jest --config jest/jest.config.services.cjs",
