@@ -3,6 +3,10 @@ import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEv
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
 import { register, Counter, Histogram } from 'prom-client';
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+
+const log = createLogger(nodeAdapter, { module: 'event-bus', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
 
 // Event Bus 指标
 export const eventBusMetrics = {
@@ -102,35 +106,35 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
     const info = await jsm.streams.info(cfg.name);
 
     if (streamNeedsUpdate(info, cfg)) {
-      console.warn(`[event-bus] Updating stream: ${cfg.name}`);
+      log.warn(`[event-bus] Updating stream: ${cfg.name}`);
       await jsm.streams.update(cfg.name, desired as never);
-      console.warn(`[event-bus] Stream updated: ${cfg.name}`);
+      log.warn(`[event-bus] Stream updated: ${cfg.name}`);
     } else {
-      console.warn(`[event-bus] Stream up-to-date: ${cfg.name}`);
+      log.warn(`[event-bus] Stream up-to-date: ${cfg.name}`);
     }
   } catch (err: unknown) {
     const errObj = err as { message?: string };
     if (String(errObj.message || "").includes("stream not found") ||
         String(errObj.message || "").includes("not found")) {
-      console.warn(`[event-bus] Creating stream: ${cfg.name}`);
+      log.warn(`[event-bus] Creating stream: ${cfg.name}`);
 
       // Try creating with full config first
       try {
         await jsm.streams.add(desired as never);
-        console.warn(`[event-bus] Stream created: ${cfg.name}`);
+        log.warn(`[event-bus] Stream created: ${cfg.name}`);
         return;
       } catch (createErr: unknown) {
         // Handle invalid JSON error (err_code 10025) with fallback retries
         const createErrObj = createErr as { api_error?: { err_code?: number } };
         if (createErrObj.api_error?.err_code === 10025) {
-          console.warn(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
+          log.warn(`[event-bus] Invalid JSON error creating stream ${cfg.name}, trying fallback configs...`);
 
           // Retry 1: Remove duplicate_window (older servers don't support it)
           const fallback1 = { ...desired };
           delete (fallback1 as Record<string, unknown>).duplicate_window;
           try {
             await jsm.streams.add(fallback1 as never);
-            console.warn(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
+            log.warn(`[event-bus] Stream created with fallback config (no duplicate_window): ${cfg.name}`);
             return;
           } catch (fallback1Err: unknown) {
             const fallback1ErrObj = fallback1Err as { api_error?: { err_code?: number } };
@@ -140,10 +144,10 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
               delete (fallback2 as Record<string, unknown>).discard;
               try {
                 await jsm.streams.add(fallback2 as never);
-                console.warn(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
+                log.warn(`[event-bus] Stream created with minimal config (no duplicate_window, no discard): ${cfg.name}`);
                 return;
               } catch (fallback2Err: unknown) {
-                console.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config:`, fallback2Err);
+                log.error(`[event-bus] Failed to create stream ${cfg.name} even with minimal config: ${JSON.stringify(fallback2Err)}`);
                 throw fallback2Err;
               }
             } else {
@@ -155,7 +159,7 @@ export async function ensureStream(jsm: JetStreamManager, cfg: AppStreamConfig):
         }
       }
     } else {
-      console.error(`[event-bus] Failed to ensure stream ${cfg.name}:`, err);
+      log.error(`[event-bus] Failed to ensure stream ${cfg.name}: ${JSON.stringify(err)}`);
       throw err;
     }
   }
@@ -192,14 +196,14 @@ export class EventBus {
         });
         eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
         
-        console.error(`Schema validation failed for ${topic} event:`, validation.errors);
+        log.error(`Schema validation failed for ${topic} event: ${JSON.stringify(validation.errors)}`);
         throw new Error(`Schema validation failed: ${validation.message}`);
       }
       
       eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
       
       const data = JSON.stringify(event);
-      console.warn(`Publishing to subject: ${natsTopic}`);
+      log.warn(`Publishing to subject: ${natsTopic}`);
       await this.js.publish(natsTopic, new TextEncoder().encode(data));
       
       const duration = (Date.now() - startTime) / 1000;
@@ -210,7 +214,7 @@ export class EventBus {
       }, duration);
       
       eventBusMetrics.eventsPublished.inc({ topic, status: 'success' });
-      console.warn(`Published ${topic} event:`, (event as { eventId?: string }).eventId);
+      log.warn(`Published ${topic} event`, { eventId: (event as { eventId?: string }).eventId });
       
     } catch (error) {
       const duration = (Date.now() - startTime) / 1000;
@@ -226,7 +230,7 @@ export class EventBus {
   }
 
   async connect(url: string = 'nats://localhost:4223', options?: { manageStreams?: boolean }) {
-    console.warn(`Connecting to NATS at: ${url}`);
+    log.warn(`Connecting to NATS at: ${url}`);
     this.nc = await connect({ servers: url });
     this.js = this.nc.jetstream();
     this.jsm = await this.nc.jetstreamManager();
@@ -235,13 +239,13 @@ export class EventBus {
     const manageStreams = options?.manageStreams ?? (process.env.FEATURE_SERVICE_MANAGES_STREAMS !== 'false');
 
     if (manageStreams) {
-      console.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
+      log.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
     } else {
-      console.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
+      log.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
     }
 
-    console.warn('Connected to EventBus');
+    log.warn('Connected to EventBus');
   }
 
   private async ensureStreams() {
@@ -307,7 +311,7 @@ export class EventBus {
             continue;
           }
 
-          console.warn(`Processing batch of ${messages.length} OnboardingCompleted events`);
+          log.warn(`Processing batch of ${messages.length} OnboardingCompleted events`);
 
           // 并发处理消息
           const processingPromises = messages.map(async (m: unknown) => {
@@ -328,7 +332,7 @@ export class EventBus {
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
-                console.error('Schema validation failed for received OnboardingCompleted event:', validation.errors);
+                log.error(`Schema validation failed for received OnboardingCompleted event: ${JSON.stringify(validation.errors)}`);
                 msg.nak();
                 return;
               }
@@ -357,8 +361,8 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              console.error('Error processing OnboardingCompleted event:', error);
-
+              log.error(`Error processing OnboardingCompleted event: ${JSON.stringify(error)}`);
+              
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
                 msg.nak();
@@ -372,7 +376,7 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          console.error('Error in OnboardingCompleted batch processing:', error);
+          log.error(`Error in OnboardingCompleted batch processing: ${JSON.stringify(error)}`);
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -421,7 +425,7 @@ export class EventBus {
             continue;
           }
 
-          console.warn(`Processing batch of ${messages.length} PlanGenerationRequested events`);
+          log.warn(`Processing batch of ${messages.length} PlanGenerationRequested events`);
 
           // 并发处理消息
           const processingPromises = messages.map(async (m: unknown) => {
@@ -442,7 +446,7 @@ export class EventBus {
                 });
                 eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
                 
-                console.error('Schema validation failed for received PlanGenerationRequested event:', validation.errors);
+                log.error(`Schema validation failed for received PlanGenerationRequested event: ${JSON.stringify(validation.errors)}`);
                 msg.nak();
                 return;
               }
@@ -471,8 +475,8 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              console.error('Error processing PlanGenerationRequested event:', error);
-
+              log.error(`Error processing PlanGenerationRequested event: ${JSON.stringify(error)}`);
+              
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
                 msg.nak();
@@ -486,7 +490,7 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          console.error('Error in PlanGenerationRequested batch processing:', error);
+          log.error(`Error in PlanGenerationRequested batch processing: ${JSON.stringify(error)}`);
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -552,11 +556,11 @@ export class EventBus {
         existingConsumer.config.max_ack_pending !== consumerConfig.max_ack_pending;
 
       if (needsUpdate) {
-        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
+        log.warn(`[event-bus] Consumer ${consumerConfig.durable_name} config differs, updating...`);
         await this.jsm.consumers.add(streamName, consumerConfig as never);
-        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
+        log.warn(`[event-bus] Consumer ${consumerConfig.durable_name} updated successfully`);
       } else {
-        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
+        log.warn(`[event-bus] Consumer ${consumerConfig.durable_name} already exists with correct config`);
       }
     } catch (error: unknown) {
       const is404 = error && typeof error === 'object' && 'code' in error && error.code === '404';
@@ -565,9 +569,9 @@ export class EventBus {
 
       if (is404 || isNotFound) {
         // Consumer doesn't exist, create it
-        console.warn(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
+        log.warn(`[event-bus] Creating new consumer ${consumerConfig.durable_name} on stream ${streamName}`);
         await this.jsm.consumers.add(streamName, consumerConfig as never);
-        console.warn(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
+        log.warn(`[event-bus] Consumer ${consumerConfig.durable_name} created successfully`);
       } else {
         throw error;
       }
@@ -587,6 +591,8 @@ export { eventValidator } from './validator.js';
 
 // Export stream mode utilities
 export { getStreamMode, getStreamCandidates } from './config.js';
+
+
 
 
 

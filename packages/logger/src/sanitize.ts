@@ -21,7 +21,7 @@ export function sanitizeText(input: unknown): SanitizeResult {
 const allowedContextKeys = new Set(['field','value','environment','route','requestId','status']);
 export type LogContext = Partial<Record<'field'|'value'|'environment'|'route'|'requestId', string> & { status: number }> & Record<string, unknown>;
 export function filterAndSanitizeContext(ctx: LogContext | undefined) {
-  if (!ctx || typeof ctx !== 'object') return { context: undefined, hashes: [] as string[] };
+  if (!ctx || typeof ctx !== 'object') return { context: undefined, hashes: [] };
   const out: Record<string, unknown> = {}; const hashes: string[] = [];
   for (const [k,v] of Object.entries(ctx)) { if (!allowedContextKeys.has(k)) continue; if (typeof v === 'string') { const s = sanitizeText(v); out[k]=s.text; hashes.push(...s.hashes);} else { out[k]=v; } }
   return { context: Object.keys(out).length ? out : undefined, hashes };

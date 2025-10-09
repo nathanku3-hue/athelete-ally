@@ -15,8 +15,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "lint": "eslint -c ../../eslint.config.mjs src",
-    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix",
+    "lint": "eslint -c ../../eslint.config.unified.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

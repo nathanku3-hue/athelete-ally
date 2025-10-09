@@ -6,7 +6,7 @@ import { execFileSync, execSync } from "node:child_process";
 import { BOUNDARIES_PILOT_GLOBS } from "./eslint-config-constants.mjs";
 
 const fsSyncPlain = await import("node:fs");
-export const CONFIG_FILE = "eslint.config.unified.mjs";
+export const CONFIG_FILE = process.env.ESLINT_CONFIG_FILE || (fsSyncPlain.default.existsSync("eslint.config.unified.mjs") ? "eslint.config.unified.mjs" : "eslint.config.mjs");
 
 export async function fileExists(p) { try { await fs.access(p); return true; } catch { return false; } }
 export async function readJsonSafe(p, fallback) { try { const t = await fs.readFile(p, "utf8"); return JSON.parse(t); } catch { return fallback; } }

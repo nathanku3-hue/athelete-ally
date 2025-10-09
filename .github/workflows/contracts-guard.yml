@@ -30,10 +30,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path || 'package-lock.json' }}
 
-      - name: Install dependencies
-
-
-        run: npm ci --no-audit --no-fund
+      - name: Install dependencies (workspaces)
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Check contracts version bump
         run: |
           echo "🔍 Checking if contracts package version was bumped..."

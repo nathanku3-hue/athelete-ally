@@ -1,3 +1,5 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { Resource } from '@opentelemetry/resources';
@@ -7,6 +9,7 @@ import type { Tracer, Meter, AttributeValue } from '@opentelemetry/api';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
+const log = createLogger(nodeAdapter, { module: 'index' });
 
 export interface TelemetryExporters {
   jaeger?: { endpoint?: string };
@@ -52,7 +55,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
 
   // Check if telemetry is enabled
   if (!enabled) {
-    console.warn(`🔇 Telemetry disabled for ${serviceName}`);
+    log.info(`🔇 Telemetry disabled for ${serviceName}`);
     return {
       sdk: undefined,
       tracer: trace.getTracer(serviceName, version),
@@ -61,7 +64,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
     };
   }
 
-  console.warn(`🔍 Initializing telemetry for ${serviceName} v${version}`);
+  log.info(`🔍 Initializing telemetry for ${serviceName} v${version}`);
 
   // Create resource with consistent attributes
   const resource = new Resource({
@@ -122,9 +125,9 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   const shutdown = async () => {
     try {
       await sdk.shutdown();
-      console.warn(`🔇 Telemetry shutdown complete for ${serviceName}`);
+      log.info(`🔇 Telemetry shutdown complete for ${serviceName}`);
     } catch (error) {
-      console.error(`❌ Error shutting down telemetry for ${serviceName}:`, error);
+      log.error(`❌ Error shutting down telemetry for ${serviceName}: ${String(error)}`);
     }
   };
 
@@ -132,7 +135,7 @@ export function initTelemetry(opts: InitTelemetryOptions): TelemetryInstance {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 
-  console.warn(`✅ Telemetry initialized for ${serviceName}`);
+  log.info(`✅ Telemetry initialized for ${serviceName}`);
   return { sdk, tracer, meter, shutdown };
 }
 
@@ -149,8 +152,9 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
         return new JaegerExporter({
           endpoint: exporters?.jaeger?.endpoint || process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
         });
-      } catch (error) {
-        console.warn('⚠️ Jaeger exporter not available, using noop');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
+        log.info('⚠️ Jaeger exporter not available, using noop');
         return undefined;
       }
 
@@ -160,13 +164,14 @@ function createTraceExporter(exporters: InitTelemetryOptions['exporters']) {
         return new OTLPTraceExporter({
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
         });
-      } catch (error) {
-        console.warn('⚠️ OTLP exporter not available, using noop');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
+        log.info('⚠️ OTLP exporter not available, using noop');
         return undefined;
       }
 
     default:
-      console.warn('📊 No trace exporter configured');
+      log.info('📊 No trace exporter configured');
       return undefined;
   }
 }
@@ -185,8 +190,9 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
           port: exporters?.prometheus?.port || parseInt(process.env.PROMETHEUS_PORT || '9464'),
           endpoint: exporters?.prometheus?.endpoint || '/metrics',
         });
-      } catch (error) {
-        console.warn('⚠️ Prometheus exporter not available, using noop');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
+        log.info('⚠️ Prometheus exporter not available, using noop');
         return undefined;
       }
 
@@ -196,13 +202,14 @@ function createMetricReader(exporters: InitTelemetryOptions['exporters']) {
         return new OTLPMetricExporter({
           url: exporters?.otlp?.endpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/metrics',
         });
-      } catch (error) {
-        console.warn('⚠️ OTLP metric exporter not available, using noop');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: error caught but not used
+      } catch (_error) {
+        log.info('⚠️ OTLP metric exporter not available, using noop');
         return undefined;
       }
 
     default:
-      console.warn('📊 No metric exporter configured');
+      log.info('📊 No metric exporter configured');
       return undefined;
   }
 }
@@ -240,3 +247,4 @@ export function createBusinessMetrics(meter: Meter, serviceName: string) {
 
 const otelPreset = { initTelemetry, createBusinessSpan, createBusinessMetrics };
 export default otelPreset;
+

@@ -1,7 +1,10 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { config } from './config.js';
 import { EventSchemas, type EventSchemaKey } from '@athlete-ally/contracts/events/schemas';
+const log = createLogger(nodeAdapter, { module: 'validator' });
 
 export interface ValidationResult {
   valid: boolean;
@@ -58,7 +61,7 @@ export class EventValidator {
 
       return { valid: true };
     } catch (error) {
-      console.error(`Schema validation error for topic ${topic}:`, error);
+      log.error(`Schema validation error for topic ${topic}: ${String(error)}`);
       return {
         valid: false,
         message: `Schema validation error: ${(error as Error).message}`,

@@ -8,8 +8,8 @@
     "dev": "npx tsx watch src/index.ts",
     "start": "node dist/index.js",
     "test": "jest --config jest.config.js --passWithNoTests",
-    "lint": "eslint -c ../../eslint.config.mjs src",
-    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix",
+    "lint": "eslint -c ../../eslint.config.unified.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,8 +21,7 @@
     "fastify": "^4.28.1",
     "fastify-raw-body": "^4.3.0",
     "nats": "^2.19.0",
-    "zod": "^3.25.76",
-    "@opentelemetry/api": "^1.7.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",

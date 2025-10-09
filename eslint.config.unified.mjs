@@ -3,11 +3,6 @@ import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
 import boundaries from 'eslint-plugin-boundaries';
 
-// Import DRY constants for Next.js patterns
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { ALLOWED_NEXT_PATTERNS } = require('./scripts/eslint-config-constants.js');
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -23,7 +18,8 @@ const eslintConfig = [
       'build/**', '**/build/**',
       'dist/**', '**/dist/**',
       'coverage/**', '**/coverage/**',
-      'next-env.d.ts', '**/next-env.d.ts',
+      'next-env.d.ts',
+      'scripts/**',
       '**/prisma/generated/**',
     ],
   },
@@ -42,7 +38,7 @@ const eslintConfig = [
   },
   // Test files configuration - relaxed rules for testing environment
   {
-    files: ['**/__tests__/**/*.{ts,tsx,js,jsx}', '**/*.test.{ts,tsx,js,jsx}', '**/tests/**/*.{ts,tsx,js,jsx}'],
+    files: ['**/__tests__/**/*.{ts,tsx,js,jsx}', '**/*.test.{ts,tsx,js,jsx}'],
     languageOptions: {
       globals: {
         jest: true, node: true, describe: true, it: true, expect: true,
@@ -72,7 +68,7 @@ const eslintConfig = [
       'prefer-const': 'warn',
       'no-var': 'error',
       'import/no-internal-modules': ['warn', {
-        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client', ...ALLOWED_NEXT_PATTERNS],
+        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client'],
       }],
       'no-restricted-imports': ['warn', {
         patterns: [
@@ -87,25 +83,7 @@ const eslintConfig = [
   // Packages: enforce no-console=error
   {
     files: ['packages/**/*.{ts,tsx,js,jsx}'],
-    ignores: ['**/__tests__/**', '**/tests/**', '**/*.spec.*', '**/*.test.*'],
     rules: { 'no-console': 'error' },
-  },
-  // Services: allow console for server-side logging
-  {
-    files: ['services/**/*.{ts,tsx,js,jsx}'],
-    rules: { 'no-console': 'off' },
-  },
-  // Scripts: relaxed rules for build/CI scripts
-  {
-    files: ['scripts/**/*.{ts,js,mjs,cjs}'],
-    rules: {
-      'no-console': 'off',
-      'import/no-internal-modules': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      'import/no-commonjs': 'off',
-    },
   },
   // Boundaries pilot (warn) for selected packages
   {

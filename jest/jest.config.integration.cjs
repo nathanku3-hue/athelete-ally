@@ -4,6 +4,7 @@ module.exports = {
   rootDir: '..',
   ...base,
   testEnvironment: 'node',
+  modulePathIgnorePatterns: ['/.next/', '/dist/', '/out/', '/coverage/'],
   roots: ['<rootDir>'],
   testMatch: [
     '**/__tests__/**/*.integration.test.ts'
@@ -19,3 +20,5 @@ module.exports = {
   // Allow empty test runs to pass (for CI stability)
   passWithNoTests: true
 };
+
+

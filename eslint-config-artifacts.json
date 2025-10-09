@@ -318,18 +318,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],
@@ -685,18 +674,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],
@@ -1052,18 +1030,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],
@@ -1198,7 +1165,7 @@
         1
       ],
       "@next/next/no-html-link-for-pages": [
-        2
+        0
       ],
       "@next/next/no-img-element": [
         1
@@ -1407,13 +1374,7 @@
         2
       ],
       "no-console": [
-        2,
-        {
-          "allow": [
-            "warn",
-            "error"
-          ]
-        }
+        2
       ],
       "import/no-internal-modules": [
         1,
@@ -1425,18 +1386,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],
@@ -1470,11 +1420,17 @@
             }
           ]
         }
+      ],
+      "boundaries/entry-point": [
+        1
+      ],
+      "boundaries/no-unknown": [
+        1
       ]
     }
   },
   {
-    "file": "packages/shared-types/src/schemas.ts",
+    "file": "packages/shared-types/src/schemas/api.ts",
     "type": "Package",
     "rules": {
       "react/display-name": [
@@ -1571,7 +1527,7 @@
         1
       ],
       "@next/next/no-html-link-for-pages": [
-        2
+        0
       ],
       "@next/next/no-img-element": [
         1
@@ -1780,13 +1736,7 @@
         2
       ],
       "no-console": [
-        2,
-        {
-          "allow": [
-            "warn",
-            "error"
-          ]
-        }
+        2
       ],
       "import/no-internal-modules": [
         1,
@@ -1798,18 +1748,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],
@@ -1843,6 +1782,12 @@
             }
           ]
         }
+      ],
+      "boundaries/entry-point": [
+        1
+      ],
+      "boundaries/no-unknown": [
+        1
       ]
     }
   },
@@ -1944,7 +1889,7 @@
         1
       ],
       "@next/next/no-html-link-for-pages": [
-        2
+        0
       ],
       "@next/next/no-img-element": [
         1
@@ -2153,7 +2098,7 @@
         2
       ],
       "no-console": [
-        0
+        1
       ],
       "import/no-internal-modules": [
         1,
@@ -2165,18 +2110,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],
@@ -2311,7 +2245,7 @@
         1
       ],
       "@next/next/no-html-link-for-pages": [
-        2
+        0
       ],
       "@next/next/no-img-element": [
         1
@@ -2520,7 +2454,7 @@
         2
       ],
       "no-console": [
-        0
+        1
       ],
       "import/no-internal-modules": [
         1,
@@ -2532,18 +2466,7 @@
             "@/**",
             "dotenv/config",
             "@prisma/client",
-            "../prisma/generated/client",
-            "next/*",
-            "next/font/google",
-            "next/font/local",
-            "next/navigation",
-            "next/server",
-            "next/image",
-            "next/link",
-            "next/headers",
-            "next/cache",
-            "next/og",
-            "next/intl"
+            "../prisma/generated/client"
           ]
         }
       ],

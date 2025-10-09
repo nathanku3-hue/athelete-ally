@@ -6,6 +6,7 @@
     "declarationMap": false,
     "outDir": "dist",
     "rootDir": "src",
+    "baseUrl": "../..",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2022",
@@ -13,8 +14,7 @@
     "verbatimModuleSyntax": true,
     "types": ["node"],
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "baseUrl": "../.."
+    "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"]
 }

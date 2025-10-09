@@ -1,3 +1,6 @@
+import { createLogger } from '@athlete-ally/logger';
+import browserAdapter from '@athlete-ally/logger/browser';
+const log = createLogger(browserAdapter, { module: 'event-tracker', service: 'frontend' });
 /**
  * 事件追踪系统
  * 用于捕获和分析用户行为数据
@@ -136,7 +139,7 @@ export class EventTracker {
     try {
       await this.sendEvents(eventsToSend);
     } catch (error) {
-      console.error('Failed to send analytics events:', error);
+      log.error('Failed to send analytics events:', error);
       // 可以选择重新添加到队列或记录到本地存储
     }
   }
@@ -199,7 +202,8 @@ export class RealTimeMetrics {
   /**
    * 计算用户参与度分数
    */
-  async calculateUserEngagementScore(userId: string): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub implementation, will use userId when implemented
+  async calculateUserEngagementScore(_userId: string): Promise<number> {
     // 这里应该查询数据库或缓存来计算参与度分数
     // 基于用户的训练频率、功能使用、会话时长等
     return 0.85; // 示例分数
@@ -208,10 +212,8 @@ export class RealTimeMetrics {
   /**
    * 计算训练效果数据
    */
-  async calculateTrainingEffectiveness(
-    userId: string, 
-    period: string
-  ): Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub implementation, will use parameters when implemented
+  async calculateTrainingEffectiveness(_userId: string, _period: string): Promise<{
     totalVolume: number;
     averageSessionDuration: number;
     consistencyScore: number;
@@ -231,7 +233,8 @@ export class RealTimeMetrics {
   /**
    * 计算流失风险
    */
-  async calculateChurnRisk(userId: string): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub implementation, will use userId when implemented
+  async calculateChurnRisk(_userId: string): Promise<number> {
     // 基于用户最近的活动、参与度、训练频率等计算流失风险
     return 0.2; // 示例风险分数 (0-1)
   }
@@ -239,7 +242,8 @@ export class RealTimeMetrics {
   /**
    * 计算计划成功率
    */
-  async calculatePlanSuccessRate(planId: string): Promise<number> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub implementation, will use planId when implemented
+  async calculatePlanSuccessRate(_planId: string): Promise<number> {
     // 基于计划执行情况、用户反馈等计算成功率
     return 0.75; // 示例成功率
   }
@@ -330,3 +334,4 @@ export const eventTracker = new EventTracker(
 );
 
 export const realTimeMetrics = new RealTimeMetrics(eventTracker);
+
