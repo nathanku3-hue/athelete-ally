@@ -119,8 +119,8 @@ jobs:
           export REDIS_URL="redis://localhost:6379"
           export NODE_ENV="test"
           
-          # Run integration tests with real database
-          npx jest --config jest.config.cjs \
+          # Run integration tests with real database - use root jest with ts-jest
+          ../../node_modules/.bin/jest --config jest.config.cjs \
             --testPathPattern="(message-reliability|reliability|integration)" \
             --runInBand \
             --verbose \

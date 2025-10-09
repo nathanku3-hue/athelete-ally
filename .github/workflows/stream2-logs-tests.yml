@@ -22,7 +22,7 @@ jobs:
       - name: Run Stream 2 Jest project
         run: |
           mkdir -p reports
-          npm exec jest -- --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
+          ./node_modules/.bin/jest --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary
