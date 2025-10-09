@@ -127,8 +127,10 @@ jobs:
         # Target revert date: 2025-10-17
         # TODO: Fix pre-existing warnings or convert Code Quality to report-only baseline
         continue-on-error: ${{ github.head_ref == 'chore/stream2-codemod-no-console' }}
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          if [ "${{ github.head_ref }}" = "chore/stream2-codemod-no-console" ]; then
+          if [ "$BRANCH_NAME" = "chore/stream2-codemod-no-console" ]; then
             echo "🔍 Running full repo lint (report-only for Stream 2)..."
             npx turbo run lint || {
               echo "⚠️  Full repo lint failed (non-blocking for Stream 2)"
