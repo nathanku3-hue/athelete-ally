@@ -214,7 +214,7 @@ export class EventBus {
       }, duration);
       
       eventBusMetrics.eventsPublished.inc({ topic, status: 'success' });
-      log.warn(`Published ${topic} event:`, (event as { eventId?: string }).eventId);
+      log.warn(`Published ${topic} event`, { eventId: (event as { eventId?: string }).eventId });
       
     } catch (error) {
       const duration = (Date.now() - startTime) / 1000;
