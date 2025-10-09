@@ -25,9 +25,15 @@ jobs:
         run: |
           mkdir -p reports
 
-          # Use locally installed jest binary
-          echo "Running tests with locally installed jest..."
-          ./node_modules/.bin/jest --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
+          # Debug: Check what was installed
+          echo "Checking jest installation..."
+          ls -la node_modules/.bin/jest* || echo "No jest binary in .bin"
+          ls -d node_modules/jest || echo "No jest package"
+          ls node_modules/jest/bin/ || echo "No jest bin directory"
+
+          # Use node to run jest directly
+          echo "Running tests with jest..."
+          node node_modules/jest/bin/jest.js --config jest/projects.stream2.cjs --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary
