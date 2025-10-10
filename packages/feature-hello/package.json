@@ -1,0 +1,23 @@
+{
+  "name": "@athlete-ally/feature-hello",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint -c ../../eslint.config.unified.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "typescript": "^5.9.2"
+  }
+}

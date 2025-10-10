@@ -1,0 +1,40 @@
+name: Stream 4 Self-Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'templates/feature-module/**'
+      - 'scripts/scaffold-module.mjs'
+      - 'packages/feature-hello/**'
+      - 'scripts/stream4-selfcheck.mjs'
+      - 'scripts/changed-tests-summary.mjs'
+      - 'jest/jest.config.packages.cjs'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  selfcheck:
+    name: Scaffold & Pilot Checks (non-blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-check)
+        run: npx turbo run build --no-daemon
+      - name: Stream 4 Self-Check
+        run: node scripts/stream4-selfcheck.mjs
+      - name: Changed Tests Summary
+        run: node scripts/changed-tests-summary.mjs
+      - name: Run Packages Jest (pilot)
+        run: node node_modules/jest/bin/jest.js --config jest/jest.config.packages.cjs
+        continue-on-error: true

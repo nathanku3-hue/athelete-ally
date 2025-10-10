@@ -15,6 +15,10 @@
 # Registries
 /registry/** @org/contracts
 
+# Stream 4: templates and pilot require dual sign-off (Safety DM + Feature DM)
+/templates/feature-module/** @org/safety @org/features
+/packages/feature-hello/**   @org/safety @org/features
+
 # Hubs (single-writer): require core team review
 /README.md                                      @org/core
 /docs/README.md                                 @org/core
