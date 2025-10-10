@@ -5,7 +5,7 @@
  */
 
 export interface FeatureToggle {
-  isEnabled(feature: string, userId?: string): boolean;
+  isEnabled(feature: string): boolean;
 }
 
 export class HelloFeatureToggle implements FeatureToggle {
@@ -15,7 +15,7 @@ export class HelloFeatureToggle implements FeatureToggle {
     this.enabledFeatures = new Set(enabledFeatures);
   }
 
-  isEnabled(feature: string, _userId?: string): boolean {
+  isEnabled(feature: string): boolean {
     return this.enabledFeatures.has(feature);
   }
 }
