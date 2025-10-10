@@ -15,7 +15,7 @@ export class HelloFeatureToggle implements FeatureToggle {
     this.enabledFeatures = new Set(enabledFeatures);
   }
 
-  isEnabled(feature: string, userId?: string): boolean {
+  isEnabled(feature: string, _userId?: string): boolean {
     return this.enabledFeatures.has(feature);
   }
 }
