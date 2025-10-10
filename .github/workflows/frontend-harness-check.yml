@@ -46,12 +46,33 @@ jobs:
           # NOTE: Intentionally using npm install (not ci) for harness testing
           npm install --legacy-peer-deps --no-audit --no-fund
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Print Jest version
-        run: npx jest --version
+        run: npm run jest:bin -- --version
 
       - name: Run frontend specs (jsdom)
         run: |
-          npx jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+          npm run jest:bin -- apps/frontend/src/__tests__/components/PlanCard.test.tsx \
             apps/frontend/src/__tests__/hooks/useTrainingQueries.test.tsx \
             --runInBand --verbose --detectOpenHandles --forceExit
 

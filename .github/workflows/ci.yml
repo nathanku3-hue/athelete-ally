@@ -71,6 +71,27 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Print ESLint Meta
@@ -260,6 +281,27 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build (pre-lint/type-check)
@@ -342,7 +384,7 @@ jobs:
           echo "?? CI Environment Diagnostics:"
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
-          echo "Jest version: $(npx jest --version)"
+          echo "Jest version: $(npm run jest:bin -- --version)"
           echo "PLANNING_DATABASE_URL: ${PLANNING_DATABASE_URL:-unset}"
           echo "REDIS_URL: ${REDIS_URL:-unset}"
           echo "NODE_ENV: ${NODE_ENV:-unset}"
@@ -359,9 +401,9 @@ jobs:
         run: |
           set -euo pipefail
           echo "?? Planning Engine Jest Configuration:"
-          ./node_modules/.bin/jest --config services/planning-engine/jest.config.cjs --showConfig | head -n 50
+          npm run jest:bin -- --config services/planning-engine/jest.config.cjs --showConfig | head -n 50
           echo "?? Planning Engine Test List:"
-          ./node_modules/.bin/jest --config services/planning-engine/jest.config.cjs --listTests --runInBand
+          npm run jest:bin -- --config services/planning-engine/jest.config.cjs --listTests --runInBand
 
       - name: Ensure test-results dir (pre-tests)
         run: mkdir -p test-results
@@ -448,6 +490,27 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build all packages (pre-tests)
@@ -509,6 +572,27 @@ jobs:
 
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
+
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
 
       - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
@@ -584,6 +668,27 @@ jobs:
       - name: Enable Corepack and Enforce Package Manager Version
         run: corepack enable
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install dependencies (workspaces)
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build packages (pre-smoke)
@@ -608,9 +713,9 @@ jobs:
           set -euo pipefail
           echo "?? Running tests via Jest orchestrator (non-blocking)..."
           echo "Node version: $(node -v)"
-          echo "Jest version: $(npx jest --version)"
-          # Use orchestrator config with controlled concurrency - use local jest binary to access ts-jest
-          JEST_MAX_WORKERS=1 ./node_modules/.bin/jest --config jest/jest.projects.cjs --runInBand --passWithNoTests --reporters=default --reporters=jest-junit
+          echo "Jest version: $(npm run jest:bin -- --version)"
+          # Use orchestrator config with controlled concurrency - use standardized jest:bin script
+          JEST_MAX_WORKERS=1 npm run jest:bin -- --config jest/jest.projects.cjs --runInBand --passWithNoTests --reporters=default --reporters=jest-junit
           echo "? Orchestrator tests completed!"
 
       - name: Ensure test results directory exists
@@ -966,14 +1071,35 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install dependencies (npm ci)
         run: npm ci --no-audit --no-fund
       - name: Print Jest version
-        run: npx jest --version
+        run: npm run jest:bin -- --version
 
       - name: Run single frontend spec (jsdom)
         run: |
-          ./node_modules/.bin/jest apps/frontend/src/__tests__/components/PlanCard.test.tsx \
+          npm run jest:bin -- apps/frontend/src/__tests__/components/PlanCard.test.tsx \
             --runInBand --verbose --detectOpenHandles --forceExit | tee frontend-smoke-log.txt
 
       - name: Upload smoke log
