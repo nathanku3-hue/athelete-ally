@@ -17,13 +17,14 @@ module.exports = {
   projects: [
     path.resolve(__dirname, 'jest.config.frontend.cjs'),
     path.resolve(__dirname, 'jest.config.services.cjs'),
-    path.resolve(__dirname, 'jest.config.integration.cjs')
+    path.resolve(__dirname, 'jest.config.integration.cjs'),
+    // Stream 4: packages project to include pilot tests
+    path.resolve(__dirname, 'jest.config.packages.cjs')
   ],
   
   // CI并发控制 - 避免CI容器在高并发下不稳定
   maxWorkers: process.env.CI === 'true' ? 1 : '50%',
   // runInBand is handled by CLI, not config
   cache: true,
-  // Ensure proper test environment setup
-  testEnvironment: 'node'
+  verbose: process.env.CI === 'true'
 };
