@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "jest:bin": "jest",
     "dev": "npx tsx src/index.ts",
     "dev:health": "npx tsx src/simple-server.ts",
     "dev:standalone": "npx tsx src/standalone-health-server.ts",
