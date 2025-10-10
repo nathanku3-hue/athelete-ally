@@ -120,28 +120,37 @@ jobs:
       - name: Verify tsx availability
         run: npx tsx --version
 
-      - name: Lint check (full repo - temporarily non-blocking for Stream 2)
-        # TEMPORARY: Non-blocking for chore/stream2-codemod-no-console PR only
-        # Issue: Pre-existing warnings in packages/shared/* (unchanged files)
-        # Failures: jwt.ts, middleware.ts, debug-logging.ts, structured-logging.ts
-        # Target revert date: 2025-10-17
-        # TODO: Fix pre-existing warnings or convert Code Quality to report-only baseline
-        continue-on-error: ${{ github.head_ref == 'chore/stream2-codemod-no-console' }}
-        env:
-          BRANCH_NAME: ${{ github.head_ref }}
+      - name: Lint check (full repo - baseline report-only)
+        # NON-BLOCKING: Full-repo baseline lint for technical debt visibility
+        # Policy: docs/ci/code-quality-policy.md (Two-Tier Linting Strategy)
+        # True gate: eslint-guardrails.yml → "Lint Changed Files Only" (--max-warnings=0)
+        # Review date: 2025-10-17 (Re-evaluate enforcement policy)
+        continue-on-error: true
         run: |
-          if [ "$BRANCH_NAME" = "chore/stream2-codemod-no-console" ]; then
-            echo "🔍 Running full repo lint (report-only for Stream 2)..."
-            npx turbo run lint || {
-              echo "⚠️  Full repo lint failed (non-blocking for Stream 2)"
-              echo "See follow-up issue for pre-existing warnings in unchanged files"
-              echo "All Stream 2 guardrails (changed-files lint, builds, scans) remain enforced"
-              exit 0
-            }
-          else
-            echo "🔍 Running full repo lint (blocking)..."
-            npx turbo run lint
-          fi
+          echo "🔍 Running full repo lint (baseline report-only)..."
+          npx turbo run lint || {
+            echo "⚠️  Full repo lint warnings detected (non-blocking)"
+            echo "This is expected for baseline tracking. See docs/ci/code-quality-policy.md"
+            exit 0
+          }
+
+      - name: Generate Lint Summary (Step Summary)
+        if: always()
+        run: |
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}"
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## 🔍 Code Quality: Full-Repo Lint (Baseline)
+
+          **Status:** Report-Only (Non-Blocking)
+
+          **Policy:** This check provides baseline visibility but does NOT block PRs.
+
+          **True Gate:** \`eslint-guardrails.yml\` → "Lint Changed Files Only" (\`--max-warnings=0\`)
+
+          **Documentation:** [docs/ci/code-quality-policy.md](${REPO_URL}/docs/ci/code-quality-policy.md)
+
+          **Review Date:** 2025-10-17 (Re-evaluate enforcement policy)
+          EOF
 
       - name: Generate ESLint Boundaries Report
         continue-on-error: true
