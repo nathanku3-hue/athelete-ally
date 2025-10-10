@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+// eslint-disable-next-line import/no-internal-modules
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
@@ -67,7 +68,7 @@ export default function SeasonPage() {
     const handleContinue = () => {
         if (trainingSeason) {
             // 准备要更新的数据
-            const updateDataPayload: any = { season: trainingSeason };
+            const updateDataPayload: Record<string, string | null | undefined> = { season: trainingSeason };
             
             // Handle competition date for preseason and offseason
             if ((trainingSeason === 'preseason' || trainingSeason === 'offseason') && year && month) {

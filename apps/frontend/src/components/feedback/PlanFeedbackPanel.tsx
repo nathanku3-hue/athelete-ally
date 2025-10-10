@@ -7,8 +7,8 @@ type AdjustmentType = 'intensity' | 'volume' | 'exercise_substitution' | 'rest' 
 
 export interface TrainingAdjustment {
   type: AdjustmentType;
-  originalValue: any;
-  adjustedValue: any;
+  originalValue: unknown;
+  adjustedValue: unknown;
   reason: string;
   confidence: number;
   exerciseId?: string;

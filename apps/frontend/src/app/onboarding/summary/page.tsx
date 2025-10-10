@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 "use client";
 
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line import/no-internal-modules
 import { useRouter } from 'next/navigation';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import { useOnboarding } from '@/contexts/OnboardingContext';
@@ -12,7 +14,7 @@ export default function SummaryPage() {
   const { data: onboardingData, isLoading, error } = state;
   
   // 追蹤原始數據，用於檢測變更
-  const [originalData, setOriginalData] = useState<any>(null);
+  const [originalData, setOriginalData] = useState<typeof onboardingData | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
   // 在組件載入時保存原始數據

@@ -226,11 +226,8 @@ jobs:
 
       - name: Lint changed frontend files
         if: steps.changed-files.outputs.frontend == 'true' && env.CHANGED_FRONTEND != ''
-        continue-on-error: true
         run: |
           echo "🔍 Linting changed frontend files..."
-          echo "⚠️  Note: This step is non-blocking during Stream 2. Pre-existing frontend ESLint errors"
-          echo "    are tracked in tech-debt issue. Target revert date: 2025-10-17"
           printf "%s\n" "$CHANGED_FRONTEND" | xargs -r npx eslint --config eslint.config.unified.mjs --max-warnings=0
           echo "✅ Changed frontend files linting passed"
 
