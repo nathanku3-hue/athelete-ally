@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps, @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from 'react';
-import { TrendingUp, Target, Activity } from 'lucide-react';
+import { TrendingUp, Target } from 'lucide-react';
 
 interface WorkoutSession {
   id: string;
@@ -26,6 +27,13 @@ interface WorkoutSession {
   }>;
 }
 
+interface ChartDataPoint {
+  date: string;
+  displayDate: string;
+  maxWeight: number;
+  sessionName: string;
+}
+
 interface StrengthChartProps {
   sessions: WorkoutSession[];
   timeRange: string;
@@ -33,7 +41,7 @@ interface StrengthChartProps {
 
 export default function StrengthChart({ sessions, timeRange }: StrengthChartProps) {
   const [selectedExercise, setSelectedExercise] = useState<string>('all');
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
   useEffect(() => {
     generateChartData();

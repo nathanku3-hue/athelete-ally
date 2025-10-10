@@ -12,8 +12,8 @@ import {
 
 interface TrainingAdjustment {
   type: 'intensity' | 'volume' | 'exercise_substitution' | 'rest' | 'warmup';
-  originalValue: any;
-  adjustedValue: any;
+  originalValue: unknown;
+  adjustedValue: unknown;
   reason: string;
   confidence: number;
   exerciseId?: string;
@@ -163,18 +163,18 @@ export default function AdjustmentSuggestions({
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Original</p>
                   <p className="text-sm text-gray-300">
-                    {typeof adjustment.originalValue === 'object' 
+                    {typeof adjustment.originalValue === 'object'
                       ? JSON.stringify(adjustment.originalValue, null, 2)
-                      : adjustment.originalValue
+                      : String(adjustment.originalValue)
                     }
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Adjusted</p>
                   <p className="text-sm text-blue-400">
-                    {typeof adjustment.adjustedValue === 'object' 
+                    {typeof adjustment.adjustedValue === 'object'
                       ? JSON.stringify(adjustment.adjustedValue, null, 2)
-                      : adjustment.adjustedValue
+                      : String(adjustment.adjustedValue)
                     }
                   </p>
                 </div>

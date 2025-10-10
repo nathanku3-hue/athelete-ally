@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+// eslint-disable-next-line import/no-internal-modules
 import { useParams, useRouter } from 'next/navigation';
 import ExerciseModal from '@/components/ui/ExerciseModal';
 import FatigueAssessment from '@/components/ui/FatigueAssessment';
-import PlanFeedbackPanel from '@/components/feedback/PlanFeedbackPanel';
+import PlanFeedbackPanel, { TrainingAdjustment } from '@/components/feedback/PlanFeedbackPanel';
 import RPEForm from '@/components/feedback/RPEForm';
 import PerformanceForm from '@/components/feedback/PerformanceForm';
 import { Exercise } from '@athlete-ally/shared-types';
@@ -12,35 +13,43 @@ import { usePlan } from '@/hooks/usePlan';
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-interface PlanData {
-  id: string;
+interface PlanExercise {
+  id?: string;
   name: string;
-  description: string;
-  status: string;
-  version: number;
-  content: {
-    microcycles: Array<{
-      weekNumber: number;
-      name: string;
-      phase: string;
-      sessions: Array<{
-        dayOfWeek: number;
-        name: string;
-        duration: number;
-        exercises: Array<{
-          id?: string;
-      name: string;
-          category: string;
-      sets: number;
-          reps: number;
-          weight?: number;
-      notes?: string;
-        }>;
-      }>;
-    }>;
-  };
+  category: string;
+  sets: number;
+  reps: number;
+  weight?: number;
+  notes?: string;
 }
 
+interface PlanSession {
+  dayOfWeek: number;
+  name: string;
+  duration: number;
+  exercises: PlanExercise[];
+}
+
+interface PlanMicrocycle {
+  weekNumber: number;
+  name: string;
+  phase: string;
+  sessions: PlanSession[];
+}
+
+interface FatigueData {
+  userId: string;
+  sessionId?: string;
+  overallFatigue: number;
+  physicalFatigue: number;
+  mentalFatigue: number;
+  sleepQuality: number;
+  stressLevel: number;
+  notes?: string;
+  previousWorkout?: string;
+  timeSinceLastWorkout?: number;
+  assessmentType: 'pre_workout' | 'post_workout' | 'daily';
+}
 
 export default function PlanPage() {
   const params = useParams();
@@ -48,14 +57,13 @@ export default function PlanPage() {
   const planId = params.planId as string;
   
   const { data: planData, isLoading: loading, error } = usePlan(planId, !!planId);
-  const [feedbackSessionIdx, setFeedbackSessionIdx] = useState(0);
+  const feedbackSessionIdx = 0; // Default to first session
   const [feedbackExerciseIdx, setFeedbackExerciseIdx] = useState(0);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
   const [isFatigueAssessmentOpen, setIsFatigueAssessmentOpen] = useState(false);
   const [isAdjustmentSuggestionsOpen, setIsAdjustmentSuggestionsOpen] = useState(false);
-  const [adjustments, setAdjustments] = useState<any[]>([]);
-  const [fatigueData, setFatigueData] = useState<any>(null);
+  const [adjustments, setAdjustments] = useState<TrainingAdjustment[]>([]);
   const [selectedWeek, setSelectedWeek] = useState(0);
 
   const handleBackToHome = () => {
@@ -109,8 +117,9 @@ export default function PlanPage() {
           comment
         })
       });
-      
+
       if (response.ok) {
+        // eslint-disable-next-line no-console
         console.log('Exercise rated successfully');
         // Refresh exercise data
         if (selectedExercise) {
@@ -123,11 +132,12 @@ export default function PlanPage() {
         }
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to rate exercise:', error);
     }
   };
 
-  const handleFatigueAssessment = async (data: any) => {
+  const handleFatigueAssessment = async (data: FatigueData) => {
     try {
       const response = await fetch('/api/v1/fatigue/assess', {
         method: 'POST',
@@ -138,18 +148,19 @@ export default function PlanPage() {
       });
 
       if (response.ok) {
+        // eslint-disable-next-line no-console
         console.log('Fatigue assessment submitted successfully');
-        setFatigueData(data);
-        
+
         // Get training adjustments
         await getTrainingAdjustments(data);
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit fatigue assessment:', error);
     }
   };
 
-  const getTrainingAdjustments = async (fatigueData: any) => {
+  const getTrainingAdjustments = async (fatigueData: FatigueData) => {
     try {
       if (!planData) return;
 
@@ -157,7 +168,7 @@ export default function PlanPage() {
       if (!currentSession) return;
 
       const trainingSession = {
-        exercises: currentSession.exercises.map((ex: any) => ({
+        exercises: currentSession.exercises.map((ex: PlanExercise) => ({
           id: ex.id || `mock-${ex.name.toLowerCase().replace(/\s+/g, '-')}`,
           name: ex.name,
           category: ex.category,
@@ -188,6 +199,7 @@ export default function PlanPage() {
         setIsAdjustmentSuggestionsOpen(true);
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get training adjustments:', error);
     }
   };
@@ -207,9 +219,11 @@ export default function PlanPage() {
       });
 
       if (response.ok) {
+        // eslint-disable-next-line no-console
         console.log('Adjustment feedback submitted successfully');
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit adjustment feedback:', error);
     }
   };
@@ -300,7 +314,7 @@ export default function PlanPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Training Weeks</h2>
             <div className="flex flex-wrap gap-2">
-            {planData.content.microcycles.map((week: any, index: number) => (
+            {planData.content.microcycles.map((week: PlanMicrocycle, index: number) => (
               <button
                 key={week.weekNumber}
                 onClick={() => setSelectedWeek(index)}
@@ -331,7 +345,7 @@ export default function PlanPage() {
 
             {/* Sessions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {currentSessions.map((session: any, sessionIndex: number) => (
+              {currentSessions.map((session: PlanSession, sessionIndex: number) => (
                 <div key={sessionIndex} className="bg-gray-800 rounded-lg p-6">
                   <div className="flex justify-between items-start mb-4">
                     <h4 className="text-lg font-semibold">{session.name}</h4>
@@ -344,7 +358,7 @@ export default function PlanPage() {
                     </p>
                     
                     <div className="space-y-2">
-                      {session.exercises.map((exercise: any, exerciseIndex: number) => (
+                      {session.exercises.map((exercise: PlanExercise, exerciseIndex: number) => (
                         <div key={exerciseIndex} className="bg-gray-700 rounded p-3 hover:bg-gray-600 transition-colors">
                           <button
                             onClick={() => handleExerciseClick(exercise.name)}
@@ -391,14 +405,14 @@ export default function PlanPage() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-400">
-                {planData.content.microcycles.reduce((total: number, week: any) => total + week.sessions.length, 0)}
+                {planData.content.microcycles.reduce((total: number, week: PlanMicrocycle) => total + week.sessions.length, 0)}
               </div>
               <div className="text-gray-400">Training Sessions</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-400">
-                {Math.round(planData.content.microcycles.reduce((total: number, week: any) => 
-                  total + week.sessions.reduce((sessionTotal: number, session: any) => sessionTotal + session.duration, 0), 0
+                {Math.round(planData.content.microcycles.reduce((total: number, week: PlanMicrocycle) =>
+                  total + week.sessions.reduce((sessionTotal: number, session: PlanSession) => sessionTotal + session.duration, 0), 0
                 ) / 60)}
               </div>
               <div className="text-gray-400">Total Hours</div>
@@ -420,7 +434,7 @@ export default function PlanPage() {
                 disabled={!currentSessions[feedbackSessionIdx] || currentSessions[feedbackSessionIdx].exercises.length === 0}
               >
                 {currentSessions[feedbackSessionIdx] && currentSessions[feedbackSessionIdx].exercises.length > 0 ?
-                  currentSessions[feedbackSessionIdx].exercises.map((ex: any, idx: number) => (
+                  currentSessions[feedbackSessionIdx].exercises.map((ex: PlanExercise, idx: number) => (
                     <option key={idx} value={idx}>{ex.name}</option>
                   )) : (
                     <option value={0}>No exercises available</option>

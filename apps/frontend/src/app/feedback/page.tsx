@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from 'react';
-import { 
-  MessageSquare, 
-  Star, 
-  Bug, 
-  Lightbulb, 
-  ThumbsUp, 
-  ThumbsDown,
+import {
+  MessageSquare,
+  Star,
+  Bug,
+  Lightbulb,
+  ThumbsUp,
   Send,
   CheckCircle
 } from 'lucide-react';
@@ -90,6 +89,7 @@ export default function FeedbackPage() {
         });
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit feedback:', error);
     } finally {
       setIsSubmitting(false);
@@ -169,7 +169,7 @@ export default function FeedbackPage() {
                 <button
                   key={type.value}
                   type="button"
-                  onClick={() => setFeedback(prev => ({ ...prev, type: type.value as any }))}
+                  onClick={() => setFeedback(prev => ({ ...prev, type: type.value as FeedbackData['type'] }))}
                   className={`p-4 rounded-lg border-2 transition-colors ${
                     feedback.type === type.value
                       ? 'border-blue-500 bg-blue-600/20'
@@ -206,7 +206,7 @@ export default function FeedbackPage() {
               <h3 className="text-lg font-semibold mb-4">Priority</h3>
               <select
                 value={feedback.priority}
-                onChange={(e) => setFeedback(prev => ({ ...prev, priority: e.target.value as any }))}
+                onChange={(e) => setFeedback(prev => ({ ...prev, priority: e.target.value as FeedbackData['priority'] }))}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
               >
                 {priorities.map((priority) => (

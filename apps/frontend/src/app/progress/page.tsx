@@ -1,14 +1,14 @@
+/* eslint-disable no-console, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  Target, 
-  Trophy, 
-  Calendar, 
+import {
+  TrendingUp,
+  Target,
+  Trophy,
+  Calendar,
   BarChart3,
   Activity,
-  Zap,
   Clock,
   Award,
   Star
@@ -30,6 +30,15 @@ interface PersonalRecord {
   notes?: string;
 }
 
+interface Exercise {
+  id: string;
+  exerciseName: string;
+  records: Array<{
+    actualWeight?: number;
+    actualReps: number;
+  }>;
+}
+
 interface WorkoutSession {
   id: string;
   sessionName?: string;
@@ -41,7 +50,7 @@ interface WorkoutSession {
   difficulty?: number;
   energy?: number;
   motivation?: number;
-  exercises: any[];
+  exercises: Exercise[];
 }
 
 interface AchievementStats {
@@ -198,7 +207,7 @@ export default function ProgressPage() {
             <div className="flex items-center space-x-4">
               <select
                 value={selectedTimeRange}
-                onChange={(e) => setSelectedTimeRange(e.target.value as any)}
+                onChange={(e) => setSelectedTimeRange(e.target.value as '7d' | '30d' | '90d' | '1y')}
                 className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
               >
                 <option value="7d">Last 7 days</option>

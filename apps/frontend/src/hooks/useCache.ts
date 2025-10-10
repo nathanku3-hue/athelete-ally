@@ -8,7 +8,7 @@ export function useCache() {
     return await cache.get<T>(key);
   }, [cache]);
 
-  const setCachedData = useCallback(async (key: string, data: any, ttl?: number): Promise<void> => {
+  const setCachedData = useCallback(async (key: string, data: unknown, ttl?: number): Promise<void> => {
     await cache.set(key, data, ttl);
   }, [cache]);
 

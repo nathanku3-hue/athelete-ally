@@ -2,9 +2,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api/client';
 
+interface Adaptation {
+  type?: string;
+  rationale?: string;
+}
+
 type AdaptationsResp = {
-  analysis: any;
-  adaptations: any[];
+  analysis: unknown;
+  adaptations: Adaptation[];
 };
 
 export function useAdaptations(planId: string, enabled = true) {
@@ -18,7 +23,7 @@ export function useAdaptations(planId: string, enabled = true) {
 export function useApplyAdaptations(planId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (adjustments: any[]) =>
+    mutationFn: (adjustments: Adaptation[]) =>
       api(`/v1/plans/${planId}/adaptations/apply`, {
         method: 'POST',
         body: JSON.stringify({ adjustments }),

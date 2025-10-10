@@ -3,18 +3,23 @@ import { useState } from 'react';
 import { useAdaptations, useApplyAdaptations } from '@/hooks/useAdaptations';
 import { useToast } from '@/contexts/ToastContext';
 
+interface Adaptation {
+  type?: string;
+  rationale?: string;
+}
+
 export default function AdaptationsPanel({ planId }: { planId: string }) {
   const { data, isLoading, error } = useAdaptations(planId, !!planId);
   const apply = useApplyAdaptations(planId);
   const { show } = useToast();
-  const [selected, setSelected] = useState<any[]>([]);
+  const [selected, setSelected] = useState<Adaptation[]>([]);
 
   if (isLoading) return <div>Loading adaptations…</div>;
   if (error) return <div role="alert">Failed to load adaptations.</div>;
 
   const adaptations = data?.adaptations || [];
 
-  function toggle(item: any) {
+  function toggle(item: Adaptation) {
     setSelected((cur) =>
       cur.includes(item) ? cur.filter((x) => x !== item) : [...cur, item]
     );

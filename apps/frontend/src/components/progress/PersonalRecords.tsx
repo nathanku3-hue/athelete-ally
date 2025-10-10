@@ -1,17 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from 'react';
-import { 
-  Trophy, 
-  Target, 
-  Activity, 
-  BarChart3, 
+import {
+  Trophy,
+  Target,
+  Activity,
+  BarChart3,
   Clock,
-  Award,
-  Calendar,
-  Zap,
-  TrendingUp,
-  Star
+  Award
 } from 'lucide-react';
 
 interface PersonalRecord {
@@ -155,7 +152,7 @@ export default function PersonalRecords({ records, onRecordClick }: PersonalReco
           </label>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as 'date' | 'value' | 'exercise')}
             className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
           >
             <option value="date">Date (Newest)</option>

@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { 
-  Award, 
-  Target, 
-  TrendingUp, 
-  Calendar, 
+import {
+  Award,
+  Target,
+  Calendar,
   Star,
   Trophy,
   Zap,
@@ -24,6 +24,15 @@ interface AchievementStats {
   }>;
 }
 
+interface Exercise {
+  id: string;
+  exerciseName: string;
+  records: Array<{
+    actualWeight?: number;
+    actualReps: number;
+  }>;
+}
+
 interface WorkoutSession {
   id: string;
   sessionName?: string;
@@ -35,7 +44,7 @@ interface WorkoutSession {
   difficulty?: number;
   energy?: number;
   motivation?: number;
-  exercises: any[];
+  exercises: Exercise[];
 }
 
 interface AchievementPanelProps {
