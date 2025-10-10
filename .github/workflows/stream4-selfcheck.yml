@@ -27,6 +27,27 @@ jobs:
         with:
           node-version: '20.18.0'
           cache: 'npm'
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install deps
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build (pre-check)
@@ -36,5 +57,5 @@ jobs:
       - name: Changed Tests Summary
         run: node scripts/changed-tests-summary.mjs
       - name: Run Packages Jest (pilot)
-        run: node node_modules/jest/bin/jest.js --config jest/jest.config.packages.cjs
+        run: npm run jest:bin -- --config jest/jest.config.packages.cjs
         continue-on-error: true
