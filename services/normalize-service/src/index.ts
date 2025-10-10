@@ -79,6 +79,14 @@ const promSleepMessagesCounter = new Counter({
   registers: [register]
 });
 
+// Create prom-client Counter for DLQ messages (cross-cutting metric for alerting)
+const dlqMessagesCounter = new Counter({
+  name: 'dlq_messages_total',
+  help: 'Total number of messages sent to Dead Letter Queue',
+  labelNames: ['consumer', 'reason', 'subject'],
+  registers: [register]
+});
+
 // Bootstrap telemetry early (traces + Prometheus exporter)
 const telemetry = bootstrapTelemetry({
   serviceName: 'normalize-service',
@@ -235,6 +243,7 @@ async function connectNATS() {
                 // Schema validation failure is non-retryable - send to DLQ
                 try {
                   await js.publish(`${hrvDlq}.schema-invalid`, m.data as any, { headers: m.headers });
+                  dlqMessagesCounter.inc({ consumer: 'hrv', reason: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
                   httpServer.log.info(`[normalize] Sent schema-invalid message to DLQ: ${hrvDlq}.schema-invalid`);
                 } catch (dlqErr) {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
@@ -270,6 +279,7 @@ async function connectNATS() {
                 httpServer.log.error(`[normalize] maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, attempt })}`);
                 try {
                   await js.publish(`${hrvDlq}.max-deliver`, m.data as any, { headers: m.headers });
+                  dlqMessagesCounter.inc({ consumer: 'hrv', reason: 'max_deliver', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
                 } catch (dlqErr) {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
@@ -285,6 +295,7 @@ async function connectNATS() {
                 httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) })}`);
                 try {
                   await js.publish(`${hrvDlq}.non-retryable`, m.data as any, { headers: m.headers });
+                  dlqMessagesCounter.inc({ consumer: 'hrv', reason: 'non_retryable', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
                 } catch (dlqErr) {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
@@ -467,6 +478,7 @@ async function connectNATS() {
                 // Schema validation failure is non-retryable - send to DLQ
                 try {
                   await js.publish(`${sleepDlq}.schema-invalid`, m.data as any, { headers: m.headers });
+                  dlqMessagesCounter.inc({ consumer: 'sleep', reason: 'schema_invalid', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED });
                   httpServer.log.info(`[normalize] Sent schema-invalid message to DLQ: ${sleepDlq}.schema-invalid`);
                 } catch (dlqErr) {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
@@ -502,6 +514,7 @@ async function connectNATS() {
                 httpServer.log.error(`[normalize] maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject: sleepDlq, attempt })}`);
                 try {
                   await js.publish(`${sleepDlq}.max-deliver`, m.data as any, { headers: m.headers });
+                  dlqMessagesCounter.inc({ consumer: 'sleep', reason: 'max_deliver', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED });
                 } catch (dlqErr) {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
@@ -517,6 +530,7 @@ async function connectNATS() {
                 httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: sleepDlq, error: err instanceof Error ? err.message : String(err) })}`);
                 try {
                   await js.publish(`${sleepDlq}.non-retryable`, m.data as any, { headers: m.headers });
+                  dlqMessagesCounter.inc({ consumer: 'sleep', reason: 'non_retryable', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED });
                 } catch (dlqErr) {
                   httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                 }
@@ -653,6 +667,7 @@ async function connectNATS() {
                   // Schema validation failure is non-retryable - send to DLQ
                   try {
                     await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
+                    dlqMessagesCounter.inc({ consumer: 'oura', reason: 'schema_invalid', subject: subj });
                   } catch (dlqErr) {
                     httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                   }
@@ -685,6 +700,7 @@ async function connectNATS() {
                   httpServer.log.error(`maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject, attempt })}`);
                   try {
                     await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
+                    dlqMessagesCounter.inc({ consumer: 'oura', reason: 'max_deliver', subject: subj });
                   } catch (dlqErr) {
                     httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                   }
@@ -698,6 +714,7 @@ async function connectNATS() {
                   httpServer.log.error(`Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject, error: err instanceof Error ? err.message : String(err) })}`);
                   try {
                     await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
+                    dlqMessagesCounter.inc({ consumer: 'oura', reason: 'non_retryable', subject: subj });
                   } catch (dlqErr) {
                     httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
                   }
@@ -880,7 +897,7 @@ httpServer.get('/health', async (_request: FastifyRequest, reply: FastifyReply) 
 
 // Metrics endpoint
 httpServer.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
-  reply.type(register.contentType);
+  reply.type('text/plain; version=0.0.4; charset=utf-8');
   return register.metrics();
 });
 

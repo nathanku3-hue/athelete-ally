@@ -20,6 +20,9 @@ const eslintConfig = [
       'coverage/**', '**/coverage/**',
       '**/next-env.d.ts',
       'scripts/**',
+      '**/scripts/**',
+      '**/cache/**',
+      '**/security/**',
       '**/prisma/generated/**',
     ],
   },
@@ -55,6 +58,13 @@ const eslintConfig = [
       'import/no-commonjs': 'off',
       'import/no-internal-modules': 'off',
       'no-restricted-imports': ['error', { paths: [ { name: 'vitest', message: "Use Jest APIs instead of Vitest. Import from '@jest/globals' if needed." } ] }],
+    },
+  },
+  // CommonJS files (.cjs) - allow require() imports
+  {
+    files: ['**/*.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
   // Default TS rules (non-test files)
