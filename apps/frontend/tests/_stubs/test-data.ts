@@ -1,24 +1,29 @@
 // Test data stubs with proper typing
 // NOTE: Replace with real helpers if these tests are kept.
 
-interface TestProtocol {
+export interface TestProtocol {
   id: string;
   name: string;
   version: string;
-  description: string;
+  description?: string;
   category: string;
   difficulty: string;
+  duration?: number;
+  frequency?: number;
   isPublic: boolean;
   isActive: boolean;
-  createdBy: string;
-  principles: unknown[];
-  requirements: unknown[];
-  blocks: unknown[];
+  createdBy?: string;
+  overview?: string;
+  principles: string[];
+  requirements: string[];
+  blocks?: unknown[];
+  templates?: unknown[];
+  executions?: unknown[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-interface TestShare {
+export interface TestShare {
   id: string;
   protocolId: string;
   sharedBy: string;
@@ -29,7 +34,7 @@ interface TestShare {
   updatedAt: Date;
 }
 
-interface TestUser {
+export interface TestUser {
   id: string;
   email: string;
   name: string;
@@ -49,12 +54,17 @@ export function createTestProtocol(name: string, createdBy: string): TestProtoco
     description: 'test protocol',
     category: 'strength',
     difficulty: 'intermediate',
+    duration: 12,
+    frequency: 3,
     isPublic: false,
     isActive: true,
     createdBy,
-    principles: [],
-    requirements: [],
+    overview: 'Test protocol overview',
+    principles: ['Progressive overload', 'Periodization'],
+    requirements: ['Barbell', 'Plates', 'Squat rack'],
     blocks: [],
+    templates: [],
+    executions: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };

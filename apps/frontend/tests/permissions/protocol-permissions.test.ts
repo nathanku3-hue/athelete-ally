@@ -6,14 +6,14 @@
 import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import { Protocol, Block, ProtocolShare, Permission } from '@athlete-ally/protocol-types';
 import { ProtocolAPIClient } from '../../src/lib/api/protocol-api';
-import { createTestUser, createTestProtocol, createTestShare } from '../helpers/test-data';
+import { createTestUser, createTestProtocol, createTestShare, TestProtocol } from '../helpers/test-data';
 
 // 测试数据
 let userA: { id: string; email: string; name: string };
 let userB: { id: string; email: string; name: string };
 let userC: { id: string; email: string; name: string };
-let protocolA: Protocol;
-let protocolB: Protocol;
+let protocolA: TestProtocol;
+let protocolB: TestProtocol;
 // Relax typing for legacy test compatibility; API surface may differ in this branch
 let apiClient: any;
 
