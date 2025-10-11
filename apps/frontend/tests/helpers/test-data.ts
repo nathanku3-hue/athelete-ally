@@ -1,33 +1,16 @@
 // Test data helpers with proper typing
 // Placeholder helpers for legacy tests; replace with real fixtures if needed.
 
-interface TestUser {
-  id: string;
-  email: string;
-  name: string;
-}
+import { TestProtocol, TestUser, TestShare } from '../_stubs/test-data';
 
-interface TestProtocol {
-  id: string;
-  name: string;
-  createdBy: string;
-  isPublic: boolean;
-}
+// Re-export types for convenience
+export type { TestProtocol, TestUser, TestShare };
 
 interface TestShareInput {
   protocolId: string;
   sharedBy?: string;
   sharedWith: string;
   permissions?: string[];
-}
-
-interface TestShare {
-  id: string;
-  protocolId: string;
-  sharedBy: string;
-  sharedWith: string;
-  permissions: string[];
-  isActive: boolean;
 }
 
 export async function createTestUser(email: string, name: string): Promise<TestUser> {
@@ -38,8 +21,23 @@ export async function createTestProtocol(name: string, createdBy: string): Promi
   return {
     id: 'prot_' + Math.random().toString(36).slice(2),
     name,
-    createdBy,
+    version: '1.0.0',
+    description: 'test protocol',
+    category: 'strength',
+    difficulty: 'intermediate',
+    duration: 12,
+    frequency: 3,
     isPublic: false,
+    isActive: true,
+    createdBy,
+    overview: 'Test protocol overview',
+    principles: ['Progressive overload', 'Periodization'],
+    requirements: ['Barbell', 'Plates', 'Squat rack'],
+    blocks: [],
+    templates: [],
+    executions: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 
@@ -51,6 +49,8 @@ export async function createTestShare(input: TestShareInput): Promise<TestShare>
     sharedWith: input.sharedWith,
     permissions: input.permissions || ['read'],
     isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 
