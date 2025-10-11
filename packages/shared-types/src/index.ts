@@ -123,14 +123,14 @@ export interface OnboardingContextType {
 }
 
 // 导出统一的Onboarding Schema
-export * from './schemas/onboarding.js';
+export * from './schemas/onboarding';
 
 // 导出RPE和User Preferences Schema
-export * from './schemas/rpe.js';
-export * from './schemas/enhanced-plan.js';
-export * from './schemas/feedback.js';
-export * from './schemas/api.js';
-export * from './schemas/hrv.js';
+export * from './schemas/rpe';
+export * from './schemas/enhanced-plan';
+export * from './schemas/feedback';
+export * from './schemas/api';
+export * from './schemas/hrv';
 
 // 导出类型（不包含运行时代码）
 export type { 
@@ -143,4 +143,4 @@ export type {
   SeasonOption,
   FeedbackType,
   FeedbackData
-} from './schemas.js';
+} from './schemas';
