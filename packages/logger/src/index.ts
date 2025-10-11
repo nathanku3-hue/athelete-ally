@@ -1,4 +1,4 @@
-import { sanitizeText, filterAndSanitizeContext, type LogContext } from './sanitize';
+import { sanitizeText, filterAndSanitizeContext, type LogContext } from './sanitize.js';
 export type LogLevel = 'debug'|'info'|'warn'|'error';
 export type LogEvent = { level: LogLevel; msg: string; ts: string; service: string; module: string; env: string; requestId?: string; release?: string; commit?: string; error?: { name?: string; message?: string; stack?: string }; code?: string|number; status?: number; route?: string; sampled?: boolean; context?: Record<string, unknown>; pii_hashes?: string[]; };
 export interface LogAdapter { emit: (event: LogEvent) => void|Promise<void> }

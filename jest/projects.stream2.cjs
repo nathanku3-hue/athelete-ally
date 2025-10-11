@@ -7,9 +7,31 @@ module.exports = {
   testEnvironment: 'node',
   modulePathIgnorePatterns: ['/.next/', '/dist/', '/out/', '/coverage/'],
   testMatch: ['<rootDir>/apps/frontend/src/tests/integration/**/*.integration.test.(ts|tsx)'],
+  
+  // Override transform config for ES modules
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+        module: 'esnext',
+        moduleResolution: 'bundler',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+        baseUrl: '.',
+        paths: {
+          '@athlete-ally/logger': ['packages/logger/src'],
+          '@athlete-ally/logger/*': ['packages/logger/src/*']
+        }
+      }
+    }],
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  },
+  
   moduleNameMapper: {
     ...(base.moduleNameMapper || {}),
-    '^@athlete-ally/logger/(.*)$': '<rootDir>/packages/logger/dist/$1',
-    '^@athlete-ally/logger$': '<rootDir>/packages/logger/dist/index.js'
+    // Map logger to source files for proper ES module handling
+    '^@athlete-ally/logger/(.*)$': '<rootDir>/packages/logger/src/$1',
+    '^@athlete-ally/logger$': '<rootDir>/packages/logger/src/index.ts'
   },
 };

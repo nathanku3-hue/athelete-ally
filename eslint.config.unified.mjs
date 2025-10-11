@@ -78,7 +78,7 @@ const eslintConfig = [
       'prefer-const': 'warn',
       'no-var': 'error',
       'import/no-internal-modules': ['warn', {
-        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client'],
+        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client', './**/*.js', '../**/*.js'],
       }],
       'no-restricted-imports': ['warn', {
         patterns: [
@@ -94,6 +94,13 @@ const eslintConfig = [
   {
     files: ['packages/**/*.{ts,tsx,js,jsx}'],
     rules: { 'no-console': 'error' },
+  },
+  // shared-types: allow internal schema re-exports
+  {
+    files: ['packages/shared-types/src/index.ts'],
+    rules: {
+      'import/no-internal-modules': ['error', { allow: ['./schemas', './schemas/*'] }],
+    },
   },
   // Boundaries pilot (warn) for selected packages
   {

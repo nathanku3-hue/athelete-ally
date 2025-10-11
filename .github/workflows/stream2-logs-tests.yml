@@ -19,42 +19,10 @@ jobs:
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build (turbo, no daemon)
         run: npm run build:all || npx turbo run build --no-daemon || echo "skip build"
-      - name: Install test dependencies (workaround peer dependency issue)
-        run: |
-          # Install ts-jest and jest dependencies (import-local, jest-cli, etc.)
-          npm install --no-save ts-jest@29.4.4 babel-jest@29.7.0 jest-environment-jsdom@29.7.0 import-local@3.2.0 jest-cli@29.7.0 @jest/core@29.7.0 @jest/types@29.6.3
-
-          # Then manually download jest LAST so it persists
-          echo "Downloading jest from npm registry..."
-          mkdir -p node_modules/jest
-          curl -fsSL https://registry.npmjs.org/jest/-/jest-29.7.0.tgz -o /tmp/jest.tgz
-          echo "Extracting jest tarball..."
-          tar -xzf /tmp/jest.tgz -C node_modules/jest --strip-components=1
-          echo "Verifying jest installation..."
-          ls -la node_modules/jest/bin/
       - name: Run Stream 2 Jest project
-        # TEMPORARY: Non-blocking for Stream 2 PR due to CI jest installation issue
-        # Issue: Jest marked "peer": true in lockfile; bin symlink not created; npm ci fails
-        # Target revert date: 2025-10-17
-        # TODO: Remove continue-on-error once jest CI installation is fixed
-        continue-on-error: true
         run: |
           mkdir -p reports
-
-          # Debug: Check what was installed
-          echo "Checking jest installation..."
-          ls -la node_modules/.bin/jest* || echo "No jest binary in .bin"
-          ls -d node_modules/jest || echo "No jest package"
-          ls node_modules/jest/bin/ || echo "No jest bin directory"
-
-          # Use npm run test:stream2 (may use global npx jest)
-          echo "Running tests via npm script..."
-          npm run test:stream2 -- --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit || {
-            echo "⚠️  Jest execution failed (non-blocking for Stream 2)"
-            echo "See issue for jest CI installation fix"
-            echo "All other guardrails (build, type-check, console scan, ESLint) remain enforced"
-            exit 0
-          }
+          npm run test:stream2 -- --runInBand --colors --json --outputFile=reports/stream2-logs-test.json --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT: reports/stream2-logs-junit.xml
       - name: Step Summary

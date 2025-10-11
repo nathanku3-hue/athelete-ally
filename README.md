@@ -86,6 +86,24 @@ EVENT_STREAM_MODE=multi node scripts/test-multi-mode-fallback.js
 - `REDIS_PORT`: Redis端口（默认6379）
 - `NATS_PORT`: NATS端口（默认4222）
 
+### NATS Stream Configuration
+- `NATS_URL`: NATS服务器地址（默认 `nats://localhost:4223`）
+- `EVENT_STREAM_MODE`: 流模式配置
+  - `single`: 使用传统 `ATHLETE_ALLY_EVENTS` 流（默认）
+  - `multi`: 使用 `AA_CORE_HOT` + `ATHLETE_ALLY_EVENTS` 多流拓扑
+- `FEATURE_SERVICE_MANAGES_STREAMS`: 服务是否管理流创建（默认 `false`）
+- `FEATURE_SERVICE_MANAGES_CONSUMERS`: 服务是否管理消费者创建（默认 `false`）
+
+**环境特定设置：**
+- **开发环境**: 服务可以创建流和消费者
+- **CI/生产环境**: 服务仅发布消息，操作员管理拓扑
+
+**诊断工具：**
+```bash
+# 检查NATS流状态（只读）
+node scripts/nats/stream-info.js
+```
+
 ### CI/CD 工作流程
 - **V3 Test**: 验证核心功能，使用独立CI Compose
 - **Deploy**: 生产环境部署，Node 20 + npm ci

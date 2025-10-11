@@ -133,9 +133,9 @@ export * from './schemas/api';
 export * from './schemas/hrv';
 
 // 导出类型（不包含运行时代码）
-export type { 
-  FatigueLevel, 
-  FatigueAssessmentInput, 
+export type {
+  FatigueLevel,
+  FatigueAssessmentInput,
   FatigueAssessmentResult,
   FatigueFactor,
   FatigueStatusResponse,

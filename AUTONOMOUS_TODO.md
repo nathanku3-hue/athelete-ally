@@ -462,21 +462,6 @@ Integration test documentation includes verification of:
 
 ---
 
-## Stream 2 PR1 DLQ Observability - COMPLETED ✅
-- **Branch**: integration/phase3-rebuild-observability
-- **PR**: [#61](https://github.com/nathanku3-hue/athelete-ally/pull/61)
-- **Status**: Successfully pushed and PR created
-- **Changes**: 
-  - Added dlq_messages_total Prometheus counter metric with comprehensive labeling
-  - Instrumented all 9 DLQ paths across 3 consumers (hrv, sleep, oura)
-  - Fixed /metrics endpoint Content-Type header
-  - Verified existing Prometheus alert rule DLQMessagesDetected
-  - Created comprehensive DLQ operations runbook (docs/ops/dlq-runbook.md)
-  - Added prom-client@^15.1.0 dependency
-  - Added 10 unit tests for dlq_messages_total metric
-  - 6 files changed: 401 insertions(+), 5 deletions(-)
-- **Impact**: Comprehensive DLQ observability with monitoring, alerting, and operational runbook
-
 ## 📋 Metadata
 
 - **Mission**: MISSION_BRIEF.md (2025-10-01)

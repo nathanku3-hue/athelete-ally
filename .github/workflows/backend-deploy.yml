@@ -36,7 +36,12 @@ jobs:
         run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build event-bus package
         run: npm run build -w packages/event-bus
-      
+
+      - name: Build shared packages
+        run: |
+          npm run build -w @athlete-ally/shared
+          npm run build -w @athlete-ally/shared-types
+
       - name: Run linting (workspace)
         run: npm run lint -w services/planning-engine
       

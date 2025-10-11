@@ -1,7 +1,7 @@
 # Code Quality Policy: Two-Tier Linting Strategy
 
 ## Status
-**Active** | **Effective:** 2025-10-11 | **Review:** 2025-10-17
+**Active** | **Effective:** 2025-10-11 | **Review:** 2025-12-31 (Extended)
 
 ## Context
 After Stream 3 PR1 (Frontend ESLint Debt) successfully resolved ~52 `@typescript-eslint/no-explicit-any` warnings, we formalized our linting strategy to balance strict quality gates with practical technical debt management.
@@ -39,19 +39,24 @@ After Stream 3 PR1 (Frontend ESLint Debt) successfully resolved ~52 `@typescript
 3. **Fast feedback loop** (only lints changed files, not entire repo)
 4. **Zero ambiguity** - `--max-warnings=0` is clear gate
 
-## Revert Plan (2025-10-17)
+## Revert Plan (2025-12-31)
 
 **Trigger Conditions** for re-evaluating baseline enforcement:
 1. **Baseline warnings < 50** across entire repo
 2. **All P1 Reliability items** completed (Jest standardization, dist exports)
 3. **No critical technical debt** PRs in flight
 
-**If triggers met:**
+**Current Status (2025-10-11):**
+- Baseline warnings: ~895 (far exceeds 50 threshold)
+- P1 Reliability items: In progress
+- **Decision:** Extend report-only status to 2025-12-31
+
+**If triggers met by 2025-12-31:**
 - Consider making baseline lint blocking again
 - OR maintain report-only status permanently with quarterly reviews
 
 **If triggers NOT met:**
-- Extend report-only status to 2025-12-31
+- Extend report-only status to 2026-03-31
 - Create dedicated technical debt cleanup sprint
 
 ## Monitoring

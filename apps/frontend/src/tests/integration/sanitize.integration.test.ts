@@ -22,8 +22,9 @@ describe('sanitize', () => {
   it('filters context keys to allowlist', () => {
     const { context } = filterAndSanitizeContext({ field: 'f', value: 'john@example.com', secret: 'x' } as any);
     expect(context).toBeDefined();
-    expect((context as any).field).toBe('[REDACTED]');
-    expect((context as any).secret).toBeUndefined();
+    expect((context as any).field).toBe('f'); // field is in allowlist, so it's preserved
+    expect((context as any).value).toBe('[REDACTED]'); // value contains email, so it's sanitized
+    expect((context as any).secret).toBeUndefined(); // secret is not in allowlist, so it's filtered out
   });
 });
 
