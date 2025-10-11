@@ -15,6 +15,7 @@
   "dependencies": {
     "@athlete-ally/contracts": "*",
     "@athlete-ally/event-bus": "*",
+    "@athlete-ally/shared": "*",
     "@athlete-ally/shared-types": "*",
     "@opentelemetry/api": "^1.7.0",
     "@prisma/client": "^5.22.0",

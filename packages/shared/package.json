@@ -19,6 +19,7 @@
     "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix"
   },
   "dependencies": {
+    "@athlete-ally/logger": "*",
     "jsonwebtoken": "^9.0.2",
     "prom-client": "^15.1.0",
     "zod": "^3.25.76"

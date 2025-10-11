@@ -8,8 +8,8 @@
     "sourceMap": true,
     "baseUrl": "../..",
     "paths": {
-      "@athlete-ally/logger": ["packages/logger/src/index.ts"],
-      "@athlete-ally/logger/server": ["packages/logger/src/adapters/node.ts"]
+      "@athlete-ally/logger": ["packages/logger/dist/index"],
+      "@athlete-ally/logger/server": ["packages/logger/dist/adapters/node"]
     }
   },
   "include": ["src/**/*"],

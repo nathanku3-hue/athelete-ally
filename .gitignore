@@ -8,6 +8,10 @@ yarn-error.log*
 .next/
 .turbo/
 dist/
+!packages/logger/dist/
+!packages/logger/dist/**
+!packages/health-schema/dist/
+!packages/health-schema/dist/**
 build/
 out/
 

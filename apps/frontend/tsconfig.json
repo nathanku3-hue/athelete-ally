@@ -18,7 +18,7 @@
       "@/*": ["./src/*"],
       "@athlete-ally/protocol-types": ["../../packages/protocol-types/src"],
       "@athlete-ally/protocol-types/*": ["../../packages/protocol-types/src/*"],
-      "@athlete-ally/health-schema": ["../../packages/health-schema/src"]
+      "@athlete-ally/health-schema": ["../../packages/health-schema/dist/index"]
     },
     "plugins": [{ "name": "next" }]
   },

@@ -9,7 +9,7 @@ module.exports = {
   testMatch: ['<rootDir>/apps/frontend/src/tests/integration/**/*.integration.test.(ts|tsx)'],
   moduleNameMapper: {
     ...(base.moduleNameMapper || {}),
-    '^@athlete-ally/logger/(.*)$': '<rootDir>/packages/logger/src/$1',
-    '^@athlete-ally/logger$': '<rootDir>/packages/logger/src/index.ts'
+    '^@athlete-ally/logger/(.*)$': '<rootDir>/packages/logger/dist/$1',
+    '^@athlete-ally/logger$': '<rootDir>/packages/logger/dist/index.js'
   },
 };
