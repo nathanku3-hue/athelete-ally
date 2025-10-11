@@ -1,4 +1,4 @@
-import { type LogAdapter, type LogEvent } from '../index';
+import { type LogAdapter, type LogEvent } from '../index.js';
 export const nodeAdapter: LogAdapter = {
   emit(event: LogEvent) {
     try {

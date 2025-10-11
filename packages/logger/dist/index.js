@@ -1,4 +1,4 @@
-import { sanitizeText, filterAndSanitizeContext } from './sanitize';
+import { sanitizeText, filterAndSanitizeContext } from './sanitize.js';
 function baseEvent(level, service, moduleName, env, msg, ctx, errObj) {
     const { text, hashes } = sanitizeText(msg);
     const { context, hashes: ctxHashes } = filterAndSanitizeContext(ctx);

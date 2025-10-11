@@ -1,4 +1,4 @@
-import { sanitizeText, filterAndSanitizeContext, type LogContext } from './sanitize';
+import { sanitizeText, filterAndSanitizeContext, type LogContext } from './sanitize.js';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type LogEvent = {
     level: LogLevel;

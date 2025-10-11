@@ -1,4 +1,4 @@
-import {} from '../index';
+import {} from '../index.js';
 export const nodeAdapter = {
     emit(event) {
         try {

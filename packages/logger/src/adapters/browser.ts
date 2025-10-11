@@ -1,4 +1,4 @@
-import { type LogAdapter, type LogEvent } from '../index';
+import { type LogAdapter, type LogEvent } from '../index.js';
 const isDev = process.env.NODE_ENV !== 'production';
 async function postLogs(events: LogEvent[]) {
   try {
