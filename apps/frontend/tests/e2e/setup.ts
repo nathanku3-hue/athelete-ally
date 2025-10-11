@@ -46,7 +46,7 @@ async function ensureTestEnvironment() {
       if (!response.ok) {
         throw new Error(`Service ${service} is not healthy`);
       }
-    } catch (error) {
+    } catch {
       console.warn(`⚠️ 服務 ${service} 未運行，某些測試可能會失敗`);
     }
   }
@@ -60,7 +60,7 @@ async function setupTestDatabase() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ environment: 'test' })
     });
-  } catch (error) {
+  } catch {
     console.warn('⚠️ 無法設置測試數據庫');
   }
 }
@@ -71,7 +71,7 @@ async function cleanupTestData() {
     await fetch('http://localhost:3001/api/test/cleanup', {
       method: 'DELETE'
     });
-  } catch (error) {
+  } catch {
     console.warn('⚠️ 無法清理測試數據');
   }
 }
@@ -86,10 +86,29 @@ async function resetTestState() {
   // 這裡可以添加每個測試前的重置邏輯
 }
 
+interface TestUserData {
+  id?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+interface TestTrainingPlanData {
+  userId?: string;
+  name?: string;
+  exercises?: unknown[];
+  [key: string]: unknown;
+}
+
+interface TestInteraction {
+  type: string;
+  data: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 // 全局測試工具函數
 export const testUtils = {
   // 創建測試用戶
-  async createTestUser(userData: any = {}) {
+  async createTestUser(userData: TestUserData = {}) {
     const defaultUser = {
       id: `test-user-${Date.now()}`,
       email: `test-${Date.now()}@example.com`,
@@ -106,7 +125,7 @@ export const testUtils = {
   },
 
   // 創建測試訓練計畫
-  async createTestTrainingPlan(userId: string, planData: any = {}) {
+  async createTestTrainingPlan(userId: string, planData: TestTrainingPlanData = {}) {
     const defaultPlan = {
       userId,
       name: 'Test Training Plan',
@@ -148,7 +167,7 @@ export const testUtils = {
   },
 
   // 模擬用戶交互
-  async simulateUserInteraction(interaction: any) {
+  async simulateUserInteraction(interaction: TestInteraction) {
     const response = await fetch('http://localhost:3001/api/test/interactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
