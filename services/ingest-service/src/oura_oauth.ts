@@ -1,7 +1,4 @@
-// Temporary any types to resolve Fastify type system drift
-type FastifyInstance = any;
-type FastifyReply = any;
-type FastifyRequest = any;
+import type { FastifyInstance, FastifyReply, FastifyRequest } from '@athlete-ally/shared/fastify-augment';
 import { randomBytes } from 'node:crypto';
 import { encrypt, decrypt } from './crypto';
 import { getTokenStore, OuraTokenRecord } from './tokenStore';
@@ -118,4 +115,3 @@ export function registerOuraOAuthRoutes(app: FastifyInstance) {
     }
   });
 }
-

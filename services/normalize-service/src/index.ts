@@ -1,5 +1,6 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
+import type { NatsConnection } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
 import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
 import { EVENT_TOPICS, HRVNormalizedStoredEvent, SleepNormalizedStoredEvent } from '@athlete-ally/contracts';
@@ -95,7 +96,7 @@ const telemetry = bootstrapTelemetry({
 });
 
 let eventBus: EventBus;
-let nc: any; // NatsConnection - keeping any for now as it's from EventBus
+let nc: NatsConnection | null = null;
 let running = true; // Global flag for graceful shutdown
 
 // Lightweight HTTP server for health/metrics

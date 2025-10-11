@@ -12,14 +12,12 @@ const log = createLogger(nodeAdapter, { module: 'error-handler', service: (typeo
  * - 错误分类和响应
  */
 
-import type { FastifyRequest, FastifyReply } from './fastify-augment.js';
+import type { FastifyRequest, FastifyReply, RequestUser } from './fastify-augment.js';
 import { ZodError } from 'zod';
 
 // Fastify请求类型定义
 interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    userId?: string;
-  };
+  user?: RequestUser;
 }
 
 // 错误类型枚举
@@ -403,4 +401,3 @@ export function createEnhancedErrorHandler() {
     reply.status(statusCode).send(response);
   };
 }
-
