@@ -3,20 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./browser": {
-      "types": "./src/adapters/browser.ts",
-      "default": "./src/adapters/browser.ts"
+      "types": "./dist/adapters/browser.d.ts",
+      "import": "./dist/adapters/browser.js",
+      "default": "./dist/adapters/browser.js"
     },
     "./server": {
-      "types": "./src/adapters/node.ts",
-      "default": "./src/adapters/node.ts"
-    }
+      "types": "./dist/adapters/node.d.ts",
+      "import": "./dist/adapters/node.js",
+      "default": "./dist/adapters/node.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -24,6 +29,9 @@
     "lint": "eslint -c ../../eslint.config.unified.mjs src",
     "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "typescript": "^5.9.2"
   }

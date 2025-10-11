@@ -1,10 +1,7 @@
 // Oura webhook utilities and route registration
 // Minimal skeleton: verifies HMAC-SHA256 using raw body and TTL idempotency.
 
-// Temporary any types to resolve Fastify type system drift
-type FastifyInstance = any;
-type FastifyRequest = any;
-type FastifyReply = any;
+import type { FastifyInstance, FastifyRequest, FastifyReply } from '@athlete-ally/shared/fastify-augment';
 import crypto from 'node:crypto';
 
 export function computeSignature(secret: string, payload: string): string {
