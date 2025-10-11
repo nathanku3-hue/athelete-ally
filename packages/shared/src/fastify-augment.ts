@@ -1,4 +1,4 @@
-import type { JWTPayload } from './auth/jwt.js';
+import type { JWTPayload } from './index.js';
 
 export type RequestUser = JWTPayload;
 
