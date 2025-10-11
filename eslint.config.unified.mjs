@@ -78,7 +78,7 @@ const eslintConfig = [
       'prefer-const': 'warn',
       'no-var': 'error',
       'import/no-internal-modules': ['warn', {
-        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client'],
+        allow: ['./**', '../**', '@athlete-ally/**', '@/**', 'dotenv/config', '@prisma/client', '../prisma/generated/client', './**/*.js', '../**/*.js'],
       }],
       'no-restricted-imports': ['warn', {
         patterns: [
