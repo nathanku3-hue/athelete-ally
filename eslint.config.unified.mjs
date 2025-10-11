@@ -99,7 +99,17 @@ const eslintConfig = [
   {
     files: ['packages/shared-types/src/index.ts'],
     rules: {
-      'import/no-internal-modules': ['error', { allow: ['./schemas', './schemas/*'] }],
+      'import/no-internal-modules': ['error', {
+        allow: [
+          './schemas/onboarding',
+          './schemas/rpe',
+          './schemas/enhanced-plan',
+          './schemas/feedback',
+          './schemas/api',
+          './schemas/hrv',
+          './schemas'
+        ]
+      }],
     },
   },
   // Boundaries pilot (warn) for selected packages
