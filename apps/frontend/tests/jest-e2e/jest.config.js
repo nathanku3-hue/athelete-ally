@@ -1,4 +1,4 @@
-export default {
+const config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
@@ -30,3 +30,5 @@ export default {
     url: 'http://localhost:3000'
   }
 };
+
+export default config;

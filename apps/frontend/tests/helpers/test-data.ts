@@ -1,9 +1,40 @@
+// Test data helpers with proper typing
 // Placeholder helpers for legacy tests; replace with real fixtures if needed.
-export async function createTestUser(email: string, name: string): Promise<any> {
+
+interface TestUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+interface TestProtocol {
+  id: string;
+  name: string;
+  createdBy: string;
+  isPublic: boolean;
+}
+
+interface TestShareInput {
+  protocolId: string;
+  sharedBy?: string;
+  sharedWith: string;
+  permissions?: string[];
+}
+
+interface TestShare {
+  id: string;
+  protocolId: string;
+  sharedBy: string;
+  sharedWith: string;
+  permissions: string[];
+  isActive: boolean;
+}
+
+export async function createTestUser(email: string, name: string): Promise<TestUser> {
   return { id: 'user_' + Math.random().toString(36).slice(2), email, name };
 }
 
-export async function createTestProtocol(name: string, createdBy: string): Promise<any> {
+export async function createTestProtocol(name: string, createdBy: string): Promise<TestProtocol> {
   return {
     id: 'prot_' + Math.random().toString(36).slice(2),
     name,
@@ -12,7 +43,7 @@ export async function createTestProtocol(name: string, createdBy: string): Promi
   };
 }
 
-export async function createTestShare(input: any): Promise<any> {
+export async function createTestShare(input: TestShareInput): Promise<TestShare> {
   return {
     id: 'share_' + Math.random().toString(36).slice(2),
     protocolId: input.protocolId,
@@ -23,5 +54,12 @@ export async function createTestShare(input: any): Promise<any> {
   };
 }
 
-const ANY: any = {};
-export default ANY;
+export const EMPTY_OBJECT: Record<string, unknown> = {};
+
+// Named exports for better module resolution
+export const testHelpers = {
+  createTestUser,
+  createTestProtocol,
+  createTestShare,
+  EMPTY_OBJECT,
+};
