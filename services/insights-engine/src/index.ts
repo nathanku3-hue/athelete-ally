@@ -54,8 +54,8 @@ fastify.register(readinessV1Routes);
 // Feature flag: READINESS_STUB
 if (process.env.READINESS_STUB === 'true') {
   console.log('READINESS_STUB enabled - returning static responses');
-  
-  fastify.get('/readiness/today', async (_request, reply) => {
+
+  fastify.get('/api/v1/readiness/today', async (_request, reply) => {
     return reply.code(200).send({
       userId: 'stub-user',
       date: new Date().toISOString().split('T')[0],
@@ -69,7 +69,7 @@ if (process.env.READINESS_STUB === 'true') {
     });
   });
 
-  fastify.get('/readiness', async (_request, reply) => {
+  fastify.get('/api/v1/readiness', async (_request, reply) => {
     const today = new Date().toISOString().split('T')[0];
     return reply.code(200).send([
       {

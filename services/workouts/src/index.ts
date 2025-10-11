@@ -79,15 +79,17 @@ const WorkoutGoalSchema = z.object({
   })).optional(),
 });
 
-// Health check with unified schema
+// Health check with unified schema (root level for infrastructure)
 server.get('/health', createFastifyHealthHandler({
   serviceName: 'workouts-service',
   version: '1.0.0',
   environment: process.env.NODE_ENV || 'development',
 }));
 
-// 获取用户摘要数据
-server.get('/api/v1/summary/:userId', async (request, reply) => {
+// API Routes Plugin with /api/v1 prefix
+server.register(async (apiRoutes) => {
+  // 获取用户摘要数据
+  apiRoutes.get('/summary/:userId', async (request, reply) => {
   const { userId } = request.params as { userId: string };
   const { timeRange = '30d' } = request.query as { timeRange?: string };
   
@@ -233,8 +235,8 @@ server.get('/api/v1/summary/:userId', async (request, reply) => {
   }
 });
 
-// Session Management Endpoints
-server.post('/sessions', async (request, reply) => {
+  // Session Management Endpoints
+  apiRoutes.post('/sessions', async (request, reply) => {
   const startTime = Date.now();
   
   try {
@@ -270,7 +272,7 @@ server.post('/sessions', async (request, reply) => {
   }
 });
 
-server.post('/sessions/:id/start', async (request, reply) => {
+  apiRoutes.post('/sessions/:id/start', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId } = request.body as { userId: string };
@@ -293,7 +295,7 @@ server.post('/sessions/:id/start', async (request, reply) => {
   }
 });
 
-server.post('/sessions/:id/pause', async (request, reply) => {
+  apiRoutes.post('/sessions/:id/pause', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId } = request.body as { userId: string };
@@ -316,7 +318,7 @@ server.post('/sessions/:id/pause', async (request, reply) => {
   }
 });
 
-server.post('/sessions/:id/resume', async (request, reply) => {
+  apiRoutes.post('/sessions/:id/resume', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId } = request.body as { userId: string };
@@ -339,7 +341,7 @@ server.post('/sessions/:id/resume', async (request, reply) => {
   }
 });
 
-server.post('/sessions/:id/complete', async (request, reply) => {
+  apiRoutes.post('/sessions/:id/complete', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const sessionData = request.body as {
@@ -381,8 +383,8 @@ server.post('/sessions/:id/complete', async (request, reply) => {
   }
 });
 
-// Exercise Management Endpoints
-server.post('/sessions/:id/exercises', async (request, reply) => {
+  // Exercise Management Endpoints
+  apiRoutes.post('/sessions/:id/exercises', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId, ...exerciseData } = request.body as { userId: string } & any;
@@ -423,7 +425,7 @@ server.post('/sessions/:id/exercises', async (request, reply) => {
   }
 });
 
-server.post('/exercises/:id/records', async (request, reply) => {
+  apiRoutes.post('/exercises/:id/records', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId, ...recordData } = request.body as { userId: string } & any;
@@ -467,8 +469,8 @@ server.post('/exercises/:id/records', async (request, reply) => {
   }
 });
 
-// Session Query Endpoints
-server.get('/sessions/:id', async (request, reply) => {
+  // Session Query Endpoints
+  apiRoutes.get('/sessions/:id', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId } = request.query as { userId: string };
@@ -494,7 +496,7 @@ server.get('/sessions/:id', async (request, reply) => {
   }
 });
 
-server.get('/sessions', async (request, reply) => {
+  apiRoutes.get('/sessions', async (request, reply) => {
   const startTime = Date.now();
   const { userId, limit = '20', offset = '0' } = request.query as { 
     userId: string; 
@@ -524,7 +526,7 @@ server.get('/sessions', async (request, reply) => {
   }
 });
 
-server.get('/sessions/active/:userId', async (request, reply) => {
+  apiRoutes.get('/sessions/active/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   
@@ -546,8 +548,8 @@ server.get('/sessions/active/:userId', async (request, reply) => {
   }
 });
 
-// Personal Records Endpoints
-server.post('/records', async (request, reply) => {
+  // Personal Records Endpoints
+  apiRoutes.post('/records', async (request, reply) => {
   const startTime = Date.now();
   
   try {
@@ -586,7 +588,7 @@ server.post('/records', async (request, reply) => {
   }
 });
 
-server.get('/records/:userId', async (request, reply) => {
+  apiRoutes.get('/records/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   const { exerciseId } = request.query as { exerciseId?: string };
@@ -609,8 +611,8 @@ server.get('/records/:userId', async (request, reply) => {
   }
 });
 
-// Goals Endpoints
-server.post('/goals', async (request, reply) => {
+  // Goals Endpoints
+  apiRoutes.post('/goals', async (request, reply) => {
   const startTime = Date.now();
   
   try {
@@ -653,7 +655,7 @@ server.post('/goals', async (request, reply) => {
   }
 });
 
-server.get('/goals/:userId', async (request, reply) => {
+  apiRoutes.get('/goals/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   const { status } = request.query as { status?: 'active' | 'achieved' | 'expired' };
@@ -676,7 +678,7 @@ server.get('/goals/:userId', async (request, reply) => {
   }
 });
 
-server.put('/goals/:id/progress', async (request, reply) => {
+  apiRoutes.put('/goals/:id/progress', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   const { userId, currentValue } = request.body as { userId: string; currentValue: number };
@@ -699,8 +701,8 @@ server.put('/goals/:id/progress', async (request, reply) => {
   }
 });
 
-// Achievement Stats Endpoints
-server.get('/achievements/:userId', async (request, reply) => {
+  // Achievement Stats Endpoints
+  apiRoutes.get('/achievements/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   
@@ -722,7 +724,7 @@ server.get('/achievements/:userId', async (request, reply) => {
   }
 });
 
-server.get('/achievements/:userId/recent', async (request, reply) => {
+  apiRoutes.get('/achievements/:userId/recent', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   const { limit = '10' } = request.query as { limit?: string };
@@ -743,7 +745,8 @@ server.get('/achievements/:userId/recent', async (request, reply) => {
     server.log.error({ error }, 'Failed to get recent achievements');
     return reply.code(500).send({ error: 'Internal server error' });
   }
-});
+  });
+}, { prefix: '/api/v1' });
 
 const port = Number(config.PORT || 4105);
 server

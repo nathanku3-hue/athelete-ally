@@ -48,15 +48,17 @@ const AdjustmentFeedbackSchema = z.object({
   feedback: z.string().optional(),
 });
 
-// Health check with unified schema
+// Health check with unified schema (root level for infrastructure)
 server.get('/health', createFastifyHealthHandler({
   serviceName: 'fatigue-service',
   version: '1.0.0',
   environment: process.env.NODE_ENV || 'development',
 }));
 
-// Submit fatigue assessment
-server.post('/fatigue/assess', async (request, reply) => {
+// API Routes Plugin with /api/v1 prefix
+server.register(async (apiRoutes) => {
+  // Submit fatigue assessment
+  apiRoutes.post('/fatigue/assess', async (request, reply) => {
   const startTime = Date.now();
   
   try {
@@ -108,8 +110,8 @@ server.post('/fatigue/assess', async (request, reply) => {
   }
 });
 
-// Get training adjustments based on fatigue
-server.post('/fatigue/adjustments', async (request, reply) => {
+  // Get training adjustments based on fatigue
+  apiRoutes.post('/fatigue/adjustments', async (request, reply) => {
   const startTime = Date.now();
   
   try {
@@ -152,8 +154,8 @@ server.post('/fatigue/adjustments', async (request, reply) => {
   }
 });
 
-// Submit adjustment feedback
-server.post('/fatigue/feedback', async (request, reply) => {
+  // Submit adjustment feedback
+  apiRoutes.post('/fatigue/feedback', async (request, reply) => {
   const startTime = Date.now();
   
   try {
@@ -195,8 +197,8 @@ server.post('/fatigue/feedback', async (request, reply) => {
   }
 });
 
-// Get user's fatigue history
-server.get('/fatigue/history/:userId', async (request, reply) => {
+  // Get user's fatigue history
+  apiRoutes.get('/fatigue/history/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   
@@ -222,8 +224,8 @@ server.get('/fatigue/history/:userId', async (request, reply) => {
   }
 });
 
-// Get user's fatigue profile
-server.get('/fatigue/profile/:userId', async (request, reply) => {
+  // Get user's fatigue profile
+  apiRoutes.get('/fatigue/profile/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   
@@ -261,8 +263,8 @@ server.get('/fatigue/profile/:userId', async (request, reply) => {
   }
 });
 
-// Update user's fatigue profile
-server.put('/fatigue/profile/:userId', async (request, reply) => {
+  // Update user's fatigue profile
+  apiRoutes.put('/fatigue/profile/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   const updateData = request.body as any;
@@ -292,8 +294,8 @@ server.put('/fatigue/profile/:userId', async (request, reply) => {
   }
 });
 
-// Get recent adjustments for a user
-server.get('/fatigue/adjustments/:userId', async (request, reply) => {
+  // Get recent adjustments for a user
+  apiRoutes.get('/fatigue/adjustments/:userId', async (request, reply) => {
   const startTime = Date.now();
   const { userId } = request.params as { userId: string };
   
@@ -317,7 +319,8 @@ server.get('/fatigue/adjustments/:userId', async (request, reply) => {
     server.log.error({ error }, 'Failed to get adjustments');
     return reply.code(500).send({ error: 'Internal server error' });
   }
-});
+  });
+}, { prefix: '/api/v1' });
 
 const port = Number(config.PORT || 4104);
 server
