@@ -21,13 +21,13 @@
         "packages/contracts/events/*"
       ],
       "@athlete-ally/logger": [
-        "packages/logger/src/index.ts"
+        "packages/logger/dist/index"
       ],
       "@athlete-ally/logger/server": [
-        "packages/logger/src/adapters/node.ts"
+        "packages/logger/dist/adapters/node"
       ],
       "@athlete-ally/logger/browser": [
-        "packages/logger/src/adapters/browser.ts"
+        "packages/logger/dist/adapters/browser"
       ]
     }
   },
@@ -40,4 +40,3 @@
     "**/*.test.ts"
   ]
 }
-

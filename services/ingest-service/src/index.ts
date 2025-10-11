@@ -1,8 +1,5 @@
 import Fastify from 'fastify';
-// Temporary any types to resolve Fastify type system drift
-type FastifyInstance = any;
-type FastifyRequest = any;
-type FastifyReply = any;
+import type { FastifyInstance, FastifyRequest, FastifyReply } from '@athlete-ally/shared/fastify-augment';
 import { registerOuraWebhookRoutes } from './oura';
 import { registerOuraOAuthRoutes } from './oura_oauth';
 import { connect as connectNats, NatsConnection } from 'nats';

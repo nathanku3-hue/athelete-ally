@@ -50,7 +50,7 @@ module.exports = {
   // Module resolution mapping (order matters - specific before generic)
   moduleNameMapper: {
     // @athlete-ally packages (specific mappings first)
-    '^@athlete-ally/logger$': '<rootDir>/packages/logger/src',
+    '^@athlete-ally/logger$': '<rootDir>/packages/logger/dist',
     '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
     '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
@@ -93,5 +93,4 @@ module.exports = {
   
   // Test configuration - removed deprecated options for Jest 29.7.0 compatibility
 };
-
 

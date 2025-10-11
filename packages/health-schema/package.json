@@ -2,12 +2,14 @@
   "name": "@athlete-ally/health-schema",
   "version": "1.0.0",
   "description": "Unified health schema for Athlete Ally services",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
+      "default": "./dist/index.js",
       "require": "./dist/index.js"
     },
     "./package.json": "./package.json"

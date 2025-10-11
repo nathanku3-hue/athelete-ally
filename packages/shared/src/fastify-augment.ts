@@ -1,10 +1,14 @@
+import type { JWTPayload } from './auth/jwt.js';
+
+export type RequestUser = JWTPayload;
+
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: { userId?: string; [k: string]: unknown };
+    user?: RequestUser;
     requestId?: string;
     rawBody?: string;
   }
 }
 
 // Re-export Fastify types for convenience
-export type { FastifyRequest, FastifyReply } from 'fastify';
+export type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
