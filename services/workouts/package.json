@@ -24,6 +24,7 @@
     "@athlete-ally/event-bus": "^0.1.0",
     "@athlete-ally/health-schema": "^1.0.0",
     "@athlete-ally/otel-preset": "^1.0.0",
+    "@athlete-ally/shared": "*",
     "@opentelemetry/exporter-jaeger": "^1.18.1",
     "@opentelemetry/exporter-prometheus": "^0.45.1",
     "@prisma/client": "^5.7.1",
