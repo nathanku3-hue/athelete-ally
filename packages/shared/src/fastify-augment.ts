@@ -12,4 +12,3 @@ declare module 'fastify' {
 
 // Re-export Fastify types for convenience
 export type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-
