@@ -352,7 +352,8 @@ jobs:
           npm run build -w packages/contracts
           npm run build -w packages/event-bus
           npm run build -w packages/protocol-types
-          npm run build -w packages/shared-types
+          npm run build -w @athlete-ally/shared
+          npm run build -w @athlete-ally/shared-types
           echo "✅ Shared packages built successfully"
 
 
