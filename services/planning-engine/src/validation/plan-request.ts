@@ -25,8 +25,8 @@ export const PlanRequestSchema = z.object({
 });
 
 // 内部类型，用于类型安全
-type PlanRequestInput = z.input<typeof PlanRequestSchema>;
-type PlanRequestOutput = z.output<typeof PlanRequestSchema>;
+// type _PlanRequestInput = z.input<typeof PlanRequestSchema>;
+// type _PlanRequestOutput = z.output<typeof PlanRequestSchema>;
 
 /**
  * 通用的事件到计划请求转换器

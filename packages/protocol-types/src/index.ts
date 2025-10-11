@@ -174,7 +174,7 @@ export interface BlockParameters {
   deloadFrequency?: number; // weeks
   
   // Custom parameters
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 export interface BlockRules {
@@ -190,7 +190,7 @@ export interface BlockRules {
   adaptationRules?: AdaptationRule[];
   
   // Custom rules
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 export interface DeloadTrigger {
@@ -219,7 +219,7 @@ export interface WeekParameters {
   exerciseModifications?: ExerciseModification[];
   
   // Custom parameters
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 export interface ExerciseModification {
@@ -435,7 +435,7 @@ export interface Adaptation {
   description: string;
   
   // Adaptation parameters
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   
   // Timing
   appliedAt: Date;
@@ -501,7 +501,7 @@ export interface TemplateParameters {
   };
   
   // Custom parameters
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 // ===========================================
@@ -565,7 +565,7 @@ export interface Recommendation {
   title: string;
   description: string;
   priority: 'low' | 'medium' | 'high';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 // ===========================================
@@ -692,7 +692,7 @@ export interface ExecutionParameters {
   };
   
   // Custom parameters
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 // ===========================================

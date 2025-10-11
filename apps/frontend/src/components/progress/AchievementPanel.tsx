@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { 
-  Award, 
-  Target, 
-  TrendingUp, 
-  Calendar, 
+import {
+  Award,
+  Target,
+  Calendar,
   Star,
   Trophy,
   Zap,
@@ -24,6 +24,15 @@ interface AchievementStats {
   }>;
 }
 
+interface Exercise {
+  id: string;
+  exerciseName: string;
+  records: Array<{
+    actualWeight?: number;
+    actualReps: number;
+  }>;
+}
+
 interface WorkoutSession {
   id: string;
   sessionName?: string;
@@ -35,7 +44,7 @@ interface WorkoutSession {
   difficulty?: number;
   energy?: number;
   motivation?: number;
-  exercises: any[];
+  exercises: Exercise[];
 }
 
 interface AchievementPanelProps {
@@ -274,7 +283,7 @@ export default function AchievementPanel({ stats, recentSessions }: AchievementP
         <div className="text-center">
           <div className="text-2xl mb-2">💪</div>
           <p className="text-sm text-gray-300 italic">
-            "Every workout is a step closer to your goals. Keep pushing forward!"
+            &quot;Every workout is a step closer to your goals. Keep pushing forward!&quot;
           </p>
         </div>
       </div>

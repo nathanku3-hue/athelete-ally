@@ -1,0 +1,360 @@
+From 8e182e6955744c809b9b0369b7c0f4e2ea34c11a Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Fri, 3 Oct 2025 01:01:07 +0800
+Subject: [PATCH] chore(observability): refine Sleep dashboard
+ location/variables; add subject var and help panel; label-scoped alerts;
+ promtool validation scripts
+
+---
+ monitoring/alert_rules.yml                    |  13 +-
+ .../grafana/dashboards/normalize-sleep.json   | 251 ++++++++++++++++++
+ package.json                                  |   2 +-
+ scripts/promtool-validate.ps1                 |   7 +
+ scripts/promtool-validate.sh                  |   8 +
+ 5 files changed, 272 insertions(+), 9 deletions(-)
+ create mode 100644 monitoring/grafana/dashboards/normalize-sleep.json
+ create mode 100644 scripts/promtool-validate.ps1
+ create mode 100644 scripts/promtool-validate.sh
+
+diff --git a/monitoring/alert_rules.yml b/monitoring/alert_rules.yml
+index f8f3ecd..656fb83 100644
+--- a/monitoring/alert_rules.yml
++++ b/monitoring/alert_rules.yml
+@@ -3,10 +3,9 @@ groups:
+     interval: 1m
+     rules:
+       - alert: SleepDLQRateNonZero
+-        expr: rate(normalize_sleep_messages_total{result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) > 0
++        expr: rate(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="dlq",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) > 0
+         for: 5m
+-        labels:
+-          severity: warning
++        labels:\n          severity: warning\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
+         annotations:
+           summary: "Sleep pipeline DLQ rate > 0"
+           description: "DLQ messages observed in the last 5m. Investigate schema or processing errors."
+@@ -15,18 +14,16 @@ groups:
+       - alert: SleepConsumerLagHigh
+         expr: nats_consumer_num_pending{stream="AA_CORE_HOT",consumer="normalize-sleep-durable"} > 100
+         for: 5m
+-        labels:
+-          severity: warning
++        labels:\n          severity: warning\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
+         annotations:
+           summary: "Sleep consumer lag high"
+           description: "Num pending > 100 for 5m. If exporter missing, see TODO in runbook and use Soak script / NATS CLI."
+           runbook_url: "docs/runbook/sleep-troubleshooting.md#lag-and-backlog"
+ 
+       - alert: SleepNoSuccesses5m
+-        expr: increase(normalize_sleep_messages_total{result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) == 0
++        expr: increase(normalize_sleep_messages_total{subject="athlete-ally.sleep.raw-received",result="success",stream="AA_CORE_HOT",durable="normalize-sleep-durable"}[5m]) == 0
+         for: 5m
+-        labels:
+-          severity: critical
++        labels:\n          severity: critical\n          team: platform\n          service: normalize-service\n          env: unknown\n          stream: AA_CORE_HOT\n          durable: normalize-sleep-durable\n          subject: athlete-ally.sleep.raw-received
+         annotations:
+           summary: "Sleep pipeline produced no successes for 5m"
+           description: "No successful sleep normalizations in the last 5m. Check consumers, NATS, and DB connectivity."
+diff --git a/monitoring/grafana/dashboards/normalize-sleep.json b/monitoring/grafana/dashboards/normalize-sleep.json
+new file mode 100644
+index 0000000..41a6baf
+--- /dev/null
++++ b/monitoring/grafana/dashboards/normalize-sleep.json
+@@ -0,0 +1,251 @@
++{
++  "__inputs": [
++    {
++      "name": "DS_PROMETHEUS",
++      "label": "Prometheus",
++      "description": "Prometheus datasource",
++      "type": "datasource",
++      "pluginId": "prometheus",
++      "pluginName": "Prometheus"
++    }
++  ],
++  "__requires": [
++    {
++      "type": "grafana",
++      "id": "grafana",
++      "name": "Grafana",
++      "version": "9.0.0"
++    },
++    {
++      "type": "panel",
++      "id": "timeseries",
++      "name": "Time series",
++      "version": "9.0.0"
++    },
++    {
++      "type": "datasource",
++      "id": "prometheus",
++      "name": "Prometheus",
++      "version": "2.0.0"
++    },
++    {
++      "type": "panel",
++      "id": "text",
++      "name": "Text",
++      "version": "9.0.0"
++    }
++  ],
++  "uid": "aa-sleep-norm",
++  "title": "Sleep Normalize Pipeline",
++  "timezone": "",
++  "version": 1,
++  "schemaVersion": 37,
++  "editable": true,
++  "refresh": "30s",
++  "time": {
++    "from": "now-24h",
++    "to": "now"
++  },
++  "templating": {
++    "list": [
++      {
++        "name": "DS_PROMETHEUS",
++        "type": "datasource",
++        "query": "prometheus",
++        "description": "Prometheus datasource"
++      },
++      {
++        "name": "job",
++        "type": "query",
++        "datasource": "${DS_PROMETHEUS}",
++        "query": "label_values(normalize_sleep_messages_total, job)",
++        "current": {
++          "selected": true,
++          "text": "normalize",
++          "value": "normalize"
++        },
++        "refresh": 1,
++        "label": "job"
++      },
++      {
++        "name": "stream",
++        "type": "custom",
++        "query": "AA_CORE_HOT,ATHLETE_ALLY_EVENTS",
++        "current": {
++          "selected": true,
++          "text": "AA_CORE_HOT",
++          "value": "AA_CORE_HOT"
++        },
++        "label": "stream"
++      },
++      {
++        "name": "durable",
++        "type": "custom",
++        "query": "normalize-sleep-durable",
++        "current": {
++          "selected": true,
++          "text": "normalize-sleep-durable",
++          "value": "normalize-sleep-durable"
++        },
++        "label": "durable"
++      },
++      {
++        "type": "custom",
++        "name": "subject",
++        "label": "subject",
++        "query": "athlete-ally.sleep.raw-received,athlete-ally.sleep.normalized-stored",
++        "current": {
++          "selected": true,
++          "value": "athlete-ally.sleep.raw-received",
++          "text": "athlete-ally.sleep.raw-received"
++        }
++      }
++    ]
++  },
++  "panels": [
++    {
++      "type": "text",
++      "title": "Sleep Pipeline Help",
++      "mode": "markdown",
++      "gridPos": {
++        "w": 24,
++        "y": 0,
++        "h": 5,
++        "x": 0
++      },
++      "options": {
++        "content": "[Runbook](docs/runbook/sleep-troubleshooting.md) | Variables: job, stream, durable, subject.\\nEN: Use variables to scope. If panels show \"No data\", confirm scrape/labels. Steady state: DLQ=0, successes increasing.\\nZH: 變數控制查詢；若顯示「無資料」，檢查 Prometheus 抓取與標籤。穩定態：DLQ=0，success 持續。"
++      }
++    },
++    {
++      "type": "timeseries",
++      "title": "Sleep Messages by Result (stacked)",
++      "description": "EN: normalize_sleep_messages_total by result; filters: subject=athlete-ally.sleep.raw-received, stream=$stream, durable=$durable, job=$job.\nZH: 按結果堆疊顯示訊息計數；篩選條件固定 subject=athlete-ally.sleep.raw-received，並依 stream/durable/job 過濾。",
++      "datasource": {
++        "type": "prometheus",
++        "uid": "${DS_PROMETHEUS}"
++      },
++      "fieldConfig": {
++        "defaults": {
++          "custom": {
++            "drawStyle": "line",
++            "lineWidth": 1
++          },
++          "unit": "short"
++        },
++        "overrides": []
++      },
++      "options": {
++        "legend": {
++          "displayMode": "table",
++          "placement": "bottom"
++        },
++        "tooltip": {
++          "mode": "multi"
++        },
++        "stacking": {
++          "mode": "normal"
++        }
++      },
++      "targets": [
++        {
++          "expr": "sum by (result) (rate(normalize_sleep_messages_total{subject=\"athlete-ally.sleep.raw-received\",stream=\"$stream\",durable=\"$durable\",job=\"$job\"}[5m]))",
++          "legendFormat": "{{result}}",
++          "refId": "A"
++        }
++      ],
++      "gridPos": {
++        "h": 8,
++        "w": 24,
++        "x": 0,
++        "y": 0
++      }
++    },
++    {
++      "type": "timeseries",
++      "title": "DLQ Trend",
++      "description": "EN: DLQ rate over time (result=dlq).\nZH: DLQ 趨勢（result=dlq）。",
++      "datasource": {
++        "type": "prometheus",
++        "uid": "${DS_PROMETHEUS}"
++      },
++      "options": {
++        "legend": {
++          "displayMode": "list"
++        },
++        "tooltip": {
++          "mode": "single"
++        }
++      },
++      "targets": [
++        {
++          "expr": "rate(normalize_sleep_messages_total{result=\"dlq\",subject=\"athlete-ally.sleep.raw-received\",stream=\"$stream\",durable=\"$durable\",job=\"$job\"}[5m])",
++          "legendFormat": "dlq",
++          "refId": "A"
++        }
++      ],
++      "gridPos": {
++        "h": 6,
++        "w": 12,
++        "x": 0,
++        "y": 8
++      }
++    },
++    {
++      "type": "timeseries",
++      "title": "Processing Duration p95/p99 (consume/publish)",
++      "description": "EN: Prefer operation=consume; if not present, shows publish (optional). topic=sleep_raw_received.\nZH: 優先顯示 consume；若無則顯示 publish（可選）。",
++      "datasource": {
++        "type": "prometheus",
++        "uid": "${DS_PROMETHEUS}"
++      },
++      "options": {
++        "legend": {
++          "displayMode": "table"
++        }
++      },
++      "targets": [
++        {
++          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"consume\",job=\"$job\"}[5m])))",
++          "legendFormat": "p95 consume",
++          "refId": "A"
++        },
++        {
++          "expr": "histogram_quantile(0.99, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"consume\",job=\"$job\"}[5m])))",
++          "legendFormat": "p99 consume",
++          "refId": "B"
++        },
++        {
++          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"publish\",job=\"$job\"}[5m])))",
++          "legendFormat": "p95 publish (opt)",
++          "refId": "C"
++        },
++        {
++          "expr": "histogram_quantile(0.99, sum by (le) (rate(event_bus_event_processing_duration_seconds_bucket{topic=\"sleep_raw_received\",operation=\"publish\",job=\"$job\"}[5m])))",
++          "legendFormat": "p99 publish (opt)",
++          "refId": "D"
++        }
++      ],
++      "gridPos": {
++        "h": 6,
++        "w": 12,
++        "x": 12,
++        "y": 8
++      }
++    },
++    {
++      "type": "text",
++      "title": "Consumer Lag Check (Placeholder)",
++      "mode": "markdown",
++      "gridPos": {
++        "h": 8,
++        "w": 24,
++        "x": 0,
++        "y": 14
++      },
++      "options": {
++        "content": "**Lag Check (NATS CLI first, Node JSM fallback)**\n\n- NATS CLI (pending):\n  - `nats consumer info $stream normalize-sleep-durable` (see `Num Pending`)\n- NATS CLI (last DLQ msg):\n  - `nats stream get AA_DLQ --last-by-subject dlq.normalize.sleep.raw-received.schema-invalid`\n- Node (pending, snippet):\n  ```js\n  import { connect } from 'nats';\n  const nc = await connect({ servers: process.env.NATS_URL || 'nats://localhost:4223' });\n  const jsm = await nc.jetstreamManager();\n  const ci = await jsm.consumers.info('$stream', 'normalize-sleep-durable');\n  console.log(ci.num_pending);\n  ```\n- Soak script (JSON): run docs/phase-3/ops/48h-soak-health-check.sh and inspect ./soak_sleep_summary.json"
++      }
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 2529a3b..6a218ed 100644
+--- a/package.json
++++ b/package.json
+@@ -83,7 +83,7 @@
+     "validate:schemas": "node scripts/validate-schemas.js",
+     "dev:compose": "docker compose up --build",
+     "dev:compose:obs": "docker compose --profile obs up --build",
+-    "lint:json": "node scripts/json-lint.js monitoring/grafana/normalize-dashboard-sleep.json docs/examples/soak_sleep_summary.example.json",
++    "lint:json": "node scripts/json-lint.js monitoring/grafana/dashboards/normalize-sleep.json docs/examples/soak_sleep_summary.example.json",
+     "lint:yaml": "node scripts/yaml-lint.js monitoring/alert_rules.yml"
+   },
+   "dependencies": {
+diff --git a/scripts/promtool-validate.ps1 b/scripts/promtool-validate.ps1
+new file mode 100644
+index 0000000..0e8b508
+--- /dev/null
++++ b/scripts/promtool-validate.ps1
+@@ -0,0 +1,7 @@
++Param([string]$RulesPath = 'monitoring/alert_rules.yml')
++try {
++  $promtool = Get-Command promtool -ErrorAction Stop
++  & $promtool.Source check rules $RulesPath
++} catch {
++  Write-Host 'promtool not found; skipping rules validation. (Install Prometheus to enable)' -ForegroundColor Yellow
++}
+\ No newline at end of file
+diff --git a/scripts/promtool-validate.sh b/scripts/promtool-validate.sh
+new file mode 100644
+index 0000000..a98b83c
+--- /dev/null
++++ b/scripts/promtool-validate.sh
+@@ -0,0 +1,8 @@
++#!/usr/bin/env bash
++set -euo pipefail
++RULES="${1:-monitoring/alert_rules.yml}"
++if command -v promtool >/dev/null 2>&1; then
++  promtool check rules "$RULES"
++else
++  echo 'promtool not found; skipping rules validation. (Install Prometheus to enable)'
++fi
+\ No newline at end of file
+-- 
+2.50.0.windows.1
+

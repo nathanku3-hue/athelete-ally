@@ -5,13 +5,20 @@
   "type": "module",
   "main": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./schemas": {
+      "types": "./src/schemas.ts",
+      "default": "./src/schemas.ts"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc --noEmit",
-    "lint": "eslint -c ../../eslint.config.mjs src",
-    "lint:fix": "eslint -c ../../eslint.config.mjs src --fix"
+    "lint": "eslint -c ../../eslint.config.unified.mjs src",
+    "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix"
   },
   "dependencies": {
     "zod": "^3.25.76"

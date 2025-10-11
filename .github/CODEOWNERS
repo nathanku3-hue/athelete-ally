@@ -1,0 +1,34 @@
+# CODEOWNERS ? update team handles to your org
+# Shards by stream
+/docs/streams/A1/** @org/stream-a1
+/docs/streams/A2/** @org/stream-a2
+/docs/streams/B/**  @org/stream-b
+
+# API shards
+/openapi/paths/**       @org/api
+/openapi/components/**  @org/api
+
+# Observability shards
+/monitoring/alert_rules.d/**           @org/observability
+/monitoring/grafana/dashboards/**      @org/observability
+
+# Registries
+/registry/** @org/contracts
+
+# Stream 4: templates and pilot require dual sign-off (Safety DM + Feature DM)
+/templates/feature-module/** @org/safety @org/features
+/packages/feature-hello/**   @org/safety @org/features
+
+# Hubs (single-writer): require core team review
+/README.md                                      @org/core
+/docs/README.md                                 @org/core
+/docs/runbook/index.md                          @org/core
+/openapi.yaml                                   @org/core
+/monitoring/alert_rules.yml                     @org/core
+/monitoring/grafana/dashboards/index.json       @org/core
+/CHANGELOG.md                                   @org/core
+/registry.json                                  @org/core
+/registry.ts                                    @org/core
+/infra/index.yaml                               @org/core
+/protobuf/registry.yaml                         @org/core
+/sql/migrations/catalog.yaml                    @org/core

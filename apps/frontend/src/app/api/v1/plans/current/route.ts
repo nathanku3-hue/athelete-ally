@@ -4,7 +4,7 @@ import { convertLbsToKg } from '@/lib/weightConverter';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching current user plan...');
+    // 获取当前用户计划
     
     // 在真实实现中，这里会从请求头或cookie中获取用户ID
     // const userId = request.headers.get('x-user-id') || 'default_user';
@@ -148,16 +148,13 @@ export async function GET(request: NextRequest) {
     // 模拟 API 延迟
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    console.log('Returning current plan:', { 
-      weekNumber: currentPlan.weekNumber, 
-      theme: currentPlan.theme,
-      trainingDaysCount: currentPlan.trainingDays.length 
-    });
-    
     return NextResponse.json(currentPlan);
     
   } catch (error) {
-    console.error('Failed to fetch current plan:', error);
+    // Log error for debugging (in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to fetch current plan:', error);
+    }
     return NextResponse.json(
       { 
         error: 'Failed to fetch current plan',

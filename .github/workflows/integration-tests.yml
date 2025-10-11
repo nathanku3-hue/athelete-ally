@@ -1,3 +1,7 @@
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 name: Integration Tests
 
 on:
@@ -13,10 +17,6 @@ on:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   sanity:
@@ -67,10 +67,31 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
       - name: Install dependencies
 
 
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Cache Prisma engines
         uses: actions/cache@v4
         with:
@@ -119,8 +140,8 @@ jobs:
           export REDIS_URL="redis://localhost:6379"
           export NODE_ENV="test"
           
-          # Run integration tests with real database
-          npx jest --config jest.config.cjs \
+          # Run integration tests with real database - use standardized jest:bin script
+          npm run jest:bin -- --config jest.config.cjs \
             --testPathPattern="(message-reliability|reliability|integration)" \
             --runInBand \
             --verbose \

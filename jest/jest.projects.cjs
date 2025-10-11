@@ -17,7 +17,9 @@ module.exports = {
   projects: [
     path.resolve(__dirname, 'jest.config.frontend.cjs'),
     path.resolve(__dirname, 'jest.config.services.cjs'),
-    path.resolve(__dirname, 'jest.config.integration.cjs')
+    path.resolve(__dirname, 'jest.config.integration.cjs'),
+    // Stream 4: packages project to include pilot tests
+    path.resolve(__dirname, 'jest.config.packages.cjs')
   ],
   
   // CI并发控制 - 避免CI容器在高并发下不稳定

@@ -70,7 +70,7 @@ server.get('/health', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (_request, _reply) => {
   return {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -100,9 +100,9 @@ server.get('/health/detailed', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (_request, _reply) => {
   const memoryUsage = process.memoryUsage();
-  
+
   return {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -156,7 +156,7 @@ server.get('/health/ready', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (_request, _reply) => {
   return {
     status: 'ready',
     message: 'Service is ready to accept requests'
@@ -178,7 +178,7 @@ server.get('/health/live', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (_request, _reply) => {
   return {
     status: 'alive',
     message: 'Service is alive'
@@ -197,9 +197,9 @@ server.get('/metrics', {
       }
     }
   }
-}, async (request, reply) => {
+}, async (_request, _reply) => {
   const memoryUsage = process.memoryUsage();
-  
+
   return {
     http_requests_total: 0,
     http_request_duration_seconds: 0,
@@ -555,7 +555,7 @@ server.get('/api/v1/plans/:planId/adaptations', {
 }, async (request, reply) => {
   try {
     const { planId } = request.params as any;
-    
+
     // 模拟适应性调整建议
     const adaptations = {
       planId,
@@ -639,7 +639,7 @@ server.post('/api/v1/plans/:planId/adaptations/apply', {
   try {
     const { planId } = request.params as any;
     const { adaptations } = request.body as any;
-    
+
     // 模拟调整应用
     const result = {
       planId,

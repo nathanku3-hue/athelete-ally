@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 "use client";
 
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line import/no-internal-modules
 import { useRouter } from 'next/navigation';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import { useOnboarding } from '@/contexts/OnboardingContext';
@@ -12,7 +14,7 @@ export default function SummaryPage() {
   const { data: onboardingData, isLoading, error } = state;
   
   // 追蹤原始數據，用於檢測變更
-  const [originalData, setOriginalData] = useState<any>(null);
+  const [originalData, setOriginalData] = useState<typeof onboardingData | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
   // 在組件載入時保存原始數據
@@ -100,7 +102,9 @@ export default function SummaryPage() {
   // 如果没有数据，创建测试数据
   React.useEffect(() => {
     if (!hasAnyData && !isLoading) {
-      console.log('Summary page - no onboarding data found, creating test data');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Summary page - no onboarding data found, creating test data');
+      }
       const testData = {
         userId: 'test_user_123',
         currentStep: 5,
@@ -116,7 +120,9 @@ export default function SummaryPage() {
         fixedSchedules: []
       };
       
-      console.log('Summary page - created test data:', testData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Summary page - created test data:', testData);
+      }
       updateData(testData);
     }
   }, [hasAnyData, isLoading, updateData]);
@@ -134,7 +140,7 @@ export default function SummaryPage() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold mb-4 text-white">Welcome to Athlete Ally</h1>
-            <p className="text-gray-400 mb-2">Let's create your personalized training plan</p>
+            <p className="text-gray-400 mb-2">Let&apos;s create your personalized training plan</p>
             <p className="text-sm text-gray-500">Complete the onboarding process to get started</p>
           </div>
           

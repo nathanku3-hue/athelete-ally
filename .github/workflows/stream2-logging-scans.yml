@@ -1,0 +1,32 @@
+name: stream2-logging-scans
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  stream2-scans:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+      - name: Install deps
+        run: npm ci || npm i
+      - name: Run console scan
+        id: console
+        run: |
+          node -e "const fs=require('fs');const r=require('child_process').execSync('npm run -s scan:console').toString(); fs.mkdirSync('reports',{recursive:true}); fs.writeFileSync('reports/console-scan.json',r); const obj=JSON.parse(r); const allow=fs.existsSync('ci/console-allowlist.json')?JSON.parse(fs.readFileSync('ci/console-allowlist.json','utf8')):[]; const allowed=new Set(allow.map(e=>e.file)); const remaining=(obj.hits||[]).filter(h=>!allowed.has(h.file)).length; const summary=\`Console: remaining \${remaining}, allowlist \${allow.length}\`; console.log(summary); fs.writeFileSync(process.env.GITHUB_STEP_SUMMARY, summary+'\n');"
+      - name: Run client bundle scan
+        id: bundle
+        run: |
+          npx tsx scripts/scan-client-bundle.ts > reports/client-bundle-scan.json || true
+          # Hard block only on server libs finding
+          node -e "const fs=require('fs');const p='reports/client-bundle-scan.json';if(!fs.existsSync(p)){process.exit(0)}; const o=JSON.parse(fs.readFileSync(p,'utf8')); if(o.offenders&&o.offenders.length){console.error('Server libs found in client'); process.exit(1)}"
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stream2-scan-artifacts
+          path: reports/*.json
+

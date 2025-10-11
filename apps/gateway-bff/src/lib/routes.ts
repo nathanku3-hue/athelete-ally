@@ -87,7 +87,7 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
   });
 
   // Health check for Magic Slice routes
-  server.get('/v1/health', async (request, reply) => {
+  server.get('/v1/health', async (_request, reply) => {
     reply.send({ status: 'ok', service: 'magic-slice-routes' });
   });
 }

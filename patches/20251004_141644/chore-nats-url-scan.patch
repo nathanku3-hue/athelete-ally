@@ -1,0 +1,2283 @@
+From fc996c4694130a0e746b5af3494db1ec0565d757 Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 01:16:41 +0800
+Subject: [PATCH 1/2] chore: NATS URL scan (report-only)
+
+---
+ reports/nats_url_scan.json     | 1886 ++++++++++++++++++++++++++++++++
+ reports/nats_url_scan.md       |  173 +++
+ scripts/ops/scan-nats-urls.mjs |  112 ++
+ 3 files changed, 2171 insertions(+)
+ create mode 100644 reports/nats_url_scan.json
+ create mode 100644 reports/nats_url_scan.md
+ create mode 100644 scripts/ops/scan-nats-urls.mjs
+
+diff --git a/reports/nats_url_scan.json b/reports/nats_url_scan.json
+new file mode 100644
+index 0000000..bc62911
+--- /dev/null
++++ b/reports/nats_url_scan.json
+@@ -0,0 +1,1886 @@
++{
++  "generatedAt": "2025-10-03T17:16:40.207Z",
++  "results": [
++    {
++      "file": "AUTONOMOUS_TODO.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 26,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "AUTONOMOUS_TODO.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 163,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 42,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 42,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 71,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 71,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 134,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 134,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "HANDOFF_REPORT.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 35,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "HANDOFF_REPORT.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 434,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "HANDOFF_REPORT.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 434,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "HANDOFF_REPORT.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 453,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "HANDOFF_REPORT.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 453,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "MISSION_BRIEF.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 28,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "MISSION_BRIEF.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 103,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "MISSION_BRIEF.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 103,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "POST_MERGE_IMPLEMENTATION_SUMMARY.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 28,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "POST_MERGE_IMPLEMENTATION_SUMMARY.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223`",
++      "line": 28,
++      "match": "NATS_URL=nats://localhost:4223`",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "POST_MERGE_TEST_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 25,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "README.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 68,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/workouts/src/summary-aggregator.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 48,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/profile-onboarding/src/index.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 38,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/.env.development.example",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 7,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/.env.development.example",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 7,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/.env.production.example",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://${NATS_HOST}:4223",
++      "line": 12,
++      "match": "NATS_URL=nats://${NATS_HOST}:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/docker-compose.production.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "${NATS_URL}",
++      "line": 16,
++      "match": "NATS_URL=${NATS_URL}",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/docker-compose.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 55,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/docker-compose.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 55,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/README.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://...",
++      "line": 72,
++      "match": "NATS_URL=nats://...",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/src/config.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 14,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/src/config.ts",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "z.string().url().default('nats://localhost:4223'),",
++      "line": 14,
++      "match": "NATS_URL=z.string().url().default('nats://localhost:4223'),",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/src/__tests__/setup.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 4,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/src/config/environment.ts",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "z.string().min(1,",
++      "line": 13,
++      "match": "NATS_URL=z.string().min(1,",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/src/config/environment.ts",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "config.NATS_URL,",
++      "line": 68,
++      "match": "NATS_URL=config.NATS_URL,",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-env.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 22,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-env.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 22,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 30,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "'nats://localhost:4223',",
++      "line": 30,
++      "match": "NATS_URL='nats://localhost:4223',",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 75,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "'nats://nats:4223',",
++      "line": 75,
++      "match": "NATS_URL='nats://nats:4223',",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 139,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 139,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 232,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-environment.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 232,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/scripts/setup-production.sh",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://\\${NATS_HOST}:4223",
++      "line": 20,
++      "match": "NATS_URL=nats://\\${NATS_HOST}:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/docs/HEALTH_CHECK_README.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 163,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/planning-engine/docs/HEALTH_CHECK_README.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 163,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/normalize-service/.env.example",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 12,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/normalize-service/.env.example",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 12,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/normalize-service/README.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 140,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/normalize-service/README.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 140,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/normalize-service/README.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 333,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/normalize-service/src/index.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 98,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/insights-engine/src/index.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 18,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/ingest-service/README.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 114,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/ingest-service/README.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 114,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/ingest-service/src/index.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 48,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/ingest-service/src/index.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 65,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "services/ingest-service/src/index.ts",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "${natsUrl}`);",
++      "line": 70,
++      "match": "NATS_URL=${natsUrl}`);",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/create-streams.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 11,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/smoke-sleep.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 14,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/smoke-sleep.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "NATS",
++      "line": 14,
++      "match": "NATS_URL=NATS",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/smoke-sleep.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 28,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/test-multi-mode-fallback.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 24,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/test-stream-init.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 15,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/consumer-diagnostic.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 5,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/migration-verify.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 5,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/pull-diagnose.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 6,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/pull-diagnose.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 6,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/pull-diagnose.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 12,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/stream-binding-test.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 21,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/stream-info.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 13,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "scripts/nats/stream-info.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 19,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "patches/20251001_db_connection_fix.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 17,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "patches/20251001_db_connection_fix.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 17,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "packages/event-bus/src/config.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 4,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "packages/event-bus/src/config.ts",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "z.string().url().default('nats://localhost:4223'),",
++      "line": 4,
++      "match": "NATS_URL=z.string().url().default('nats://localhost:4223'),",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "packages/event-bus/src/index.ts",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 223,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "monitoring/grafana/dashboards/normalize-sleep.json",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 247,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 379,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 430,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 480,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 601,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 601,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 702,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_CODE_SNIPPETS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 702,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 186,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 186,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 191,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 198,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 198,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats1.prod",
++      "port": 4223,
++      "line": 201,
++      "match": "nats://nats1.prod:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
++      "line": 201,
++      "match": "NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "user",
++      "port": null,
++      "line": 204,
++      "match": "nats://user:pass",
++      "tls": false,
++      "warn": true,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats:[REDACTED]@nats.prod:4223",
++      "line": 204,
++      "match": "NATS_URL=nats:[REDACTED]@nats.prod:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 349,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 349,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats1.prod",
++      "port": 4223,
++      "line": 399,
++      "match": "nats://nats1.prod:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
++      "line": 399,
++      "match": "NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4222,
++      "line": 466,
++      "match": "nats://localhost:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_ENV_VARIABLES.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 466,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/PHASE2_RUNBOOK.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats1.prod",
++      "port": 4223,
++      "line": 85,
++      "match": "nats://nats1.prod:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/PHASE2_RUNBOOK.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
++      "line": 85,
++      "match": "NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/testing/TEST_INTEGRATION_SUPPORT.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 392,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/testing/TEST_INTEGRATION_SUPPORT.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "'nats://localhost:4223';",
++      "line": 392,
++      "match": "NATS_URL='nats://localhost:4223';",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/48h-soak-health-check.sh",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 16,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/48h-soak-health-check.sh",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 27,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/48h-soak-health-check.sh",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "\"${NATS_URL:-nats://localhost:4223}\"",
++      "line": 27,
++      "match": "NATS_URL=\"${NATS_URL:-nats://localhost:4223}\"",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/48h-soak-health-check.sh",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "$NATS_URL\"",
++      "line": 667,
++      "match": "NATS_URL=$NATS_URL\"",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-consumers.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 9,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-consumers.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 15,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/create-consumers.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 15,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-consumers.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 25,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-streams.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 9,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-streams.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 16,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/create-streams.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 16,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-streams.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "prod-nats",
++      "port": 4222,
++      "line": 19,
++      "match": "nats://prod-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/phase-3/ops/create-streams.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://prod-nats:4222",
++      "line": 19,
++      "match": "NATS_URL=nats://prod-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/create-streams.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 29,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/migrate-subjects.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 11,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/migrate-subjects.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 15,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/migrate-subjects.js",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 15,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/migrate-subjects.js",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 21,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_ISSUE.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 76,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_ISSUE.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 76,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_ISSUE.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 79,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_ISSUE.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 79,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 88,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 88,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 100,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 144,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 144,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 154,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats",
++      "port": 4222,
++      "line": 485,
++      "match": "nats://staging-nats:4222",
++      "tls": false,
++      "warn": true,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/PHASE_B_RUNBOOK.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats:4222",
++      "line": 485,
++      "match": "NATS_URL=nats://staging-nats:4222",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 10,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 32,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 32,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats.example.com",
++      "port": 4223,
++      "line": 43,
++      "match": "nats://staging-nats.example.com:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats.example.com:4223",
++      "line": 43,
++      "match": "NATS_URL=nats://staging-nats.example.com:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "staging-nats.example.com",
++      "port": 4223,
++      "line": 50,
++      "match": "nats://staging-nats.example.com:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "non-prod"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://staging-nats.example.com:4223",
++      "line": 50,
++      "match": "NATS_URL=nats://staging-nats.example.com:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "prod-nats.example.com",
++      "port": 4223,
++      "line": 61,
++      "match": "nats://prod-nats.example.com:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://prod-nats.example.com:4223",
++      "line": 61,
++      "match": "NATS_URL=nats://prod-nats.example.com:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "prod-nats.example.com",
++      "port": 4223,
++      "line": 68,
++      "match": "nats://prod-nats.example.com:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://prod-nats.example.com:4223",
++      "line": 68,
++      "match": "NATS_URL=nats://prod-nats.example.com:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "prod-nats.example.com",
++      "port": 4223,
++      "line": 75,
++      "match": "nats://prod-nats.example.com:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "prod"
++    },
++    {
++      "file": "docs/phase-3/ops/SLEEP_SOAK_RESULTS.md",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://prod-nats.example.com:4223",
++      "line": 75,
++      "match": "NATS_URL=nats://prod-nats.example.com:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 48,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 64,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 141,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose/preview.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 31,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose/preview.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 31,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose/preview.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "nats",
++      "port": 4223,
++      "line": 49,
++      "match": "nats://nats:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "docker-compose/preview.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://nats:4223",
++      "line": 49,
++      "match": "NATS_URL=nats://nats:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": "apps/frontend/src/lib/realtime.ts",
++      "type": "url",
++      "scheme": "ws",
++      "host": "localhost",
++      "port": 3001,
++      "line": 28,
++      "match": "ws://localhost:3001",
++      "tls": false,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": ".github/workflows/oura-e2e.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 32,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": ".github/workflows/oura-e2e.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 32,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": ".github/workflows/oura-e2e.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "$NATS_URL",
++      "line": 137,
++      "match": "NATS_URL=$NATS_URL",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": ".github/workflows/oura-e2e.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "$NATS_URL",
++      "line": 139,
++      "match": "NATS_URL=$NATS_URL",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": ".github/workflows/oura-e2e.yml",
++      "type": "url",
++      "scheme": "nats",
++      "host": "localhost",
++      "port": 4223,
++      "line": 190,
++      "match": "nats://localhost:4223",
++      "tls": true,
++      "warn": false,
++      "riskTier": "unknown"
++    },
++    {
++      "file": ".github/workflows/oura-e2e.yml",
++      "type": "env",
++      "key": "NATS_URL",
++      "value": "nats://localhost:4223",
++      "line": 190,
++      "match": "NATS_URL=nats://localhost:4223",
++      "tls": null,
++      "warn": false,
++      "riskTier": "unknown"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/reports/nats_url_scan.md b/reports/nats_url_scan.md
+new file mode 100644
+index 0000000..80b54e5
+--- /dev/null
++++ b/reports/nats_url_scan.md
+@@ -0,0 +1,173 @@
++# NATS URL Scan
++
++Generated: 2025-10-03T17:16:40.215Z
++
++- Total matches: 162
++- Prod-tier matches: 7
++- TLS-protected: 86
++- Warnings (plain nats://): 12
++
++## Findings
++
++- [url] nats://localhost:4223 (AUTONOMOUS_TODO.md:26) tier=unknown tls=yes
++- [url] nats://localhost:4223 (AUTONOMOUS_TODO.md:163) tier=unknown tls=yes
++- [url] nats://nats:4223 (docker-compose.yml:42) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (docker-compose.yml:42) tier=unknown tls=no
++- [url] nats://nats:4223 (docker-compose.yml:71) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (docker-compose.yml:71) tier=unknown tls=no
++- [url] nats://nats:4223 (docker-compose.yml:134) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (docker-compose.yml:134) tier=unknown tls=no
++- [url] nats://localhost:4223 (HANDOFF_REPORT.md:35) tier=unknown tls=yes
++- [url] nats://localhost:4223 (HANDOFF_REPORT.md:434) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (HANDOFF_REPORT.md:434) tier=unknown tls=no
++- [url] nats://localhost:4223 (HANDOFF_REPORT.md:453) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (HANDOFF_REPORT.md:453) tier=unknown tls=no
++- [url] nats://localhost:4223 (MISSION_BRIEF.md:28) tier=unknown tls=yes
++- [url] nats://localhost:4223 (MISSION_BRIEF.md:103) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (MISSION_BRIEF.md:103) tier=unknown tls=no
++- [url] nats://localhost:4223 (POST_MERGE_IMPLEMENTATION_SUMMARY.md:28) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223` (POST_MERGE_IMPLEMENTATION_SUMMARY.md:28) tier=unknown tls=no
++- [url] nats://localhost:4223 (POST_MERGE_TEST_RESULTS.md:25) tier=unknown tls=yes
++- [url] nats://localhost:4223 (README.md:68) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/workouts/src/summary-aggregator.ts:48) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/profile-onboarding/src/index.ts:38) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/planning-engine/.env.development.example:7) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/.env.development.example:7) tier=unknown tls=no
++- [env] NATS_URL=nats://${NATS_HOST}:4223 (services/planning-engine/.env.production.example:12) tier=unknown tls=no
++- [env] NATS_URL=${NATS_URL} (services/planning-engine/docker-compose.production.yml:16) tier=unknown tls=no
++- [url] nats://nats:4223 (services/planning-engine/docker-compose.yml:55) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (services/planning-engine/docker-compose.yml:55) tier=unknown tls=no
++- [env] NATS_URL=nats://... (services/planning-engine/README.md:72) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/planning-engine/src/config.ts:14) tier=unknown tls=yes
++- [env] NATS_URL=z.string().url().default('nats://localhost:4223'), (services/planning-engine/src/config.ts:14) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/planning-engine/src/__tests__/setup.ts:4) tier=unknown tls=yes
++- [env] NATS_URL=z.string().min(1, (services/planning-engine/src/config/environment.ts:13) tier=unknown tls=no
++- [env] NATS_URL=config.NATS_URL, (services/planning-engine/src/config/environment.ts:68) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/planning-engine/scripts/setup-env.js:22) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/scripts/setup-env.js:22) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:30) tier=unknown tls=yes
++- [env] NATS_URL='nats://localhost:4223', (services/planning-engine/scripts/setup-environment.js:30) tier=unknown tls=no
++- [url] nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:75) tier=unknown tls=yes
++- [env] NATS_URL='nats://nats:4223', (services/planning-engine/scripts/setup-environment.js:75) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:139) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/scripts/setup-environment.js:139) tier=unknown tls=no
++- [url] nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:232) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (services/planning-engine/scripts/setup-environment.js:232) tier=unknown tls=no
++- [env] NATS_URL=nats://\${NATS_HOST}:4223 (services/planning-engine/scripts/setup-production.sh:20) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/planning-engine/docs/HEALTH_CHECK_README.md:163) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/planning-engine/docs/HEALTH_CHECK_README.md:163) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/normalize-service/.env.example:12) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/normalize-service/.env.example:12) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/normalize-service/README.md:140) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/normalize-service/README.md:140) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/normalize-service/README.md:333) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/normalize-service/src/index.ts:98) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/insights-engine/src/index.ts:18) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/ingest-service/README.md:114) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (services/ingest-service/README.md:114) tier=unknown tls=no
++- [url] nats://localhost:4223 (services/ingest-service/src/index.ts:48) tier=unknown tls=yes
++- [url] nats://localhost:4223 (services/ingest-service/src/index.ts:65) tier=unknown tls=yes
++- [env] NATS_URL=${natsUrl}`); (services/ingest-service/src/index.ts:70) tier=unknown tls=no
++- [url] nats://localhost:4223 (scripts/create-streams.js:11) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/smoke-sleep.js:14) tier=unknown tls=yes
++- [env] NATS_URL=NATS (scripts/smoke-sleep.js:14) tier=unknown tls=no
++- [url] nats://localhost:4223 (scripts/smoke-sleep.js:28) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/test-multi-mode-fallback.js:24) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/test-stream-init.js:15) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/nats/consumer-diagnostic.js:5) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/nats/migration-verify.js:5) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/nats/pull-diagnose.js:6) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (scripts/nats/pull-diagnose.js:6) tier=unknown tls=no
++- [url] nats://localhost:4223 (scripts/nats/pull-diagnose.js:12) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/nats/stream-binding-test.js:21) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/nats/stream-info.js:13) tier=unknown tls=yes
++- [url] nats://localhost:4223 (scripts/nats/stream-info.js:19) tier=unknown tls=yes
++- [url] nats://localhost:4223 (patches/20251001_db_connection_fix.md:17) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (patches/20251001_db_connection_fix.md:17) tier=unknown tls=no
++- [url] nats://localhost:4223 (packages/event-bus/src/config.ts:4) tier=unknown tls=yes
++- [env] NATS_URL=z.string().url().default('nats://localhost:4223'), (packages/event-bus/src/config.ts:4) tier=unknown tls=no
++- [url] nats://localhost:4223 (packages/event-bus/src/index.ts:223) tier=unknown tls=yes
++- [url] nats://localhost:4223 (monitoring/grafana/dashboards/normalize-sleep.json:247) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:379) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:430) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:480) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:601) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:601) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:702) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_CODE_SNIPPETS.md:702) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:186) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:186) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:191) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:198) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:198) tier=unknown tls=no
++- [url] nats://nats1.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:201) tier=prod tls=yes
++- [env] NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:201) tier=unknown tls=no
++- [url] nats://user:pass (docs/PHASE2_ENV_VARIABLES.md:204) tier=unknown tls=no WARN
++- [env] NATS_URL=nats:[REDACTED]@nats.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:204) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:349) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:349) tier=unknown tls=no
++- [url] nats://nats1.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:399) tier=prod tls=yes
++- [env] NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (docs/PHASE2_ENV_VARIABLES.md:399) tier=unknown tls=no
++- [url] nats://localhost:4222 (docs/PHASE2_ENV_VARIABLES.md:466) tier=unknown tls=no WARN
++- [url] nats://localhost:4223 (docs/PHASE2_ENV_VARIABLES.md:466) tier=unknown tls=yes
++- [url] nats://nats1.prod:4223 (docs/PHASE2_RUNBOOK.md:85) tier=prod tls=yes
++- [env] NATS_URL=nats://nats1.prod:4223,nats2.prod:4223,nats3.prod:4223 (docs/PHASE2_RUNBOOK.md:85) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/testing/TEST_INTEGRATION_SUPPORT.md:392) tier=unknown tls=yes
++- [env] NATS_URL='nats://localhost:4223'; (docs/testing/TEST_INTEGRATION_SUPPORT.md:392) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/48h-soak-health-check.sh:16) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/48h-soak-health-check.sh:27) tier=unknown tls=yes
++- [env] NATS_URL="${NATS_URL:-nats://localhost:4223}" (docs/phase-3/ops/48h-soak-health-check.sh:27) tier=unknown tls=no
++- [env] NATS_URL=$NATS_URL" (docs/phase-3/ops/48h-soak-health-check.sh:667) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/create-consumers.js:9) tier=unknown tls=yes
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/create-consumers.js:15) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/create-consumers.js:15) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/create-consumers.js:25) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/create-streams.js:9) tier=unknown tls=yes
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/create-streams.js:16) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/create-streams.js:16) tier=unknown tls=no
++- [url] nats://prod-nats:4222 (docs/phase-3/ops/create-streams.js:19) tier=prod tls=no WARN
++- [env] NATS_URL=nats://prod-nats:4222 (docs/phase-3/ops/create-streams.js:19) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/create-streams.js:29) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:11) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:15) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:15) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/migrate-subjects.js:21) tier=unknown tls=yes
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:76) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:76) tier=unknown tls=no
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:79) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_ISSUE.md:79) tier=unknown tls=no
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:88) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:88) tier=unknown tls=no
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:100) tier=non-prod tls=no WARN
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:144) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:144) tier=unknown tls=no
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:154) tier=non-prod tls=no WARN
++- [url] nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:485) tier=non-prod tls=no WARN
++- [env] NATS_URL=nats://staging-nats:4222 (docs/phase-3/ops/PHASE_B_RUNBOOK.md:485) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:10) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:32) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:32) tier=unknown tls=no
++- [url] nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:43) tier=non-prod tls=yes
++- [env] NATS_URL=nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:43) tier=unknown tls=no
++- [url] nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:50) tier=non-prod tls=yes
++- [env] NATS_URL=nats://staging-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:50) tier=unknown tls=no
++- [url] nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:61) tier=prod tls=yes
++- [env] NATS_URL=nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:61) tier=unknown tls=no
++- [url] nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:68) tier=prod tls=yes
++- [env] NATS_URL=nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:68) tier=unknown tls=no
++- [url] nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:75) tier=prod tls=yes
++- [env] NATS_URL=nats://prod-nats.example.com:4223 (docs/phase-3/ops/SLEEP_SOAK_RESULTS.md:75) tier=unknown tls=no
++- [url] nats://localhost:4223 (docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md:48) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md:64) tier=unknown tls=yes
++- [url] nats://localhost:4223 (docs/phase-3/ops/SOAK_PERIOD_QUICK_REF.md:141) tier=unknown tls=yes
++- [url] nats://nats:4223 (docker-compose/preview.yml:31) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (docker-compose/preview.yml:31) tier=unknown tls=no
++- [url] nats://nats:4223 (docker-compose/preview.yml:49) tier=unknown tls=yes
++- [env] NATS_URL=nats://nats:4223 (docker-compose/preview.yml:49) tier=unknown tls=no
++- [url] ws://localhost:3001 (apps/frontend/src/lib/realtime.ts:28) tier=unknown tls=no
++- [url] nats://localhost:4223 (.github/workflows/oura-e2e.yml:32) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (.github/workflows/oura-e2e.yml:32) tier=unknown tls=no
++- [env] NATS_URL=$NATS_URL (.github/workflows/oura-e2e.yml:137) tier=unknown tls=no
++- [env] NATS_URL=$NATS_URL (.github/workflows/oura-e2e.yml:139) tier=unknown tls=no
++- [url] nats://localhost:4223 (.github/workflows/oura-e2e.yml:190) tier=unknown tls=yes
++- [env] NATS_URL=nats://localhost:4223 (.github/workflows/oura-e2e.yml:190) tier=unknown tls=no
+\ No newline at end of file
+diff --git a/scripts/ops/scan-nats-urls.mjs b/scripts/ops/scan-nats-urls.mjs
+new file mode 100644
+index 0000000..e6feb09
+--- /dev/null
++++ b/scripts/ops/scan-nats-urls.mjs
+@@ -0,0 +1,112 @@
++#!/usr/bin/env node
++// scripts/ops/scan-nats-urls.mjs
++// Scans repo for NATS URLs and env refs. Outputs JSON and Markdown reports.
++
++import fs from 'fs';
++import path from 'path';
++
++const EXCLUDE_DIRS = new Set(['node_modules','.git','dist','build','coverage','.turbo','.next']);
++const INCLUDE_EXT = new Set(['.ts','.tsx','.js','.jsx','.mjs','.cjs','.json','.yml','.yaml','.md','.env','.sh','.ps1','.toml','.ini','.cfg','.conf']);
++
++const PROD_RE = /(prod|production|live|primary)/i;
++
++function listFiles(dir) {
++  const out = [];
++  const stack = [dir];
++  while (stack.length) {
++    const d = stack.pop();
++    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
++      if (e.name.startsWith('.codex')) continue;
++      const p = path.join(d, e.name);
++      if (e.isDirectory()) {
++        if (EXCLUDE_DIRS.has(e.name)) continue;
++        stack.push(p);
++      } else {
++        const ext = path.extname(e.name).toLowerCase();
++        if (INCLUDE_EXT.has(ext) || e.name.startsWith('.env')) out.push(p);
++      }
++    }
++  }
++  return out;
++}
++
++function scanFile(file) {
++  const text = fs.readFileSync(file, 'utf8');
++  const lines = text.split(/\r?\n/);
++  const hits = [];
++  const urlRe = /(nats|tls|ws|wss):\/\/([A-Za-z0-9_.:-]+)(?:\b|\/)/g;
++  const envRe = /\b(NATS_URL|NATS_SERVERS)\b\s*[:=]\s*([^\s#]+)/g;
++  for (let i=0;i<lines.length;i++) {
++    const line = lines[i];
++    let m;
++    urlRe.lastIndex=0;
++    while ((m = urlRe.exec(line)) !== null) {
++      const scheme=m[1];
++      const hostport=m[2];
++      const [host,port] = hostport.split(':');
++      hits.push({ type:'url', scheme, host, port: port?Number(port):null, line: i+1, match: `${scheme}://${hostport}` });
++    }
++    envRe.lastIndex=0;
++    while ((m = envRe.exec(line)) !== null) {
++      const key=m[1]; const val=m[2];
++      hits.push({ type:'env', key, value: redact(val), line: i+1, match: `${key}=${redact(val)}` });
++    }
++  }
++  return hits;
++}
++
++function redact(v) { return v.replace(/:[^@\s]+@/g, ':[REDACTED]@'); }
++
++function tier(host) {
++  if (!host) return 'unknown';
++  return PROD_RE.test(host) ? 'prod' : (/(dev|staging|test)/i.test(host) ? 'non-prod' : 'unknown');
++}
++
++function assess(item) {
++  if (item.type==='url') {
++    const tls = item.scheme==='tls' || item.scheme==='wss' || item.port===4223;
++    const warn = item.scheme==='nats' && !tls;
++    return { tls, warn, riskTier: tier(item.host) };
++  }
++  return { tls: null, warn: false, riskTier: 'unknown' };
++}
++
++function main() {
++  const root = process.cwd();
++  const files = listFiles(root);
++  const results = [];
++  for (const f of files) {
++    const rel = path.relative(root, f).replace(/\\/g,'/');
++    const hits = scanFile(f);
++    if (hits.length) {
++      for (const h of hits) {
++        const meta = assess(h);
++        results.push({ file: rel, ...h, ...meta });
++      }
++    }
++  }
++  const outDir = path.join('reports');
++  fs.mkdirSync(outDir, { recursive: true });
++  const jsonPath = path.join(outDir, 'nats_url_scan.json');
++  fs.writeFileSync(jsonPath, JSON.stringify({ generatedAt: new Date().toISOString(), results }, null, 2));
++  const mdPath = path.join(outDir, 'nats_url_scan.md');
++  const counts = { total: results.length, prod: results.filter(x=>x.riskTier==='prod').length, tls: results.filter(x=>x.tls===true).length, warn: results.filter(x=>x.warn===true).length };
++  const md = [
++    '# NATS URL Scan',
++    '',
++    `Generated: ${new Date().toISOString()}`,
++    '',
++    `- Total matches: ${counts.total}`,
++    `- Prod-tier matches: ${counts.prod}`,
++    `- TLS-protected: ${counts.tls}`,
++    `- Warnings (plain nats://): ${counts.warn}`,
++    '',
++    '## Findings',
++    '',
++    ...results.slice(0,500).map(r => `- [${r.type}] ${r.match} (${r.file}:${r.line}) tier=${r.riskTier} tls=${r.tls===true?'yes':'no'}${r.warn?' WARN':''}`)
++  ].join('\n');
++  fs.writeFileSync(mdPath, md);
++  console.log(`Wrote ${jsonPath} and ${mdPath}`);
++}
++
++main();
+\ No newline at end of file
+-- 
+2.50.0.windows.1
+
+
+From 1b64888b0f19c8c9fe7b53b938efa4077aa8eb2d Mon Sep 17 00:00:00 2001
+From: Release Bot <release-bot@local>
+Date: Sat, 4 Oct 2025 14:10:47 +0800
+Subject: [PATCH 2/2] chore(nats-scan): add prod-hosts allowlist and quoted env
+ support
+
+---
+ config/prod-hosts.txt          |  5 +++++
+ scripts/ops/scan-nats-urls.mjs | 14 ++++++++++++--
+ 2 files changed, 17 insertions(+), 2 deletions(-)
+ create mode 100644 config/prod-hosts.txt
+
+diff --git a/config/prod-hosts.txt b/config/prod-hosts.txt
+new file mode 100644
+index 0000000..046118a
+--- /dev/null
++++ b/config/prod-hosts.txt
+@@ -0,0 +1,5 @@
++# Prod-tier host allowlist (one substring per line)
++# Examples:
++# prod.company.com
++# nats.prod
++# .production.
+\ No newline at end of file
+diff --git a/scripts/ops/scan-nats-urls.mjs b/scripts/ops/scan-nats-urls.mjs
+index e6feb09..d0f7a79 100644
+--- a/scripts/ops/scan-nats-urls.mjs
++++ b/scripts/ops/scan-nats-urls.mjs
+@@ -9,6 +9,15 @@ const EXCLUDE_DIRS = new Set(['node_modules','.git','dist','build','coverage','.
+ const INCLUDE_EXT = new Set(['.ts','.tsx','.js','.jsx','.mjs','.cjs','.json','.yml','.yaml','.md','.env','.sh','.ps1','.toml','.ini','.cfg','.conf']);
+ 
+ const PROD_RE = /(prod|production|live|primary)/i;
++const PROD_LIST_FILE = path.resolve(process.cwd(), 'config/prod-hosts.txt');
++
++function loadProdAllowlist(){
++  try{
++    const raw = fs.readFileSync(PROD_LIST_FILE, 'utf8');
++    return raw.split(/\r?\n/).map(s=>s.trim()).filter(s=>s && !s.startsWith('#'));
++  } catch { return []; }
++}
++const PROD_ALLOW = loadProdAllowlist();
+ 
+ function listFiles(dir) {
+   const out = [];
+@@ -35,7 +44,7 @@ function scanFile(file) {
+   const lines = text.split(/\r?\n/);
+   const hits = [];
+   const urlRe = /(nats|tls|ws|wss):\/\/([A-Za-z0-9_.:-]+)(?:\b|\/)/g;
+-  const envRe = /\b(NATS_URL|NATS_SERVERS)\b\s*[:=]\s*([^\s#]+)/g;
++  const envRe = /\b(NATS_URL|NATS_SERVERS)\b\s*[:=]\s*(['\"]?)([^\s#'\"`]+)\2/g;
+   for (let i=0;i<lines.length;i++) {
+     const line = lines[i];
+     let m;
+@@ -48,7 +57,7 @@ function scanFile(file) {
+     }
+     envRe.lastIndex=0;
+     while ((m = envRe.exec(line)) !== null) {
+-      const key=m[1]; const val=m[2];
++      const key=m[1]; const val=m[3];
+       hits.push({ type:'env', key, value: redact(val), line: i+1, match: `${key}=${redact(val)}` });
+     }
+   }
+@@ -59,6 +68,7 @@ function redact(v) { return v.replace(/:[^@\s]+@/g, ':[REDACTED]@'); }
+ 
+ function tier(host) {
+   if (!host) return 'unknown';
++  if (PROD_ALLOW.some(p => host.includes(p))) return 'prod';
+   return PROD_RE.test(host) ? 'prod' : (/(dev|staging|test)/i.test(host) ? 'non-prod' : 'unknown');
+ }
+ 
+-- 
+2.50.0.windows.1
+

@@ -346,10 +346,10 @@ function generateMockMicrocycles(trainingIntent: TrainingIntent) {
   return microcycles;
 }
 
-function generateMockSessions(trainingIntent: TrainingIntent, week: number) {
+function generateMockSessions(trainingIntent: TrainingIntent, _week: number) {
   const sessions = [];
   const daysPerWeek = trainingIntent.timeConstraints.availableDays;
-  
+
   for (let day = 1; day <= daysPerWeek; day++) {
     sessions.push({
       dayOfWeek: day,
@@ -366,7 +366,7 @@ function generateMockSessions(trainingIntent: TrainingIntent, week: number) {
   return sessions;
 }
 
-function generateMockExercises(trainingIntent: TrainingIntent, day: number) {
+function generateMockExercises(trainingIntent: TrainingIntent, _day: number) {
   const exercises = [];
   const exerciseCount = Math.min(6, Math.max(3, Math.floor(trainingIntent.timeConstraints.sessionDuration / 10)));
   

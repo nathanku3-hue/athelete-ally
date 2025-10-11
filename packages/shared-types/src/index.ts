@@ -131,3 +131,16 @@ export * from './schemas/enhanced-plan';
 export * from './schemas/feedback';
 export * from './schemas/api';
 export * from './schemas/hrv';
+
+// 导出类型（不包含运行时代码）
+export type { 
+  FatigueLevel, 
+  FatigueAssessmentInput, 
+  FatigueAssessmentResult,
+  FatigueFactor,
+  FatigueStatusResponse,
+  Season,
+  SeasonOption,
+  FeedbackType,
+  FeedbackData
+} from './schemas';

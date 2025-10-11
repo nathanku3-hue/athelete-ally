@@ -191,7 +191,7 @@ export const requireTenantAccess = async (req: AuthenticatedRequest, res: Respon
  * 权限信息附加中间件
  * 将用户权限信息附加到请求对象
  */
-export const attachPermissions = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const attachPermissions = async (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
   try {
     const { protocolId } = req.params;
     const userId = req.user?.id;

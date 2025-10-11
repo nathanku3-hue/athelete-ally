@@ -1,0 +1,381 @@
+test
+--- /dev/null	2025-10-05 00:29:33.407861872 +0800
++++ .codex/worktrees/stream-e-readiness-v1/services/insights-engine/src/metrics.ts	2025-10-05 00:02:41.547340400 +0800
+@@ -0,0 +1,69 @@
++// Prometheus metrics for insights-engine readiness API
++// Uses shared registry to avoid duplicate default metrics across services
++import crypto from 'crypto';
++import { Counter, Histogram } from 'prom-client';
++import { getMetricsRegistry } from '@athlete-ally/shared';
++
++const register = getMetricsRegistry();
++
++// Hash user id to keep low-cardinality label while allowing grouping in dev
++function hashUser(userId: string): string {
++  try {
++    return crypto.createHash('sha256').update(userId).digest('hex').slice(0, 12);
++  } catch {
++    return 'anon';
++  }
++}
++
++// Whether to include user label (default false to limit cardinality); enable per env
++const includeUserLabel = (process.env.METRICS_INCLUDE_USER === 'true');
++
++export const readinessComputeTotal = new Counter({
++  name: 'readiness_compute_total',
++  help: 'Total compute attempts for readiness v1',
++  labelNames: includeUserLabel ? ['operation', 'status', 'user'] as const : ['operation', 'status'] as const,
++  registers: [register],
++});
++
++export const readinessComputeDurationSeconds = new Histogram({
++  name: 'readiness_compute_duration_seconds',
++  help: 'Duration of readiness computation in seconds',
++  labelNames: ['operation', 'status'],
++  buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
++  registers: [register],
++});
++
++export const httpRequestsTotal = new Counter({
++  name: 'http_requests_total',
++  help: 'HTTP requests count',
++  labelNames: ['method', 'route', 'status'],
++  registers: [register],
++});
++
++export async function timeCompute<T>(operation: 'latest' | 'range', userId: string, fn: () => Promise<T>): Promise<{ result: 'success' | 'error'; value?: T; error?: unknown }> {
++  const start = process.hrtime.bigint();
++  try {
++    const value = await fn();
++    const dur = Number(process.hrtime.bigint() - start) / 1e9; // seconds
++    readinessComputeDurationSeconds.labels(operation, 'success').observe(dur);
++    if (includeUserLabel) readinessComputeTotal.labels(operation, 'success', hashUser(userId)).inc(1);
++    else readinessComputeTotal.labels(operation, 'success').inc(1);
++    return { result: 'success', value };
++  } catch (error) {
++    const dur = Number(process.hrtime.bigint() - start) / 1e9; // seconds
++    readinessComputeDurationSeconds.labels(operation, 'error').observe(dur);
++    if (includeUserLabel) readinessComputeTotal.labels(operation, 'error', hashUser(userId)).inc(1);
++    else readinessComputeTotal.labels(operation, 'error').inc(1);
++    return { result: 'error', error };
++  }
++}
++
++export function incHttpRequest(method: string, route: string, status: number): void {
++  httpRequestsTotal.labels(method.toUpperCase(), route, String(status)).inc(1);
++}
++
++export async function renderMetrics(): Promise<string> {
++  // prom-client registers are managed via shared registry; export its metrics
++  return await register.metrics();
++}
++
+--- /dev/null	2025-10-05 00:29:33.407861872 +0800
++++ .codex/worktrees/stream-e-readiness-v1/services/insights-engine/src/routes/readinessV1.ts	2025-10-05 00:02:58.767950300 +0800
+@@ -0,0 +1,72 @@
++import { FastifyInstance } from 'fastify';
++import { toYyyyMmDd, startOfUtcDay } from '../utils/date';
++import { PrismaClient } from '../../prisma/generated/client';
++import { PrismaRepo } from '../repo';
++import { computeAndUpsertReadiness } from '../readinessV1';
++import { timeCompute, incHttpRequest, renderMetrics } from '../metrics';
++
++export async function readinessV1Routes(fastify: FastifyInstance) {
++  const prisma = new PrismaClient();
++  const repo = new PrismaRepo(prisma);
++
++  fastify.get('/api/v1/readiness/:userId/latest', async (request, reply) => {
++    const { userId } = request.params as { userId: string };
++    try {
++      // Compute today if missing (idempotent), record metrics
++      const today = startOfUtcDay(new Date());
++      const t = await timeCompute('latest', userId, async () => {
++        await computeAndUpsertReadiness(repo, userId, today);
++        return true;
++      });
++      const latest = await repo.getLatestReadiness(userId);
++      if (!latest) {
++        incHttpRequest('GET', '/api/v1/readiness/:userId/latest', 200);
++        return reply.code(200).send({ userId, incomplete: true });
++      }
++      incHttpRequest('GET', '/api/v1/readiness/:userId/latest', 200);
++      return reply.code(200).send({
++        userId: latest.userId,
++        date: toYyyyMmDd(latest.date),
++        score: latest.score,
++        incomplete: latest.incomplete ?? false,
++        components: latest.components ?? undefined,
++      });
++    } catch (err: any) {
++      fastify.log.error({ err }, 'readiness latest failed');
++      incHttpRequest('GET', '/api/v1/readiness/:userId/latest', 500);
++      return reply.code(500).send({ error: 'internal_error' });
++    }
++  });
++
++  fastify.get('/api/v1/readiness/:userId', async (request, reply) => {
++    const { userId } = request.params as { userId: string };
++    const { days } = request.query as { days?: string };
++    const n = Math.max(1, Math.min(31, Number(days ?? '7') || 7));
++    try {
++      // Optionally compute today to ensure current value exists
++      const today = startOfUtcDay(new Date());
++      await timeCompute('range', userId, async () => {
++        await computeAndUpsertReadiness(repo, userId, today);
++      });
++      const list = await repo.getReadinessRange(userId, n);
++      incHttpRequest('GET', '/api/v1/readiness/:userId', 200);
++      return reply.code(200).send(list.map(r => ({
++        userId: r.userId,
++        date: toYyyyMmDd(r.date),
++        score: r.score,
++        incomplete: r.incomplete ?? false,
++        components: r.components ?? undefined,
++      })));
++    } catch (err: any) {
++      fastify.log.error({ err }, 'readiness range failed');
++      incHttpRequest('GET', '/api/v1/readiness/:userId', 500);
++      return reply.code(500).send({ error: 'internal_error' });
++    }
++  });
++
++  // Expose Prometheus metrics endpoint at /metrics
++  fastify.get('/metrics', async (_req, reply) => {
++    reply.type('text/plain');
++    return await renderMetrics();
++  });
++}
+--- /dev/null	2025-10-05 00:29:33.407861872 +0800
++++ .codex/worktrees/stream-e-readiness-v1/scripts/smoke-readiness.js	2025-10-05 00:03:32.139958300 +0800
+@@ -0,0 +1,86 @@
++#!/usr/bin/env node
++// Simple smoke test for insights-engine readiness API
++// Usage: node scripts/smoke-readiness.js --base http://localhost:4103 --user u1 --days 7 --out reports/readiness
++const fs = require('fs');
++const path = require('path');
++
++function parseArgs(argv) {
++  const args = { base: 'http://localhost:4103', user: 'u1', days: 7, out: 'reports/readiness' };
++  for (let i = 2; i < argv.length; i++) {
++    const a = argv[i];
++    const next = argv[i + 1];
++    if (a === '--base' && next) { args.base = next; i++; }
++    else if (a === '--user' && next) { args.user = next; i++; }
++    else if (a === '--days' && next) { args.days = Number(next) || 7; i++; }
++    else if (a === '--out' && next) { args.out = next; i++; }
++  }
++  return args;
++}
++
++async function main() {
++  const { base, user, days, out } = parseArgs(process.argv);
++  const results = { ok: true, checks: [], base, user, days, ts: new Date().toISOString() };
++
++  function pass(name, info) { results.checks.push({ name, ok: true, info }); }
++  function fail(name, info) { results.ok = false; results.checks.push({ name, ok: false, info }); }
++
++  try {
++    // latest
++    const latestUrl = `${base}/api/v1/readiness/${encodeURIComponent(user)}/latest`;
++    const res1 = await fetch(latestUrl);
++    if (res1.status !== 200) {
++      fail('latest.status', `expected 200 got ${res1.status}`);
++    } else {
++      const body = await res1.json();
++      const hasScoreOrIncomplete = (typeof body.score === 'number') || (body.incomplete === true);
++      if (!hasScoreOrIncomplete) fail('latest.shape', 'missing score and incomplete');
++      else pass('latest.shape', 'ok');
++    }
++  } catch (e) {
++    fail('latest.error', String(e && e.message || e));
++  }
++
++  try {
++    // range (descending)
++    const rangeUrl = `${base}/api/v1/readiness/${encodeURIComponent(user)}?days=${encodeURIComponent(days)}`;
++    const res2 = await fetch(rangeUrl);
++    if (res2.status !== 200) {
++      fail('range.status', `expected 200 got ${res2.status}`);
++    } else {
++      const arr = await res2.json();
++      if (!Array.isArray(arr)) {
++        fail('range.shape', 'expected array');
++      } else {
++        const okOrder = arr.every((v, i) => i === 0 || (arr[i - 1].date >= v.date));
++        if (!okOrder) fail('range.order', 'not descending by date');
++        else pass('range.order', 'ok');
++      }
++    }
++  } catch (e) {
++    fail('range.error', String(e && e.message || e));
++  }
++
++  // write report
++  try {
++    const dir = path.resolve(out);
++    fs.mkdirSync(dir, { recursive: true });
++    const ts = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
++    const file = path.join(dir, `${ts}.json`);
++    fs.writeFileSync(file, JSON.stringify(results, null, 2));
++    // eslint-disable-next-line no-console
++    console.log(`readiness smoke written: ${file}`);
++  } catch (e) {
++    // eslint-disable-next-line no-console
++    console.error('failed to write report:', e);
++  }
++
++  process.exit(results.ok ? 0 : 1);
++}
++
++// Node 18 fallback for global fetch
++if (typeof fetch === 'undefined') {
++  global.fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
++}
++
++main();
++
+--- /dev/null	2025-10-05 00:29:33.407861872 +0800
++++ .codex/worktrees/stream-e-readiness-v1/docs/runbook/readiness.md	2025-10-05 00:03:44.351756700 +0800
+@@ -0,0 +1,35 @@
++# Readiness API Runbook (Stream E)
++
++Scope: services/insights-engine only. Provides baseline smoke steps and metrics interpretation for readiness v1.
++
++Usage
++- Start service: `npm run dev -w services/insights-engine` (Node 20.18.x)
++- Endpoints:
++  - `GET /api/v1/readiness/:userId/latest` → `{ userId, date?, score?, incomplete, components? }`
++  - `GET /api/v1/readiness/:userId?days=7` → array sorted by `date` (DESC)
++  - `GET /metrics` → Prometheus text format
++
++Smoke Test
++- Command: `node scripts/smoke-readiness.js --base http://localhost:4103 --user <id> --days 7 --out reports/readiness`
++- Pass criteria:
++  - latest returns 200 and contains either `score` (number) or `incomplete: true`
++  - range returns 200 and an array in descending date order
++- Output: `reports/readiness/<timestamp>.json` (not committed)
++
++Metrics
++- `http_requests_total{method,route,status}`: counts readiness route hits
++- `readiness_compute_total{operation,status[,user]}`: compute attempts and results
++- `readiness_compute_duration_seconds{operation,status}`: histogram for compute time
++- Cardinality control: set `METRICS_INCLUDE_USER=true` to add hashed `user` label (12 hex chars). Default off.
++
++Edge Cases & Behavior
++- Date handling: UTC day boundaries via `startOfUtcDay()`; storage uses UTC dates
++- Range days clamp: `1..31`; invalid/NaN defaults to `7`
++- Missing inputs: marks `incomplete=true`; clamps scores to 0..100
++- Errors: returns `{ error: 'internal_error' }` with 500; metrics label `status=error`
++
++Troubleshooting
++- No metrics: ensure `/metrics` reachable; confirm `prom-client` registered (default metrics present)
++- High cardinality: keep `METRICS_INCLUDE_USER` off in prod; use only in dev for local triage
++- DB unavailable: routes still return `incomplete` where possible; observe `status=error` increments
++
+--- /dev/null	2025-10-05 00:29:33.407861872 +0800
++++ .codex/worktrees/stream-e-readiness-v1/openapi/paths/e-readiness-latest.yaml	2025-10-05 00:03:58.924218300 +0800
+@@ -0,0 +1,41 @@
++id: stream-e-readiness-latest
++openapi: 3.0.0
++info:
++  title: Insights Readiness Latest
++  version: 1.0.0
++paths:
++  /api/v1/readiness/{userId}/latest:
++    get:
++      summary: Get latest readiness for a user
++      parameters:
++        - in: path
++          name: userId
++          required: true
++          schema:
++            type: string
++      responses:
++        '200':
++          description: Latest readiness or incomplete marker
++          content:
++            application/json:
++              examples:
++                complete:
++                  value:
++                    userId: u1
++                    date: '20240101'
++                    score: 85
++                    incomplete: false
++                    components:
++                      hrvScore: 95
++                      sleepScore: 80
++                incomplete:
++                  value:
++                    userId: u1
++                    incomplete: true
++        '500':
++          description: Internal error
++          content:
++            application/json:
++              example:
++                error: internal_error
++
+--- /dev/null	2025-10-05 00:29:33.407861872 +0800
++++ .codex/worktrees/stream-e-readiness-v1/openapi/paths/e-readiness-range.yaml	2025-10-05 00:04:07.445318900 +0800
+@@ -0,0 +1,44 @@
++id: stream-e-readiness-range
++openapi: 3.0.0
++info:
++  title: Insights Readiness Range
++  version: 1.0.0
++paths:
++  /api/v1/readiness/{userId}:
++    get:
++      summary: Get readiness range (descending by date)
++      parameters:
++        - in: path
++          name: userId
++          required: true
++          schema:
++            type: string
++        - in: query
++          name: days
++          required: false
++          schema:
++            type: integer
++            minimum: 1
++            maximum: 31
++            default: 7
++      responses:
++        '200':
++          description: Readiness items sorted by date DESC
++          content:
++            application/json:
++              example:
++                - userId: u1
++                  date: '20240103'
++                  score: 82
++                  incomplete: false
++                - userId: u1
++                  date: '20240102'
++                  score: 78
++                  incomplete: false
++        '500':
++          description: Internal error
++          content:
++            application/json:
++              example:
++                error: internal_error
++
+--- services/insights-engine/package.json	2025-10-03 12:48:06.517623300 +0800
++++ .codex/worktrees/stream-e-readiness-v1/services/insights-engine/package.json	2025-10-05 00:26:26.799832700 +0800
+@@ -18,10 +18,12 @@
+   "dependencies": {
+     "@athlete-ally/contracts": "*",
+     "@athlete-ally/event-bus": "*",
++    "@athlete-ally/shared": "*",
+     "@athlete-ally/shared-types": "*",
+     "@prisma/client": "^5.22.0",
+     "fastify": "^4.28.1",
+     "nats": "^2.19.0",
++    "prom-client": "^15.1.0",
+     "prisma": "^5.22.0",
+     "zod": "^3.25.76"
+   },

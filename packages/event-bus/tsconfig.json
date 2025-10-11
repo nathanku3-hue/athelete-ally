@@ -8,12 +8,35 @@
     "sourceMap": true,
     "baseUrl": "../..",
     "paths": {
-      "@athlete-ally/contracts": ["packages/contracts"],
-      "@athlete-ally/contracts/*": ["packages/contracts/*"],
-      "@athlete-ally/contracts/events": ["packages/contracts/events"],
-      "@athlete-ally/contracts/events/*": ["packages/contracts/events/*"]
+      "@athlete-ally/contracts": [
+        "packages/contracts"
+      ],
+      "@athlete-ally/contracts/*": [
+        "packages/contracts/*"
+      ],
+      "@athlete-ally/contracts/events": [
+        "packages/contracts/events"
+      ],
+      "@athlete-ally/contracts/events/*": [
+        "packages/contracts/events/*"
+      ],
+      "@athlete-ally/logger": [
+        "packages/logger/dist/index"
+      ],
+      "@athlete-ally/logger/server": [
+        "packages/logger/dist/adapters/node"
+      ],
+      "@athlete-ally/logger/browser": [
+        "packages/logger/dist/adapters/browser"
+      ]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.test.ts"
+  ]
 }

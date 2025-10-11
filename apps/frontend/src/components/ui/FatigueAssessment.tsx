@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Activity, Brain, Moon, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { Activity, Brain, Moon, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface FatigueAssessmentProps {
   isOpen: boolean;

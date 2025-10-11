@@ -1,10 +1,7 @@
 // Oura webhook utilities and route registration
 // Minimal skeleton: verifies HMAC-SHA256 using raw body and TTL idempotency.
 
-// Temporary any types to resolve Fastify type system drift
-type FastifyInstance = any;
-type FastifyRequest = any;
-type FastifyReply = any;
+import type { FastifyInstance, FastifyRequest, FastifyReply } from '@athlete-ally/shared/fastify-augment';
 import crypto from 'node:crypto';
 
 export function computeSignature(secret: string, payload: string): string {
@@ -33,11 +30,11 @@ export function verifySignature(opts: { secret: string; rawBody: string; headerS
 class TTLCache {
   private store = new Map<string, number>();
   private readonly ttlMs: number;
-  private readonly janitor: NodeJS.Timeout;
 
   constructor(ttlSeconds: number) {
     this.ttlMs = Math.max(1, ttlSeconds) * 1000;
-    this.janitor = setInterval(() => this.sweep(), Math.min(this.ttlMs, 60_000)).unref();
+    // Start background sweep interval (unref'd so it doesn't keep process alive)
+    setInterval(() => this.sweep(), Math.min(this.ttlMs, 60_000)).unref();
   }
 
   has(key: string): boolean {

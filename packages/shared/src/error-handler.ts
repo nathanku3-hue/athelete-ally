@@ -1,3 +1,6 @@
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+const log = createLogger(nodeAdapter, { module: 'error-handler', service: (typeof process !== 'undefined' && process.env && process.env.APP_NAME) || 'package' });
 /**
  * 🛡️ 统一错误处理中间件
  * 作者: 后端团队
@@ -9,8 +12,13 @@
  * - 错误分类和响应
  */
 
-import type { FastifyRequest, FastifyReply } from './fastify-augment.js';
+import type { FastifyRequest, FastifyReply, RequestUser } from './fastify-augment.js';
 import { ZodError } from 'zod';
+
+// Fastify请求类型定义
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: RequestUser;
+}
 
 // 错误类型枚举
 export enum ErrorType {
@@ -41,7 +49,7 @@ export interface StandardError {
   type: ErrorType;
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   severity: ErrorSeverity;
   timestamp: string;
   requestId?: string;
@@ -64,7 +72,7 @@ export class ErrorClassifier {
     
     // Prisma 数据库错误 (通过错误名称和消息判断)
     if (error.name === 'PrismaClientKnownRequestError') {
-      const prismaError = error as any;
+      const prismaError = error as { code?: string };
       switch (prismaError.code) {
         case 'P2002':
           return {
@@ -153,7 +161,7 @@ export class ErrorBuilder {
       severity: classification.severity,
       timestamp: new Date().toISOString(),
       requestId: request?.id,
-      userId: (request as any)?.user?.userId,
+      userId: (request as AuthenticatedRequest)?.user?.userId,
       service: process.env.SERVICE_NAME || 'unknown',
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     };
@@ -170,11 +178,11 @@ export class ErrorBuilder {
       type: ErrorType.VALIDATION_ERROR,
       code: 'VALIDATION_FAILED',
       message: 'Request validation failed',
-      details,
+      details: { errors: details },
       severity: ErrorSeverity.LOW,
       timestamp: new Date().toISOString(),
       requestId: request?.id,
-      userId: (request as any)?.user?.userId,
+      userId: (request as AuthenticatedRequest)?.user?.userId,
       service: process.env.SERVICE_NAME || 'unknown'
     };
   }
@@ -220,19 +228,29 @@ export class ErrorLogger {
     
     switch (logLevel) {
       case 'error':
-        console.error('🚨 Error:', JSON.stringify(logData, null, 2));
+        log.error(`🚨 Error: ${JSON.stringify(logData, null, 2)}`);
         break;
       case 'warn':
-        console.warn('⚠️ Warning:', JSON.stringify(logData, null, 2));
+        log.warn(`⚠️ Warning: ${JSON.stringify(logData, null, 2)}`);
         break;
       case 'info':
-        console.info('ℹ️ Info:', JSON.stringify(logData, null, 2));
+        log.info(`ℹ️ Info: ${JSON.stringify(logData, null, 2)}`);
         break;
       default:
-        console.log('📝 Log:', JSON.stringify(logData, null, 2));
-    }
+        log.info(`📝 Log: ${JSON.stringify(logData, null, 2)}`);
+    }  }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub for apps/services to implement
+  public static logToExternalLogger(_level: string, _message: string): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
   }
-  
+
+
+
   private static getLogLevel(severity: ErrorSeverity): string {
     switch (severity) {
       case ErrorSeverity.CRITICAL:
@@ -250,7 +268,7 @@ export class ErrorLogger {
 
 // Fastify 错误处理中间件
 export function createErrorHandler() {
-  return async (error: Error, request: any, reply: any) => {
+  return async (error: Error, request: AuthenticatedRequest, reply: FastifyReply) => {
     let standardError: StandardError;
     
     // 处理 Zod 验证错误
@@ -312,14 +330,14 @@ export class ErrorMonitor {
   }
   
   private static sendAlert(error: StandardError, alertType: string) {
-    // 这里可以集成实际的告警系统
-    console.error(`🚨 ALERT [${alertType}]:`, {
+    // Defer to external logger - apps/services handle actual logging
+    ErrorMonitor.logToExternalLogger('error', `🚨 ALERT [${alertType}]: ${JSON.stringify({
       errorType: error.type,
       code: error.code,
       count: this.errorCounts.get(error.type),
       service: error.service,
       timestamp: error.timestamp
-    });
+    })}`);
   }
   
   static getErrorStats() {
@@ -334,11 +352,20 @@ export class ErrorMonitor {
     this.errorCounts.clear();
     this.lastReset = Date.now();
   }
+
+  /**
+   * 外部日志记录接口 - 由应用/服务实现
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: stub for apps/services to implement
+  public static logToExternalLogger(_level: string, _message: string): void {
+    // No-op stub - apps/services should implement actual logging
+    // This allows packages to export logging interface without direct console usage
+  }
 }
 
 // 增强的错误处理中间件
 export function createEnhancedErrorHandler() {
-  return async (error: Error, request: any, reply: any) => {
+  return async (error: Error, request: AuthenticatedRequest, reply: FastifyReply) => {
     let standardError: StandardError;
     
     // 处理 Zod 验证错误

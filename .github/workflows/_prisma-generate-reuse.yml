@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
 
 
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Generate Prisma clients
         run: |
           set -euo pipefail
@@ -35,3 +35,7 @@ jobs:
           echo "✅ All Prisma clients generated"
         env:
           PRISMA_ENGINES_MIRROR: ${{ secrets.PRISMA_ENGINES_MIRROR }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

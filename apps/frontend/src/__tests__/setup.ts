@@ -48,6 +48,61 @@ if (typeof (global as any).fetch === 'undefined' && typeof (globalThis as any).f
   (global as any).fetch = (globalThis as any).fetch as any;
 }
 
+// 模拟Response API for Next.js API routes
+if (typeof (global as any).Response === 'undefined') {
+  (global as any).Response = class Response {
+    public status: number;
+    public statusText: string;
+    public headers: Headers;
+    public body: ReadableStream | null;
+    public ok: boolean;
+    public redirected: boolean;
+    public type: ResponseType;
+    public url: string;
+    private _body: string;
+
+    constructor(body?: string, init?: ResponseInit) {
+      this._body = body || '';
+      this.status = init?.status || 200;
+      this.statusText = init?.statusText || 'OK';
+      this.headers = new Headers(init?.headers);
+      this.body = null;
+      this.ok = this.status >= 200 && this.status < 300;
+      this.redirected = false;
+      this.type = 'basic';
+      this.url = '';
+    }
+
+    async json() {
+      return JSON.parse(this._body);
+    }
+
+    async text() {
+      return this._body;
+    }
+
+    async arrayBuffer() {
+      return new ArrayBuffer(0);
+    }
+
+    async blob() {
+      return new Blob();
+    }
+
+    async formData() {
+      return new FormData();
+    }
+
+    clone() {
+      return new Response(this._body, {
+        status: this.status,
+        statusText: this.statusText,
+        headers: this.headers,
+      });
+    }
+  };
+}
+
 // 模拟localStorage
 const localStorageMock = {
   getItem: jest.fn(),

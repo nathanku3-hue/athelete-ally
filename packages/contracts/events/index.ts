@@ -90,6 +90,28 @@ export interface HRVNormalizedStoredEvent {
   };
 }
 
+export interface SleepRawReceivedEvent {
+  eventId: string;
+  payload: {
+    userId: string;
+    date: string; // 'YYYY-MM-DD'
+    durationMinutes: number; // >= 0
+    capturedAt?: string; // ISO datetime
+    raw?: Record<string, unknown>;
+  };
+}
+
+export interface SleepNormalizedStoredEvent {
+  record: {
+    userId: string;
+    date: string; // 'YYYY-MM-DD'
+    durationMinutes: number;
+    qualityScore?: number; // 0..100
+    vendor: 'oura' | 'whoop' | 'unknown';
+    capturedAt: string; // ISO datetime
+  };
+}
+
 // Event topics
 export const EVENT_TOPICS = {
   ONBOARDING_COMPLETED: 'athlete-ally.onboarding.completed',
@@ -98,6 +120,10 @@ export const EVENT_TOPICS = {
   PLAN_GENERATION_FAILED: 'athlete-ally.plans.generation-failed',
   HRV_RAW_RECEIVED: 'athlete-ally.hrv.raw-received',
   HRV_NORMALIZED_STORED: 'athlete-ally.hrv.normalized-stored',
+  SLEEP_RAW_RECEIVED: 'athlete-ally.sleep.raw-received',
+  SLEEP_NORMALIZED_STORED: 'athlete-ally.sleep.normalized-stored',
+  READINESS_COMPUTED: 'athlete-ally.readiness.computed',
+  READINESS_STORED: 'athlete-ally.readiness.stored',
 } as const;
 
 // Export schemas from dedicated file

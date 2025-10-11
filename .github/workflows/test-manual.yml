@@ -1,3 +1,7 @@
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 name: Test Manual Workflow
 
 on:

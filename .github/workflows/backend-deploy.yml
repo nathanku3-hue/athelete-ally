@@ -1,3 +1,7 @@
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 name: Backend Deploy
 
 on:
@@ -29,7 +33,7 @@ jobs:
           cache-dependency-path: ${{ needs.sanity.outputs.cache-dependency-path }}
       
       - name: Install dependencies (root level)
-        run: npm ci --no-audit --no-fund
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
       - name: Build event-bus package
         run: npm run build -w packages/event-bus
       
@@ -71,4 +75,3 @@ jobs:
         run: |
           echo "Deploying to production..."
           # ???????????
-

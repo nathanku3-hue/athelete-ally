@@ -46,13 +46,13 @@ Brief description of changes and motivation.
 - [ ] Documentation updated (if needed)
 - [ ] No merge conflicts
 - [ ] CI/CD pipeline passes
+- [ ] Does not introduce new ESLint violations beyond budget (delta-only)
 
 ## 🚀 Deployment Notes
 <!-- Any special deployment considerations -->
 
 ## 📋 Additional Notes
 <!-- Any additional information for reviewers -->
-
 
 
 

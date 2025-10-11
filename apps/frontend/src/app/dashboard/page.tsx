@@ -23,7 +23,7 @@ export default function DashboardPage() {
    * @param score - 用戶選擇的 1-5 分數
    */
   const handleFatigueScoreSubmit = (score: number) => {
-    console.log(`疲勞評分已記錄: ${score}`);
+    // Fatigue score logging removed - use proper state management instead
     
     // 在此處，我們可以將分數與 WorkoutSession 模型關聯，並發送到後端或狀態管理器
     // 例如: updateWorkoutSession(todayWorkoutSessionId, { fatigueScore: score });
@@ -46,17 +46,17 @@ export default function DashboardPage() {
 
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-8">
         <h1 className="text-4xl font-bold mb-4">Welcome Back, Alex</h1>
-        <p className="text-lg text-gray-400 mb-12">Ready to train? Let's get started.</p>
+        <p className="text-lg text-gray-400 mb-12">Ready to train? Let&apos;s get started.</p>
 
         <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-2">Today's Workout</h2>
+          <h2 className="text-2xl font-semibold mb-2">Today&apos;s Workout</h2>
           <p className="text-blue-400 mb-6">Upper Body Strength - Day 1</p>
 
           <button
             onClick={handleStartWorkoutClick}
             className="w-full px-8 py-4 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg"
           >
-            Start Today's Workout
+            Start Today&apos;s Workout
           </button>
         </div>
       </div>

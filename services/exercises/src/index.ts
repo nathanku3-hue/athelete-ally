@@ -28,11 +28,13 @@ const ExerciseRatingSchema = z.object({
   comment: z.string().optional(),
 });
 
-// Health check
+// Health check (root level for infrastructure)
 server.get('/health', async () => ({ status: 'ok' }));
 
-// Get exercise by ID
-server.get('/exercises/:id', async (request, reply) => {
+// API Routes Plugin with /api/v1 prefix
+server.register(async (apiRoutes) => {
+  // Get exercise by ID
+  apiRoutes.get('/exercises/:id', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   
@@ -99,8 +101,8 @@ server.get('/exercises/:id', async (request, reply) => {
   }
 });
 
-// Search exercises
-server.get('/exercises', async (request, reply) => {
+  // Search exercises
+  apiRoutes.get('/exercises', async (request, reply) => {
   const startTime = Date.now();
   const query = request.query as any;
   
@@ -215,8 +217,8 @@ server.get('/exercises', async (request, reply) => {
   }
 });
 
-// Rate an exercise
-server.post('/exercises/:id/rate', async (request, reply) => {
+  // Rate an exercise
+  apiRoutes.post('/exercises/:id/rate', async (request, reply) => {
   const startTime = Date.now();
   const { id } = request.params as { id: string };
   
@@ -300,8 +302,8 @@ server.post('/exercises/:id/rate', async (request, reply) => {
   }
 });
 
-// Get exercise categories
-server.get('/categories', async (request, reply) => {
+  // Get exercise categories
+  apiRoutes.get('/categories', async (_request, reply) => {
   try {
     const categories = await prisma.exerciseCategory.findMany({
       orderBy: { order: 'asc' },
@@ -314,8 +316,8 @@ server.get('/categories', async (request, reply) => {
   }
 });
 
-// Get popular exercises
-server.get('/exercises/popular', async (request, reply) => {
+  // Get popular exercises
+  apiRoutes.get('/exercises/popular', async (_request, reply) => {
   try {
     const exercises = await prisma.exercise.findMany({
       where: { isActive: true },
@@ -339,7 +341,8 @@ server.get('/exercises/popular', async (request, reply) => {
     server.log.error({ error }, 'Failed to get popular exercises');
     return reply.code(500).send({ error: 'Internal server error' });
   }
-});
+  });
+}, { prefix: '/api/v1' });
 
 const port = Number(config.PORT || 4103);
 server

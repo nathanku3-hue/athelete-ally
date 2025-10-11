@@ -7,7 +7,7 @@ import { FastifyInstance } from 'fastify';
 
 async function apiDocsRoutes(fastify: FastifyInstance) {
   // API文档端点
-  fastify.get('/api/docs', async (request, reply) => {
+  fastify.get('/api/docs', async (_request, reply) => {
     const apiDocs = {
       version: '1.0.0',
       title: 'Athlete Ally Planning Engine API',
@@ -258,7 +258,7 @@ async function apiDocsRoutes(fastify: FastifyInstance) {
   });
 
   // 健康检查测试端点
-  fastify.get('/api/test/health', async (request, reply) => {
+  fastify.get('/api/test/health', async (_request, reply) => {
     const healthCheck = {
       timestamp: new Date().toISOString(),
       status: 'healthy',
@@ -274,7 +274,7 @@ async function apiDocsRoutes(fastify: FastifyInstance) {
   });
 
   // 计划生成测试端点
-  fastify.post('/api/test/plan-generation', async (request, reply) => {
+  fastify.post('/api/test/plan-generation', async (_request, reply) => {
     const testData = {
       userProfile: {
         age: 25,
@@ -302,7 +302,7 @@ async function apiDocsRoutes(fastify: FastifyInstance) {
   });
 
   // 反馈收集测试端点
-  fastify.post('/api/test/feedback', async (request, reply) => {
+  fastify.post('/api/test/feedback', async (_request, reply) => {
     const testRpeFeedback = {
       sessionId: 'test-session-1',
       exerciseId: 'test-exercise-1',

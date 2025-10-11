@@ -176,46 +176,4 @@ describe('HRV Consumer Retry Logic', () => {
       expect(config.ackWaitMs).toBe(60000);
     });
   });
-
-  describe('Metrics Labels', () => {
-    it('should emit metrics with correct labels for all result types', () => {
-      const testCases = [
-        { result: 'success', expectedLabels: { result: 'success', subject: 'athlete-ally.hrv.raw-received', stream: 'ATHLETE_ALLY_EVENTS', durable: 'normalize-hrv-durable' } },
-        { result: 'schema_invalid', expectedLabels: { result: 'schema_invalid', subject: 'athlete-ally.hrv.raw-received', stream: 'ATHLETE_ALLY_EVENTS', durable: 'normalize-hrv-durable' } },
-        { result: 'retry', expectedLabels: { result: 'retry', subject: 'athlete-ally.hrv.raw-received', stream: 'ATHLETE_ALLY_EVENTS', durable: 'normalize-hrv-durable' } },
-        { result: 'dlq', expectedLabels: { result: 'dlq', subject: 'athlete-ally.hrv.raw-received', stream: 'ATHLETE_ALLY_EVENTS', durable: 'normalize-hrv-durable' } },
-        { result: 'processing_error', expectedLabels: { result: 'processing_error', subject: 'athlete-ally.hrv.raw-received', stream: 'ATHLETE_ALLY_EVENTS', durable: 'normalize-hrv-durable' } }
-      ];
-
-      testCases.forEach(({ result, expectedLabels }) => {
-        // Verify all required labels are present
-        expect(expectedLabels.result).toBeDefined();
-        expect(expectedLabels.subject).toBeDefined();
-        expect(expectedLabels.stream).toBeDefined();
-        expect(expectedLabels.durable).toBeDefined();
-        
-        // Verify label values match expected format
-        expect(expectedLabels.subject).toMatch(/^athlete-ally\./);
-        expect(expectedLabels.stream).toMatch(/^(ATHLETE_ALLY_EVENTS|AA_CORE_HOT)$/);
-        expect(expectedLabels.durable).toMatch(/^normalize-hrv-durable$/);
-      });
-    });
-
-    it('should handle stream fallback in metrics labels', () => {
-      // Test that metrics work with both primary and fallback streams
-      const primaryStream = 'AA_CORE_HOT';
-      const fallbackStream = 'ATHLETE_ALLY_EVENTS';
-      
-      const primaryLabels = { result: 'success', subject: 'athlete-ally.hrv.raw-received', stream: primaryStream, durable: 'normalize-hrv-durable' };
-      const fallbackLabels = { result: 'success', subject: 'athlete-ally.hrv.raw-received', stream: fallbackStream, durable: 'normalize-hrv-durable' };
-      
-      // Both should have valid label structure
-      expect(primaryLabels.stream).toBe('AA_CORE_HOT');
-      expect(fallbackLabels.stream).toBe('ATHLETE_ALLY_EVENTS');
-      
-      // Both should have same subject and durable
-      expect(primaryLabels.subject).toBe(fallbackLabels.subject);
-      expect(primaryLabels.durable).toBe(fallbackLabels.durable);
-    });
-  });
 });

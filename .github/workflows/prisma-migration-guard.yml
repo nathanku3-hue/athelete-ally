@@ -120,3 +120,7 @@ jobs:
         run: |
           echo "🧹 Cleaning up test resources..."
           # Clean up any test databases or temporary files
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

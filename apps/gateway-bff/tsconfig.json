@@ -4,7 +4,7 @@
     "target": "ES2020",
     "lib": ["ES2020"],
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -18,13 +18,16 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@packages/*": ["../../packages/*/src"],
-      "@services/*": ["../../services/*/src"],
-      "@apps/*": ["../../apps/*/src"]
+      "@athlete-ally/logger": ["../../packages/logger/dist/index"],
+      "@athlete-ally/logger/server": ["../../packages/logger/dist/adapters/node"],
+      "@athlete-ally/logger/browser": ["../../packages/logger/dist/adapters/browser"],
+      "@athlete-ally/*": ["../../packages/*"],
+      "@packages/*": ["../../packages/*"],
+      "@services/*": ["../../services/*"],
+      "@apps/*": ["../../apps/*"]
     }
   },
   "include": [
@@ -32,10 +35,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "../../services/**/*",
-    "../../packages/**/*"
+    "dist"
   ]
 }
-
 

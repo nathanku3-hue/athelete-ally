@@ -60,15 +60,15 @@ export interface JetStreamConsumerOptions {
 }
 
 export class JetStreamConsumer {
-  private nc: NatsConnection;
+  // private nc: NatsConnection; // Unused
   private js: JetStreamClient;
   private jsm: JetStreamManager;
   private consumers = new Map<string, any>();
   private isHealthy = true;
   private heartbeatInterval: NodeJS.Timeout | null = null;
 
-  constructor(nc: NatsConnection, js: JetStreamClient, jsm: JetStreamManager) {
-    this.nc = nc;
+  constructor(_nc: NatsConnection, js: JetStreamClient, jsm: JetStreamManager) {
+    // this.nc = nc; // Unused
     this.js = js;
     this.jsm = jsm;
   }

@@ -22,10 +22,11 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
-    "lint": "eslint -c ../../eslint.config.mjs src/**/*.ts",
-    "lint:fix": "eslint -c ../../eslint.config.mjs src/**/*.ts --fix"
+    "lint": "eslint -c ../../eslint.config.unified.mjs src/**/*.ts",
+    "lint:fix": "eslint -c ../../eslint.config.unified.mjs src/**/*.ts --fix"
   },
   "dependencies": {
+    "@athlete-ally/logger": "*",
     "nats": "^2.19.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",

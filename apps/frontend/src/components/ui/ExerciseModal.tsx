@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Star, Clock, Target, AlertTriangle, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Star, Target, AlertTriangle, Play } from 'lucide-react';
 import { Exercise } from '@athlete-ally/shared-types';
 import { logger } from '@/lib/logger';
 
@@ -21,7 +21,6 @@ export default function ExerciseModal({
   onRate, 
   userId 
 }: ExerciseModalProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [userRating, setUserRating] = useState(0);
   const [userDifficulty, setUserDifficulty] = useState(0);
   const [userComment, setUserComment] = useState('');

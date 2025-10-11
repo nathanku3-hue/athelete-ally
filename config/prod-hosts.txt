@@ -1,0 +1,5 @@
+# Prod-tier host allowlist (one substring per line)
+# Examples:
+# prod.company.com
+# nats.prod
+# .production.

@@ -8,6 +8,10 @@ yarn-error.log*
 .next/
 .turbo/
 dist/
+!packages/logger/dist/
+!packages/logger/dist/**
+!packages/health-schema/dist/
+!packages/health-schema/dist/**
 build/
 out/
 
@@ -112,3 +116,12 @@ cripts -Name start-*.ps1* | Sort-Object
 # Large dependency analysis files
 reports/deps/eslint-boundaries*.json
 
+# Reports directory
+reports/
+
+# Smoke test artifacts
+smoke-results/
+
+# Stream2 exceptions and temp files
+!apps/frontend/src/app/api/logs/**
+tmp_codemod*.json

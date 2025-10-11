@@ -5,8 +5,6 @@ import Fastify from 'fastify';
 import { Client as PgClient } from 'pg';
 import { Redis } from 'ioredis';
 import { config } from './config.js';
-import { prisma } from './db.js';
-import { z } from 'zod';
 // 使用统一的shared包组件
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { EventBus } from '@athlete-ally/event-bus';

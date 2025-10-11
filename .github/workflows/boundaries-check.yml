@@ -1,85 +1,56 @@
-name: Boundaries Check (New/Modified Files)
+name: Boundaries Check
 
 on:
   pull_request:
-    paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-  push:
-    branches: [main]
-    paths:
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * *'
 
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  pull-requests: write
 
 jobs:
-  boundaries-check:
-    name: Check Boundaries (New/Modified Files)
+  boundaries:
+    name: "Boundaries: Scan and Enforce"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Checkout (selected ref)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
-          fetch-depth: 2  # Need previous commit for diff
+          fetch-depth: 0
 
-      - name: Setup Node 20
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20.18.0'
-          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install
+        run: npm ci
 
-
-        run: npm ci --no-audit --no-fund
-      - name: Check boundaries for new/modified files
+      - name: Scan + PR Summary (pilot warn)
+        id: summary
+        env:
+          ESLINT_USE_FLAT_CONFIG: 'true'
+          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
         run: |
-          set -euo pipefail
-          echo "🔍 Checking boundaries for new/modified files..."
-          
-          # Get list of changed TypeScript/TSX files (excluding test files)
-          CHANGED_FILES="$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(ts|tsx)$' | grep -v -E '(test|spec)\.(ts|tsx)$' | grep -v '__tests__' || true)"
-          
-          if [ -z "${CHANGED_FILES:-}" ]; then
-            echo "✅ No non-test TypeScript files changed, skipping boundary check"
-            exit 0
-          fi
-          
-          echo "📁 Changed non-test TypeScript files:"
-          echo "${CHANGED_FILES}"
-          
-          # Run ESLint with error-level boundary rules on changed files only
-          # Allow: relative imports (./** ../**), monorepo packages (@athlete-ally/**), Next.js aliases (@/**), dotenv
-          echo "🚨 Running strict boundary checks on changed files..."
-          npx eslint --no-error-on-unmatched-pattern --max-warnings=0 \
-            "$(printf "%s" "${CHANGED_FILES}")" \
-            --rule "import/no-internal-modules: [error, { allow: [\"./**\", \"../**\", \"@athlete-ally/**\", \"@/**\", \"dotenv/config\"] }]" \
-            --rule "no-restricted-imports: error" \
-            --format=compact
-          
-          echo "✅ Boundary checks passed for new/modified files"
+          node scripts/boundaries-pr-summary.mjs
 
-      - name: Generate boundaries report
-        continue-on-error: true
-        run: |
-          mkdir -p reports/deps
-          npx eslint . -f json > reports/deps/eslint-boundaries-strict.json || echo "ESLint boundaries report generated with warnings"
-
-      - name: Upload Boundaries Report
+      - name: Upload Boundaries Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: boundaries-report-${{ github.run_id }}
-          path: reports/deps/eslint-boundaries-strict.json
-          retention-days: 7
+          name: boundaries-report
+          path: boundaries-report.json
+          if-no-files-found: ignore
+
+      - name: Enforce Zero New Violations (frozen only)
+        if: always()
+        env:
+          ESLINT_USE_FLAT_CONFIG: 'true'
+          ESLINT_CONFIG_FILE: eslint.config.unified.mjs
+        run: |
+          node scripts/boundaries-enforce-zero-new.mjs
+

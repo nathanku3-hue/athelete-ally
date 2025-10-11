@@ -21,7 +21,7 @@ export const SessionRatingModal: React.FC<SessionRatingModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center shadow-2xl">
         <h2 className="text-3xl font-bold mb-2">Workout Complete ✓</h2>
-        <p className="text-gray-400 mb-6">Great work! You've finished your session.</p>
+        <p className="text-gray-400 mb-6">Great work! You&apos;ve finished your session.</p>
         
         <div className="border-t border-gray-700 my-6"></div>
 

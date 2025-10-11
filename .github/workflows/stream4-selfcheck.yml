@@ -1,0 +1,61 @@
+name: Stream 4 Self-Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'templates/feature-module/**'
+      - 'scripts/scaffold-module.mjs'
+      - 'packages/feature-hello/**'
+      - 'scripts/stream4-selfcheck.mjs'
+      - 'scripts/changed-tests-summary.mjs'
+      - 'jest/jest.config.packages.cjs'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  selfcheck:
+    name: Scaffold & Pilot Checks (non-blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+      - name: Verify Node.js and npm versions
+        run: |
+          node_version=$(node -v)
+          npm_version=$(npm -v)
+          echo "Node.js version: $node_version"
+          echo "npm version: $npm_version"
+
+          # Check Node.js version is 20.18.x
+          if [[ ! $node_version =~ ^v20\.18\. ]]; then
+            echo "❌ Error: Node.js version must be 20.18.x, got $node_version"
+            exit 1
+          fi
+
+          # Check npm version is 10.x
+          if [[ ! $npm_version =~ ^10\. ]]; then
+            echo "❌ Error: npm version must be 10.x, got $npm_version"
+            exit 1
+          fi
+
+          echo "✅ Version check passed: Node.js $node_version, npm $npm_version"
+
+      - name: Install deps
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      - name: Build (pre-check)
+        run: npx turbo run build --no-daemon
+      - name: Stream 4 Self-Check
+        run: node scripts/stream4-selfcheck.mjs
+      - name: Changed Tests Summary
+        run: node scripts/changed-tests-summary.mjs
+      - name: Run Packages Jest (pilot)
+        run: npm run jest:bin -- --config jest/jest.config.packages.cjs
+        continue-on-error: true

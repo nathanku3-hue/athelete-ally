@@ -1,0 +1,176 @@
+name: Contract Check
+
+on:
+  pull_request:
+    paths:
+      - 'apps/frontend/src/app/api/**'
+      - 'packages/shared-types/**'
+      - 'apps/frontend/src/__tests__/contracts/**'
+      - 'scripts/detect-contract-drift.js'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/frontend/src/app/api/**'
+      - 'packages/shared-types/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract-check:
+    name: Contract Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for emergency bypass
+        id: check_bypass
+        env:
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ "$PR_LABELS" == *"allowcontractdrift"* ]]; then
+            echo "⚠️ Emergency bypass label detected. Skipping contract checks."
+            echo "bypass=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Contract checks bypassed due to allowcontractdrift label. This should be audited and removed after addressing the issue."
+            echo "::notice::Bypass Details: PR #$PR_NUMBER - $PR_TITLE"
+            echo "::notice::Bypass Author: $PR_AUTHOR"
+            echo "::notice::Bypass Timestamp: $(date -u)"
+            echo "::notice::Bypass Branch: $PR_BRANCH"
+          else
+            echo "bypass=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js
+        if: steps.check_bypass.outputs.bypass == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+
+      - name: Build health-schema
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔧 Building health-schema..."
+          npx turbo run build --filter=@athlete-ally/health-schema --no-daemon
+          test -f packages/health-schema/dist/index.js
+          test -f packages/health-schema/dist/index.d.ts
+
+      - name: Type check
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔍 Running TypeScript type check..."
+          npx tsc --noEmit --project apps/frontend/tsconfig.json
+          echo "✅ TypeScript type check passed"
+
+      - name: Build check
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔨 Running Next.js build check..."
+          npm run build
+          echo "✅ Next.js build check passed"
+
+      - name: Contract drift detection
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔍 Running contract drift detection..."
+          node scripts/detect-contract-drift.js
+          echo "✅ Contract drift detection passed"
+
+      - name: Contract tests
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🧪 Running contract tests..."
+          npm test -- apps/frontend/src/__tests__/contracts/type-consistency.test.ts
+          echo "✅ Contract tests passed"
+
+      - name: Runtime validation test
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔧 Testing runtime validation..."
+          node scripts/validate-contracts.js
+          echo "✅ Runtime validation test passed"
+
+      - name: Check for stray literals
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔍 Checking for stray literals..."
+
+          # Check for 'normal' fatigue level
+          if grep -r "'normal'" apps/frontend/src --exclude-dir=node_modules --exclude-dir=.next --exclude="*.test.ts" --exclude="*.d.ts"; then
+            echo "❌ Found 'normal' fatigue level literals. Use 'moderate' from shared types."
+            exit 1
+          fi
+
+          # Check for hyphenated seasons
+          if grep -r "'off-season'\|'pre-season'\|'in-season'" apps/frontend/src --exclude-dir=node_modules --exclude-dir=.next --exclude="*.test.ts" --exclude="*.d.ts"; then
+            echo "❌ Found hyphenated season literals. Use 'offseason', 'preseason', 'inseason' from shared types."
+            exit 1
+          fi
+
+          echo "✅ No stray literals found"
+
+      - name: Verify shared type imports
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔍 Verifying shared type imports..."
+
+          # Check that API routes import from shared types (exclude infrastructure endpoints and tests)
+          for file in apps/frontend/src/app/api/**/*.ts; do
+            if [[ -f "$file" ]]; then
+              # Skip infrastructure endpoints (health, metrics) and test files
+              if [[ "$file" == *"/health/"* ]] || [[ "$file" == *"/metrics/"* ]] || [[ "$file" == *".test.ts" ]] || [[ "$file" == *"__tests__"* ]]; then
+                continue
+              fi
+              if ! grep -q "@athlete-ally/shared-types" "$file"; then
+                echo "❌ $file should import from @athlete-ally/shared-types"
+                exit 1
+              fi
+            fi
+          done
+
+          echo "✅ Shared type imports verified"
+
+      - name: Summary
+        if: always()
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          echo "📊 Contract Check Summary"
+          echo "========================"
+          BYPASS_STATUS="${{ steps.check_bypass.outputs.bypass }}"
+          
+          if [[ "$BYPASS_STATUS" == "true" ]]; then
+            echo "⚠️ Contract checks BYPASSED due to allowcontractdrift label"
+            echo "🔍 This bypass should be audited and removed after addressing the issue"
+            echo "📋 Bypass reason: Emergency contract drift allowance"
+            echo "⏰ Bypass timestamp: $(date)"
+            echo "👤 Bypass author: $PR_AUTHOR"
+            echo "🔗 PR: #$PR_NUMBER - $PR_TITLE"
+            echo "🌿 Branch: $PR_BRANCH"
+            echo ""
+            echo "🚨 AUDIT REQUIRED: This bypass must be reviewed and removed after issue resolution"
+          else
+            echo "✅ TypeScript compilation"
+            echo "✅ Next.js build"
+            echo "✅ Contract drift detection"
+            echo "✅ Contract tests"
+            echo "✅ Runtime validation"
+            echo "✅ Stray literal check"
+            echo "✅ Shared type imports"
+            echo "🎉 All contract checks passed!"
+          fi
+          echo "========================"

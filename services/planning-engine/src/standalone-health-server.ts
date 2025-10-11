@@ -20,7 +20,7 @@ const server = Fastify({
 });
 
 // 基础健康检查
-server.get('/health', async (request, reply) => {
+server.get('/health', async (_request, _reply) => {
   const memUsage = process.memoryUsage();
   const uptime = process.uptime();
   
@@ -63,7 +63,7 @@ server.get('/health', async (request, reply) => {
 });
 
 // 详细健康检查
-server.get('/health/detailed', async (request, reply) => {
+server.get('/health/detailed', async (_request, _reply) => {
   const memUsage = process.memoryUsage();
   const cpuUsage = process.cpuUsage();
   const uptime = process.uptime();
@@ -127,7 +127,7 @@ server.get('/health/detailed', async (request, reply) => {
 });
 
 // 就绪检查
-server.get('/health/ready', async (request, reply) => {
+server.get('/health/ready', async (_request, _reply) => {
   return {
     status: 'ready',
     timestamp: new Date().toISOString(),
@@ -144,7 +144,7 @@ server.get('/health/ready', async (request, reply) => {
 });
 
 // 存活检查
-server.get('/health/live', async (request, reply) => {
+server.get('/health/live', async (_request, _reply) => {
   return {
     status: 'alive',
     timestamp: new Date().toISOString(),
@@ -153,7 +153,7 @@ server.get('/health/live', async (request, reply) => {
 });
 
 // 系统信息检查
-server.get('/health/system', async (request, reply) => {
+server.get('/health/system', async (_request, _reply) => {
   const memUsage = process.memoryUsage();
   const cpuUsage = process.cpuUsage();
   
@@ -186,7 +186,7 @@ server.get('/health/system', async (request, reply) => {
 });
 
 // 基础路由
-server.get('/', async (request, reply) => {
+server.get('/', async (_request, _reply) => {
   return {
     service: 'planning-engine-health',
     version: '1.0.0',

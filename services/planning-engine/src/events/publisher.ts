@@ -51,7 +51,7 @@ export class EventPublisher {
     }
   }
 
-  private async publishWithMetrics<T>(
+  private async publishWithMetrics(
     topic: string,
     publishFn: () => Promise<void>
   ) {

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+type FilterValue = string | string[] | { min?: number; max?: number };
 
 interface FilterOption {
   key: string;
@@ -17,7 +19,7 @@ interface FilterOption {
 }
 
 interface AdvancedSearchProps {
-  onSearch: (query: string, filters: Record<string, any>) => void;
+  onSearch: (query: string, filters: Record<string, FilterValue>) => void;
   onClear: () => void;
   filters: FilterOption[];
   placeholder?: string;
@@ -32,7 +34,7 @@ export function AdvancedSearch({
   className,
 }: AdvancedSearchProps) {
   const [query, setQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
+  const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
   const [showFilters, setShowFilters] = useState(false);
 
   const handleSearch = () => {
@@ -45,7 +47,7 @@ export function AdvancedSearch({
     onClear();
   };
 
-  const updateFilter = (key: string, value: any) => {
+  const updateFilter = (key: string, value: FilterValue) => {
     setActiveFilters(prev => ({
       ...prev,
       [key]: value,
@@ -71,8 +73,8 @@ export function AdvancedSearch({
           <Input
             placeholder={placeholder}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
             className="pl-10"
           />
         </div>
@@ -104,11 +106,11 @@ export function AdvancedSearch({
             const filter = filters.find(f => f.key === key);
             if (!filter) return null;
 
-            const displayValue = Array.isArray(value) 
-              ? value.join(', ') 
+            const displayValue = Array.isArray(value)
+              ? value.join(', ')
               : typeof value === 'object' && value !== null
               ? `${value.min || ''}-${value.max || ''}`
-              : value;
+              : String(value);
 
             return (
               <Badge
@@ -152,8 +154,8 @@ export function AdvancedSearch({
                 
                 {filter.type === 'select' && filter.options && (
                   <select
-                    value={activeFilters[filter.key] || ''}
-                    onChange={(e) => updateFilter(filter.key, e.target.value)}
+                    value={typeof activeFilters[filter.key] === 'string' ? activeFilters[filter.key] as string : ''}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateFilter(filter.key, e.target.value)}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   >
                     <option value="">全部</option>
@@ -171,9 +173,9 @@ export function AdvancedSearch({
                       <label key={option.value} className="flex items-center space-x-2">
                         <input
                           type="checkbox"
-                          checked={activeFilters[filter.key]?.includes(option.value) || false}
-                          onChange={(e) => {
-                            const currentValues = activeFilters[filter.key] || [];
+                          checked={Array.isArray(activeFilters[filter.key]) && (activeFilters[filter.key] as string[]).includes(option.value) || false}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            const currentValues = Array.isArray(activeFilters[filter.key]) ? (activeFilters[filter.key] as string[]) : [];
                             const newValues = e.target.checked
                               ? [...currentValues, option.value]
                               : currentValues.filter((v: string) => v !== option.value);
@@ -192,11 +194,14 @@ export function AdvancedSearch({
                     <Input
                       type="number"
                       placeholder="最小值"
-                      value={activeFilters[filter.key]?.min || ''}
-                      onChange={(e) => updateFilter(filter.key, {
-                        ...activeFilters[filter.key],
-                        min: e.target.value ? Number(e.target.value) : undefined,
-                      })}
+                      value={typeof activeFilters[filter.key] === 'object' && !Array.isArray(activeFilters[filter.key]) ? (activeFilters[filter.key] as { min?: number; max?: number }).min || '' : ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const current = typeof activeFilters[filter.key] === 'object' && !Array.isArray(activeFilters[filter.key]) ? (activeFilters[filter.key] as { min?: number; max?: number }) : {};
+                        updateFilter(filter.key, {
+                          ...current,
+                          min: e.target.value ? Number(e.target.value) : undefined,
+                        });
+                      }}
                       min={filter.min}
                       max={filter.max}
                     />
@@ -204,11 +209,14 @@ export function AdvancedSearch({
                     <Input
                       type="number"
                       placeholder="最大值"
-                      value={activeFilters[filter.key]?.max || ''}
-                      onChange={(e) => updateFilter(filter.key, {
-                        ...activeFilters[filter.key],
-                        max: e.target.value ? Number(e.target.value) : undefined,
-                      })}
+                      value={typeof activeFilters[filter.key] === 'object' && !Array.isArray(activeFilters[filter.key]) ? (activeFilters[filter.key] as { min?: number; max?: number }).max || '' : ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const current = typeof activeFilters[filter.key] === 'object' && !Array.isArray(activeFilters[filter.key]) ? (activeFilters[filter.key] as { min?: number; max?: number }) : {};
+                        updateFilter(filter.key, {
+                          ...current,
+                          max: e.target.value ? Number(e.target.value) : undefined,
+                        });
+                      }}
                       min={filter.min}
                       max={filter.max}
                     />

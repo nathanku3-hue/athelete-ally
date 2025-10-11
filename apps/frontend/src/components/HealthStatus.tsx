@@ -8,7 +8,7 @@ interface HealthCheck {
   status: 'healthy' | 'unhealthy';
   responseTime: number;
   timestamp: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 interface HealthStatus {
