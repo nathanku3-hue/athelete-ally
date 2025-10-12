@@ -8,6 +8,8 @@ COPY tsconfig.base.json ./
 COPY turbo.json ./
 COPY packages ./packages
 COPY services/normalize-service ./services/normalize-service
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 
 # Install and generate Prisma client
 RUN npm ci

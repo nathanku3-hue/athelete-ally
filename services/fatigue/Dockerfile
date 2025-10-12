@@ -9,6 +9,8 @@ COPY turbo.json ./
 # 拷貝所有需要被 link 的 workspace
 COPY packages ./packages
 COPY services/fatigue ./services/fatigue
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 
 # 運行完整的 monorepo 安裝
 RUN npm ci

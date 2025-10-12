@@ -8,6 +8,8 @@ WORKDIR /usr/src/app
 # Copy package files
 COPY package*.json ./
 COPY services/insights-engine/package.json ./services/insights-engine/
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 COPY packages/event-bus/package.json ./packages/event-bus/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/contracts/package.json ./packages/contracts/
@@ -22,6 +24,8 @@ WORKDIR /usr/src/app
 # Copy package files
 COPY package*.json ./
 COPY services/insights-engine/package.json ./services/insights-engine/
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 COPY packages/event-bus/package.json ./packages/event-bus/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/contracts/package.json ./packages/contracts/
@@ -31,6 +35,8 @@ RUN npm ci
 
 # Copy source code
 COPY services/insights-engine ./services/insights-engine
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 COPY packages ./packages
 COPY tsconfig.base.json ./
 
