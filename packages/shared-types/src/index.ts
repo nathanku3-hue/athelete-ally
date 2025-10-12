@@ -122,15 +122,8 @@ export interface OnboardingContextType {
   submitData: () => Promise<{ success: boolean; planId?: string; jobId?: string; error?: string }>;
 }
 
-// 导出统一的Onboarding Schema
-export * from './schemas/onboarding';
-
-// 导出RPE和User Preferences Schema
-export * from './schemas/rpe';
-export * from './schemas/enhanced-plan';
-export * from './schemas/feedback';
-export * from './schemas/api';
-export * from './schemas/hrv';
+// 导出所有 Schema 模块（通过 schemas 入口点）
+export * from './schemas';
 
 // 导出类型（不包含运行时代码）
 export type {
