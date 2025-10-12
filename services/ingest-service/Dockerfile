@@ -8,6 +8,8 @@ COPY tsconfig.base.json ./
 COPY turbo.json ./
 COPY packages ./packages
 COPY services/ingest-service ./services/ingest-service
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 
 # Install and build
 RUN npm ci
