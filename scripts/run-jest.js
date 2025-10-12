@@ -65,21 +65,50 @@ if (!jestPath) {
   // Try to find jest anywhere in node_modules
   const nodeModulesPath = path.join(workspaceRoot, 'node_modules');
   if (fs.existsSync(nodeModulesPath)) {
-    console.error('\nContents of node_modules:');
+    console.error('\nContents of root node_modules:');
     try {
-      const entries = fs.readdirSync(nodeModulesPath).slice(0, 20);
-      console.error(entries.join(', '));
-      if (fs.existsSync(path.join(nodeModulesPath, 'jest'))) {
-        console.error('\njest directory exists, checking contents:');
-        const jestContents = fs.readdirSync(path.join(nodeModulesPath, 'jest'));
-        console.error(jestContents.join(', '));
+      const entries = fs.readdirSync(nodeModulesPath);
+      console.error(`Total entries: ${entries.length}`);
+      console.error('First 30:', entries.slice(0, 30).join(', '));
+
+      // Check if jest exists anywhere
+      const jestDir = path.join(nodeModulesPath, 'jest');
+      if (fs.existsSync(jestDir)) {
+        console.error('\njest directory exists! Checking structure:');
+        const jestContents = fs.readdirSync(jestDir);
+        console.error('jest contents:', jestContents.join(', '));
+
+        const binDir = path.join(jestDir, 'bin');
+        if (fs.existsSync(binDir)) {
+          console.error('jest/bin contents:', fs.readdirSync(binDir).join(', '));
+        } else {
+          console.error('jest/bin does NOT exist');
+        }
+      } else {
+        console.error('\njest is NOT installed in root node_modules');
+      }
+
+      // Search for jest in .bin
+      const binDir = path.join(nodeModulesPath, '.bin', 'jest');
+      if (fs.existsSync(binDir)) {
+        console.error('\nFound jest symlink in .bin:', binDir);
+        try {
+          const realPath = fs.realpathSync(binDir);
+          console.error('Symlink points to:', realPath);
+          jestPath = realPath;
+        } catch (e) {
+          console.error('Could not resolve symlink:', e.message);
+        }
       }
     } catch (e) {
       console.error('Could not read node_modules:', e.message);
     }
   }
 
-  process.exit(1);
+  if (!jestPath) {
+    console.error('\nPlease ensure jest is installed by running: npm ci');
+    process.exit(1);
+  }
 }
 
 console.log('Found jest at:', jestPath);
