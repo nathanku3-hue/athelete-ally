@@ -12,6 +12,26 @@ datasource db {
   url      = env("PLANNING_DATABASE_URL")
 }
 
+enum MovementStageStatus {
+  DRAFT
+  READY_FOR_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MovementAuditAction {
+  CREATED
+  UPDATED
+  REVIEW_SUBMITTED
+  APPROVED
+  REJECTED
+  PUBLISHED
+  ARCHIVED
+  METADATA_UPDATED
+}
+
 model Plan {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -207,7 +227,94 @@ model AdaptationRecord {
   @@map("adaptation_records")
 }
 
+model MovementStaging {
+  id          String               @id @default(cuid())
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
+  name        String
+  slug        String
+  classification String
+  equipment   String[] @default([])
+  primaryMuscles String[] @default([])
+  secondaryMuscles String[] @default([])
+  recommendedRpe Float?
+  progressionIds String[] @default([])
+  regressionIds String[] @default([])
+  tags        String[] @default([])
+  instructions Json?
+  metadata    Json?
 
+  status      MovementStageStatus  @default(DRAFT)
+  createdById String
+  updatedById String
+  reviewerId  String?
+  reviewedAt  DateTime?
+  reviewNotes String?
+  publishedMovement MovementLibrary? @relation("MovementPublication", fields: [publishedMovementId], references: [id])
+  publishedMovementId String?
+
+  auditLogs   MovementAuditLog[]
+
+  @@unique([slug])
+  @@index([status])
+  @@index([createdById])
+  @@index([reviewerId])
+  @@map("movement_staging")
+}
+
+model MovementLibrary {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  name        String
+  slug        String   @unique
+  classification String
+  equipment   String[] @default([])
+  primaryMuscles String[] @default([])
+  secondaryMuscles String[] @default([])
+  recommendedRpe Float?
+  progressionIds String[] @default([])
+  regressionIds String[] @default([])
+  tags        String[] @default([])
+  instructions Json?
+  metadata    Json?
+  version     Int      @default(1)
+  stagingSourceId String?
+  stagingSnapshot Json?
+  publishedById String
+  publishedAt DateTime @default(now())
+
+  auditLogs   MovementAuditLog[]
+  publishedDrafts MovementStaging[] @relation("MovementPublication")
+
+  @@index([classification])
+  @@index([publishedAt])
+  @@map("movement_library")
+}
+
+model MovementAuditLog {
+  id          String              @id @default(cuid())
+  createdAt   DateTime            @default(now())
+
+  action      MovementAuditAction
+  actorId     String
+  actorEmail  String
+  actorRole   String?
+  movementStagingId String?
+  movementLibraryId String?
+  diff        Json?
+  notes       String?
+  metadata    Json?
+
+  movementStaging MovementStaging? @relation(fields: [movementStagingId], references: [id])
+  movementLibrary MovementLibrary? @relation(fields: [movementLibraryId], references: [id])
+
+  @@index([movementStagingId])
+  @@index([movementLibraryId])
+  @@index([action])
+  @@map("movement_audit_log")
+}
 
 

@@ -155,8 +155,7 @@ export default function PurposePage() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
         <div className="w-full max-w-4xl flex flex-col">
           <div className="text-center mb-10">
-            {/* 更新：顯示為 Step 2 of 5 */}
-            <p className="text-blue-400 font-semibold mb-2">Step 2 of 5</p>
+            <p className="text-blue-400 font-semibold mb-2">Step 1 of 5</p>
             <h1 className="text-4xl md:text-5xl font-bold mb-3">
               What&apos;s Your Training Purpose?
             </h1>
