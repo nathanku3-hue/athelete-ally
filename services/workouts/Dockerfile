@@ -5,6 +5,7 @@ WORKDIR /app
 # 關鍵：從根上下文，拷貝所有構建所需的文件
 COPY package*.json ./
 COPY tsconfig.base.json ./
+COPY config ./config
 COPY turbo.json ./
 # 拷貝所有需要被 link 的 workspace
 COPY packages ./packages
