@@ -122,18 +122,5 @@ export interface OnboardingContextType {
   submitData: () => Promise<{ success: boolean; planId?: string; jobId?: string; error?: string }>;
 }
 
-// 导出所有 Schema 模块（通过 schemas 入口点）
+// Export all schema modules (types and runtime validators)
 export * from './schemas';
-
-// 导出类型（不包含运行时代码）
-export type {
-  FatigueLevel,
-  FatigueAssessmentInput,
-  FatigueAssessmentResult,
-  FatigueFactor,
-  FatigueStatusResponse,
-  Season,
-  SeasonOption,
-  FeedbackType,
-  FeedbackData
-} from './schemas';
