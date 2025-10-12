@@ -5,6 +5,7 @@ WORKDIR /app
 # Copy monorepo build context from root
 COPY package*.json ./
 COPY tsconfig.base.json ./
+COPY config ./config
 COPY turbo.json ./
 COPY packages ./packages
 COPY services/normalize-service ./services/normalize-service

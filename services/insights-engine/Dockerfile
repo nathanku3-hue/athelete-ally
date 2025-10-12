@@ -39,6 +39,7 @@ COPY services/insights-engine ./services/insights-engine
 COPY scripts ./scripts
 COPY packages ./packages
 COPY tsconfig.base.json ./
+COPY config ./config
 
 # Generate Prisma client
 WORKDIR /usr/src/app/services/insights-engine
