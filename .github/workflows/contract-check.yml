@@ -66,6 +66,14 @@ jobs:
           test -f packages/health-schema/dist/index.js
           test -f packages/health-schema/dist/index.d.ts
 
+      - name: Build shared packages
+        if: steps.check_bypass.outputs.bypass == 'false'
+        run: |
+          echo "🔧 Building shared packages for dist exports..."
+          npx turbo run build --filter=@athlete-ally/shared --filter=@athlete-ally/shared-types --no-daemon
+          test -f packages/shared/dist/index.js
+          test -f packages/shared-types/dist/index.js
+
       - name: Type check
         if: steps.check_bypass.outputs.bypass == 'false'
         run: |

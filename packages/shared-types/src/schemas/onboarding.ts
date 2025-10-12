@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+// Base season enum
+export const SeasonSchema = z.enum(['offseason', 'preseason', 'inseason']);
+export type Season = z.infer<typeof SeasonSchema>;
+
+export const SeasonOptionSchema = z.object({
+  id: SeasonSchema,
+  title: z.string(),
+  description: z.string(),
+});
+export type SeasonOption = z.infer<typeof SeasonOptionSchema>;
+
 // 统一的OnboardingPayloadSchema - 单一数据源
 export const OnboardingPayloadSchema = z.object({
   // 必需字段
@@ -20,7 +31,7 @@ export const OnboardingPayloadSchema = z.object({
   proficiency: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
   
   // 步骤3: 赛季和目标
-  season: z.enum(['offseason', 'preseason', 'inseason']).optional(),
+  season: SeasonSchema.optional(),
   competitionDate: z.string().datetime().optional(),
   
   // 步骤4: 可用性 - 统一为数字类型
@@ -90,7 +101,7 @@ export const OnboardingStepSchema = z.object({
   ]).optional(),
   purposeDetails: z.string().max(500).optional(),
   proficiency: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
-  season: z.enum(['offseason', 'preseason', 'inseason']).optional(),
+  season: SeasonSchema.optional(),
   competitionDate: z.string().datetime().optional(),
   availabilityDays: z.number().int().min(1).max(7).optional(),
   weeklyGoalDays: z.number().int().min(1).max(7).optional(),
