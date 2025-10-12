@@ -3,5 +3,6 @@ export * from './onboarding';
 export * from './rpe';
 export * from './enhanced-plan';
 export * from './feedback';
+export * from './fatigue';
 export * from './api';
 export * from './hrv';

@@ -1,8 +1,21 @@
 import { z } from 'zod';
 
-// Base fatigue level enum
-export const FatigueLevelSchema = z.enum(['low', 'moderate', 'high']);
-export type FatigueLevel = z.infer<typeof FatigueLevelSchema>;
+// Feedback type enum
+export const FeedbackTypeSchema = z.enum(['bug', 'feature', 'improvement', 'general']);
+export type FeedbackType = z.infer<typeof FeedbackTypeSchema>;
+
+// Feedback data schema
+export const FeedbackDataSchema = z.object({
+  type: FeedbackTypeSchema,
+  rating: z.number().min(1).max(5),
+  title: z.string().min(1).max(100),
+  description: z.string().min(1).max(1000),
+  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  category: z.string(),
+  userEmail: z.string().email().optional(),
+  userId: z.string().optional(),
+});
+export type FeedbackData = z.infer<typeof FeedbackDataSchema>;
 
 export const RPEFeedbackSchema = z.object({
   sessionId: z.string(),
