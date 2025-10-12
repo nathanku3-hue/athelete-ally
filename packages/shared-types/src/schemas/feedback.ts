@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+// Base fatigue level enum
+export const FatigueLevelSchema = z.enum(['low', 'moderate', 'high']);
+export type FatigueLevel = z.infer<typeof FatigueLevelSchema>;
+
 export const RPEFeedbackSchema = z.object({
   sessionId: z.string(),
   exerciseId: z.string(),

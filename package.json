@@ -9,7 +9,7 @@
   },
   "scripts": {
     "preinstall": "node scripts/check-node-version.cjs",
-    "jest:bin": "npx --no-install jest",
+    "jest:bin": "npm exec jest --",
     "dev": "next dev apps/frontend -p 3000",
     "dev:frontend": "next dev apps/frontend -p 3000",
     "dev:bff": "npm run dev -w apps/gateway-bff",
