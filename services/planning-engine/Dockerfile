@@ -16,7 +16,7 @@ COPY scripts ./scripts
 RUN npm ci
 
 # 在完整的 monorepo 上下文中，只構建我們需要的那個服務
-RUN npx turbo run build --filter=planning-engine
+RUN npx turbo run build --filter=@athlete-ally/planning-engine
 
 # --- STAGE 2: Runner ---
 FROM node:lts-alpine

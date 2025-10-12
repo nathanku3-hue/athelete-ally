@@ -16,7 +16,7 @@ RUN npm ci
 RUN cd services/normalize-service && npx prisma generate
 
 # Build service
-RUN npx turbo run build --filter=normalize
+RUN npx turbo run build --filter=normalize-service
 
 # --- STAGE 2: Runner ---
 FROM node:20.18-slim

@@ -13,7 +13,7 @@ COPY scripts ./scripts
 
 # Install and build
 RUN npm ci
-RUN npx turbo run build --filter=ingest
+RUN npx turbo run build --filter=ingest-service
 
 # --- STAGE 2: Runner ---
 FROM node:20.18-slim
