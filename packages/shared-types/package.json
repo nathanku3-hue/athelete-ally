@@ -12,9 +12,9 @@
       "default": "./dist/index.js"
     },
     "./schemas": {
-      "types": "./dist/schemas.d.ts",
-      "import": "./dist/schemas.js",
-      "default": "./dist/schemas.js"
+      "types": "./dist/schemas/index.d.ts",
+      "import": "./dist/schemas/index.js",
+      "default": "./dist/schemas/index.js"
     },
     "./package.json": "./package.json"
   },
