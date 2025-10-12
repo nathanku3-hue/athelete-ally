@@ -1,119 +1,80 @@
 #!/usr/bin/env node
 /**
- * Reliable jest binary wrapper
- * Finds and executes the local jest installation
+ * Jest wrapper - finds and executes local jest
  */
 const { spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-// Find the workspace root (where package.json with workspaces is)
-function findWorkspaceRoot(startDir) {
-  let currentDir = startDir;
-  while (currentDir !== path.dirname(currentDir)) {
-    const pkgPath = path.join(currentDir, 'package.json');
+// Find workspace root
+function findWorkspaceRoot(dir) {
+  let current = dir;
+  while (current !== path.dirname(current)) {
+    const pkgPath = path.join(current, 'package.json');
     if (fs.existsSync(pkgPath)) {
       try {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-        if (pkg.workspaces) {
-          return currentDir;
-        }
+        if (pkg.workspaces) return current;
       } catch {}
     }
-    currentDir = path.dirname(currentDir);
+    current = path.dirname(current);
   }
   return null;
 }
 
-const workspaceRoot = findWorkspaceRoot(__dirname) || process.cwd();
-
-// Build possible jest locations
-const possiblePaths = [
-  // Workspace root node_modules
-  path.join(workspaceRoot, 'node_modules', 'jest', 'bin', 'jest.js'),
-  // Current directory node_modules
-  path.join(process.cwd(), 'node_modules', 'jest', 'bin', 'jest.js'),
-  // Script directory node_modules
-  path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js')
-];
-
+const root = findWorkspaceRoot(__dirname) || process.cwd();
 let jestPath = null;
 
-// Try require.resolve first (works in most cases)
-try {
-  jestPath = require.resolve('jest/bin/jest.js');
-} catch {
-  // Fall back to checking file system paths
-  for (const testPath of possiblePaths) {
-    if (fs.existsSync(testPath)) {
-      jestPath = testPath;
-      break;
-    }
+// Priority 1: Check .bin/jest (npm's standard location)
+const binJest = path.join(root, 'node_modules', '.bin', 'jest');
+if (fs.existsSync(binJest)) {
+  try {
+    jestPath = fs.realpathSync(binJest);
+  } catch (e) {
+    // Symlink resolution failed, try using it directly
+    jestPath = binJest;
   }
 }
 
+// Priority 2: Try require.resolve
 if (!jestPath) {
-  console.error('Error: Could not find jest installation');
-  console.error('Workspace root:', workspaceRoot);
-  console.error('Current directory:', process.cwd());
-  console.error('Script directory:', __dirname);
-  console.error('Searched paths:');
-  possiblePaths.forEach(p => {
-    console.error(`  - ${p} (exists: ${fs.existsSync(p)})`);
-  });
+  try {
+    jestPath = require.resolve('jest/bin/jest.js');
+  } catch {}
+}
 
-  // Try to find jest anywhere in node_modules
-  const nodeModulesPath = path.join(workspaceRoot, 'node_modules');
-  if (fs.existsSync(nodeModulesPath)) {
-    console.error('\nContents of root node_modules:');
-    try {
-      const entries = fs.readdirSync(nodeModulesPath);
-      console.error(`Total entries: ${entries.length}`);
-      console.error('First 30:', entries.slice(0, 30).join(', '));
-
-      // Check if jest exists anywhere
-      const jestDir = path.join(nodeModulesPath, 'jest');
-      if (fs.existsSync(jestDir)) {
-        console.error('\njest directory exists! Checking structure:');
-        const jestContents = fs.readdirSync(jestDir);
-        console.error('jest contents:', jestContents.join(', '));
-
-        const binDir = path.join(jestDir, 'bin');
-        if (fs.existsSync(binDir)) {
-          console.error('jest/bin contents:', fs.readdirSync(binDir).join(', '));
-        } else {
-          console.error('jest/bin does NOT exist');
-        }
-      } else {
-        console.error('\njest is NOT installed in root node_modules');
-      }
-
-      // Search for jest in .bin
-      const binDir = path.join(nodeModulesPath, '.bin', 'jest');
-      if (fs.existsSync(binDir)) {
-        console.error('\nFound jest symlink in .bin:', binDir);
-        try {
-          const realPath = fs.realpathSync(binDir);
-          console.error('Symlink points to:', realPath);
-          jestPath = realPath;
-        } catch (e) {
-          console.error('Could not resolve symlink:', e.message);
-        }
-      }
-    } catch (e) {
-      console.error('Could not read node_modules:', e.message);
-    }
-  }
-
-  if (!jestPath) {
-    console.error('\nPlease ensure jest is installed by running: npm ci');
-    process.exit(1);
+// Priority 3: Check direct path
+if (!jestPath) {
+  const directPath = path.join(root, 'node_modules', 'jest', 'bin', 'jest.js');
+  if (fs.existsSync(directPath)) {
+    jestPath = directPath;
   }
 }
 
-console.log('Found jest at:', jestPath);
+// Not found - provide diagnostic
+if (!jestPath) {
+  console.error('Error: Jest not found in node_modules');
+  console.error('Workspace root:', root);
 
-// Run jest with all forwarded arguments
+  const nmPath = path.join(root, 'node_modules');
+  if (fs.existsSync(nmPath)) {
+    const hasBin = fs.existsSync(path.join(nmPath, '.bin'));
+    const hasJest = fs.existsSync(path.join(nmPath, 'jest'));
+    console.error('node_modules exists:', hasBin ? 'has .bin' : 'no .bin', hasJest ? 'has jest' : 'no jest');
+
+    if (hasBin) {
+      const binContents = fs.readdirSync(path.join(nmPath, '.bin'));
+      console.error('.bin contents:', binContents.slice(0, 10).join(', '));
+    }
+  } else {
+    console.error('node_modules does not exist!');
+  }
+
+  console.error('\nRun: npm ci --workspaces --include-workspace-root');
+  process.exit(1);
+}
+
+// Execute jest
 const result = spawnSync('node', [jestPath, ...process.argv.slice(2)], {
   stdio: 'inherit',
   cwd: process.cwd()
