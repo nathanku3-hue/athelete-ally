@@ -4,6 +4,86 @@
 
 This document explains the rationale behind each UI variant and the tradeoffs considered.
 
+## Final Selections (2025-01-21)
+
+After product/design review and internal evaluation, the following variants have been selected for integration:
+
+### CoachTip: Variant B (Modern Card / "Slide-In Card")
+
+**Selected Variant**: `CoachTipVariantB` (Modern Card with gradient accents)
+
+**Decision Rationale**:
+1. **Differentiation**: The gradient card design better communicates the "AI coach" value proposition and adaptive intelligence, which is core to Athlete Ally's positioning.
+2. **RPE Context**: The badge system for displaying RPE context ("Avg RPE: 7.2") makes adaptive recommendations more credible and transparent.
+3. **Engagement**: Visual prominence increases likelihood that users will read and act on tips, especially for critical insights (deload recommendations, recovery alerts).
+4. **Testing Feedback**: Early Storybook reviews indicated that Variant B felt more "premium" and "personalized" compared to Variant A's generic tooltip style.
+
+**Implementation Notes**:
+- Used for high-value, infrequent tips (weekly insights, milestone recommendations, safety alerts)
+- Appears in plan detail view, weekly review page, and post-session summary
+- Feature flag: `coachTip` → defaults to `'B'` in production
+- Telemetry tracking: `coach_tip_shown`, `coach_tip_dismissed`, `coach_tip_accepted`
+
+**Related Story IDs**: STREAM3-012, STREAM3-018
+
+---
+
+### Weekly Review: Hybrid Model ("User-Choice Review")
+
+**Selected Approach**: Adaptive hybrid combining both Variant A and Variant B elements
+
+**Decision Rationale**:
+1. **User Preference**: Rather than forcing one approach, the hybrid model allows users to toggle between:
+   - **Intensity Focus** (fewer sessions, higher intensity)
+   - **Volume Focus** (more sessions, moderate intensity)
+2. **Data + Story**: The hybrid combines Variant A's detailed metrics table with Variant B's visual cards for highlights and insights.
+3. **Flexibility**: Accommodates both analytical users (who want tables) and visual users (who prefer cards) without requiring separate builds.
+4. **Adaptive Engine Integration**: The toggle directly maps to backend planning engine parameters (`adjustmentPreference: 'intensity' | 'volume'`), enabling true personalization.
+
+**Implementation Notes**:
+- Default view shows Variant B's hero section + Variant A's metrics grid
+- Toggle button at top: "Prefer Intensity" vs "Prefer Volume"
+- Selected preference saved to user profile and applied to next week's plan
+- Feature flag: `weeklyReview` → currently set to `'B'` as primary, with Variant A table embedded
+- Telemetry tracking: `weekly_review_shown`, `weekly_review_applied`, `adjustment_preference_changed`
+
+**Related Story IDs**: STREAM3-025, STREAM3-031
+
+---
+
+### Onboarding Copy: Variant B (Personalized/Adaptive)
+
+**Selected Variant**: `onboardingCopyB` (Personalized coach messaging)
+
+**Decision Rationale**:
+1. **Broader Appeal**: Variant B's "AI coach that learns" framing resonates with a wider audience than Variant A's technical language.
+2. **Emotional Connection**: The coaching metaphor builds trust and sets expectations for a long-term partnership, which is critical for retention.
+3. **Simplified Onboarding**: Less technical jargon reduces cognitive load during the critical first-user experience.
+4. **Market Positioning**: Differentiates from competitors (Strava, TrainingPeaks) who lead with data/metrics rather than personalization.
+
+**Implementation Notes**:
+- Used in onboarding flow (welcome screen, RPE education, "How It Works")
+- A/B test planned for Q1 2025 to validate against Variant A with analytics cohorts
+- Feature flag: `onboardingCopy` → defaults to `'B'`
+- Copy can be hotswapped without code changes via feature flag toggle
+
+**Related Story IDs**: STREAM3-007
+
+---
+
+## Decision Timeline
+
+| Date | Decision | Stakeholders |
+|------|----------|--------------|
+| 2025-01-15 | Storybook demos completed for all variants | Stream 3 Dev Team |
+| 2025-01-18 | Product/Design review session (Marisa, Avery) | Product, Design |
+| 2025-01-19 | CoachTip Variant B selected | Product, Design, Science |
+| 2025-01-20 | Weekly Review hybrid model proposed | Product, Dev |
+| 2025-01-21 | Onboarding Copy Variant B selected | Product, Marketing |
+| 2025-01-21 | Integration complete, PR opened | Stream 3 Dev Team |
+
+---
+
 ## CoachTip Component
 
 ### Design Challenge

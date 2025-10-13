@@ -124,3 +124,7 @@ export interface OnboardingContextType {
 
 // Export all schema modules (types and runtime validators)
 export * from './schemas';
+
+// Stream 3: UI Prototypes - Backend API contracts
+export * from './coach-tip';
+export * from './weekly-review';
