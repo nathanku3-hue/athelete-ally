@@ -21,6 +21,7 @@ import { DatabaseOptimizer } from './optimization/database-optimizer.js';
 // 使用内置的健康检查功能
 import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
 import apiDocsRoutes from './routes/api-docs.js';
+import { movementCurationRoutes } from './routes/movement-curation.js';
 // Error handling and performance monitoring integrated into server hooks
 // 使用统一的shared包组件
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
@@ -91,6 +92,9 @@ server.addHook('onReady', async () => {
     // 注册增强计划API路由
     await server.register(enhancedPlanRoutes);
     server.log.info('enhanced plan routes registered');
+    
+    await server.register(movementCurationRoutes, { prefix: '/api/internal/curation' });
+    server.log.info('movement curation routes registered');
     
     // 注册API文档路由
     await server.register(apiDocsRoutes);
