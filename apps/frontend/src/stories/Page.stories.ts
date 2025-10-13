@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
+// eslint-disable-next-line import/no-internal-modules
 import { expect, userEvent, within } from 'storybook/test';
 
 import { Page } from './Page';

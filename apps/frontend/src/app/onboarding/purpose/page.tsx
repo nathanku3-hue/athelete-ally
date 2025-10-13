@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// eslint-disable-next-line import/no-internal-modules
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
@@ -70,9 +71,7 @@ const NotificationModal = ({ onClose }: { onClose: () => void }) => {
     
     const handleEmailSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (process.env.NODE_ENV === 'development') {
-            console.log("Email submitted for notification.");
-        }
+        // Email notification submitted (removed console.log for lint compliance)
         onClose(); // 提交後關閉彈窗
     };
 

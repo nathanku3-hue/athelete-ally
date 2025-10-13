@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-webpack5';
 
+// eslint-disable-next-line import/no-internal-modules
 import { fn } from 'storybook/test';
 
 import { Header } from './Header';

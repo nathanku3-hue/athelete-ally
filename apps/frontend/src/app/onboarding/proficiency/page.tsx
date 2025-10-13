@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// eslint-disable-next-line import/no-internal-modules
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
