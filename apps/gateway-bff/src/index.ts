@@ -11,6 +11,51 @@ import { config } from './config.js';
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
 import { registerMagicSliceRoutes } from './lib/routes.js';
+import { isFeatureEnabled, closeFeatureFlags } from './lib/featureFlags.js';
+
+type ProxyOptions = {
+  method?: string;
+  body?: unknown;
+};
+
+const forwardToPlanningEngine = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+  path: string,
+  options: ProxyOptions = {},
+) => {
+  try {
+    const headers: Record<string, string> = {};
+    const authHeader = request.headers.authorization;
+    if (authHeader) {
+      headers.Authorization = String(authHeader);
+    }
+
+    let body: string | undefined;
+    const method = options.method ?? (options.body ? 'POST' : 'GET');
+    if (options.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(options.body);
+    }
+
+    const response = await fetch(`${config.PLANNING_ENGINE_URL}${path}`, {
+      method,
+      headers,
+      body,
+    });
+
+    const text = await response.text();
+    try {
+      const json = text ? JSON.parse(text) : {};
+      return reply.code(response.status).send(json);
+    } catch {
+      return reply.code(response.status).send(text);
+    }
+  } catch (err) {
+    request.log.error({ err, path }, 'planning engine proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
+  }
+};
 
 const hasCuratorAccess = (request: FastifyRequest) => {
   const user = (request as unknown as { user?: { role?: string } }).user;
@@ -107,6 +152,10 @@ await server.register(swaggerUi, { routePrefix: '/api/docs', uiConfig: { docExpa
 
 // Register Magic Slice routes for frontend hooks
 registerMagicSliceRoutes(server);
+
+server.addHook('onClose', async () => {
+  await closeFeatureFlags();
+});
 
 // Root welcome
 server.get('/', async () => ({ message: 'Welcome to the API!' }));
@@ -424,6 +473,78 @@ server.get('/api/v1/workouts/summary', async (request, reply) => {
     try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
   } catch (err) {
     request.log.error({ err }, 'workout summary proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
+  }
+});
+
+server.post('/api/v1/workouts/:planId/compress', async (request, reply) => {
+  try {
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { planId } = request.params as { planId: string };
+    const payload = {
+      ...(request.body as Record<string, unknown> | undefined),
+      userId: user.userId,
+    };
+
+    return forwardToPlanningEngine(
+      request,
+      reply,
+      `/api/v1/plans/${encodeURIComponent(planId)}/compress`,
+      { method: 'POST', body: payload },
+    );
+  } catch (err) {
+    request.log.error({ err }, 'time crunch proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
+  }
+});
+
+server.get('/api/v1/workouts/:planId/sessions/:sessionId/time-crunch', async (request, reply) => {
+  try {
+    const user = (request as any).user;
+    if (!user?.userId) return reply.code(401).send({ error: 'unauthorized' });
+    const { planId, sessionId } = request.params as { planId: string; sessionId: string };
+
+    const uiFlagEnabled = await isFeatureEnabled('feature.v1_planning_time_crunch_ui', false);
+    if (!uiFlagEnabled) {
+      return reply.send({
+        flagEnabled: false,
+        uiFlagEnabled,
+        planId,
+        sessionId,
+      });
+    }
+
+    const headers: Record<string, string> = {};
+    const authHeader = request.headers.authorization;
+    if (authHeader) {
+      headers.Authorization = String(authHeader);
+    }
+
+    const url = `${config.PLANNING_ENGINE_URL}/api/v1/plans/${encodeURIComponent(
+      planId,
+    )}/sessions/${encodeURIComponent(sessionId)}/time-crunch?userId=${encodeURIComponent(user.userId)}`;
+    const response = await fetch(url, { headers });
+    const text = await response.text();
+
+    let payload: any;
+    try {
+      payload = text ? JSON.parse(text) : {};
+    } catch {
+      payload = text;
+    }
+
+    if (!response.ok) {
+      return reply.code(response.status).send(payload);
+    }
+
+    if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+      payload.uiFlagEnabled = uiFlagEnabled;
+    }
+
+    return reply.code(200).send(payload);
+  } catch (err) {
+    request.log.error({ err }, 'time crunch status proxy failed');
     return reply.code(502).send({ error: 'bad_gateway' });
   }
 });

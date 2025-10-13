@@ -90,6 +90,25 @@ class TrainingAPI {
     });
   }
 
+  async getTimeCrunchStatus(planId: string, sessionId: string) {
+    return this.request(`/api/v1/workouts/${planId}/sessions/${sessionId}/time-crunch`);
+  }
+
+  async compressSession(
+    planId: string,
+    payload: {
+      sessionId: string;
+      targetMinutes: number;
+      source?: string;
+      reason?: string;
+    },
+  ) {
+    return this.request(`/api/v1/workouts/${planId}/compress`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
   // 动作相关
   async getExercises() {
     return this.request('/api/v1/exercises');
@@ -117,6 +136,5 @@ class TrainingAPI {
 }
 
 export const trainingAPI = new TrainingAPI();
-
 
 

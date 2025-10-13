@@ -87,10 +87,16 @@ model Session {
   dayOfWeek Int      // 1-7 (Monday-Sunday)
   name      String?
   duration  Int?     // minutes
-  
+  isTimeCrunchActive Boolean  @default(false)
+  timeCrunchMinutes   Int?
+  timeCrunchAppliedAt DateTime?
+  compressedPlan      Json?
+  compressionDiff     Json?
+  compressionSummary  String?
+
   // Relations
   exercises Exercise[]
-  
+
   @@map("sessions")
 }
 
@@ -258,6 +264,7 @@ model MovementStaging {
 
   @@unique([slug])
   @@index([status])
+  @@index([updatedAt])
   @@index([createdById])
   @@index([reviewerId])
   @@map("movement_staging")
@@ -274,7 +281,7 @@ model MovementLibrary {
   equipment   String[] @default([])
   primaryMuscles String[] @default([])
   secondaryMuscles String[] @default([])
-  recommendedRpe Float?
+  recommendedRpe Float
   progressionIds String[] @default([])
   regressionIds String[] @default([])
   tags        String[] @default([])
@@ -289,6 +296,8 @@ model MovementLibrary {
   auditLogs   MovementAuditLog[]
   publishedDrafts MovementStaging[] @relation("MovementPublication")
 
+  @@index([updatedAt])
+  @@index([slug, publishedAt(sort: Desc)], map: "movement_library_slug_published_at_idx")
   @@index([classification])
   @@index([publishedAt])
   @@map("movement_library")
@@ -316,5 +325,3 @@ model MovementAuditLog {
   @@index([action])
   @@map("movement_audit_log")
 }
-
-
