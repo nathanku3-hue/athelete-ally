@@ -379,7 +379,7 @@ Integration test documentation includes verification of:
 **Files Retained** (19 untracked files - all intentional):
 
 *Documentation*:
-- `MISSION_BRIEF.md` - Mission documentation for autonomous execution
+- `docs/archive/sessions/MISSION_BRIEF.md` - Mission documentation for autonomous execution
 
 *Patch History* (9 files):
 - `patches/_telemetry-bootstrap.patch` - Phase 1
@@ -443,7 +443,7 @@ Integration test documentation includes verification of:
 2. Decide which new files to commit:
    - Recommend: hrv-consumer.test.ts, INTEGRATION_TESTS.md, .env.example
    - Consider: NATS diagnostic scripts (useful tools)
-   - Optional: MISSION_BRIEF.md and patches/ (historical documentation)
+   - Optional: docs/archive/sessions/MISSION_BRIEF.md and patches/ (historical documentation)
 3. Create commit(s) for the work
 4. Consider creating PR to merge release/phase3-foundation → main
 
@@ -464,7 +464,7 @@ Integration test documentation includes verification of:
 
 ## 📋 Metadata
 
-- **Mission**: MISSION_BRIEF.md (2025-10-01)
+- **Mission**: docs/archive/sessions/MISSION_BRIEF.md (2025-10-01)
 - **Branch**: release/phase3-foundation
 - **Started**: 2025-10-01
 - **Last Updated**: 2025-10-01 (Phase 4 completed)
