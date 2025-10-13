@@ -458,7 +458,25 @@ Integration test documentation includes verification of:
 
 ## 🔄 Active Tasks
 
-(No active tasks - all phases complete)
+### P0 - Stream B: H0 Schema Alignment & Validation Plan
+- 優先級: P0
+- 任務描述: 整理 movement staging/library schema 與 audit 流程，向 Data Platform 提出審核請求並補齊 docs/streams/B 記錄
+- 依賴項: movement-curation-runbook baseline
+- 狀態: [x] Done
+- 嘗試次數: 1
+- 補丁文件: patches/20251013_planning_schema_alignment.patch
+- 產出與筆記: Added enforcement around library recommended RPE, provisioned updated_at indexes for staging/library tables, added slug+published_at composite index migration, and blocked publish without RPE. Ran `npm run type-check --workspace @athlete-ally/planning-engine` and lint (warnings only).
+- 驗證標準: Prisma schema/migration matches DP feedback; CLI publish rejects missing RPE in staging.
+
+### P0 - Stream B: Gateway BFF Curation Proxy
+- 優先級: P0
+- 任務描述: 在 gateway-bff 暴露 /api/internal/curation/** 代理，轉發到 planning-engine 並維持 curator JWT 驗證
+- 依賴項: planning-engine movement-curation routes
+- 狀態: [x] Done
+- 嘗試次數: 1
+- 補丁文件: patches/20251013_gateway_bff_curation_proxy.patch
+- 產出與筆記: Refactored curation proxy into `src/lib/curation/registerCurationRoutes.ts`, updated `index.ts` wiring, and added contract coverage via `curation-proxy.contract.test.ts`. Ran `npm run type-check --workspace @athlete-ally/gateway-bff` and `npm run lint --workspace @athlete-ally/gateway-bff` (lint returns existing warnings only).
+- 驗證標準: 新增單元測試覆蓋行為；手動 curl 透過 gateway 返回 staging/published 資料成功
 
 ---
 

@@ -185,6 +185,61 @@ export function useTrainingAPI() {
     }
   }, [setLoading, setError]);
 
+  const loadTimeCrunchStatus = useCallback(async (planId: string, sessionId: string) => {
+    try {
+      setError(null);
+      const response = await trainingAPI.getTimeCrunchStatus(planId, sessionId);
+      const session = (response as any)?.session;
+      const timeCrunch = (response as any)?.timeCrunch;
+      if (session) {
+        updateSession(sessionId, {
+          duration: session.duration ?? 0,
+          isTimeCrunchActive: timeCrunch?.isActive ?? false,
+          timeCrunchMinutes: timeCrunch?.minutes ?? null,
+          compressionSummary: timeCrunch?.summary ?? null,
+          compressionDiff: timeCrunch?.diff ?? null,
+          compressedSession: timeCrunch?.compressedSession ?? null,
+        });
+      }
+      return response;
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to load time crunch status');
+      throw error;
+    }
+  }, [setError, updateSession]);
+
+  const compressSession = useCallback(async (planId: string, payload: {
+    sessionId: string;
+    targetMinutes: number;
+    source?: string;
+    reason?: string;
+  }) => {
+    try {
+      setError(null);
+      const response = await trainingAPI.compressSession(planId, payload);
+      const { sessionId } = payload;
+      const compressedSession = (response as any)?.compressedSession;
+      const diff = (response as any)?.diff;
+      const summary = (response as any)?.summary;
+      if (compressedSession) {
+        const achievedMinutes = (response as any)?.achievedMinutes ?? compressedSession.duration;
+        const targetMinutes = (response as any)?.targetMinutes ?? payload.targetMinutes;
+        updateSession(sessionId, {
+          duration: Math.round(achievedMinutes),
+          isTimeCrunchActive: compressedSession.isTimeCrunchActive ?? false,
+          timeCrunchMinutes: Math.round(targetMinutes),
+          compressionSummary: summary ?? null,
+          compressionDiff: diff ?? null,
+          compressedSession,
+        });
+      }
+      return response;
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to compress session');
+      throw error;
+    }
+  }, [setError, updateSession]);
+
   return {
     // 计划相关
     loadPlans,
@@ -201,7 +256,7 @@ export function useTrainingAPI() {
     startSession,
     completeSession,
     completeExercise,
+    loadTimeCrunchStatus,
+    compressSession,
   };
 }
-
-

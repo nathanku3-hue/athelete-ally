@@ -1,9 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
+import { Button } from '@/components/ui/button';
+import { TimeCrunchModal } from '@/components/training/TimeCrunchModal';
+import { TimeCrunchSummary } from '@/components/training/TimeCrunchSummary';
+import { useTrainingAPI } from '@/hooks/useTrainingAPI';
+import { Loader2 } from 'lucide-react';
 
 // ============================================================================
 // Mock Data & Types
@@ -28,9 +33,11 @@ interface TrainingDay {
   title: string;
   estimatedTime: string;
   exercises: ExerciseDetail[];
+  sessionId?: string;
 }
 
 interface WeeklyPlan {
+  id?: string;
   weekNumber: number;
   theme: string;
   volume: 'Low' | 'Mid' | 'High';
@@ -39,6 +46,7 @@ interface WeeklyPlan {
 }
 
 const MOCK_PLAN_V2: WeeklyPlan = {
+  id: 'mock-plan',
   weekNumber: 1,
   theme: 'Foundation',
   volume: 'Mid',
@@ -48,19 +56,127 @@ const MOCK_PLAN_V2: WeeklyPlan = {
       day: 'Monday',
       title: 'Upper Body Strength',
       estimatedTime: '60 min',
+      sessionId: 'session_mock_monday',
       exercises: [
         { id: 'ex1', name: 'Bench Press', sets: 4, reps: 8, plannedWeight: 135, cue: 'Heavy & Focused', description: 'Primary horizontal pushing movement.', videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA' },
         { id: 'ex2', name: 'Pull Ups', sets: 4, reps: 10, plannedWeight: 0, cue: 'Slow & Controlled', description: 'Vertical pulling movement for lats and biceps.', videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA' },
         { id: 'ex3', name: 'Dumbbell Rows', sets: 3, reps: 12, plannedWeight: 45, cue: 'Slow & Controlled', description: 'Horizontal pulling for back thickness.', videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA' },
       ],
     },
-    { day: 'Wednesday', title: 'Lower Body Power', estimatedTime: '75 min', exercises: [ { id: 'ex4', name: 'Barbell Squat', sets: 5, reps: 5, plannedWeight: 225, cue: 'Heavy & Focused', description: 'The king of lower body exercises.', videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA' } ] },
-    { day: 'Friday', title: 'Full Body Hypertrophy', estimatedTime: '70 min', exercises: [ { id: 'ex7', name: 'Deadlift', sets: 3, reps: 5, plannedWeight: 275, cue: 'Heavy & Focused', description: 'Full-body strength builder.', videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA' } ] },
-    { day: 'Saturday', title: 'Active Recovery', estimatedTime: '30 min', exercises: [] },
+    {
+      day: 'Wednesday',
+      title: 'Lower Body Power',
+      estimatedTime: '75 min',
+      sessionId: 'session_mock_wednesday',
+      exercises: [
+        {
+          id: 'ex4',
+          name: 'Barbell Squat',
+          sets: 5,
+          reps: 5,
+          plannedWeight: 225,
+          cue: 'Heavy & Focused',
+          description: 'The king of lower body exercises.',
+          videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA',
+        },
+      ],
+    },
+    {
+      day: 'Friday',
+      title: 'Full Body Hypertrophy',
+      estimatedTime: '70 min',
+      sessionId: 'session_mock_friday',
+      exercises: [
+        {
+          id: 'ex7',
+          name: 'Deadlift',
+          sets: 3,
+          reps: 5,
+          plannedWeight: 275,
+          cue: 'Heavy & Focused',
+          description: 'Full-body strength builder.',
+          videoThumbnailUrl: 'https://placehold.co/100x100/1E293B/FFFFFF/png?text=AA',
+        },
+      ],
+    },
+    {
+      day: 'Saturday',
+      title: 'Active Recovery',
+      estimatedTime: '30 min',
+      sessionId: 'session_mock_saturday',
+      exercises: [],
+    },
   ],
 };
 
 const ALL_DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+interface NormalizedTimeCrunchState {
+    flagEnabled: boolean;
+    uiFlagEnabled: boolean;
+    summary: string | null;
+    minutes: number | null;
+    diff: {
+        removedExercises: Array<{
+            id: string;
+            name: string;
+            estimatedMinutes: number;
+            priority: 'low' | 'medium';
+        }>;
+        reducedExercises: Array<{
+            id: string;
+            name: string;
+            fromSets: number;
+            toSets: number;
+            priority: 'medium' | 'high';
+            minutesSaved: number;
+        }>;
+        totalMinutesSaved: number;
+        originalDuration: number;
+        achievedDuration: number;
+        targetDuration: number;
+    } | null;
+    status: string | null;
+}
+
+const emptyTimeCrunchState: NormalizedTimeCrunchState = {
+    flagEnabled: false,
+    uiFlagEnabled: false,
+    summary: null,
+    minutes: null,
+    diff: null,
+    status: null,
+};
+
+function normalizeTimeCrunchResponse(data: any): NormalizedTimeCrunchState {
+    if (!data || typeof data !== 'object') {
+        return emptyTimeCrunchState;
+    }
+
+    const uiFlagEnabled = data.uiFlagEnabled !== undefined ? Boolean(data.uiFlagEnabled) : true;
+    const flagEnabled = data.flagEnabled !== undefined ? Boolean(data.flagEnabled) : true;
+
+    if (data.timeCrunch) {
+        const tc = data.timeCrunch ?? {};
+        return {
+            flagEnabled,
+            uiFlagEnabled,
+            summary: tc.summary ?? null,
+            minutes: tc.minutes ?? null,
+            diff: tc.diff ?? null,
+            status: tc.isActive ? 'compressed' : 'idle',
+        };
+    }
+
+    return {
+        flagEnabled,
+        uiFlagEnabled,
+        summary: data.summary ?? null,
+        minutes: data.targetMinutes ?? data.achievedMinutes ?? null,
+        diff: data.diff ?? null,
+        status: data.status ?? null,
+    };
+}
 
 // ============================================================================
 // UI Components
@@ -170,6 +286,13 @@ export default function TrainingPlanPageV2_Fixed() {
     const [selectedDay, setSelectedDay] = useState(ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday");
     const [plan, setPlan] = useState<WeeklyPlan | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [planId, setPlanId] = useState<string | null>(null);
+    const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+    const [timeCrunchModalOpen, setTimeCrunchModalOpen] = useState(false);
+    const [timeCrunchState, setTimeCrunchState] = useState<NormalizedTimeCrunchState>(emptyTimeCrunchState);
+    const [timeCrunchLoading, setTimeCrunchLoading] = useState(false);
+    const [timeCrunchError, setTimeCrunchError] = useState<string | null>(null);
+    const { loadTimeCrunchStatus, compressSession } = useTrainingAPI();
 
     // 加载用户偏好
     useEffect(() => {
@@ -220,11 +343,14 @@ export default function TrainingPlanPageV2_Fixed() {
                 }
                 
                 setPlan(planData);
-                
+                setPlanId(planData.id || null);
+
                 // 设置默认选中的日期
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
                 const todayPlan = planData.trainingDays.find(d => d.day === today);
                 setSelectedDay(todayPlan?.day || planData.trainingDays[0]?.day || today);
+                setSelectedSessionId(todayPlan?.sessionId || planData.trainingDays[0]?.sessionId || null);
+                setTimeCrunchState(emptyTimeCrunchState);
                 
             } catch (error) {
                 // Log error for debugging (in development)
@@ -239,10 +365,13 @@ export default function TrainingPlanPageV2_Fixed() {
                     console.log('Falling back to mock data...');
                 }
                 setPlan(MOCK_PLAN_V2);
+                setPlanId(MOCK_PLAN_V2.id || 'mock-plan');
                 
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
                 const fallbackTodayPlan = MOCK_PLAN_V2.trainingDays.find(d => d.day === today);
                 setSelectedDay(fallbackTodayPlan?.day || MOCK_PLAN_V2.trainingDays[0]?.day || today);
+                setSelectedSessionId(fallbackTodayPlan?.sessionId || MOCK_PLAN_V2.trainingDays[0]?.sessionId || null);
+                setTimeCrunchState(emptyTimeCrunchState);
             } finally {
                 setIsLoading(false);
             }
@@ -250,6 +379,43 @@ export default function TrainingPlanPageV2_Fixed() {
 
         fetchPlanData();
     }, []);
+
+    useEffect(() => {
+        if (!planId || !selectedSessionId) {
+            return;
+        }
+
+        let cancelled = false;
+        setTimeCrunchState(emptyTimeCrunchState);
+        const fetchStatus = async () => {
+            try {
+                setTimeCrunchLoading(true);
+                setTimeCrunchError(null);
+                const result = await loadTimeCrunchStatus(planId, selectedSessionId);
+                if (cancelled) {
+                    return;
+                }
+                const normalized = normalizeTimeCrunchResponse(result);
+                setTimeCrunchState(normalized);
+            } catch (err) {
+                if (cancelled) {
+                    return;
+                }
+                setTimeCrunchError(err instanceof Error ? err.message : 'Unable to load Time Crunch status');
+                setTimeCrunchState(emptyTimeCrunchState);
+            } finally {
+                if (!cancelled) {
+                    setTimeCrunchLoading(false);
+                }
+            }
+        };
+
+        fetchStatus();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [planId, selectedSessionId, loadTimeCrunchStatus]);
 
     // 处理单位切换并保存偏好
     const handleUnitChange = async (newUnit: Unit) => {
@@ -299,6 +465,34 @@ export default function TrainingPlanPageV2_Fixed() {
 
     const todayString = ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday";
 
+    const handleOpenTimeCrunch = () => {
+        setTimeCrunchError(null);
+        setTimeCrunchModalOpen(true);
+    };
+
+    const handleTimeCrunchSubmit = async (minutes: number) => {
+        if (!planId || !selectedSessionId) {
+            return;
+        }
+
+        try {
+            setTimeCrunchLoading(true);
+            setTimeCrunchError(null);
+            const result = await compressSession(planId, {
+                sessionId: selectedSessionId,
+                targetMinutes: minutes,
+                source: 'cta',
+            });
+            const normalized = normalizeTimeCrunchResponse(result);
+            setTimeCrunchState(normalized);
+            setTimeCrunchModalOpen(false);
+        } catch (err) {
+            setTimeCrunchError(err instanceof Error ? err.message : 'Time Crunch Mode request failed');
+        } finally {
+            setTimeCrunchLoading(false);
+        }
+    };
+
     // 错误状态处理
     if (error && !plan) {
         return (
@@ -318,6 +512,13 @@ export default function TrainingPlanPageV2_Fixed() {
     }
 
     return (
+        <>
+        <TimeCrunchModal
+            open={timeCrunchModalOpen}
+            onClose={() => setTimeCrunchModalOpen(false)}
+            onSubmit={handleTimeCrunchSubmit}
+            defaultMinutes={timeCrunchState.minutes ?? 30}
+        />
         <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
                 {isLoading ? (
@@ -334,12 +535,26 @@ export default function TrainingPlanPageV2_Fixed() {
                             {ALL_DAYS_OF_WEEK.map(day => {
                                 const trainingDay = plan?.trainingDays.find(d => d.day === day);
                                 return trainingDay ? (
-                                    <button key={day} onClick={() => setSelectedDay(day)} className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${selectedDay === day ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-800 hover:bg-gray-700'}`}>
+                                    <button
+                                        key={day}
+                                        onClick={() => {
+                                            setSelectedDay(day);
+                                            setSelectedSessionId(trainingDay.sessionId || null);
+                                        }}
+                                        className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${selectedDay === day ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-800 hover:bg-gray-700'}`}
+                                    >
                                         <p className="font-bold flex justify-between items-center">{day} {day === todayString && <span className="text-xs font-semibold bg-yellow-400 text-black px-2 py-0.5 rounded-full">Today</span>}</p>
                                         <p className="text-sm">{trainingDay.title}</p>
                                     </button>
                                 ) : (
-                                    <div key={day} onClick={() => handleRestDayClick(day)} className="w-full text-left p-4 rounded-lg bg-gray-800/50 opacity-60 cursor-pointer transition-all duration-200 hover:opacity-100 hover:bg-gray-700/50">
+                                    <div
+                                        key={day}
+                                        onClick={() => {
+                                            handleRestDayClick(day);
+                                            setSelectedSessionId(null);
+                                        }}
+                                        className="w-full text-left p-4 rounded-lg bg-gray-800/50 opacity-60 cursor-pointer transition-all duration-200 hover:opacity-100 hover:bg-gray-700/50"
+                                    >
                                         <p className="font-bold flex justify-between items-center text-gray-400">{day} {day === todayString && <span className="text-xs font-semibold bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full">Today</span>}</p>
                                         <p className="text-sm text-gray-500">Rest</p>
                                     </div>
@@ -355,6 +570,46 @@ export default function TrainingPlanPageV2_Fixed() {
                                 <div className="bg-gray-800/50 p-6 rounded-lg">
                                     <h2 className="text-2xl font-bold mb-1">{dayDetails.title}</h2>
                                     <p className="text-gray-400 mb-6">Estimated Time: {dayDetails.estimatedTime}</p>
+                                    {selectedSessionId && timeCrunchState.uiFlagEnabled ? (
+                                        <div className="mb-6 rounded-lg border border-blue-500/30 bg-blue-500/5 p-4">
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                                <div>
+                                                    <p className="text-sm text-blue-200/80">Short on Time?</p>
+                                                    <h3 className="text-lg font-semibold text-blue-100">Time Crunch Mode 保留核心動作並自動壓縮課表</h3>
+                                                </div>
+                                                <Button
+                                                    size="sm"
+                                                    variant={timeCrunchState.flagEnabled ? 'default' : 'outline'}
+                                                    onClick={handleOpenTimeCrunch}
+                                                    disabled={timeCrunchLoading || !timeCrunchState.flagEnabled}
+                                                >
+                                                    {timeCrunchLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    {timeCrunchState.flagEnabled ? '壓縮課表' : '暫不可用'}
+                                                </Button>
+                                            </div>
+                                            {timeCrunchError && (
+                                                <p className="mt-2 text-sm text-red-300">{timeCrunchError}</p>
+                                            )}
+                                            {timeCrunchLoading && !timeCrunchState.summary && !timeCrunchError ? (
+                                                <p className="mt-3 flex items-center gap-2 text-sm text-blue-200/80">
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    載入壓縮建議中...
+                                                </p>
+                                            ) : timeCrunchState.flagEnabled && timeCrunchState.summary ? (
+                                                <div className="mt-4">
+                                                    <TimeCrunchSummary
+                                                        summary={timeCrunchState.summary}
+                                                        minutes={timeCrunchState.minutes}
+                                                        diff={timeCrunchState.diff}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <p className="mt-3 text-sm text-blue-200/80">
+                                                    AI 會保留核心訓練，移除低優先度動作並調整組數，讓你在有限時間內仍能完成關鍵訓練。
+                                                </p>
+                                            )}
+                                        </div>
+                                    ) : null}
                                     <div className="space-y-4">
                                         {dayDetails.exercises.map(ex => <ExerciseCard key={ex.id} exercise={ex} unit={unit} />)}
                                     </div>
@@ -365,5 +620,6 @@ export default function TrainingPlanPageV2_Fixed() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

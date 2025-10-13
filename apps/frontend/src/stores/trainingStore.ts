@@ -27,6 +27,49 @@ interface TrainingSession {
   status: 'pending' | 'in_progress' | 'completed' | 'skipped';
   startedAt?: string;
   completedAt?: string;
+  isTimeCrunchActive?: boolean;
+  timeCrunchMinutes?: number | null;
+  compressionSummary?: string | null;
+  compressionDiff?: {
+    removedExercises: Array<{
+      id: string;
+      name: string;
+      estimatedMinutes: number;
+      priority: 'low' | 'medium';
+    }>;
+    reducedExercises: Array<{
+      id: string;
+      name: string;
+      fromSets: number;
+      toSets: number;
+      priority: 'medium' | 'high';
+      minutesSaved: number;
+    }>;
+    totalMinutesSaved: number;
+    originalDuration: number;
+    achievedDuration: number;
+    targetDuration: number;
+  } | null;
+  compressedSession?: {
+    sessionId: string;
+    dayOfWeek: number;
+    name: string | null;
+    duration: number;
+    isTimeCrunchActive: boolean;
+    exercises: Array<{
+      id: string;
+      name: string;
+      category: string | null;
+      sets: number | null;
+      reps: string | null;
+      weight: string | null;
+      notes: string | null;
+      order: number;
+      priority: 'high' | 'medium' | 'low';
+      estimatedMinutes: number;
+    }>;
+    notes: string | null;
+  } | null;
 }
 
 interface Exercise {
@@ -144,6 +187,5 @@ export const useTrainingStore = create<TrainingState>()(
     }
   )
 );
-
 
 
