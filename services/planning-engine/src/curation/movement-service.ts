@@ -420,6 +420,14 @@ export class MovementCurationService {
         throw new MovementCurationError('Draft must be approved before publishing');
       }
 
+      if (draft.recommendedRpe === null || draft.recommendedRpe === undefined) {
+        movementCurationMetrics.recordPublishAttempt('failure', {
+          reason: 'missing_recommended_rpe',
+          from: draft.status,
+        });
+        throw new MovementCurationError('Draft must include a recommended RPE before publishing');
+      }
+
       const latestVersion = await tx.movementLibrary.findFirst({
         where: { slug: draft.slug },
         orderBy: { version: 'desc' },
