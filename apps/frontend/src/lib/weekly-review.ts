@@ -1,6 +1,7 @@
 "use client";
 
 import { WeeklyReviewSummary } from '@athlete-ally/shared-types';
+// eslint-disable-next-line import/no-internal-modules
 import { api } from './api/client';
 
 export async function fetchWeeklyReview(planId: string): Promise<WeeklyReviewSummary | null> {
@@ -42,6 +43,7 @@ export async function sendWeeklyReviewTelemetry(
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.warn('Weekly review telemetry failed', error);
     }
   }

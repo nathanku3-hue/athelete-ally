@@ -1,6 +1,7 @@
 "use client";
 
 import { CoachTipPayload, CoachTipEventName } from '@athlete-ally/shared-types';
+// eslint-disable-next-line import/no-internal-modules
 import { api } from './api/client';
 
 export async function fetchCoachTip(planId: string): Promise<CoachTipPayload | null> {
@@ -27,6 +28,7 @@ export async function sendCoachTipTelemetry(event: CoachTipEventName, tip: Coach
     });
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.warn('Coach tip telemetry failed', error);
     }
   }

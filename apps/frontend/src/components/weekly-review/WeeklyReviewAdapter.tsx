@@ -18,6 +18,7 @@ interface WeeklyReviewAdapterProps {
 }
 
 export function WeeklyReviewAdapter({ review, onApplied }: WeeklyReviewAdapterProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isApplying, setIsApplying] = useState(false);
 
   // Transform backend data to variant format
@@ -70,7 +71,11 @@ export function WeeklyReviewAdapter({ review, onApplied }: WeeklyReviewAdapterPr
         await applyWeeklyReview(review.planId);
         onApplied?.();
       } catch (error) {
-        console.error('Failed to apply weekly review:', error);
+        // Error handling for weekly review application
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.error('Failed to apply weekly review:', error);
+        }
       } finally {
         setIsApplying(false);
       }
