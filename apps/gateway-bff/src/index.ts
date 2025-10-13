@@ -1,7 +1,7 @@
 // Initialize OpenTelemetry first
 import './telemetry.js';
 import 'dotenv/config';
-import Fastify from 'fastify';
+import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
@@ -11,6 +11,56 @@ import { config } from './config.js';
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { userRateLimitMiddleware, strictRateLimitMiddleware } from './middleware/rateLimiter.js';
 import { registerMagicSliceRoutes } from './lib/routes.js';
+
+const hasCuratorAccess = (request: FastifyRequest) => {
+  const user = (request as unknown as { user?: { role?: string } }).user;
+  if (!user) return false;
+  return user.role === 'curator' || user.role === 'admin';
+};
+
+type ProxyOptions = {
+  method?: string;
+  body?: unknown;
+};
+
+const forwardToPlanningEngine = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+  path: string,
+  options: ProxyOptions = {},
+) => {
+  try {
+    const headers: Record<string, string> = {};
+    const authHeader = request.headers.authorization;
+    if (authHeader) {
+      headers.Authorization = String(authHeader);
+    }
+
+    let body: string | undefined;
+    const method = options.method ?? (options.body ? 'POST' : 'GET');
+    if (options.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify(options.body);
+    }
+
+    const response = await fetch(`${config.PLANNING_ENGINE_URL}${path}`, {
+      method,
+      headers,
+      body,
+    });
+
+    const text = await response.text();
+    try {
+      const json = text ? JSON.parse(text) : {};
+      return reply.code(response.status).send(json);
+    } catch {
+      return reply.code(response.status).send(text);
+    }
+  } catch (err) {
+    request.log.error({ err, path }, 'movement curation proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
+  }
+};
 
 // Create server
 const server = Fastify({ logger: true });
@@ -155,6 +205,183 @@ server.get('/api/v1/plans/status', async (request, reply) => {
     request.log.error({ err }, 'plan status proxy failed');
     return reply.code(502).send({ error: 'bad_gateway' });
   }
+});
+
+const curatorForbidden = (reply: FastifyReply) =>
+  reply.code(403).send({ error: 'forbidden', message: 'Curator access required' });
+
+server.get('/api/internal/curation/movements', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const query = (request.query ?? {}) as {
+    status?: unknown;
+    search?: unknown;
+    tag?: unknown;
+    reviewerId?: unknown;
+  };
+
+  const toArray = (value: unknown) => {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item)).filter((item) => item.length > 0);
+    }
+    if (value === undefined || value === null) return [];
+    const stringified = String(value).trim();
+    return stringified ? [stringified] : [];
+  };
+
+  const params = new URLSearchParams();
+  for (const statusValue of toArray(query.status)) {
+    params.append('status', statusValue);
+  }
+
+  const search = typeof query.search === 'string' ? query.search.trim() : undefined;
+  const tag = typeof query.tag === 'string' ? query.tag.trim() : undefined;
+  const reviewerId = typeof query.reviewerId === 'string' ? query.reviewerId.trim() : undefined;
+
+  if (search) params.set('search', search);
+  if (tag) params.set('tag', tag);
+  if (reviewerId) params.set('reviewerId', reviewerId);
+
+  const qs = params.toString();
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements${qs ? `?${qs}` : ''}`,
+  );
+});
+
+server.get('/api/internal/curation/movements/:id', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const { id } = (request.params ?? {}) as { id?: string };
+  if (!id) {
+    return reply.code(400).send({ error: 'invalid_request', message: 'Movement id is required' });
+  }
+
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements/${encodeURIComponent(id)}`,
+  );
+});
+
+server.post('/api/internal/curation/movements', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  return forwardToPlanningEngine(request, reply, '/api/internal/curation/movements', {
+    method: 'POST',
+    body: request.body ?? {},
+  });
+});
+
+server.patch('/api/internal/curation/movements/:id', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const { id } = (request.params ?? {}) as { id?: string };
+  if (!id) {
+    return reply.code(400).send({ error: 'invalid_request', message: 'Movement id is required' });
+  }
+
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements/${encodeURIComponent(id)}`,
+    { method: 'PATCH', body: request.body ?? {} },
+  );
+});
+
+server.post('/api/internal/curation/movements/:id/submit', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const { id } = (request.params ?? {}) as { id?: string };
+  if (!id) {
+    return reply.code(400).send({ error: 'invalid_request', message: 'Movement id is required' });
+  }
+
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements/${encodeURIComponent(id)}/submit`,
+    { method: 'POST', body: request.body ?? {} },
+  );
+});
+
+server.post('/api/internal/curation/movements/:id/request-changes', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const { id } = (request.params ?? {}) as { id?: string };
+  if (!id) {
+    return reply.code(400).send({ error: 'invalid_request', message: 'Movement id is required' });
+  }
+
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements/${encodeURIComponent(id)}/request-changes`,
+    { method: 'POST', body: request.body ?? {} },
+  );
+});
+
+server.post('/api/internal/curation/movements/:id/approve', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const { id } = (request.params ?? {}) as { id?: string };
+  if (!id) {
+    return reply.code(400).send({ error: 'invalid_request', message: 'Movement id is required' });
+  }
+
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements/${encodeURIComponent(id)}/approve`,
+    { method: 'POST', body: request.body ?? {} },
+  );
+});
+
+server.post('/api/internal/curation/movements/:id/publish', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const { id } = (request.params ?? {}) as { id?: string };
+  if (!id) {
+    return reply.code(400).send({ error: 'invalid_request', message: 'Movement id is required' });
+  }
+
+  return forwardToPlanningEngine(
+    request,
+    reply,
+    `/api/internal/curation/movements/${encodeURIComponent(id)}/publish`,
+    { method: 'POST', body: request.body ?? {} },
+  );
+});
+
+server.get('/api/internal/curation/library', async (request, reply) => {
+  if (!hasCuratorAccess(request)) {
+    return curatorForbidden(reply);
+  }
+
+  const query = (request.query ?? {}) as { search?: unknown };
+  const search = typeof query.search === 'string' ? query.search.trim() : undefined;
+  const path = `/api/internal/curation/library${
+    search ? `?${new URLSearchParams({ search }).toString()}` : ''
+  }`;
+
+  return forwardToPlanningEngine(request, reply, path);
 });
 
 // Proxy: Exercises list/search -> Exercises Service

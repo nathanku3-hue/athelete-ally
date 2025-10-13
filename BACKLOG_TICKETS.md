@@ -59,6 +59,23 @@ Create Grafana dashboard and alerts for normalize service metrics and DLQ monito
 - [ ] Alert: Consumer lag threshold exceeded
 - [ ] Dashboard: Consumer lag visualization
 
+---
+
+## BUG: Season Validation Parity in Onboarding
+
+**Priority**: Medium  
+**Labels**: `bug`, `frontend`, `contracts`, `streamA`
+
+### Issue
+- Shared schema (`packages/shared-types/src/schemas/onboarding.ts`) requires `competitionDate` when validating step 3 (`season_goals`), but the frontend context permits null season/competition payloads.
+- Mismatch causes inconsistent validation outcomes between backend-safe parsing and client-side navigation, especially when the season step is intentionally skipped in H0.
+
+### Acceptance Criteria
+- [ ] Align shared schema step validation with updated frontend flow (season optional, no forced competition date).
+- [ ] Ensure profile-onboarding service accepts the relaxed payload without manual overrides.
+- [ ] Update onboarding tests (contracts + e2e) to reflect the adjusted season rules.
+- [ ] Document the revised validation contract in `docs/streams/streamA`.
+
 ### Metrics to Monitor
 - `normalize_hrv_messages_total{result,subject,stream,durable}`
 - `dlq_messages_total`
