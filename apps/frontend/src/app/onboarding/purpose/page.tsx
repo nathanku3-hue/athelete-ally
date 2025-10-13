@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// eslint-disable-next-line import/no-internal-modules
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
@@ -70,9 +71,7 @@ const NotificationModal = ({ onClose }: { onClose: () => void }) => {
     
     const handleEmailSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (process.env.NODE_ENV === 'development') {
-            console.log("Email submitted for notification.");
-        }
+        // Email notification submitted (removed console.log for lint compliance)
         onClose(); // 提交後關閉彈窗
     };
 
@@ -155,8 +154,7 @@ export default function PurposePage() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
         <div className="w-full max-w-4xl flex flex-col">
           <div className="text-center mb-10">
-            {/* 更新：顯示為 Step 2 of 5 */}
-            <p className="text-blue-400 font-semibold mb-2">Step 2 of 5</p>
+            <p className="text-blue-400 font-semibold mb-2">Step 1 of 5</p>
             <h1 className="text-4xl md:text-5xl font-bold mb-3">
               What&apos;s Your Training Purpose?
             </h1>

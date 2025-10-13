@@ -4,6 +4,9 @@ import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
+import { scorePlanCandidate } from '../scoring/fixed-weight.js';
+import { isFeatureEnabled } from '../feature-flags/index.js';
+import { PlanScoringSummary } from '../types/scoring.js';
 // import { Prisma } from '../../prisma/generated/client/index.js';
 // 使用统一的日志记录
 // 使用console进行日志记录，避免循环依赖
@@ -232,6 +235,15 @@ export class AsyncPlanGenerator {
     // 生成计划
     const planData = await generateTrainingPlan(request);
 
+    let scoringSummary: PlanScoringSummary | null = null;
+    const scoringEnabled = await isFeatureEnabled('feature.v1_planning_scoring', false);
+
+    if (scoringEnabled) {
+      scoringSummary = scorePlanCandidate(planData, request);
+      (planData as TrainingPlan).scoring = scoringSummary;
+      console.info({ jobId, scoring: scoringSummary.total }, 'Applied fixed-weight scoring to plan candidate');
+    }
+
     // 更新进度
     await this.updateJobStatus(jobId, 'processing', 75);
 
@@ -246,7 +258,12 @@ export class AsyncPlanGenerator {
     await this.publishPlanGeneratedEvent(jobId, request.userId, planData);
 
     // 完成
-    await this.updateJobStatus(jobId, 'completed', 100);
+    await this.updateJobStatus(
+      jobId,
+      'completed',
+      100,
+      scoringSummary ? { resultData: { scoring: scoringSummary } } : undefined
+    );
   }
 
   // 保存计划到数据库
@@ -315,12 +332,23 @@ export class AsyncPlanGenerator {
   private async updateJobStatus(
     jobId: string,
     status: string,
-    progress: number
+    progress: number,
+    extras?: { resultData?: unknown }
   ): Promise<void> {
     try {
+      const data: Record<string, unknown> = {
+        status,
+        progress,
+        updatedAt: new Date(),
+      };
+
+      if (extras && 'resultData' in extras && extras.resultData !== undefined) {
+        data.resultData = extras.resultData;
+      }
+
       await prisma.planJob.updateMany({
         where: { jobId },
-        data: { status, progress, updatedAt: new Date() },
+        data,
       });
     } catch (error) {
       console.warn(`Failed to update job status: ${error} for jobId: ${jobId}`);
