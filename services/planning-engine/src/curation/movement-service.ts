@@ -234,7 +234,15 @@ export class MovementCurationService {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   private async refreshDraftStatusMetrics(tx: TransactionClient) {
-    const grouped = await tx.movementStaging.groupBy({
+    const staging = tx.movementStaging as typeof tx.movementStaging & {
+      groupBy?: (args: unknown) => Promise<Array<{ status: MovementStageStatus; _count: { status: number } }>>;
+    };
+
+    if (typeof staging.groupBy !== 'function') {
+      return;
+    }
+
+    const grouped = await staging.groupBy({
       by: ['status'],
       _count: { status: true },
     });
@@ -248,7 +256,15 @@ export class MovementCurationService {
   }
 
   async synchronizeDraftMetrics() {
-    const grouped = await this.client.movementStaging.groupBy({
+    const staging = this.client.movementStaging as typeof this.client.movementStaging & {
+      groupBy?: (args: unknown) => Promise<Array<{ status: MovementStageStatus; _count: { status: number } }>>;
+    };
+
+    if (typeof staging.groupBy !== 'function') {
+      return;
+    }
+
+    const grouped = await staging.groupBy({
       by: ['status'],
       _count: { status: true },
     });
