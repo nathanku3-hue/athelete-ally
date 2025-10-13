@@ -43,7 +43,8 @@ async function ensureClient(): Promise<LaunchDarkly.LDClient | null> {
       return client;
     })
     .catch((error: unknown) => {
-      log.error({ err: error }, 'Failed to initialize LaunchDarkly client');
+      const err = error instanceof Error ? error : new Error(String(error));
+      log.error(err, { route: 'feature-flags:init' });
       ldClient.close();
       client = null;
       return null;
@@ -68,7 +69,8 @@ export async function isFeatureEnabled(flagKey: string, defaultValue = false): P
   try {
     return await ldClient.variation(flagKey, CONTEXT, defaultValue);
   } catch (error) {
-    log.error({ err: error }, `LaunchDarkly variation failed for flag ${flagKey}`);
+    const err = error instanceof Error ? error : new Error(String(error));
+    log.error(err, { route: `feature-flags:${flagKey}` });
     return defaultValue;
   }
 }
@@ -81,7 +83,11 @@ export async function closeFeatureFlags(): Promise<void> {
   try {
     await client.flush();
   } catch (error) {
-    log.warn({ err: error }, 'LaunchDarkly flush failed during shutdown');
+    const err = error instanceof Error ? error : new Error(String(error));
+    log.warn('LaunchDarkly flush failed during shutdown', {
+      route: 'feature-flags:close',
+      value: err.message,
+    });
   }
 
   await client.close();
