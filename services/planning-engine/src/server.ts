@@ -18,6 +18,7 @@ import { concurrencyController } from './concurrency/controller.js';
 import { Task } from './types/index.js';
 import { AsyncPlanGenerator } from './optimization/async-plan-generator.js';
 import { DatabaseOptimizer } from './optimization/database-optimizer.js';
+import { initializeFeatureFlags, closeFeatureFlags } from './feature-flags/index.js';
 // 使用内置的健康检查功能
 import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
 import apiDocsRoutes from './routes/api-docs.js';
@@ -49,6 +50,8 @@ const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, 
 
 server.addHook('onReady', async () => {
   try {
+    await initializeFeatureFlags();
+
     await pg.connect();
     server.log.info('connected to planning_db');
   } catch (e) {
@@ -95,11 +98,15 @@ server.addHook('onReady', async () => {
     // 注册API文档路由
     await server.register(apiDocsRoutes);
     server.log.info('API documentation routes registered');
-    
+
   } catch (e) {
     server.log.error({ err: e }, 'failed to connect event processor');
     process.exit(1);
   }
+});
+
+server.addHook('onClose', async () => {
+  await closeFeatureFlags();
 });
 
 // Event handler for onboarding completed

@@ -5,6 +5,8 @@
  * @note 这是一个占位符模块，实际LLM集成需要根据具体需求实现
  */
 
+import { PlanScoringSummary } from './types/scoring.js';
+
 export interface TrainingPlanRequest {
   userId: string;
   proficiency: 'beginner' | 'intermediate' | 'advanced';
@@ -27,6 +29,7 @@ export interface TrainingPlan {
   microcycles: unknown[];
   createdAt: Date;
   updatedAt: Date;
+  scoring?: PlanScoringSummary;
 }
 
 /**

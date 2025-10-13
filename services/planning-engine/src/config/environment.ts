@@ -12,6 +12,7 @@ const environmentSchema = z.object({
   REDIS_URL: z.string().min(1, 'Redis URL is required'),
   NATS_URL: z.string().min(1, 'NATS URL is required'),
   OPENAI_API_KEY: z.string().min(1, 'OpenAI API key is required'),
+  LAUNCHDARKLY_SDK_KEY: z.string().optional(),
   JWT_SECRET: z.string().optional().default('default-jwt-secret-that-is-long-enough-for-development-purposes'),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
   RATE_LIMIT_WINDOW_MS: z.string().default('900000'), // 15 minutes
@@ -67,6 +68,7 @@ export const configObject = {
   REDIS_URL: config.REDIS_URL,
   NATS_URL: config.NATS_URL,
   OPENAI_API_KEY: config.OPENAI_API_KEY,
+  LAUNCHDARKLY_SDK_KEY: config.LAUNCHDARKLY_SDK_KEY,
   JWT_SECRET: config.JWT_SECRET,
   LOG_LEVEL: config.LOG_LEVEL,
   RATE_LIMIT_WINDOW_MS: parseInt(config.RATE_LIMIT_WINDOW_MS),
