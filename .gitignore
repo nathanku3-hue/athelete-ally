@@ -125,3 +125,6 @@ smoke-results/
 # Stream2 exceptions and temp files
 !apps/frontend/src/app/api/logs/**
 tmp_codemod*.json
+
+*storybook.log
+storybook-static

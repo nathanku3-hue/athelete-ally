@@ -114,6 +114,11 @@ const buildQueryString = (params: Record<string, string | string[] | undefined>)
   return result ? `?${result}` : '';
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extractString = (value: unknown) => (typeof value === 'string' ? value : undefined);
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {};
   const token = getToken();
@@ -136,7 +141,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
 
   const text = await response.text();
-  let parsed: any = {};
+  let parsed: unknown = {};
 
   if (text) {
     try {
@@ -150,17 +155,17 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 
   if (!response.ok) {
+    const errorBody = isRecord(parsed) ? parsed : {};
     const message =
-      typeof parsed?.message === 'string'
-        ? parsed.message
-        : typeof parsed?.error === 'string'
-          ? parsed.error
-          : `Request failed with status ${response.status}`;
+      extractString(errorBody.message) ??
+      extractString(errorBody.error) ??
+      `Request failed with status ${response.status}`;
     throw new Error(message);
   }
 
-  if (parsed && typeof parsed === 'object' && 'data' in parsed) {
-    return parsed.data as T;
+  if (isRecord(parsed) && 'data' in parsed) {
+    const dataRecord = parsed as { data: unknown };
+    return dataRecord.data as T;
   }
 
   return parsed as T;
@@ -237,4 +242,3 @@ export const curationApi = {
     return request<MovementLibraryEntry[]>(`/api/internal/curation/library${query}`);
   },
 };
-

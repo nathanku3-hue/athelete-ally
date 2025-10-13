@@ -6,6 +6,7 @@ const EnvSchema = z.object({
   PLANNING_DATABASE_URL: z.string().url().optional().default('postgresql://test:test@localhost:5432/test_planning'),
   REDIS_URL: z.string().url().optional().default('redis://localhost:6379'),
   OPENAI_API_KEY: z.string().optional(),
+  LAUNCHDARKLY_SDK_KEY: z.string().optional(),
   
   // 监控配置
   METRICS_PORT: z.string().transform((v) => Number(v)).default('9466'),
@@ -38,7 +39,7 @@ const EnvSchema = z.object({
   PLAN_CACHE_TTL_SECONDS: z.string().transform((v) => Number(v)).default('3600'), // 计划缓存TTL（1小时）
   PLAN_GENERATION_TIMEOUT_MS: z.string().transform((v) => Number(v)).default('60000'), // 计划生成超时时间
   PLAN_GENERATION_RETRY_DELAY_MS: z.string().transform((v) => Number(v)).default('5000'), // 重试延迟时间
-  
+
   // 数据库优化配置
   DB_BATCH_SIZE: z.string().transform((v) => Number(v)).default('100'), // 数据库批处理大小
   DB_CONNECTION_POOL_SIZE: z.string().transform((v) => Number(v)).default('10'), // 数据库连接池大小

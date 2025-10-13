@@ -124,7 +124,7 @@ export class JWTManager {
 
     try {
       return this.verifyToken(token);
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }
