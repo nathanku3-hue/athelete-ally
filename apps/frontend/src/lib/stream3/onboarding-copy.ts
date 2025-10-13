@@ -2,86 +2,126 @@
  * Onboarding Copy Variants
  * Stream 3: UI Prototypes
  *
- * Two copy variants emphasizing different value propositions:
- * - Variant A: Technical/Data-driven approach
- * - Variant B: Personalized/Adaptive approach (emphasizes RPE adaptation)
+ * Provides different messaging variants for onboarding flows
  */
 
-export interface OnboardingCopy {
-  welcome: {
-    title: string;
-    subtitle: string;
+export interface OnboardingCopyVariant {
+  hero: {
+    headline: string;
+    subheadline: string;
     cta: string;
   };
-  rpeIntro: {
+  value: {
     title: string;
-    description: string;
-    tip: string;
+    points: string[];
   };
-  adaptiveEngine: {
+  howItWorks: {
     title: string;
-    description: string;
-    benefits: string[];
+    steps: Array<{
+      title: string;
+      description: string;
+    }>;
   };
 }
 
 /**
  * Variant A: Technical/Data-driven
- * Emphasizes metrics, precision, and data-driven training
+ * Appeals to analytical users who want precision and evidence
  */
-export const onboardingCopyA: OnboardingCopy = {
-  welcome: {
-    title: 'Welcome to Athlete Ally',
-    subtitle: 'Data-driven training designed for your goals. Track metrics, analyze performance, and optimize your training program.',
-    cta: 'Start Building Your Profile',
+export const onboardingCopyVariantA: OnboardingCopyVariant = {
+  hero: {
+    headline: 'Precision Training, Powered by Data',
+    subheadline:
+      'Our RPE-based adaptive algorithm adjusts your training in real-time, delivering 40% more accurate load management than static programs.',
+    cta: 'Start Your Plan',
   },
-  rpeIntro: {
-    title: 'Understanding RPE (Rate of Perceived Exertion)',
-    description: 'RPE is a 1-10 scale measuring how hard each session feels. This metric helps track training intensity and adjust your program based on objective data.',
-    tip: 'Consistent RPE logging improves program accuracy by 40%',
+  value: {
+    title: 'Why RPE-Based Training Works',
+    points: [
+      'Evidence-based algorithms analyze your subjective recovery data',
+      'Automatic volume and intensity adjustments based on your daily readiness',
+      'Quantified progress tracking with detailed performance metrics',
+      'Research-backed methodology proven in peer-reviewed studies',
+    ],
   },
-  adaptiveEngine: {
-    title: 'Smart Training Algorithms',
-    description: 'Our engine analyzes your performance data to calculate optimal training loads and recovery periods.',
-    benefits: [
-      'Automated load calculations based on RPE trends',
-      'Data-driven periodization adjustments',
-      'Performance metrics tracking and analysis',
-      'Volume and intensity management',
+  howItWorks: {
+    title: 'How It Works',
+    steps: [
+      {
+        title: 'Log Your RPE',
+        description:
+          'After each session, rate your perceived exertion on a 1-10 scale. This subjective metric is more predictive of recovery than any objective measure.',
+      },
+      {
+        title: 'Algorithm Analyzes',
+        description:
+          'Our multi-factor scoring engine (60% safety, 30% compliance, 10% performance) calculates your optimal next-session load.',
+      },
+      {
+        title: 'Automatic Adjustments',
+        description:
+          'Your program adapts daily based on trend analysis, ensuring you train hard when fresh and back off when fatigued.',
+      },
+      {
+        title: 'Track Progress',
+        description:
+          'View detailed charts of volume, intensity, and RPE trends over time. Export data for external analysis if needed.',
+      },
     ],
   },
 };
 
 /**
  * Variant B: Personalized/Adaptive
- * Emphasizes the personal coach experience and adaptive intelligence
+ * Appeals to users who want a coaching relationship and personal guidance
  */
-export const onboardingCopyB: OnboardingCopy = {
-  welcome: {
-    title: 'Your Personal AI Coach',
-    subtitle: 'Training that adapts to you. We learn how your body responds and adjust your program in real-time, so you can focus on what matters—getting stronger.',
-    cta: 'Let\'s Get Started',
+export const onboardingCopyVariantB: OnboardingCopyVariant = {
+  hero: {
+    headline: 'Your AI Coach, Learning Every Day',
+    subheadline:
+      'Training that adapts to your life. Whether you crushed a workout or barely slept, your plan adjusts to keep you progressing safely.',
+    cta: 'Meet Your Coach',
   },
-  rpeIntro: {
-    title: 'Teaching Your AI Coach How You Feel',
-    description: 'After each session, share how hard it felt (1-10). Your AI coach uses this to understand your unique response to training—making your program truly yours.',
-    tip: 'The more you share, the smarter your program becomes',
+  value: {
+    title: 'Training That Understands You',
+    points: [
+      'Learns how your body responds to training stress over time',
+      'Adapts to life stressors like poor sleep, work demands, or illness',
+      'Celebrates your wins and guides you through challenging weeks',
+      'Feels like having a coach in your pocket, available 24/7',
+    ],
   },
-  adaptiveEngine: {
-    title: 'How Your AI Coach Works',
-    description: 'Think of it as having a coach who learns your body better than anyone. Every workout teaches us more about what works for you.',
-    benefits: [
-      'Learns your recovery patterns and adjusts automatically',
-      'Notices when you\'re ready to push harder or need rest',
-      'Adapts to life changes—travel, stress, sleep quality',
-      'Gets better at coaching you with every session',
+  howItWorks: {
+    title: 'How Your Coach Works With You',
+    steps: [
+      {
+        title: 'Share How You Feel',
+        description:
+          'After training, tell us how hard it felt. That simple feedback is all your coach needs to understand your recovery.',
+      },
+      {
+        title: 'AI Learns Your Patterns',
+        description:
+          'Over time, your coach learns your unique recovery patterns, stress tolerance, and performance trends.',
+      },
+      {
+        title: 'Plan Adapts Automatically',
+        description:
+          "Based on your feedback, your coach adjusts tomorrow's workout to match your readiness. Push hard when you're fresh, dial back when you need rest.",
+      },
+      {
+        title: 'Celebrate Progress Together',
+        description:
+          'Get weekly summaries of your progress, adaptive insights on your training, and personalized encouragement.',
+      },
     ],
   },
 };
 
 /**
- * Hook to get onboarding copy based on variant
+ * Get onboarding copy based on variant preference
+ * @param variant 'A' for Technical, 'B' for Personalized
  */
-export function getOnboardingCopy(variant: 'A' | 'B'): OnboardingCopy {
-  return variant === 'B' ? onboardingCopyB : onboardingCopyA;
+export function getOnboardingCopy(variant: 'A' | 'B'): OnboardingCopyVariant {
+  return variant === 'B' ? onboardingCopyVariantB : onboardingCopyVariantA;
 }

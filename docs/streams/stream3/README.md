@@ -141,25 +141,40 @@ Accessibility is verified via Storybook's a11y addon.
 
 ```
 apps/frontend/src/
-├── components/stream3/
-│   ├── CoachTip.tsx              # Unified component
-│   ├── CoachTipVariantA.tsx      # Traditional tooltip
-│   ├── CoachTipVariantB.tsx      # Modern card
-│   ├── CoachTip.stories.tsx      # Storybook stories
-│   ├── WeeklyReview.tsx          # Unified component
-│   ├── WeeklyReviewVariantA.tsx  # Traditional dashboard
-│   ├── WeeklyReviewVariantB.tsx  # Visual story format
-│   ├── WeeklyReview.stories.tsx  # Storybook stories
-│   ├── VariantSwitcher.tsx       # Dev toggle tool
-│   └── VariantSwitcher.stories.tsx
+├── components/
+│   ├── coach-tip/
+│   │   ├── CoachTipCard.tsx         # Original backend-integrated card
+│   │   └── CoachTipAdapter.tsx      # Adapter: backend → variants (with telemetry)
+│   ├── weekly-review/
+│   │   ├── WeeklyReviewCard.tsx     # Original backend-integrated card
+│   │   └── WeeklyReviewAdapter.tsx  # Adapter: backend → variants (with telemetry)
+│   └── stream3/
+│       ├── CoachTip.tsx             # Unified variant switcher
+│       ├── CoachTipVariantA.tsx     # Traditional tooltip
+│       ├── CoachTipVariantB.tsx     # Modern card
+│       ├── CoachTip.stories.tsx     # Storybook stories
+│       ├── WeeklyReview.tsx         # Unified variant switcher
+│       ├── WeeklyReviewVariantA.tsx # Traditional dashboard
+│       ├── WeeklyReviewVariantB.tsx # Visual story format
+│       ├── WeeklyReview.stories.tsx # Storybook stories
+│       ├── VariantSwitcher.tsx      # Dev toggle tool
+│       └── VariantSwitcher.stories.tsx
 ├── hooks/
-│   └── useFeatureVariant.ts      # Feature flag hook
-└── lib/stream3/
-    └── onboarding-copy.ts        # Copy variants
+│   └── useFeatureVariant.ts         # Feature flag hook
+└── lib/
+    ├── coach-tip.ts                 # API + telemetry for CoachTip
+    ├── weekly-review.ts             # API + telemetry for WeeklyReview
+    └── stream3/
+        └── onboarding-copy.ts       # Copy variants
+
+packages/shared-types/src/
+├── coach-tip.ts                     # CoachTip types (backend contract)
+└── weekly-review.ts                 # WeeklyReview types (backend contract)
 
 docs/streams/stream3/
-├── README.md                     # This file
-└── DESIGN_DECISIONS.md           # Design rationale
+├── README.md                        # This file
+├── DESIGN_DECISIONS.md              # Design rationale
+└── feature-flags-telemetry.md       # Feature flags & telemetry spec
 ```
 
 ## Design Decisions
@@ -168,7 +183,57 @@ See [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) for detailed rationale behind e
 
 ## Integration Guide
 
-### Using CoachTip in Your Code
+### Using Adapter Components (Recommended)
+
+For production use with backend API integration and automatic telemetry:
+
+#### CoachTip with Backend Data
+
+```typescript
+import { CoachTipAdapter } from '@/components/coach-tip/CoachTipAdapter';
+import { fetchCoachTip } from '@/lib/coach-tip';
+
+const tip = await fetchCoachTip(planId);
+if (tip) {
+  <CoachTipAdapter
+    tip={tip}
+    onDismiss={() => handleDismiss()}
+    onAccept={() => handleAccept()}
+  />
+}
+```
+
+The adapter:
+- Automatically maps backend `CoachTipPayload` types to variant props
+- Sends telemetry events (`coach_tip_shown`, `coach_tip_dismissed`, `coach_tip_accepted`)
+- Respects feature flags to switch between Variant A/B
+
+#### WeeklyReview with Backend Data
+
+```typescript
+import { WeeklyReviewAdapter } from '@/components/weekly-review/WeeklyReviewAdapter';
+import { fetchWeeklyReview } from '@/lib/weekly-review';
+
+const review = await fetchWeeklyReview(planId);
+if (review) {
+  <WeeklyReviewAdapter
+    review={review}
+    onApplied={() => handleApplied()}
+  />
+}
+```
+
+The adapter:
+- Transforms `WeeklyReviewSummary` backend types to variant props
+- Handles "Apply adjustments" action automatically
+- Sends `weekly_review_applied` telemetry
+- Respects feature flags to switch between Variant A/B
+
+### Using Variant Components Directly (Prototyping)
+
+For Storybook demos, static content, or manual data:
+
+#### CoachTip Variants
 
 ```typescript
 import { CoachTip } from '@/components/stream3/CoachTip';
@@ -187,7 +252,7 @@ import { CoachTip } from '@/components/stream3/CoachTip';
 />
 ```
 
-### Using WeeklyReview in Your Code
+#### WeeklyReview Variants
 
 ```typescript
 import { WeeklyReview } from '@/components/stream3/WeeklyReview';
@@ -212,12 +277,16 @@ import { WeeklyReview } from '@/components/stream3/WeeklyReview';
 
 ## Testing & Validation
 
-- [ ] All components render correctly in Storybook
-- [ ] Accessibility checks pass (a11y addon)
-- [ ] Keyboard navigation works
-- [ ] Feature flags toggle correctly
-- [ ] Mobile responsive layouts verified
-- [ ] Copy variants documented
+- [x] All components render correctly in Storybook
+- [x] Accessibility checks pass (ARIA, semantic HTML, focus indicators)
+- [x] Keyboard navigation works
+- [x] Feature flags toggle correctly via VariantSwitcher
+- [x] Mobile responsive layouts verified (Tailwind breakpoints)
+- [x] Copy variants documented (onboarding-copy.ts)
+- [x] Adapter components integrate backend types correctly
+- [x] Telemetry hooks fire on user actions
+- [x] Type-checking passes (TypeScript strict mode)
+- [x] Linting passes (ESLint unified config)
 
 ## Next Steps
 
