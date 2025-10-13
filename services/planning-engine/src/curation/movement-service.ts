@@ -14,7 +14,6 @@ import {
   movementDraftUpdateSchema,
 } from './movement-validation.js';
 import { normalizeStringList, toMovementSlug } from './movement-utils.js';
-import { movementCurationMetrics } from './movement-metrics.js';
 
 export interface CurationActor {
   id: string;
@@ -233,34 +232,6 @@ const recordAuditEvent = async (
 export class MovementCurationService {
   constructor(private readonly client: PrismaClient = prisma) {}
 
-  private async refreshDraftStatusMetrics(tx: TransactionClient) {
-    const grouped = await tx.movementStaging.groupBy({
-      by: ['status'],
-      _count: { status: true },
-    });
-
-    movementCurationMetrics.setDraftStatusCounts(
-      grouped.map((entry) => ({
-        status: entry.status,
-        count: entry._count.status,
-      })),
-    );
-  }
-
-  async synchronizeDraftMetrics() {
-    const grouped = await this.client.movementStaging.groupBy({
-      by: ['status'],
-      _count: { status: true },
-    });
-
-    movementCurationMetrics.setDraftStatusCounts(
-      grouped.map((entry) => ({
-        status: entry.status,
-        count: entry._count.status,
-      })),
-    );
-  }
-
   async createDraft(payload: MovementDraftInput, actor: CurationActor) {
     const parsed = movementDraftSchema.parse(payload);
     const normalized = normalizeDraftPayload(parsed);
@@ -295,9 +266,6 @@ export class MovementCurationService {
         stagingMovement: draft,
         diff: { after: shapeStagingForAudit(draft) },
       });
-
-      movementCurationMetrics.recordDraftCreated();
-      await this.refreshDraftStatusMetrics(tx);
 
       return draft;
     });
@@ -389,7 +357,6 @@ export class MovementCurationService {
       const draft = await tx.movementStaging.findUnique({ where: { id } });
 
       if (!draft) {
-        movementCurationMetrics.recordPublishAttempt('failure', { reason: 'not_found' });
         throw new MovementCurationError('Draft movement not found');
       }
 
@@ -397,10 +364,6 @@ export class MovementCurationService {
         draft.status !== MovementStageStatus.APPROVED &&
         draft.status !== MovementStageStatus.READY_FOR_REVIEW
       ) {
-        movementCurationMetrics.recordPublishAttempt('failure', {
-          reason: 'invalid_status',
-          from: draft.status,
-        });
         throw new MovementCurationError('Draft must be approved before publishing');
       }
 
@@ -466,10 +429,6 @@ export class MovementCurationService {
         metadata: options.metadata ?? null,
       });
 
-      movementCurationMetrics.recordStatusTransition(draft.status, MovementStageStatus.PUBLISHED);
-      movementCurationMetrics.recordPublishAttempt('success', { from: draft.status });
-      await this.refreshDraftStatusMetrics(tx);
-
       return { draft: updatedDraft, library: libraryRecord };
     });
   }
@@ -526,9 +485,6 @@ export class MovementCurationService {
         notes,
       });
 
-      movementCurationMetrics.recordStatusTransition(existing.status, nextStatus);
-      await this.refreshDraftStatusMetrics(tx);
-
       return updated;
     });
   }
@@ -570,17 +526,6 @@ export class MovementCurationService {
         { slug: 'asc' },
         { version: 'desc' },
       ],
-    });
-  }
-
-  async getDraftBySlug(slug: string) {
-    return this.client.movementStaging.findUnique({ where: { slug } });
-  }
-
-  async getLatestLibraryMovement(slug: string) {
-    return this.client.movementLibrary.findFirst({
-      where: { slug },
-      orderBy: { version: 'desc' },
     });
   }
 }
