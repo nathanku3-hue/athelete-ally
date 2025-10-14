@@ -1,952 +1,111 @@
-import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
-import { consumerOpts, JsMsg, JetStreamPullSubscription } from 'nats';
+/**
+ * Normalize Service - Main Entry Point
+ * Orchestrates HRV, Sleep, and Oura webhook data normalization
+ */
+
+// Initialize OpenTelemetry first
+import './telemetry.js';
+
 import type { NatsConnection } from 'nats';
 import { PrismaClient } from '../prisma/generated/client';
-import { EventBus, getStreamCandidates } from '@athlete-ally/event-bus';
-import { EVENT_TOPICS, HRVNormalizedStoredEvent, SleepNormalizedStoredEvent } from '@athlete-ally/contracts';
-import { eventValidator } from '@athlete-ally/event-bus';
-import { SpanStatusCode } from '@opentelemetry/api';
-import { getMetricsRegistry } from '@athlete-ally/shared';
-import { Counter } from 'prom-client';
+import { EventBus } from '@athlete-ally/event-bus';
+import { config } from './config.js';
+import { createHttpServer } from './http/server.js';
+import { registerRoutes } from './http/routes.js';
+import { HRVConsumer } from './consumers/hrv-consumer.js';
+import { SleepConsumer } from './consumers/sleep-consumer.js';
+import { OuraConsumer } from './consumers/oura-consumer.js';
 
-// Type definitions for better type safety
-interface TelemetrySpan {
-  setAttribute: (key: string, value: string | number) => void;
-  setStatus: (status: { code: number; message?: string }) => void;
-  end: () => void;
-  recordException: (err: unknown) => void;
-}
-
-interface TelemetryTracer {
-  startActiveSpan: (name: string, fn: (span: TelemetrySpan) => Promise<void>) => Promise<void>;
-}
-
-interface TelemetryMeter {
-    createCounter: (name: string, options: { description: string }) => {
-      add: (value: number, labels: Record<string, string>) => void;
-    };
-}
-
-interface TelemetryBootstrap {
-  tracer: TelemetryTracer;
-  meter: TelemetryMeter;
-}
-
-interface WithExtractedContext {
-  (headers: Record<string, string>, fn: () => Promise<void>): Promise<void>;
-}
-
-// Optional telemetry bootstrap (fallback to no-op if package unavailable)
-/* eslint-disable @typescript-eslint/no-require-imports */
-let bootstrapTelemetry: (opts: unknown) => TelemetryBootstrap;
-let withExtractedContext: WithExtractedContext;
-try {
-  ({ bootstrapTelemetry, withExtractedContext } = require('@athlete-ally/telemetry-bootstrap'));
-} catch {
-  // No-op fallbacks
-  withExtractedContext = async (_headers: Record<string, string>, fn: () => Promise<void>) => await fn();
-  bootstrapTelemetry = () => ({ 
-    tracer: { 
-      startActiveSpan: async (_name: string, fn: (span: TelemetrySpan) => Promise<void>) => await fn({ 
-        setAttribute() {}, setStatus() {}, end() {}, recordException() {} 
-      }) 
-    },
-    meter: { createCounter: () => ({ add: () => {} }) }
-  });
-}
-/* eslint-enable @typescript-eslint/no-require-imports */
-
+// Initialize core dependencies
 const prisma = new PrismaClient();
-const BATCH_SIZE = 10;
-const EXPIRES_MS = 5000;
-const IDLE_BACKOFF_MS = 50;
-
-// Get shared metrics registry (ensures default metrics registered only once)
-const register = getMetricsRegistry();
-
-// Create prom-client Counter for HRV messages with full labels
-const promHrvMessagesCounter = new Counter({
-  name: 'normalize_hrv_messages_total',
-  help: 'Total number of HRV messages processed by normalize service',
-  labelNames: ['result', 'subject', 'stream', 'durable'],
-  registers: [register]
-});
-
-// Create prom-client Counter for Sleep messages with full labels
-const promSleepMessagesCounter = new Counter({
-  name: 'normalize_sleep_messages_total',
-  help: 'Total number of Sleep messages processed by normalize service',
-  labelNames: ['result', 'subject', 'stream', 'durable'],
-  registers: [register]
-});
-
-// Create prom-client Counter for DLQ messages (cross-cutting metric for alerting)
-const dlqMessagesCounter = new Counter({
-  name: 'dlq_messages_total',
-  help: 'Total number of messages sent to Dead Letter Queue',
-  labelNames: ['consumer', 'reason', 'subject'],
-  registers: [register]
-});
-
-// Bootstrap telemetry early (traces + Prometheus exporter)
-const telemetry = bootstrapTelemetry({
-  serviceName: 'normalize-service',
-  traces: { enabled: true },
-  metrics: { enabled: true, port: parseInt(process.env.PROMETHEUS_PORT || '9464'), endpoint: process.env.PROMETHEUS_ENDPOINT || '/metrics' },
-});
-
+const httpServer = createHttpServer();
 let eventBus: EventBus;
 let nc: NatsConnection | null = null;
-let running = true; // Global flag for graceful shutdown
 
-// Lightweight HTTP server for health/metrics
-const httpServer = Fastify({ logger: true });
+// Consumer instances
+let hrvConsumer: HRVConsumer;
+let sleepConsumer: SleepConsumer;
+let ouraConsumer: OuraConsumer;
 
+/**
+ * Connect to NATS and initialize consumers
+ */
 async function connectNATS() {
   try {
-    const natsUrl = process.env.NATS_URL || 'nats://localhost:4223';
-    
     // Initialize EventBus
     eventBus = new EventBus();
-    await eventBus.connect(natsUrl);
+    await eventBus.connect(config.natsUrl);
     httpServer.log.info('Connected to EventBus');
-    
+
     nc = eventBus.getNatsConnection();
-    const js = eventBus.getJetStream();
-    const jsm = eventBus.getJetStreamManager();
-    
-    // Durable JetStream consumer for HRV raw data
-    try {
-      const hrvDurable = process.env.NORMALIZE_HRV_DURABLE || 'normalize-hrv-durable';
-      const hrvMaxDeliver = parseInt(process.env.NORMALIZE_HRV_MAX_DELIVER || '5');
-      const hrvDlq = process.env.NORMALIZE_HRV_DLQ_SUBJECT || 'dlq.normalize.hrv.raw-received';
-      const hrvAckWaitMs = parseInt(process.env.NORMALIZE_HRV_ACK_WAIT_MS || '60000'); // 60s default
 
-      // Log HRV consumer configuration for debugging
-      console.log(`[normalize-hrv] DLQ subject prefix: ${hrvDlq}`);
-      console.log(`[normalize-hrv] Consumer: ${hrvDurable}, maxDeliver: ${hrvMaxDeliver}, ackWait: ${hrvAckWaitMs}ms`);
+    // Initialize and start consumers
+    hrvConsumer = new HRVConsumer(eventBus, prisma, httpServer.log);
+    await hrvConsumer.start();
+    httpServer.log.info('HRV consumer started');
 
-      // Create OTel counters for HRV metrics
-      const hrvMessagesCounter = telemetry.meter.createCounter('normalize_hrv_messages_total', {
-        description: 'Total number of HRV messages processed by normalize service',
-      });
+    sleepConsumer = new SleepConsumer(eventBus, prisma, httpServer.log);
+    await sleepConsumer.start();
+    httpServer.log.info('Sleep consumer started');
 
-      // Stream binding order: Use getStreamCandidates() for mode-aware stream selection
-      const streamCandidates = getStreamCandidates();
-      let actualStreamName = '';
+    ouraConsumer = new OuraConsumer(eventBus, httpServer.log);
+    await ouraConsumer.start();
+    httpServer.log.info('Oura consumer started');
 
-      console.log(`[normalize-service] Stream candidates: ${streamCandidates.join(', ')}`);
-
-      // Consumer creation strategy:
-      // - Default: Create consumers if FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false'
-      // - CI/Prod: Set FEATURE_SERVICE_MANAGES_CONSUMERS=false to bind to existing consumers
-      // - This allows services to self-manage consumers in development while relying on
-      //   external consumer management in production environments
-      if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false') {
-        for (const streamName of streamCandidates) {
-          try {
-            await jsm.consumers.add(streamName, {
-              durable_name: hrvDurable,
-              filter_subject: EVENT_TOPICS.HRV_RAW_RECEIVED,
-              ack_policy: 'explicit' as any,
-              deliver_policy: 'all' as any,
-              max_deliver: hrvMaxDeliver,
-              ack_wait: hrvAckWaitMs * 1_000_000, // Convert ms to ns
-              max_ack_pending: 1000 // High capacity to avoid blocking
-            });
-            httpServer.log.info(`[normalize] HRV consumer created on ${streamName}: ${hrvDurable}`);
-            actualStreamName = streamName;
-            break; // Successfully created on this stream
-          } catch (e) {
-            // Consumer might already exist or stream not available
-            const error = e as Error;
-            httpServer.log.info(`[normalize] Attempted to create HRV consumer on ${streamName}: ${hrvDurable}. Error: ${error.message}. Trying next candidate.`);
-            if (error.message.includes('consumer already exists')) {
-              // Consumer already exists, try to bind to it
-              actualStreamName = streamName;
-              httpServer.log.info(`[normalize] Consumer ${hrvDurable} already exists on ${streamName}, will bind to existing consumer.`);
-              break;
-            }
-          }
-        }
-      } else {
-        // Default: try to bind to existing consumers
-        for (const streamName of streamCandidates) {
-          try {
-            // Try to get consumer info to verify it exists
-            await jsm.consumers.info(streamName, hrvDurable);
-            actualStreamName = streamName;
-            httpServer.log.info(`[normalize] Found existing HRV consumer on ${streamName}: ${hrvDurable}`);
-            break;
-          } catch (e) {
-            httpServer.log.info(`[normalize] Consumer ${hrvDurable} not found on ${streamName}. Trying next candidate.`);
-          }
-        }
-      }
-
-      if (!actualStreamName) {
-        throw new Error('Failed to find HRV consumer on any available stream. Ensure EventBus has created the consumer or set FEATURE_SERVICE_MANAGES_CONSUMERS=false to disable consumer creation.');
-      }
-
-      // Bind to existing durable consumer
-      const opts = consumerOpts();
-      opts.bind(actualStreamName, hrvDurable);
-      opts.ackExplicit();
-      opts.manualAck();
-      opts.maxDeliver(hrvMaxDeliver);
-      opts.ackWait(hrvAckWaitMs);
-
-      const sub = await js.pullSubscribe(EVENT_TOPICS.HRV_RAW_RECEIVED, opts) as JetStreamPullSubscription;
-        httpServer.log.info(`[normalize] HRV durable pull consumer bound: ${hrvDurable}, subject: ${EVENT_TOPICS.HRV_RAW_RECEIVED}, ackWait: ${hrvAckWaitMs}ms, maxDeliver: ${hrvMaxDeliver}`);
-
-      // Message handler function
-      async function handleHrvMessage(m: JsMsg) {
-        const info = m.info;
-        const meta = {
-          streamSeq: info?.streamSequence,
-          deliverySeq: info?.deliverySequence,
-          redeliveries: info?.deliveryCount || 0,
-          subject: m.subject,
-        };
-        
-        httpServer.log.info(`[normalize] Processing HRV message: ${JSON.stringify(meta)}`);
-        
-        // Extract headers safely
-        const hdrs = m.headers ? Object.fromEntries(
-          Array.from(m.headers as Iterable<[string, string[]]>).map(([k, vals]) => [k, Array.isArray(vals) && vals.length ? vals[0] : ''])
-        ) : {};
-
-        await withExtractedContext(hdrs, async () => {
-          await telemetry.tracer.startActiveSpan('normalize.hrv.consume', async (span: TelemetrySpan) => {
-
-            // Add JetStream metadata attributes
-            span.setAttribute('messaging.system', 'nats');
-            span.setAttribute('messaging.destination', EVENT_TOPICS.HRV_RAW_RECEIVED);
-            span.setAttribute('messaging.operation', 'process');
-            if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
-            if (typeof info.streamSequence === 'number') span.setAttribute('messaging.nats.stream_sequence', info.streamSequence);
-            if (typeof info.deliverySequence === 'number') span.setAttribute('messaging.nats.delivery_sequence', info.deliverySequence);
-            if (typeof info.deliveryCount === 'number') span.setAttribute('messaging.redelivery_count', Math.max(0, info.deliveryCount - 1));
-
-            try {
-              const text = m.string();
-              httpServer.log.debug(`[normalize] HRV message text: ${text}`);
-                const eventData = JSON.parse(text);
-              httpServer.log.info(`[normalize] HRV event data: ${JSON.stringify({ ...eventData, userId: 'present' })}`); // PII protection
-
-              // Validate event schema
-                const validation = await eventValidator.validateEvent('hrv_raw_received', eventData as any);
-                if (!validation.valid) {
-                httpServer.log.warn(`[normalize] HRV validation failed: ${JSON.stringify(validation.errors)}`);
-                hrvMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-                promHrvMessagesCounter.inc({ result: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-
-                // Schema validation failure is non-retryable - send to DLQ
-                try {
-                  await js.publish(`${hrvDlq}.schema-invalid`, m.data as any, { headers: m.headers });
-                  dlqMessagesCounter.inc({ consumer: 'hrv', reason: 'schema_invalid', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
-                  httpServer.log.info(`[normalize] Sent schema-invalid message to DLQ: ${hrvDlq}.schema-invalid`);
-                } catch (dlqErr) {
-                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                }
-                m.term(); // Terminate - non-retryable
-                span.setStatus({ code: SpanStatusCode.ERROR, message: 'schema validation failed' });
-                span.end();
-                return;
-              }
-
-              httpServer.log.info(`[normalize] HRV validation passed, processing data...`);
-                await processHrvData(eventData.payload);
-              httpServer.log.info(`[normalize] HRV data processed successfully`);
-              m.ack();
-                    hrvMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-                    promHrvMessagesCounter.inc({ result: 'success', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-              span.setStatus({ code: SpanStatusCode.OK });
-              } catch (err: unknown) {
-              const deliveries = info?.deliveryCount || 1;
-              const attempt = deliveries;
-
-              // Determine if error is retryable
-              const isRetryable = (err: unknown): boolean => {
-                const errMsg = err instanceof Error ? err.message : String(err);
-                return errMsg.includes('ECONNREFUSED') ||
-                       errMsg.includes('timeout') ||
-                       errMsg.includes('ETIMEDOUT') ||
-                       errMsg.includes('Connection') ||
-                       errMsg.includes('ENOTFOUND');
-              };
-
-                if (attempt >= hrvMaxDeliver) {
-                httpServer.log.error(`[normalize] maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, attempt })}`);
-                try {
-                  await js.publish(`${hrvDlq}.max-deliver`, m.data as any, { headers: m.headers });
-                  dlqMessagesCounter.inc({ consumer: 'hrv', reason: 'max_deliver', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
-                } catch (dlqErr) {
-                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                }
-                m.term();
-                hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-                promHrvMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-              } else if (isRetryable(err)) {
-                httpServer.log.warn(`[normalize] Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver: hrvMaxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
-                m.nak(5000); // 5s delay for retry
-                hrvMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-                promHrvMessagesCounter.inc({ result: 'retry', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-              } else {
-                httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: hrvDlq, error: err instanceof Error ? err.message : String(err) })}`);
-                try {
-                  await js.publish(`${hrvDlq}.non-retryable`, m.data as any, { headers: m.headers });
-                  dlqMessagesCounter.inc({ consumer: 'hrv', reason: 'non_retryable', subject: EVENT_TOPICS.HRV_RAW_RECEIVED });
-                } catch (dlqErr) {
-                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                }
-                m.term();
-                hrvMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-                promHrvMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.HRV_RAW_RECEIVED, stream: actualStreamName, durable: hrvDurable });
-              }
-              span.recordException(err);
-              span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : 'Unknown error' });
-            } finally {
-              span.end();
-            }
-          });
-        });
-      }
-
-      // Pull consumer loop - using stable pull+iterator pattern
-      (async () => {
-        httpServer.log.info(`[normalize] Starting HRV message processing loop...`);
-        try {
-          while (running) {
-            try {
-              await sub.pull({ batch: BATCH_SIZE, expires: EXPIRES_MS });
-
-              let processed = 0;
-              const deadline = Date.now() + EXPIRES_MS + 100;
-              
-              for await (const m of sub) {
-                if (processed > 0 && processed % 3 === 0) {
-                  m.working(); // Extend ack_wait for long handlers
-                }
-                await handleHrvMessage(m);
-                processed++;
-                if (processed >= BATCH_SIZE || Date.now() >= deadline) break;
-              }
-              
-              if (processed === 0) {
-                httpServer.log.info(`[normalize] No messages pulled, waiting...`);
-              }
-            } catch (err: unknown) {
-              if (!running) break;
-              httpServer.log.error(`[normalize] Pull/process error: ${JSON.stringify(err)}`);
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, IDLE_BACKOFF_MS));
-          }
-        } catch (err) {
-          if (!running) {
-            httpServer.log.info('[normalize] HRV consumer loop stopped due to shutdown');
-          } else {
-            httpServer.log.error(`[normalize] HRV consumer loop error: ${JSON.stringify(err)}`);
-          }
-        }
-        httpServer.log.info('[normalize] HRV message processing loop exited');
-      })();
-    } catch (e) {
-      httpServer.log.error(`Failed to initialize durable HRV consumer: ${JSON.stringify(e)}`);
-      throw e;
-    }
-
-    // Durable JetStream consumer for Sleep raw data
-    try {
-      const sleepDurable = process.env.NORMALIZE_SLEEP_DURABLE || 'normalize-sleep-durable';
-      const sleepMaxDeliver = parseInt(process.env.NORMALIZE_SLEEP_MAX_DELIVER || '5');
-      const sleepDlq = process.env.NORMALIZE_SLEEP_DLQ_SUBJECT || 'dlq.normalize.sleep.raw-received';
-      const sleepAckWaitMs = parseInt(process.env.NORMALIZE_SLEEP_ACK_WAIT_MS || '60000'); // 60s default
-
-      // Log Sleep consumer configuration for debugging
-      console.log(`[normalize-sleep] DLQ subject prefix: ${sleepDlq}`);
-      console.log(`[normalize-sleep] Consumer: ${sleepDurable}, maxDeliver: ${sleepMaxDeliver}, ackWait: ${sleepAckWaitMs}ms`);
-
-      // Create OTel counters for Sleep metrics
-      const sleepMessagesCounter = telemetry.meter.createCounter('normalize_sleep_messages_total', {
-        description: 'Total number of Sleep messages processed by normalize service',
-      });
-
-      // Stream binding order: Use getStreamCandidates() for mode-aware stream selection
-      const streamCandidates = getStreamCandidates();
-      let actualStreamName = '';
-
-      console.log(`[normalize-service] Sleep stream candidates: ${streamCandidates.join(', ')}`);
-
-      // Consumer creation strategy (same as HRV)
-      if (process.env.FEATURE_SERVICE_MANAGES_CONSUMERS !== 'false') {
-        for (const streamName of streamCandidates) {
-          try {
-            await jsm.consumers.add(streamName, {
-              durable_name: sleepDurable,
-              filter_subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED,
-              ack_policy: 'explicit' as any,
-              deliver_policy: 'all' as any,
-              max_deliver: sleepMaxDeliver,
-              ack_wait: sleepAckWaitMs * 1_000_000, // Convert ms to ns
-              max_ack_pending: 1000
-            });
-            httpServer.log.info(`[normalize] Sleep consumer created on ${streamName}: ${sleepDurable}`);
-            actualStreamName = streamName;
-            break;
-          } catch (e) {
-            const error = e as Error;
-            httpServer.log.info(`[normalize] Attempted to create Sleep consumer on ${streamName}: ${sleepDurable}. Error: ${error.message}. Trying next candidate.`);
-            if (error.message.includes('consumer already exists')) {
-              actualStreamName = streamName;
-              httpServer.log.info(`[normalize] Consumer ${sleepDurable} already exists on ${streamName}, will bind to existing consumer.`);
-              break;
-            }
-          }
-        }
-      } else {
-        for (const streamName of streamCandidates) {
-          try {
-            await jsm.consumers.info(streamName, sleepDurable);
-            actualStreamName = streamName;
-            httpServer.log.info(`[normalize] Found existing Sleep consumer on ${streamName}: ${sleepDurable}`);
-            break;
-          } catch (e) {
-            httpServer.log.info(`[normalize] Consumer ${sleepDurable} not found on ${streamName}. Trying next candidate.`);
-          }
-        }
-      }
-
-      if (!actualStreamName) {
-        throw new Error('Failed to find Sleep consumer on any available stream.');
-      }
-
-      // Bind to existing durable consumer
-      const opts = consumerOpts();
-      opts.bind(actualStreamName, sleepDurable);
-      opts.ackExplicit();
-      opts.manualAck();
-      opts.maxDeliver(sleepMaxDeliver);
-      opts.ackWait(sleepAckWaitMs);
-
-      const sub = await js.pullSubscribe(EVENT_TOPICS.SLEEP_RAW_RECEIVED, opts) as JetStreamPullSubscription;
-      httpServer.log.info(`[normalize] Sleep durable pull consumer bound: ${sleepDurable}, subject: ${EVENT_TOPICS.SLEEP_RAW_RECEIVED}, ackWait: ${sleepAckWaitMs}ms, maxDeliver: ${sleepMaxDeliver}`);
-
-      // Message handler function
-      async function handleSleepMessage(m: JsMsg) {
-        const info = m.info;
-        const meta = {
-          streamSeq: info?.streamSequence,
-          deliverySeq: info?.deliverySequence,
-          redeliveries: info?.deliveryCount || 0,
-          subject: m.subject,
-        };
-
-        httpServer.log.info(`[normalize] Processing Sleep message: ${JSON.stringify(meta)}`);
-
-        // Extract headers safely
-        const hdrs = m.headers ? Object.fromEntries(
-          Array.from(m.headers as Iterable<[string, string[]]>).map(([k, vals]) => [k, Array.isArray(vals) && vals.length ? vals[0] : ''])
-        ) : {};
-
-        await withExtractedContext(hdrs, async () => {
-          await telemetry.tracer.startActiveSpan('normalize.sleep.consume', async (span: TelemetrySpan) => {
-
-            // Add JetStream metadata attributes
-            span.setAttribute('messaging.system', 'nats');
-            span.setAttribute('messaging.destination', EVENT_TOPICS.SLEEP_RAW_RECEIVED);
-            span.setAttribute('messaging.operation', 'process');
-            if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
-            if (typeof info.streamSequence === 'number') span.setAttribute('messaging.nats.stream_sequence', info.streamSequence);
-            if (typeof info.deliverySequence === 'number') span.setAttribute('messaging.nats.delivery_sequence', info.deliverySequence);
-            if (typeof info.deliveryCount === 'number') span.setAttribute('messaging.redelivery_count', Math.max(0, info.deliveryCount - 1));
-
-            try {
-              const text = m.string();
-              httpServer.log.debug(`[normalize] Sleep message text: ${text}`);
-              const eventData = JSON.parse(text);
-              httpServer.log.info(`[normalize] Sleep event data: ${JSON.stringify({ ...eventData, userId: 'present' })}`);
-
-              // Validate event schema
-              const validation = await eventValidator.validateEvent('sleep_raw_received', eventData as any);
-              if (!validation.valid) {
-                httpServer.log.warn(`[normalize] Sleep validation failed: ${JSON.stringify(validation.errors)}`);
-                sleepMessagesCounter.add(1, { result: 'schema_invalid', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-                promSleepMessagesCounter.inc({ result: 'schema_invalid', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-
-                // Schema validation failure is non-retryable - send to DLQ
-                try {
-                  await js.publish(`${sleepDlq}.schema-invalid`, m.data as any, { headers: m.headers });
-                  dlqMessagesCounter.inc({ consumer: 'sleep', reason: 'schema_invalid', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED });
-                  httpServer.log.info(`[normalize] Sent schema-invalid message to DLQ: ${sleepDlq}.schema-invalid`);
-                } catch (dlqErr) {
-                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                }
-                m.term();
-                span.setStatus({ code: SpanStatusCode.ERROR, message: 'schema validation failed' });
-                span.end();
-                return;
-              }
-
-              httpServer.log.info(`[normalize] Sleep validation passed, processing data...`);
-              await processSleepData(eventData.payload);
-              httpServer.log.info(`[normalize] Sleep data processed successfully`);
-              m.ack();
-              sleepMessagesCounter.add(1, { result: 'success', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-              promSleepMessagesCounter.inc({ result: 'success', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-              span.setStatus({ code: SpanStatusCode.OK });
-            } catch (err: unknown) {
-              const deliveries = info?.deliveryCount || 1;
-              const attempt = deliveries;
-
-              // Determine if error is retryable
-              const isRetryable = (err: unknown): boolean => {
-                const errMsg = err instanceof Error ? err.message : String(err);
-                return errMsg.includes('ECONNREFUSED') ||
-                       errMsg.includes('timeout') ||
-                       errMsg.includes('ETIMEDOUT') ||
-                       errMsg.includes('Connection') ||
-                       errMsg.includes('ENOTFOUND');
-              };
-
-              if (attempt >= sleepMaxDeliver) {
-                httpServer.log.error(`[normalize] maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject: sleepDlq, attempt })}`);
-                try {
-                  await js.publish(`${sleepDlq}.max-deliver`, m.data as any, { headers: m.headers });
-                  dlqMessagesCounter.inc({ consumer: 'sleep', reason: 'max_deliver', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED });
-                } catch (dlqErr) {
-                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                }
-                m.term();
-                sleepMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-                promSleepMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-              } else if (isRetryable(err)) {
-                httpServer.log.warn(`[normalize] Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver: sleepMaxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
-                m.nak(5000);
-                sleepMessagesCounter.add(1, { result: 'retry', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-                promSleepMessagesCounter.inc({ result: 'retry', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-              } else {
-                httpServer.log.error(`[normalize] Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject: sleepDlq, error: err instanceof Error ? err.message : String(err) })}`);
-                try {
-                  await js.publish(`${sleepDlq}.non-retryable`, m.data as any, { headers: m.headers });
-                  dlqMessagesCounter.inc({ consumer: 'sleep', reason: 'non_retryable', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED });
-                } catch (dlqErr) {
-                  httpServer.log.error(`[normalize] Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                }
-                m.term();
-                sleepMessagesCounter.add(1, { result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-                promSleepMessagesCounter.inc({ result: 'dlq', subject: EVENT_TOPICS.SLEEP_RAW_RECEIVED, stream: actualStreamName, durable: sleepDurable });
-              }
-              span.recordException(err);
-              span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : 'Unknown error' });
-            } finally {
-              span.end();
-            }
-          });
-        });
-      }
-
-      // Pull consumer loop - using stable pull+iterator pattern
-      (async () => {
-        httpServer.log.info(`[normalize] Starting Sleep message processing loop...`);
-        try {
-          while (running) {
-            try {
-              await sub.pull({ batch: BATCH_SIZE, expires: EXPIRES_MS });
-
-              let processed = 0;
-              const deadline = Date.now() + EXPIRES_MS + 100;
-
-              for await (const m of sub) {
-                if (processed > 0 && processed % 3 === 0) {
-                  m.working();
-                }
-                await handleSleepMessage(m);
-                processed++;
-                if (processed >= BATCH_SIZE || Date.now() >= deadline) break;
-              }
-
-              if (processed === 0) {
-                httpServer.log.info(`[normalize] No Sleep messages pulled, waiting...`);
-              }
-            } catch (err: unknown) {
-              if (!running) break;
-              httpServer.log.error(`[normalize] Sleep pull/process error: ${JSON.stringify(err)}`);
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            await new Promise(resolve => setTimeout(resolve, IDLE_BACKOFF_MS));
-          }
-        } catch (err) {
-          if (!running) {
-            httpServer.log.info('[normalize] Sleep consumer loop stopped due to shutdown');
-          } else {
-            httpServer.log.error(`[normalize] Sleep consumer loop error: ${JSON.stringify(err)}`);
-          }
-        }
-        httpServer.log.info('[normalize] Sleep message processing loop exited');
-      })();
-    } catch (e) {
-      httpServer.log.error(`Failed to initialize durable Sleep consumer: ${JSON.stringify(e)}`);
-      throw e;
-    }
-
-    // Durable JetStream consumer for vendor Oura webhook with DLQ strategy
-    try {
-      const js = eventBus.getJetStream();
-      const jsm = eventBus.getJetStreamManager();
-      const durableName = process.env.NORMALIZE_DURABLE_NAME || 'normalize-oura';
-      const subj = 'vendor.oura.webhook.received';
-      const maxDeliver = parseInt(process.env.NORMALIZE_OURA_MAX_DELIVER || '5');
-      const dlqSubject = process.env.NORMALIZE_DLQ_SUBJECT || 'dlq.vendor.oura.webhook';
-      const ackWaitMs = parseInt(process.env.NORMALIZE_OURA_ACK_WAIT_MS || '15000');
-
-      // Create OTel counters for metrics
-      const messagesCounter = telemetry.meter.createCounter('normalize_messages_total', {
-        description: 'Total number of messages processed by normalize service',
-      });
-      const redeliveriesCounter = telemetry.meter.createCounter('normalize_redeliveries_total', {
-        description: 'Total number of message redeliveries',
-      });
-
-      try {
-        const stream = await (jsm as any).streams.find(subj);
-        httpServer.log.info(`[normalize] Oura subject stream: ${JSON.stringify(stream)}`);
-      } catch {
-        httpServer.log.warn(`[normalize] Oura subject stream not found; ensure JetStream stream includes ${subj}`);
-      }
-
-      const opts = consumerOpts();
-      opts.durable(durableName);
-      opts.deliverAll();
-      opts.ackExplicit();
-      opts.manualAck();
-      opts.maxDeliver(maxDeliver);
-      opts.ackWait(ackWaitMs);
-      const sub = await js.pullSubscribe(subj, opts);
-
-      (async () => {
-        for await (const m of sub) {
-          const msg = m as JsMsg;
-          const hdrs = msg.headers ? Object.fromEntries(
-            Array.from(msg.headers as Iterable<[string, string[]]>).map(([k, vals]) => [k, Array.isArray(vals) && vals.length ? vals[0] : ''])
-          ) : {};
-          
-          await withExtractedContext(hdrs, async () => {
-            await telemetry.tracer.startActiveSpan('normalize.oura.consume', async (span: TelemetrySpan) => {
-              span.setAttribute('messaging.system', 'nats');
-              span.setAttribute('messaging.destination', subj);
-              span.setAttribute('messaging.operation', 'process');
-              
-              // Add JetStream metadata attributes
-              const info = msg.info;
-              if (info.stream) span.setAttribute('messaging.nats.stream', info.stream);
-              if (typeof info.streamSequence === 'number') span.setAttribute('messaging.nats.stream_sequence', info.streamSequence);
-              if (typeof info.deliverySequence === 'number') span.setAttribute('messaging.nats.delivery_sequence', info.deliverySequence);
-              if (typeof info.deliveryCount === 'number') span.setAttribute('messaging.redelivery_count', Math.max(0, info.deliveryCount - 1));
-              
-              try {
-                const text = msg.string();
-                if (!text || text[0] !== '{') {
-                  httpServer.log.warn('Oura webhook payload is not valid JSON');
-                  messagesCounter.add(1, { result: 'schema_invalid', subject: subj });
-                  msg.term();
-                  span.setStatus({ code: SpanStatusCode.ERROR, message: 'Oura webhook payload is not valid JSON' });
-                  span.end();
-                  return;
-                }
-                const eventData = JSON.parse(text);
-                httpServer.log.info(`Oura webhook event: ${JSON.stringify(eventData)}`);
-
-                // Validate event schema
-                const validation = await eventValidator.validateEvent('vendor_oura_webhook_received', eventData as any);
-                if (!validation.valid) {
-                  httpServer.log.warn(`Oura webhook validation failed: ${JSON.stringify(validation.errors)}`);
-                  messagesCounter.add(1, { result: 'schema_invalid', subject: subj });
-                  // Schema validation failure is non-retryable - send to DLQ
-                  try {
-                    await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
-                    dlqMessagesCounter.inc({ consumer: 'oura', reason: 'schema_invalid', subject: subj });
-                  } catch (dlqErr) {
-                    httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                  }
-                  msg.term();
-                  span.setStatus({ code: SpanStatusCode.ERROR, message: 'Oura webhook validation failed' });
-                  span.end();
-                  return;
-                }
-
-                // Process Oura webhook data
-                msg.ack();
-                messagesCounter.add(1, { result: 'success', subject: subj });
-                span.setStatus({ code: SpanStatusCode.OK });
-              } catch (err: unknown) {
-                const deliveries = (msg.info && typeof msg.info.deliveryCount === 'number') ? msg.info.deliveryCount : (msg.redelivered ? 2 : 1);
-                const attempt = deliveries;
-                redeliveriesCounter.add(1, { subject: subj, attempt: attempt.toString() });
-
-                // Determine if error is retryable
-                const isRetryable = (err: unknown): boolean => {
-                  const errMsg = err instanceof Error ? err.message : String(err);
-                  return errMsg.includes('ECONNREFUSED') ||
-                         errMsg.includes('timeout') ||
-                         errMsg.includes('ETIMEDOUT') ||
-                         errMsg.includes('Connection') ||
-                         errMsg.includes('ENOTFOUND');
-                };
-                  
-                  if (attempt >= maxDeliver) {
-                  httpServer.log.error(`maxDeliver reached, sending to DLQ: ${JSON.stringify({ dlqSubject, attempt })}`);
-                  try {
-                    await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
-                    dlqMessagesCounter.inc({ consumer: 'oura', reason: 'max_deliver', subject: subj });
-                  } catch (dlqErr) {
-                    httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                  }
-                  msg.term();
-                    messagesCounter.add(1, { result: 'dlq', subject: subj });
-                } else if (isRetryable(err)) {
-                  httpServer.log.warn(`Retryable error, NAK with delay: ${JSON.stringify({ attempt, maxDeliver, error: err instanceof Error ? err.message : String(err) })}`);
-                  msg.nak(5000); // 5s delay for retry
-                  messagesCounter.add(1, { result: 'retry', subject: subj });
-                  } else {
-                  httpServer.log.error(`Non-retryable error, sending to DLQ: ${JSON.stringify({ dlqSubject, error: err instanceof Error ? err.message : String(err) })}`);
-                  try {
-                    await js.publish(dlqSubject, msg.data as any, { headers: msg.headers });
-                    dlqMessagesCounter.inc({ consumer: 'oura', reason: 'non_retryable', subject: subj });
-                  } catch (dlqErr) {
-                    httpServer.log.error(`Failed to publish to DLQ: ${JSON.stringify(dlqErr)}`);
-                  }
-                  msg.term();
-                  messagesCounter.add(1, { result: 'dlq', subject: subj });
-                }
-                span.recordException(err);
-                span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : 'Unknown error' });
-              } finally {
-                span.end();
-              }
-            });
-          });
-        }
-      })();
-    } catch (e) {
-      httpServer.log.error(`Failed to initialize durable Oura consumer: ${JSON.stringify(e)}`);
-      throw e;
-    }
   } catch (err) {
     httpServer.log.error(`Failed to connect to NATS: ${JSON.stringify(err)}`);
     throw err;
   }
 }
 
-async function processHrvData(payload: { userId: string; date: string; rMSSD?: number; rmssd?: number; lnRMSSD?: number; lnRmssd?: number }) {
-  try {
-    const { userId, date } = payload;
-
-    // Contract compatibility: support both rMSSD (contract standard) and rmssd (legacy)
-    const rmssd = payload.rMSSD ?? payload.rmssd;
-    const lnRmssd = payload.lnRMSSD ?? payload.lnRmssd ?? (typeof rmssd === 'number' ? Math.log(rmssd) : null);
-
-    if (!userId || !date || typeof rmssd !== 'number') {
-      throw new Error('Invalid HRV payload: missing required fields');
-    }
-
-    // Calculate lnRmssd if not provided
-    const calculatedLnRmssd = lnRmssd ?? Math.log(rmssd);
-
-    // Upsert HRV data
-    const row = await prisma.hrvData.upsert({
-      where: {
-        userId_date: {
-          userId,
-          date: new Date(date)
-        }
-      },
-      update: {
-        rmssd,
-        lnRmssd: calculatedLnRmssd,
-        capturedAt: new Date(),
-        updatedAt: new Date()
-      },
-      create: {
-        userId,
-        date: new Date(date),
-        rmssd,
-        lnRmssd: calculatedLnRmssd,
-        capturedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    });
-
-    // Publish normalized event
-    const normalizedEvent: HRVNormalizedStoredEvent = {
-      record: {
-        userId: row.userId,
-        date: typeof row.date === 'string' ? row.date : row.date.toISOString().split('T')[0],
-        rMSSD: row.rmssd ?? 0, // Handle null case
-        lnRMSSD: row.lnRmssd ?? 0, // Handle null case
-        readinessScore: 0,
-        vendor: 'oura',
-        capturedAt: row.capturedAt.toISOString()
-      }
-    };
-
-      await eventBus.publishHRVNormalizedStored(normalizedEvent);
-    httpServer.log.info(`[normalize] HRV data upserted and event published for date ${date}`);
-  } catch (error) {
-    httpServer.log.error(`[normalize] Error processing HRV data: ${JSON.stringify(error)}`);
-    throw error;
-  }
-}
-
-async function processSleepData(payload: { userId: string; date: string; durationMinutes: number; capturedAt?: string; raw?: Record<string, unknown> }) {
-  try {
-    const { userId, date, durationMinutes, capturedAt, raw } = payload;
-
-    if (!userId || !date || typeof durationMinutes !== 'number') {
-      throw new Error('Invalid Sleep payload: missing required fields');
-    }
-
-    // Determine vendor from raw data if available
-    const vendor = (raw && typeof raw === 'object' && 'source' in raw && typeof raw.source === 'string')
-      ? raw.source
-      : 'unknown';
-
-    // Extract qualityScore if available in raw data
-    const qualityScore = (raw && typeof raw === 'object' && 'qualityScore' in raw && typeof raw.qualityScore === 'number')
-      ? Math.min(100, Math.max(0, raw.qualityScore))
-      : null;
-
-    // Upsert Sleep data
-    const row = await prisma.sleepData.upsert({
-      where: {
-        userId_date: {
-          userId,
-          date: new Date(date)
-        }
-      },
-      update: {
-        durationMinutes,
-        qualityScore,
-        vendor,
-        capturedAt: capturedAt ? new Date(capturedAt) : new Date(),
-        updatedAt: new Date()
-      },
-      create: {
-        userId,
-        date: new Date(date),
-        durationMinutes,
-        qualityScore,
-        vendor,
-        capturedAt: capturedAt ? new Date(capturedAt) : new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    });
-
-    // Publish normalized event
-    const normalizedEvent: SleepNormalizedStoredEvent = {
-      record: {
-        userId: row.userId,
-        date: typeof row.date === 'string' ? row.date : row.date.toISOString().split('T')[0],
-        durationMinutes: row.durationMinutes,
-        qualityScore: row.qualityScore ?? undefined,
-        vendor: (row.vendor === 'oura' || row.vendor === 'whoop') ? row.vendor : 'unknown',
-        capturedAt: row.capturedAt.toISOString()
-      }
-    };
-
-    await eventBus.publishSleepNormalizedStored(normalizedEvent);
-    httpServer.log.info( `[normalize] published ${EVENT_TOPICS.SLEEP_NORMALIZED_STORED} userId=${row.userId} date=${typeof row.date ===  'string' ? row.date : row.date.toISOString().split('T')[0]} `); 
-    httpServer.log.info(`[normalize] Sleep data upserted and event published for date ${date}`);
-  } catch (error) {
-    httpServer.log.error(`[normalize] Error processing Sleep data: ${JSON.stringify(error)}`);
-    throw error;
-  }
-}
-
-// Health check endpoint
-httpServer.get('/health', async (_request: FastifyRequest, reply: FastifyReply) => {
-  try {
-    // Check database connection
-    await prisma.$queryRaw`SELECT 1`;
-    
-    // Check NATS connection
-    if (!nc || nc.isClosed()) {
-      throw new Error('NATS connection not available');
-    }
-
-    reply.send({ 
-      status: 'healthy', 
-      timestamp: new Date().toISOString(),
-      services: {
-        database: 'connected',
-        nats: 'connected'
-      }
-    });
-  } catch (error) {
-    reply.status(503).send({ 
-      status: 'unhealthy', 
-      timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-// Metrics endpoint
-httpServer.get('/metrics', async (_request: FastifyRequest, reply: FastifyReply) => {
-  reply.type('text/plain; version=0.0.4; charset=utf-8');
-  return register.metrics();
-});
-
+/**
+ * Start the service
+ */
 async function start() {
   try {
+    // Register HTTP routes
+    registerRoutes(httpServer, prisma, () => nc);
+
+    // Connect to NATS and start consumers
     await connectNATS();
-    
-    const port = parseInt(process.env.PORT || '4112');
-    await httpServer.listen({ port, host: '0.0.0.0' });
-    httpServer.log.info(`Normalize service listening on port ${port}`);
+
+    // Start HTTP server
+    await httpServer.listen({ port: config.port, host: config.host });
+    httpServer.log.info(`Normalize service listening on port ${config.port}`);
   } catch (error) {
     httpServer.log.error(`Failed to start normalize service: ${JSON.stringify(error)}`);
     process.exit(1);
   }
 }
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  httpServer.log.info('Received SIGINT, shutting down gracefully...');
+/**
+ * Graceful shutdown handler
+ */
+async function shutdown(signal: string) {
+  httpServer.log.info(`Received ${signal}, shutting down gracefully...`);
   running = false;
-  
-  try {
-    await httpServer.close();
-    if (nc) await nc.close();
-    await prisma.$disconnect();
-    httpServer.log.info('Shutdown complete');
-    process.exit(0);
-  } catch (error) {
-    httpServer.log.error(`Error during shutdown: ${JSON.stringify(error)}`);
-    process.exit(1);
-  }
-});
 
-process.on('SIGTERM', async () => {
-  httpServer.log.info('Received SIGTERM, shutting down gracefully...');
-  running = false;
-  
   try {
+    // Stop consumers
+    if (hrvConsumer) hrvConsumer.stop();
+    if (sleepConsumer) sleepConsumer.stop();
+
+    // Close connections
     await httpServer.close();
     if (nc) await nc.close();
     await prisma.$disconnect();
+
     httpServer.log.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
     httpServer.log.error(`Error during shutdown: ${JSON.stringify(error)}`);
     process.exit(1);
   }
-});
+}
+
+// Register shutdown handlers
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 // Start the service
 start().catch((error) => {
