@@ -105,6 +105,9 @@ services/*/prisma/generated/
 **/prisma/generated/
 .prisma/
 
+# Generated hub files
+/openapi.yaml
+
 # Offline artifacts (exact names only)
 autonomous_session.bundle
 autonomous_session.patch
