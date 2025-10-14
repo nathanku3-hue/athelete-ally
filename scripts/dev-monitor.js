@@ -92,7 +92,7 @@ async function restartService(service) {
   try {
     // ????
     await new Promise((resolve) => {
-      exec(`docker compose -f docker-compose/preview.yml stop ${service.name.toLowerCase().replace(/\s+/g, '-')}`, (error) => {
+      exec(`docker compose -f docker/compose/preview.yml stop ${service.name.toLowerCase().replace(/\s+/g, '-')}`, (error) => {
         resolve();
       });
     });
@@ -102,7 +102,7 @@ async function restartService(service) {
     
     // ????
     await new Promise((resolve, reject) => {
-      exec(`docker compose -f docker-compose/preview.yml up -d ${service.name.toLowerCase().replace(/\s+/g, '-')}`, (error, stdout) => {
+      exec(`docker compose -f docker/compose/preview.yml up -d ${service.name.toLowerCase().replace(/\s+/g, '-')}`, (error, stdout) => {
         if (error) {
           reject(error);
         } else {
@@ -247,11 +247,11 @@ function setupInputHandling() {
         break;
       case 'r':
         console.log(colorize('?? ??????...', 'yellow'));
-        exec('docker compose -f docker-compose/preview.yml restart');
+        exec('docker compose -f docker/compose/preview.yml restart');
         break;
       case 'c':
         console.log(colorize('?? ????...', 'yellow'));
-        exec('docker compose -f docker-compose/preview.yml down -v');
+        exec('docker compose -f docker/compose/preview.yml down -v');
         break;
       default:
         if (command) {

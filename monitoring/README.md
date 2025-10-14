@@ -262,10 +262,10 @@ docker-compose restart
 - ????????
   - Windows: `scripts/start-monitoring.ps1`
   - Unix: `scripts/start-monitoring.sh`
-- ?? docker-compose/preview.yml ????? Prometheus/Grafana/Jaeger?
-  - `docker compose -f docker-compose/preview.yml up -d prometheus grafana jaeger`
+- ?? docker/compose/preview.yml ????? Prometheus/Grafana/Jaeger?
+  - `docker compose -f docker/compose/preview.yml up -d prometheus grafana jaeger`
 - ??/??
-  - `docker compose -f docker-compose/preview.yml down -v`
+  - `docker compose -f docker/compose/preview.yml down -v`
 
 ### 2) ???????
 - ?????`GET /health`?????
@@ -326,7 +326,7 @@ docker-compose restart
 ### 8) ????
 ```bash
 # ?? Prometheus scrape ??
-docker compose -f docker-compose/preview.yml logs prometheus | rg scrape
+docker compose -f docker/compose/preview.yml logs prometheus | rg scrape
 
 # ?? BFF ????
 curl -s http://localhost:9464/metrics | head -n 20

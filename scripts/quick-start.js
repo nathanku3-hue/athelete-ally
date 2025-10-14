@@ -85,7 +85,7 @@ function startDockerServices() {
     console.log(colorize('?? ??Docker??...', 'blue'));
     
     const dockerProcess = spawn('docker', [
-      'compose', '-f', 'docker-compose/preview.yml', 'up', '--build', '-d'
+      'compose', '-f', 'docker/compose/preview.yml', 'up', '--build', '-d'
     ], {
       stdio: 'inherit',
       shell: true

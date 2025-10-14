@@ -213,12 +213,12 @@ jobs:
       # 清理旧的Docker容器和网络 (项目范围)
       - name: Clean up existing containers (project-scoped)
         run: |
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml down -v --remove-orphans || true
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml down -v --remove-orphans || true
 
       - name: Verify CI configuration
         run: |
           echo "🔍 Rendering final Docker Compose configuration..."
-          docker compose -f ./docker-compose/ci-standalone.yml config > final-config.yml
+          docker compose -f ./docker/compose/ci-standalone.yml config > final-config.yml
           
           echo "📋 Checking for ports configuration..."
           if grep -q '^\s*ports:' final-config.yml; then
@@ -236,25 +236,25 @@ jobs:
       - name: Start isolated test services
         run: |
           docker compose -p ci_${{ github.run_id }} \
-            -f ./docker-compose/ci-standalone.yml \
+            -f ./docker/compose/ci-standalone.yml \
             up -d postgres redis nats
 
       - name: Wait for services to be ready
         run: |
           echo "Waiting for services to be healthy..."
-          timeout 60 bash -c 'until docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml ps | grep -q "healthy"; do sleep 2; done' || true
+          timeout 60 bash -c 'until docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml ps | grep -q "healthy"; do sleep 2; done' || true
           echo "All services are healthy"
 
       - name: Verify services status
         run: |
           # 验证基础设施服务是否正常启动
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml ps
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml ps
 
       - name: Verify service connectivity
         run: |
           echo "🔍 Testing service connectivity..."
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml exec -T redis redis-cli ping || echo "❌ Redis connection failed"
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml exec -T postgres pg_isready -U athlete || echo "❌ PostgreSQL connection failed"
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml exec -T redis redis-cli ping || echo "❌ Redis connection failed"
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml exec -T postgres pg_isready -U athlete || echo "❌ PostgreSQL connection failed"
           
           # 使用curl容器检查NATS连接
           NET="ci_${{ github.run_id }}_ci-network"
@@ -264,9 +264,9 @@ jobs:
         if: failure()
         run: |
           echo "🔍 Service diagnostics..."
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml ps
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml ps
           echo "📋 Service logs:"
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml logs --tail=200
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml logs --tail=200
 
       - name: Run integration tests
         run: npm run test:integration -w packages/contracts
@@ -288,7 +288,7 @@ jobs:
       - name: Stop test services (project-scoped)
         if: always()
         run: |
-          docker compose -p ci_${{ github.run_id }} -f ./docker-compose/ci-standalone.yml down -v --remove-orphans
+          docker compose -p ci_${{ github.run_id }} -f ./docker/compose/ci-standalone.yml down -v --remove-orphans
 
   # 性能測試
   performance-tests:

@@ -101,7 +101,7 @@ start_backend() {
 start_monitoring() {
     log_info "??????..."
     
-    if docker compose -f docker-compose/preview.yml up -d prometheus grafana postgres redis nats; then
+    if docker compose -f docker/compose/preview.yml up -d prometheus grafana postgres redis nats; then
         log_success "????????"
     else
         log_warning "?????????????..."
