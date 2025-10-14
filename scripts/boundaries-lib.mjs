@@ -64,7 +64,7 @@ export async function runEslint(globs) {
 
 export function loadAllowPatternsSync() {
   try {
-    const raw = fsSync.readFileSync("ci/boundaries-allowlist.json", "utf8");
+    const raw = fsSync.readFileSync(".github/ci/boundaries-allowlist.json", "utf8");
     const json = JSON.parse(raw);
     return Array.isArray(json.allowedPatterns) ? json.allowedPatterns : [];
   } catch { return []; }

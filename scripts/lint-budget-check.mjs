@@ -81,7 +81,7 @@ function allowedBy(entryList, filePath, ruleId) {
   return false;
 }
 
-const budgetPath = path.join(process.cwd(), 'lint-budget.json');
+const budgetPath = path.join(process.cwd(), '.github', 'ci', 'lint-budget.json');
 const baseline = readJSON(budgetPath, { budgetByRule: {}, tierByRule: {} });
 const budget = baseline.budgetByRule || {};
 const tierByRule = baseline.tierByRule || {};

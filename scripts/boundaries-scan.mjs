@@ -24,7 +24,7 @@ const data = {
   items: { pilot, nonPilot }
 };
 
-await fs.mkdir("ci", { recursive: true });
+await fs.mkdir(".github/ci", { recursive: true });
 if (process.argv.includes("--write-baseline")) {
   const baseline = {
     frozenAt: new Date().toISOString(),
@@ -32,9 +32,9 @@ if (process.argv.includes("--write-baseline")) {
     violationsByRule: data.totals.overall.byRule,
     pilotTotals: data.totals.pilot,
     items: data.items,
-    allowedPatterns: JSON.parse(await fs.readFile("ci/boundaries-allowlist.json", "utf8").catch(()=>"{}"))
+    allowedPatterns: JSON.parse(await fs.readFile(".github/ci/boundaries-allowlist.json", "utf8").catch(()=>"{}"))
   };
-  await fs.writeFile("ci/boundaries-baseline.json", JSON.stringify(baseline, null, 2) + "\n", "utf8");
+  await fs.writeFile(".github/ci/boundaries-baseline.json", JSON.stringify(baseline, null, 2) + "\n", "utf8");
 }
 
 process.stdout.write(JSON.stringify(data, null, 2) + "\n");

@@ -89,7 +89,8 @@ const payload = {
   tierByRule,
 };
 
-const outPath = path.join(process.cwd(), 'lint-budget.json');
+const outPath = path.join(process.cwd(), '.github', 'ci', 'lint-budget.json');
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, JSON.stringify(payload, null, 2));
 console.log('Wrote baseline to ' + outPath);
 
