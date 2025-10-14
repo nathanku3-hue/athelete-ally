@@ -47,5 +47,33 @@ module.exports = {
   // Transform ignore patterns for ESM packages
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'
-  ]
+  ],
+
+  // Override ts-jest transform to use src paths for packages during testing
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+        module: 'esnext',
+        moduleResolution: 'node16',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+        baseUrl: '../..',
+        paths: {
+          '@athlete-ally/database-utils': ['./packages/database-utils/src'],
+          '@athlete-ally/logger': ['./packages/logger/dist/index'],
+          '@athlete-ally/logger/server': ['./packages/logger/dist/adapters/node'],
+          '@athlete-ally/logger/browser': ['./packages/logger/dist/adapters/browser'],
+          '@athlete-ally/shared': ['./packages/shared/src'],
+          '@athlete-ally/shared/*': ['./packages/shared/src/*'],
+          '@athlete-ally/shared-types': ['./packages/shared-types/src'],
+          '@athlete-ally/event-bus': ['./packages/event-bus/src'],
+          '@athlete-ally/contracts': ['./packages/contracts/events'],
+          '@athlete-ally/protocol-types': ['./packages/protocol-types/src'],
+        }
+      }
+    }],
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  }
 };
