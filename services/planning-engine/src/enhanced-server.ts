@@ -9,9 +9,6 @@ import swaggerUi from '@fastify/swagger-ui';
 import { PrismaClient } from '../prisma/generated/client/index.js';
 import { Redis } from 'ioredis';
 import { configObject } from './config/environment.js';
-// 健康检查功能已集成到主服务器中
-// import { ErrorHandler } from './middleware/error-handler.js';
-// import { PerformanceMonitor } from './middleware/performance.js';
 
 const server = Fastify({ 
   logger: {

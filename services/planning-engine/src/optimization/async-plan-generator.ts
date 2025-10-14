@@ -7,9 +7,6 @@ import { ConcurrencyController } from '../concurrency/controller.js';
 import { scorePlanCandidate } from '../scoring/fixed-weight.js';
 import { isFeatureEnabled } from '../feature-flags/index.js';
 import { PlanScoringSummary } from '../types/scoring.js';
-// import { Prisma } from '../../prisma/generated/client/index.js';
-// 使用统一的日志记录
-// 使用console进行日志记录，避免循环依赖
 
 // 缓存接口
 interface PlanCache {

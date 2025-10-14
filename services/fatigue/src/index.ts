@@ -27,21 +27,6 @@ const FatigueAssessmentSchema = z.object({
   assessmentType: z.enum(['pre_workout', 'post_workout', 'daily']).default('pre_workout'),
 });
 
-// Commented out for future use - schema for training session validation
-// const TrainingSessionSchema = z.object({
-//   exercises: z.array(z.object({
-//     id: z.string(),
-//     name: z.string(),
-//     category: z.string(),
-//     sets: z.number(),
-//     reps: z.number(),
-//     weight: z.number().optional(),
-//     intensity: z.number().min(1).max(5).optional(),
-//   })),
-//   totalDuration: z.number(),
-//   restBetweenSets: z.number(),
-// });
-
 const AdjustmentFeedbackSchema = z.object({
   adjustmentId: z.string(),
   satisfactionScore: z.number().min(1).max(5),

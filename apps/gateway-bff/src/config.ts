@@ -1,5 +1,3 @@
-// 临时注释掉共享配置导入，使用独立配置
-// import { createEnvConfig, generateRedisUrl } from '../../packages/shared/src/config/env-config.js';
 import { z } from 'zod';
 
 // 环境变量配置模式
