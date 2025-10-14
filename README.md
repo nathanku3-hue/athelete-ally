@@ -5,23 +5,52 @@ Athlete Ally 是一个AI驱动的运动训练平台，提供个性化的训练�
 
 ## 项目结构
 
+本项目遵循 **Turborepo/Nx 行业标准** 的 TypeScript 单体仓库结构组织：
+
 ```
 athlete-ally/
-├── apps/                    # 前端应用
-│   └── gateway-bff/        # API网关
-├── services/               # 后端服务
-│   ├── planning-engine/    # 训练计划引擎
-│   ├── profile-onboarding/ # 用户档案
-│   ├── exercises/          # 运动数据库
-│   └── fatigue/            # 疲劳管理
-├── packages/               # 共享包
-│   ├── shared/            # 共享工具
-│   ├── contracts/         # API合约
-│   └── protocol-types/    # 协议类型
-├── monitoring/             # 监控配置
-├── docs/                   # 项目文档
-└── infrastructure/         # 基础设施
+├── .github/                # CI/CD workflows & configurations
+│   ├── ci/                # CI配置文件（boundaries, lint-budget等）
+│   └── workflows/         # GitHub Actions工作流
+├── apps/                   # 前端应用
+│   ├── frontend/          # Next.js前端应用
+│   └── gateway-bff/       # API网关 (BFF)
+│       └── tests/e2e/     # Gateway端到端测试
+├── services/              # 后端微服务
+│   ├── planning-engine/   # AI驱动训练计划引擎
+│   ├── profile-onboarding/ # 用户档案入职服务
+│   ├── exercises/         # 运动数据库服务
+│   └── fatigue/           # 疲劳管理服务
+├── packages/              # 共享包
+│   ├── shared/           # 共享工具和utilities
+│   ├── contracts/        # 服务间API合约
+│   ├── protocol-types/   # 协议类型定义
+│   ├── logger/           # 统一日志记录
+│   └── health-schema/    # 健康检查schema
+├── infrastructure/        # 基础设施配置
+│   ├── monitoring/       # Prometheus, Grafana配置
+│   └── observability/    # 可观测性工具
+├── docker/               # Docker配置
+│   └── compose/          # Docker Compose文件
+├── docs/                 # 项目文档
+│   ├── examples/         # 配置示例文件
+│   ├── rfcs/            # RFC决策文档
+│   └── streams/         # 流式开发记录
+├── scripts/              # 构建和开发脚本
+├── config/               # 共享配置（TypeScript, Jest等）
+├── .env.example          # 环境变量模板
+└── turbo.json            # Turborepo配置
 ```
+
+### 关键目录说明
+
+- **`.github/ci/`**: 所有CI相关配置（代码边界、lint预算、控制台扫描）
+- **`docker/compose/`**: 所有Docker Compose文件（开发、CI、预览环境）
+- **`infrastructure/`**: 监控、可观测性和基础设施即代码
+- **`docs/examples/`**: 环境变量和配置示例（`.env.example`保留在根目录）
+- **`apps/gateway-bff/tests/e2e/`**: 端到端测试与服务共置
+
+详见: [Stream D Cleanup Summary](docs/streams/D/CLEANUP_SUMMARY.md)
 
 ## NATS JetStream 配置
 
