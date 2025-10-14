@@ -186,7 +186,7 @@ npm run infra:clean
 ```
 
 ### 环境变量配置
-复制 `env.example` 为 `.env` 并配置关键变量：
+复制 `docs/examples/env.example` 为 `.env` 并配置关键变量：
 - `POSTGRES_PORT`: PostgreSQL端口（默认5432）
 - `REDIS_PORT`: Redis端口（默认6379）
 - `NATS_PORT`: NATS端口（默认4222）

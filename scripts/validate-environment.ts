@@ -176,7 +176,7 @@ function checkFileStructure(): { status: 'pass' | 'fail' | 'warning'; message: s
     'apps/frontend/tsconfig.json',
     'apps/frontend/tailwind.config.mjs',
     'docker/compose/preview.yml',
-    'env.example',
+    'docs/examples/env.example',
     'apps/frontend/src/app/layout.tsx',
     'apps/frontend/src/app/page.tsx',
     'packages/shared/src/index.ts',
