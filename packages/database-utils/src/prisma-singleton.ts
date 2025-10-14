@@ -16,7 +16,7 @@
 /**
  * Interface for any Prisma Client constructor
  */
-interface PrismaClientConstructor<T = any> {
+interface PrismaClientConstructor<T = unknown> {
   new (): T;
 }
 

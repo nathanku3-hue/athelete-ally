@@ -34,6 +34,7 @@ module.exports = {
     '^\\.\\./prisma/generated/client/index\\.ts$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
     '^\\.\\./prisma/generated/client/index\\.js$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
     // Service-specific @athlete-ally package mappings (override base mappings)
+    '^@athlete-ally/database-utils$': '<rootDir>/packages/database-utils/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
     '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
     '^@athlete-ally/shared$': '<rootDir>/packages/shared/src',
