@@ -164,10 +164,8 @@ function ipToNumber(ip: string): number {
 /**
  * Check if request is within rate limits
  */
-function isWithinRateLimit(request: NextRequest): boolean {
+function isWithinRateLimit(_request: NextRequest): boolean {
   // Simple rate limiting - in production, use Redis or similar
-  const _clientIP = getClientIP(request);
-  
   // For now, just return true - implement proper rate limiting in production
   return true;
 }

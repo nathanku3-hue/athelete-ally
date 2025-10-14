@@ -1,6 +1,5 @@
 // services/optimization/src/QueryOptimizationService.ts
 import { PrismaClient } from '@prisma/client';
-// import { ProtocolCacheService } from '../cache/src/ProtocolCacheService';
 
 export interface QueryMetrics {
   query: string;
