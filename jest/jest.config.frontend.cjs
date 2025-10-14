@@ -31,8 +31,7 @@ module.exports = {
     '.*useTrainingQueries\\.test\\.tsx$'
   ],
   setupFilesAfterEnv: [
-    '<rootDir>/apps/frontend/src/__tests__/setup.ts',
-    '<rootDir>/src/__tests__/setup.ts'
+    '<rootDir>/apps/frontend/src/__tests__/setup.ts'
   ],
   testEnvironmentOptions: { url: 'http://localhost:3000' },
 
