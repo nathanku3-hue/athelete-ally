@@ -95,8 +95,8 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
     "no-console": "warn",
     "prefer-const": "warn",
     "no-var": "error",
-    "import/no-internal-modules": ["warn", { 
-      allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client"] 
+    "import/no-internal-modules": ["warn", {
+      allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client", "next/server"]
     }],
     "no-restricted-imports": ["warn", {
       patterns: [

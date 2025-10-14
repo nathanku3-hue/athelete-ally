@@ -341,9 +341,6 @@ export class AdaptationEngine {
    * 创建恢复性调整
    */
   private createRecoveryAdaptation(_currentPlan: any, fatigueLevel: number): AdaptationResult {
-    // const _intensityReduction = Math.min(0.3, fatigueLevel * 0.05);
-    // const _volumeReduction = Math.min(0.4, fatigueLevel * 0.06);
-
     return {
       type: 'recovery',
       changes: {

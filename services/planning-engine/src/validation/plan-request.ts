@@ -24,10 +24,6 @@ export const PlanRequestSchema = z.object({
   competitionDate: z.string().optional(),
 });
 
-// 内部类型，用于类型安全
-// type _PlanRequestInput = z.input<typeof PlanRequestSchema>;
-// type _PlanRequestOutput = z.output<typeof PlanRequestSchema>;
-
 /**
  * 通用的事件到计划请求转换器
  * 应用域默认值并验证输入
