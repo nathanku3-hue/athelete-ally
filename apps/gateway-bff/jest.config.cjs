@@ -2,7 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
 
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: [
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.integration.test.ts',
@@ -57,7 +57,7 @@ module.exports = {
     '!**/build/**'
   ],
 
-  setupFilesAfterEnv: ['<rootDir>/../../src/__tests__/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/e2e/setup.ts'],
 
   testTimeout: 15000,
 
