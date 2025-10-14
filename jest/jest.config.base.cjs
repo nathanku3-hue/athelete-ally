@@ -83,7 +83,7 @@ module.exports = {
       tsconfig: {
         jsx: 'react-jsx',
         module: 'esnext',
-        moduleResolution: 'node',
+        moduleResolution: 'node16',
         allowSyntheticDefaultImports: true,
         esModuleInterop: true,
         baseUrl: '.',

@@ -27,10 +27,11 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs && npm run build:copy-cjs",
+    "build": "npm run build:esm && npm run build:cjs && npm run build:copy-cjs && npm run build:fix-cjs",
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:copy-cjs": "node -e \"const fs=require('fs');const path=require('path');function copyAsCjs(src,dest){const files=fs.readdirSync(src,{withFileTypes:true});files.forEach(f=>{const srcPath=path.join(src,f.name);const destPath=path.join(dest,f.name);if(f.isDirectory()){if(!fs.existsSync(destPath))fs.mkdirSync(destPath,{recursive:true});copyAsCjs(srcPath,destPath)}else if(f.name.endsWith('.js')){const cjsName=f.name.replace('.js','.cjs');fs.copyFileSync(srcPath,path.join(dest,cjsName))}})}copyAsCjs('dist-cjs','dist')\"",
+    "build:fix-cjs": "node scripts/fix-cjs-imports.cjs",
     "type-check": "tsc --noEmit",
     "lint": "eslint -c ../../eslint.config.unified.mjs src",
     "lint:fix": "eslint -c ../../eslint.config.unified.mjs src --fix"

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.filterAndSanitizeContext = exports.sanitizeText = void 0;
 exports.createLogger = createLogger;
-const sanitize_js_1 = require("./sanitize.js");
+const sanitize_js_1 = require("./sanitize.cjs");
 Object.defineProperty(exports, "sanitizeText", { enumerable: true, get: function () { return sanitize_js_1.sanitizeText; } });
 Object.defineProperty(exports, "filterAndSanitizeContext", { enumerable: true, get: function () { return sanitize_js_1.filterAndSanitizeContext; } });
 function baseEvent(level, service, moduleName, env, msg, ctx, errObj) {
