@@ -83,7 +83,6 @@ async function start() {
  */
 async function shutdown(signal: string) {
   httpServer.log.info(`Received ${signal}, shutting down gracefully...`);
-  running = false;
 
   try {
     // Stop consumers
