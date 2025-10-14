@@ -34,6 +34,7 @@ module.exports = {
     '^\\.\\./prisma/generated/client/index\\.ts$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
     '^\\.\\./prisma/generated/client/index\\.js$': '<rootDir>/services/planning-engine/prisma/generated/client/index.js',
     // Service-specific @athlete-ally package mappings (override base mappings)
+    '^@athlete-ally/database-utils$': '<rootDir>/packages/database-utils/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
     '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
     '^@athlete-ally/shared$': '<rootDir>/packages/shared/src',
@@ -46,5 +47,34 @@ module.exports = {
   // Transform ignore patterns for ESM packages
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$|@athlete-ally/.*))'
-  ]
+  ],
+
+  // Override ts-jest transform to use src paths for packages during testing
+  // Note: baseUrl is relative to Jest's rootDir (which is '../..' from planning-engine)
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+        module: 'esnext',
+        moduleResolution: 'node16',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+        baseUrl: '.',
+        paths: {
+          '@athlete-ally/database-utils': ['packages/database-utils/src/index.ts'],
+          '@athlete-ally/logger': ['packages/logger/dist/index'],
+          '@athlete-ally/logger/server': ['packages/logger/dist/adapters/node'],
+          '@athlete-ally/logger/browser': ['packages/logger/dist/adapters/browser'],
+          '@athlete-ally/shared': ['packages/shared/src'],
+          '@athlete-ally/shared/*': ['packages/shared/src/*'],
+          '@athlete-ally/shared-types': ['packages/shared-types/src'],
+          '@athlete-ally/event-bus': ['packages/event-bus/src'],
+          '@athlete-ally/contracts': ['packages/contracts/events'],
+          '@athlete-ally/protocol-types': ['packages/protocol-types/src'],
+        }
+      }
+    }],
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  }
 };

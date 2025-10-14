@@ -96,6 +96,12 @@
       ],
       "@athlete-ally/logger/browser": [
         "./packages/logger/dist/adapters/browser"
+      ],
+      "@athlete-ally/database-utils": [
+        "./packages/database-utils/dist/index"
+      ],
+      "@athlete-ally/shared/fastify-augment": [
+        "./packages/shared/dist/fastify-augment"
       ]
     }
   },

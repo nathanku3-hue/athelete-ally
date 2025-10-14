@@ -50,7 +50,12 @@ module.exports = {
   // Module resolution mapping (order matters - specific before generic)
   moduleNameMapper: {
     // @athlete-ally packages (specific mappings first)
-    '^@athlete-ally/logger$': '<rootDir>/packages/logger/dist',
+    // Use CJS builds for packages that have them (Jest compatibility)
+    '^@athlete-ally/logger$': '<rootDir>/packages/logger/dist/index.cjs',
+    '^@athlete-ally/logger/browser$': '<rootDir>/packages/logger/dist/adapters/browser.cjs',
+    '^@athlete-ally/logger/server$': '<rootDir>/packages/logger/dist/adapters/node.cjs',
+    '^@athlete-ally/database-utils$': '<rootDir>/packages/database-utils/src',
+    '^@athlete-ally/shared/fastify-augment$': '<rootDir>/packages/shared/dist/fastify-augment.cjs',
     '^@athlete-ally/event-bus$': '<rootDir>/packages/event-bus/src',
     '^@athlete-ally/protocol-types$': '<rootDir>/packages/protocol-types/src',
     '^@athlete-ally/contracts$': '<rootDir>/packages/contracts/events',
@@ -78,7 +83,7 @@ module.exports = {
       tsconfig: {
         jsx: 'react-jsx',
         module: 'esnext',
-        moduleResolution: 'node',
+        moduleResolution: 'node16',
         allowSyntheticDefaultImports: true,
         esModuleInterop: true,
         baseUrl: '.',
