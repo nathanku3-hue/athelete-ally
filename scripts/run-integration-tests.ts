@@ -51,7 +51,7 @@ async function startDockerEnvironment(): Promise<TestResult> {
   console.log('🐳 正在启动Docker环境...');
   
   return new Promise((resolve) => {
-    const dockerProcess = spawn('docker', ['compose', '-f', 'docker-compose/preview.yml', 'up', '--build', '-d'], {
+    const dockerProcess = spawn('docker', ['compose', '-f', 'docker/compose/preview.yml', 'up', '--build', '-d'], {
       stdio: 'pipe',
       shell: true,
     });
@@ -186,7 +186,7 @@ async function stopDockerEnvironment(): Promise<void> {
   console.log('🛑 正在停止Docker环境...');
   
   try {
-    await execAsync('docker compose -f docker-compose/preview.yml down -v');
+    await execAsync('docker compose -f docker/compose/preview.yml down -v');
     console.log('✅ Docker环境已停止');
   } catch (error) {
     console.error('❌ 停止Docker环境失败:', error);

@@ -51,7 +51,7 @@ npm install
 
 # 3. ????????
 echo -e "${BLUE}?? ????????...${NC}"
-docker-compose -f docker-compose/preview.yml up -d postgres redis nats
+docker-compose -f docker/compose/preview.yml up -d postgres redis nats
 
 # 4. ????????
 echo -e "${BLUE}? ????????...${NC}"
@@ -59,7 +59,7 @@ sleep 15
 
 # ??PostgreSQL??
 echo -e "${BLUE}?? ???????...${NC}"
-until docker-compose -f docker-compose/preview.yml exec postgres pg_isready -U athlete -d athlete; do
+until docker-compose -f docker/compose/preview.yml exec postgres pg_isready -U athlete -d athlete; do
     echo -e "${YELLOW}? ??PostgreSQL??...${NC}"
     sleep 2
 done
@@ -67,7 +67,7 @@ echo -e "${GREEN}? PostgreSQL ??${NC}"
 
 # ??Redis??
 echo -e "${BLUE}?? ??Redis??...${NC}"
-until docker-compose -f docker-compose/preview.yml exec redis redis-cli ping; do
+until docker-compose -f docker/compose/preview.yml exec redis redis-cli ping; do
     echo -e "${YELLOW}? ??Redis??...${NC}"
     sleep 2
 done
@@ -88,5 +88,5 @@ echo -e "${BLUE}?? ??: http://localhost:9090 (Prometheus)${NC}"
 echo -e "${BLUE}?? ???: http://localhost:3001 (Grafana)${NC}"
 
 # ??????
-docker-compose -f docker-compose/preview.yml up --build
+docker-compose -f docker/compose/preview.yml up --build
 

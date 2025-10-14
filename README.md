@@ -77,8 +77,8 @@ EVENT_STREAM_MODE=multi node scripts/test-multi-mode-fallback.js
 - Docker & Docker Compose
 
 ### Docker Compose 配置
-- **本地开发**: 使用 [`docker-compose/preview.yml`](docker-compose/preview.yml) 进行端口绑定，支持环境变量端口重映射
-- **CI环境**: 使用 [`docker-compose/ci-standalone.yml`](docker-compose/ci-standalone.yml) 进行完全隔离，无端口绑定
+- **本地开发**: 使用 [`docker/compose/preview.yml`](docker/compose/preview.yml) 进行端口绑定，支持环境变量端口重映射
+- **CI环境**: 使用 [`docker/compose/ci-standalone.yml`](docker/compose/ci-standalone.yml) 进行完全隔离，无端口绑定
 - **未来计划**: 将迁移到Docker Compose profiles方案（local vs ci）
 
 ### 环境变量
@@ -186,7 +186,7 @@ npm run infra:clean
 ```
 
 ### 环境变量配置
-复制 `env.example` 为 `.env` 并配置关键变量：
+复制 `docs/examples/env.example` 为 `.env` 并配置关键变量：
 - `POSTGRES_PORT`: PostgreSQL端口（默认5432）
 - `REDIS_PORT`: Redis端口（默认6379）
 - `NATS_PORT`: NATS端口（默认4222）
@@ -198,7 +198,7 @@ npm run infra:clean
 npm run build:all
 
 # 启动生产环境
-docker compose -f docker-compose/preview.yml up -d
+docker compose -f docker/compose/preview.yml up -d
 ```
 
 ## 核心功能

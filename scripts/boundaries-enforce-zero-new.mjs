@@ -12,7 +12,7 @@ const changed = getChangedFiles();
 const globs = changed.length ? changed : ['**/*.{ts,tsx,js,jsx}'];
 const results = await runEslint(globs);
 const { pilot } = partitionPilot(results);
-const baseline = JSON.parse(await fs.readFile('ci/boundaries-baseline.json', 'utf8').catch(()=>'{"items":{"pilot":[]}}'));
+const baseline = JSON.parse(await fs.readFile('.github/ci/boundaries-baseline.json', 'utf8').catch(()=>'{"items":{"pilot":[]}}'));
 const allowPatterns = loadAllowPatternsSync();
 const newPilot = deltaNew(pilot, baseline.items?.pilot || [], allowPatterns);
 

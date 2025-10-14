@@ -9,7 +9,7 @@ const results = await runEslint(globs);
 const { pilot, nonPilot } = partitionPilot(results);
 
 // Load baseline and allowlist
-const baseline = JSON.parse(await fs.readFile('ci/boundaries-baseline.json', 'utf8').catch(()=>'{"items": {"pilot":[],"nonPilot":[]},"totals":{"pilot":{"total":0,"byRule":{}},"overall":{"total":0,"byRule":{}}}}'));
+const baseline = JSON.parse(await fs.readFile('.github/ci/boundaries-baseline.json', 'utf8').catch(()=>'{"items": {"pilot":[],"nonPilot":[]},"totals":{"pilot":{"total":0,"byRule":{}},"overall":{"total":0,"byRule":{}}}}'));
 const allowPatterns = loadAllowPatternsSync();
 
 const newPilot = deltaNew(pilot, baseline.items?.pilot || [], allowPatterns);
