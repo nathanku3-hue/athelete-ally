@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { Redis } from 'ioredis';
-import { EventProcessor } from '@athlete-ally/event-bus';
+import { EventBus } from '@athlete-ally/event-bus';
 import { CoachTipGenerator } from './tip-generator.js';
 import { TipStorage } from './tip-storage.js';
 import { CoachTipSubscriber } from './subscriber.js';
@@ -16,7 +16,7 @@ const config = {
 
 // Global components
 let redis: Redis;
-let eventProcessor: EventProcessor;
+let eventBus: EventBus;
 let tipGenerator: CoachTipGenerator;
 let tipStorage: TipStorage;
 let subscriber: CoachTipSubscriber;
@@ -42,13 +42,11 @@ async function initializeComponents() {
   await redis.connect();
   server.log.info('Connected to Redis');
 
-  // Initialize event processor
-  eventProcessor = new EventProcessor({
-    natsUrl: process.env.NATS_URL || 'nats://localhost:4222',
-    consumerGroup: 'coach-tip-service'
-  });
+  // Initialize event bus
+  eventBus = new EventBus();
+  await eventBus.connect(process.env.NATS_URL || 'nats://localhost:4223');
   
-  server.log.info('Event processor initialized');
+  server.log.info('Event bus connected');
 
   // Initialize tip generator
   tipGenerator = new CoachTipGenerator();
@@ -58,8 +56,8 @@ async function initializeComponents() {
   tipStorage = new TipStorage(redis);
   server.log.info('Tip storage initialized');
 
-  // Initialize event subscriber
-  subscriber = new CoachTipSubscriber(eventProcessor, tipGenerator, tipStorage);
+  // Initialize event subscriber  
+  subscriber = new CoachTipSubscriber(eventBus, tipGenerator, tipStorage);
   await subscriber.connect();
   server.log.info('Event subscriber connected');
 }

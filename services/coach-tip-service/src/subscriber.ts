@@ -1,20 +1,20 @@
-import { EventProcessor, Task } from '@athlete-ally/event-bus';
+import { EventBus } from '@athlete-ally/event-bus';
 import { PlanGeneratedEvent } from '@athlete-ally/contracts';
 import { CoachTipGenerator, TipGenerationContext, PlanScoringSummary } from './tip-generator.js';
 import { TipStorage } from './tip-storage.js';
 
 export class CoachTipSubscriber {
-  private eventProcessor: EventProcessor;
+  private eventBus: EventBus;
   private tipGenerator: CoachTipGenerator;
   private tipStorage: TipStorage;
-  private isConnected = false;
+  private isSubscribed = false;
 
   constructor(
-    eventProcessor: EventProcessor,
+    eventBus: EventBus,
     tipGenerator: CoachTipGenerator,
     tipStorage: TipStorage
   ) {
-    this.eventProcessor = eventProcessor;
+    this.eventBus = eventBus;
     this.tipGenerator = tipGenerator;
     this.tipStorage = tipStorage;
   }
@@ -23,27 +23,19 @@ export class CoachTipSubscriber {
    * Connect to the event bus and subscribe to plan_generated events
    */
   async connect(): Promise<void> {
-    if (this.isConnected) {
-      console.warn('CoachTip subscriber already connected');
+    if (this.isSubscribed) {
+      console.warn('CoachTip subscriber already subscribed');
       return;
     }
 
     try {
-      await this.eventProcessor.connect();
-      console.info('CoachTip subscriber connected to event bus');
-      
       // Subscribe to plan_generated events
-      await this.eventProcessor.subscribe(
-        'plan_generated',
-        this.handlePlanGenerated.bind(this),
-        {
-          maxConcurrent: 5, // Process up to 5 tips concurrently
-          enableConcurrencyControl: true
-        }
+      await this.eventBus.subscribeToPlanGenerated(
+        this.handlePlanGenerated.bind(this)
       );
       
       console.info('CoachTip subscriber listening for plan_generated events');
-      this.isConnected = true;
+      this.isSubscribed = true;
     } catch (error) {
       console.error('Failed to connect CoachTip subscriber:', error);
       throw error;
@@ -54,13 +46,13 @@ export class CoachTipSubscriber {
    * Disconnect from the event bus
    */
   async disconnect(): Promise<void> {
-    if (!this.isConnected) {
+    if (!this.isSubscribed) {
       return;
     }
 
     try {
-      await this.eventProcessor.disconnect();
-      this.isConnected = false;
+      // EventBus doesn't have explicit unsubscribe, connection will be closed on shutdown
+      this.isSubscribed = false;
       console.info('CoachTip subscriber disconnected');
     } catch (error) {
       console.error('Error disconnecting CoachTip subscriber:', error);
@@ -71,8 +63,7 @@ export class CoachTipSubscriber {
   /**
    * Handle plan_generated events and generate coaching tips
    */
-  private async handlePlanGenerated(task: Task<PlanGeneratedEvent>): Promise<void> {
-    const event = task.data;
+  private async handlePlanGenerated(event: PlanGeneratedEvent): Promise<void> {
     
     console.info({
       eventId: event.eventId,
@@ -176,7 +167,7 @@ export class CoachTipSubscriber {
    * Get connection status
    */
   isConnected(): boolean {
-    return this.isConnected;
+    return this.isSubscribed;
   }
 
   /**
@@ -184,7 +175,7 @@ export class CoachTipSubscriber {
    */
   getStats() {
     return {
-      isConnected: this.isConnected,
+      isConnected: this.isSubscribed,
       timestamp: new Date().toISOString()
     };
   }
