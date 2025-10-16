@@ -55,10 +55,12 @@ jobs:
           for file in $LARGE_FILES; do
             ALLOWED=false
             for pattern in "${ALLOWLIST[@]}"; do
-              if [[ "$file" == $pattern ]] || [[ "$file" == *"$pattern"* ]]; then
-                ALLOWED=true
-                break
-              fi
+              case "$file" in
+                $pattern|*"$pattern"*)
+                  ALLOWED=true
+                  break
+                  ;;
+              esac
             done
             if [ "$ALLOWED" = false ]; then
               FILTERED_FILES="$FILTERED_FILES$file\n"

@@ -39,7 +39,7 @@ export interface PlanGeneratedEvent {
   planName: string;
   status: 'generating' | 'completed' | 'failed';
   version: number;
-  planData?: any; // Full plan content including scoring data
+  planData?: Record<string, unknown>; // Full plan content including scoring data
 }
 
 export interface PlanGenerationRequestedEvent {

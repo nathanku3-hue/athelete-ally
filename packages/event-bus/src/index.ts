@@ -1,8 +1,8 @@
-import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
-import { register, Counter, Histogram } from 'prom-client';
+import { register, Counter, Histogram, Gauge } from 'prom-client';
 import { createLogger } from '@athlete-ally/logger';
 import nodeAdapter from '@athlete-ally/logger/server';
 
@@ -51,6 +51,34 @@ export const eventBusMetrics = {
     name: 'event_bus_events_rejected_total',
     help: 'Total number of events rejected',
     labelNames: ['topic', 'reason']
+  }),
+
+  // NAK 次数（可重试）
+  eventsNak: new Counter({
+    name: 'event_bus_events_nak_total',
+    help: 'Total number of events NAKed (retry requested)',
+    labelNames: ['topic', 'reason']
+  }),
+
+  // 永久 ACK 次数（不可重试错误）
+  eventsAckPermanent: new Counter({
+    name: 'event_bus_events_ack_permanent_total',
+    help: 'Total number of events ACKed permanently after error',
+    labelNames: ['topic']
+  }),
+
+  // Consumer lag（服务端待投递 + 等待确认）
+  consumerLag: new Gauge({
+    name: 'event_bus_consumer_lag',
+    help: 'Consumer lag (num_pending + ack_pending)',
+    labelNames: ['topic', 'durable']
+  }),
+
+  // 等待确认的消息数
+  consumerAckPending: new Gauge({
+    name: 'event_bus_consumer_ack_pending',
+    help: 'Number of ack pending messages for the consumer',
+    labelNames: ['topic', 'durable']
   })
 };
 
@@ -361,7 +389,12 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              log.error(`Error processing OnboardingCompleted event: ${JSON.stringify(error)}`);
+              if (error instanceof Error) {
+                log.error(`Error processing OnboardingCompleted event: ${error.message}`);
+                log.error(`Stack: ${error.stack}`);
+              } else {
+                log.error(`Error processing OnboardingCompleted event: ${JSON.stringify(error)}`);
+              }
               
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
@@ -376,7 +409,12 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          log.error(`Error in OnboardingCompleted batch processing: ${JSON.stringify(error)}`);
+          if (error instanceof Error) {
+            log.error(`Error in OnboardingCompleted batch processing: ${error.message}`);
+            log.error(`Stack: ${error.stack}`);
+          } else {
+            log.error(`Error in OnboardingCompleted batch processing: ${JSON.stringify(error)}`);
+          }
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
@@ -475,7 +513,12 @@ export class EventBus {
               }, duration);
               
               eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              log.error(`Error processing PlanGenerationRequested event: ${JSON.stringify(error)}`);
+              if (error instanceof Error) {
+                log.error(`Error processing PlanGenerationRequested event: ${error.message}`);
+                log.error(`Stack: ${error.stack}`);
+              } else {
+                log.error(`Error processing PlanGenerationRequested event: ${JSON.stringify(error)}`);
+              }
               
               // 根据错误类型决定是否重试
               if (this.shouldRetry(error)) {
@@ -490,9 +533,123 @@ export class EventBus {
           await Promise.allSettled(processingPromises);
           
         } catch (error) {
-          log.error(`Error in PlanGenerationRequested batch processing: ${JSON.stringify(error)}`);
+          if (error instanceof Error) {
+            log.error(`Error in PlanGenerationRequested batch processing: ${error.message}`);
+            log.error(`Stack: ${error.stack}`);
+          } else {
+            log.error(`Error in PlanGenerationRequested batch processing: ${JSON.stringify(error)}`);
+          }
           // 错误时等待更长时间
           await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    })();
+  }
+
+  async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
+    if (!this.js) throw new Error('JetStream not initialized');
+
+    // Use push subscription with consumerOpts builder (NATS v2.29+)
+    const deliverSubject = `_INBOX.coach-tip.${Date.now()}`;
+    const opts = consumerOpts();
+    opts.durable('coach-tip-plan-gen-consumer');
+    opts.ackExplicit();
+    opts.deliverAll();
+    opts.deliverTo(deliverSubject);
+    
+    const psub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
+
+    const topic = 'plan_generated';
+
+    log.warn(`[event-bus] Starting PlanGenerated subscription (simple iterator)`);
+
+    // 定期上报 consumer 指标（每 5s）
+    (async () => {
+      try {
+        const durable = 'coach-tip-plan-gen-consumer';
+        const streamName = 'ATHLETE_ALLY_EVENTS';
+        const jsm = this.jsm || (this.nc ? await this.nc.jetstreamManager() : null);
+        if (jsm) {
+          setInterval(async () => {
+            try {
+              const info = await jsm.consumers.info(streamName, durable);
+              const lag = Number(info.num_pending || 0) + Number(info.num_ack_pending || 0);
+              eventBusMetrics.consumerLag.set({ topic, durable }, lag);
+              eventBusMetrics.consumerAckPending.set({ topic, durable }, Number(info.num_ack_pending || 0));
+            } catch (e) {
+              // ignore metric fetch errors
+            }
+          }, 5000);
+        }
+      } catch (_) {
+        // ignore
+      }
+    })();
+
+    // Simple async iterator - matches working pattern
+    (async () => {
+      for await (const msg of psub as any) {
+        const startTime = Date.now();
+
+        try {
+          const eventData = JSON.parse(new TextDecoder().decode(msg.data));
+            
+            // Schema validation
+            const validation = await eventValidator.validateEvent(topic, eventData);
+            eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
+            
+            if (!validation.valid) {
+              eventBusMetrics.schemaValidationFailures.inc({ 
+                topic, 
+                error_type: 'validation_failed' 
+              });
+              eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
+              eventBusMetrics.eventsNak.inc({ topic, reason: 'schema_validation_failed' });
+              
+              log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
+              msg.nak();
+              continue;
+            }
+            
+            eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
+            
+            const event = eventData as PlanGeneratedEvent;
+            await callback(event);
+
+            const duration = (Date.now() - startTime) / 1000;
+            eventBusMetrics.eventProcessingDuration.observe({
+              topic,
+              operation: 'consume',
+              status: 'success'
+            }, duration);
+
+            eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
+            msg.ack();
+            
+          } catch (error) {
+            const duration = (Date.now() - startTime) / 1000;
+            eventBusMetrics.eventProcessingDuration.observe({
+              topic,
+              operation: 'consume',
+              status: 'error'
+            }, duration);
+            
+            eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
+            if (error instanceof Error) {
+              log.error(`Error processing PlanGenerated event: ${error.message}`);
+              log.error(`Stack: ${error.stack}`);
+            } else {
+              log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
+            }
+            
+            // Determine retry based on error type
+            if (this.shouldRetry(error)) {
+              eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
+              msg.nak();
+            } else {
+              eventBusMetrics.eventsAckPermanent.inc({ topic });
+              msg.ack(); // Permanent failure, acknowledge message
+            }
         }
       }
     })();
