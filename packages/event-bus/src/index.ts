@@ -545,10 +545,39 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    // Fix: Only pass durable name - batch/expires belong in fetch()
-    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+    // eslint-disable-next-line no-console
+    console.error('[DEBUG] [event-bus] subscribeToPlanGenerated called');
+    // eslint-disable-next-line no-console
+    console.error('[DEBUG] [event-bus] About to call pullSubscribe with:', {
+      subject: EVENT_TOPICS.PLAN_GENERATED,
       durable: 'coach-tip-plan-gen-consumer'
-    } as never);
+    });
+
+    let psub;
+    try {
+      // eslint-disable-next-line no-console
+      console.error('[DEBUG] [event-bus] Calling pullSubscribe...');
+
+      // Fix: Only pass durable name - batch/expires belong in fetch()
+      psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+        durable: 'coach-tip-plan-gen-consumer'
+      } as never);
+
+      // eslint-disable-next-line no-console
+      console.error('[DEBUG] [event-bus] pullSubscribe completed successfully!');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[ERROR] [event-bus] ===== pullSubscribe FAILED =====');
+      // eslint-disable-next-line no-console
+      console.error('[ERROR] [event-bus] Error type:', typeof error);
+      // eslint-disable-next-line no-console
+      console.error('[ERROR] [event-bus] Error message:', error instanceof Error ? error.message : String(error));
+      // eslint-disable-next-line no-console
+      console.error('[ERROR] [event-bus] Error stack:', error instanceof Error ? error.stack : 'N/A');
+      // eslint-disable-next-line no-console
+      console.error('[ERROR] [event-bus] Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      throw error;
+    }
 
     const topic = 'plan_generated';
 
