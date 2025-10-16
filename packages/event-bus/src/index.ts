@@ -269,6 +269,18 @@ export class EventBus {
     if (manageStreams) {
       log.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
+
+      // Pre-create coach-tip consumer so pullSubscribe can bind cleanly
+      log.warn('[event-bus] Pre-creating coach-tip consumer...');
+      await this.ensureConsumer('ATHLETE_ALLY_EVENTS', {
+        durable_name: 'coach-tip-plan-gen-consumer',
+        filter_subject: EVENT_TOPICS.PLAN_GENERATED,
+        ack_policy: 'explicit',
+        deliver_policy: 'all',
+        max_deliver: 3,
+        ack_wait: 30_000_000_000, // 30 seconds in nanoseconds
+        max_ack_pending: 100
+      });
     } else {
       log.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
     }
