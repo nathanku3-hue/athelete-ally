@@ -558,6 +558,7 @@ export class EventBus {
     const opts = consumerOpts()
       .durable(durableName)
       .ackExplicit()
+      .deliverAll()  // Consume all pending messages
       .filterSubject(EVENT_TOPICS.PLAN_GENERATED)
       .deliverTo(createInbox());
 

@@ -70,22 +70,8 @@ export class CoachTipSubscriber {
     }
 
     try {
-      log.info('[DEBUG] Creating consumer before subscribing...');
-
-      // Pre-create consumer with explicit configuration
-      await this.eventBus.ensureConsumer('ATHLETE_ALLY_EVENTS', {
-        durable_name: 'coach-tip-plan-gen-consumer',
-        filter_subject: 'athlete-ally.plans.generated',
-        ack_policy: 'explicit',
-        deliver_policy: 'all',
-        max_deliver: 3,
-        ack_wait: 30_000_000_000, // 30 seconds in nanoseconds
-        max_ack_pending: 100
-      });
-
-      log.info('[DEBUG] Consumer created/verified successfully');
-
       // Subscribe to plan_generated events
+      // consumerOpts will automatically create/bind the durable consumer
       await this.eventBus.subscribeToPlanGenerated(
         this.handlePlanGenerated.bind(this)
       );
