@@ -274,7 +274,6 @@ export class EventBus {
       log.warn('[event-bus] Pre-creating coach-tip consumer...');
       await this.ensureConsumer('ATHLETE_ALLY_EVENTS', {
         durable_name: 'coach-tip-plan-gen-consumer',
-        filter_subject: EVENT_TOPICS.PLAN_GENERATED,
         ack_policy: 'explicit',
         deliver_policy: 'all',
         max_deliver: 3,
@@ -759,7 +758,7 @@ export class EventBus {
    */
   async ensureConsumer(streamName: string, consumerConfig: {
     durable_name: string;
-    filter_subject: string;
+    filter_subject?: string;
     ack_policy: 'explicit' | 'none' | 'all';
     deliver_policy: 'all' | 'last' | 'new' | 'by_start_sequence' | 'by_start_time' | 'last_per_subject';
     max_deliver: number;
@@ -771,10 +770,10 @@ export class EventBus {
     try {
       // Try to get existing consumer info
       const existingConsumer = await this.jsm.consumers.info(streamName, consumerConfig.durable_name);
-      
+
       // Check if configuration needs updating
-      const needsUpdate = 
-        existingConsumer.config.filter_subject !== consumerConfig.filter_subject ||
+      const needsUpdate =
+        (consumerConfig.filter_subject !== undefined && existingConsumer.config.filter_subject !== consumerConfig.filter_subject) ||
         existingConsumer.config.ack_policy !== consumerConfig.ack_policy ||
         existingConsumer.config.deliver_policy !== consumerConfig.deliver_policy ||
         existingConsumer.config.max_deliver !== consumerConfig.max_deliver ||
