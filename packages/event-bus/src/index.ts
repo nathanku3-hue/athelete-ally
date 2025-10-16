@@ -319,9 +319,7 @@ export class EventBus {
     if (!this.js) throw new Error('JetStream not initialized');
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.ONBOARDING_COMPLETED, {
-      durable: 'planning-engine-onboarding-sub',
-      batch: 10,
-      expires: 1000
+      durable: 'planning-engine-onboarding-sub'
     } as never);
 
     const topic = 'onboarding_completed';
@@ -443,9 +441,7 @@ export class EventBus {
     if (!this.js) throw new Error('JetStream not initialized');
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATION_REQUESTED, {
-      durable: 'planning-engine-plan-gen-sub',
-      batch: 10,
-      expires: 1000
+      durable: 'planning-engine-plan-gen-sub'
     } as never);
 
     const topic = 'plan_generation_requested';
@@ -549,62 +545,12 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
+    // Fix: Only pass durable name - batch/expires belong in fetch()
+    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+      durable: 'coach-tip-plan-gen-consumer'
+    } as never);
+
     const topic = 'plan_generated';
-    const durableName = 'coach-tip-plan-gen-consumer';
-    const streamName = 'ATHLETE_ALLY_EVENTS';
-
-    console.error(`[DEBUG] ===== subscribeToPlanGenerated starting =====`);
-    console.error(`[DEBUG] Topic: ${EVENT_TOPICS.PLAN_GENERATED}`);
-    console.error(`[DEBUG] Durable: ${durableName}`);
-    console.error(`[DEBUG] Stream: ${streamName}`);
-
-    // Check if consumer exists and inspect its config
-    try {
-      const jsm = await this.nc!.jetstreamManager();
-      console.error(`[DEBUG] Checking if consumer exists...`);
-      const consumerInfo = await jsm.consumers.info(streamName, durableName);
-      console.error(`[DEBUG] Consumer exists:`, JSON.stringify({
-        name: consumerInfo.name,
-        filter_subject: consumerInfo.config.filter_subject,
-        ack_policy: consumerInfo.config.ack_policy,
-        deliver_policy: consumerInfo.config.deliver_policy,
-        num_pending: consumerInfo.num_pending,
-        num_ack_pending: consumerInfo.num_ack_pending
-      }, null, 2));
-    } catch (e) {
-      console.error(`[DEBUG] Consumer does not exist (will be created by pullSubscribe)`);
-      console.error(`[DEBUG] Consumer check error:`, e instanceof Error ? e.message : String(e));
-    }
-
-    // Use pull subscription - matches working pattern
-    let psub;
-    try {
-      console.error(`[DEBUG] Attempting pullSubscribe...`);
-      console.error(`[DEBUG] Options:`, JSON.stringify({
-        durable: durableName,
-        batch: 10,
-        expires: 1000
-      }, null, 2));
-
-      psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
-        durable: durableName,
-        batch: 10,
-        expires: 1000
-      } as never);
-
-      console.error(`[DEBUG] pullSubscribe succeeded!`);
-
-    } catch (error) {
-      console.error(`[ERROR] ===== pullSubscribe FAILED =====`);
-      console.error(`[ERROR] Error type:`, typeof error);
-      console.error(`[ERROR] Error constructor:`, error?.constructor?.name);
-      console.error(`[ERROR] Error message:`, error instanceof Error ? error.message : String(error));
-      console.error(`[ERROR] Error stack:`, error instanceof Error ? error.stack : 'N/A');
-      console.error(`[ERROR] Error code:`, (error as any)?.code);
-      console.error(`[ERROR] Error api_error:`, (error as any)?.api_error);
-      console.error(`[ERROR] Full error (JSON):`, JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-      throw error;
-    }
 
     log.warn(`[event-bus] Starting PlanGenerated pull subscription`);
 
