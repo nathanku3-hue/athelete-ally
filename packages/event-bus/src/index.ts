@@ -549,16 +549,24 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    // Use pull subscription to match working pattern
-    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
-      durable: 'coach-tip-plan-gen-consumer',
-      batch: 10,
-      expires: 1000
-    } as never);
+    try {
+      log.warn(`[event-bus] [DEBUG] Starting subscribeToPlanGenerated`);
+      log.warn(`[event-bus] [DEBUG] Topic: ${EVENT_TOPICS.PLAN_GENERATED}`);
+      log.warn(`[event-bus] [DEBUG] Durable name: coach-tip-plan-gen-consumer`);
 
-    const topic = 'plan_generated';
+      // Use pull subscription to match working pattern
+      log.warn(`[event-bus] [DEBUG] Calling pullSubscribe...`);
+      const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+        durable: 'coach-tip-plan-gen-consumer',
+        batch: 10,
+        expires: 1000
+      } as never);
 
-    log.warn(`[event-bus] Starting PlanGenerated pull subscription`);
+      log.warn(`[event-bus] [DEBUG] pullSubscribe completed successfully`);
+
+      const topic = 'plan_generated';
+
+      log.warn(`[event-bus] Starting PlanGenerated pull subscription`);
 
     // 定期上报 consumer 指标（每 5s）
     (async () => {
@@ -679,6 +687,16 @@ export class EventBus {
         }
       }
     })();
+
+    } catch (error) {
+      log.error(`[event-bus] [ERROR] Failed in subscribeToPlanGenerated`, {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        errorType: typeof error,
+        errorKeys: error && typeof error === 'object' ? Object.keys(error) : []
+      });
+      throw error;
+    }
   }
 
   async close() {
