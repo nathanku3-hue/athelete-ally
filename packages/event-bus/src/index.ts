@@ -1,4 +1,4 @@
-import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts, createInbox } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
@@ -549,26 +549,21 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
+    // Use pull subscription - matches working pattern
+    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+      durable: 'coach-tip-plan-gen-consumer',
+      batch: 10,
+      expires: 1000
+    } as never);
+
     const topic = 'plan_generated';
-    const durableName = 'coach-tip-plan-gen-consumer';
 
-    log.warn(`[event-bus] Starting PlanGenerated push subscription`);
-
-    // Use push subscription with consumerOpts (proven pattern)
-    const opts = consumerOpts()
-      .durable(durableName)
-      .ackExplicit()
-      .deliverAll()  // Consume all pending messages
-      .filterSubject(EVENT_TOPICS.PLAN_GENERATED)
-      .deliverTo(createInbox());
-
-    const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
-
-    log.warn(`[event-bus] PlanGenerated subscription created successfully`);
+    log.warn(`[event-bus] Starting PlanGenerated pull subscription`);
 
     // Consumer lag metrics (every 5s)
     (async () => {
       try {
+        const durableName = 'coach-tip-plan-gen-consumer';
         const streamName = 'ATHLETE_ALLY_EVENTS';
         const jsm = this.jsm || (this.nc ? await this.nc.jetstreamManager() : null);
         if (jsm) {
@@ -588,82 +583,99 @@ export class EventBus {
       }
     })();
 
-    // Process messages with async iterator
+    // Pull subscription with batch processing - matches working pattern
     (async () => {
-      try {
-        for await (const msg of sub) {
-          const startTime = Date.now();
+      while (true) {
+        try {
+          // Batch fetch messages
+          const messages = await (psub as unknown as { fetch: (opts: { max: number; expires: number }) => Promise<unknown[]> }).fetch({ max: 10, expires: 1000 });
 
-          try {
-            const eventData = JSON.parse(new TextDecoder().decode(msg.data));
-
-            // Schema validation
-            const validation = await eventValidator.validateEvent(topic, eventData);
-            eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
-
-            if (!validation.valid) {
-              eventBusMetrics.schemaValidationFailures.inc({
-                topic,
-                error_type: 'validation_failed'
-              });
-              eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-
-              log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
-              msg.nak();
-              continue;
-            }
-
-            eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
-
-            const event = eventData as PlanGeneratedEvent;
-
-            log.warn(`Processing PlanGenerated event: ${event.eventId}`);
-
-            await callback(event);
-
-            const duration = (Date.now() - startTime) / 1000;
-            eventBusMetrics.eventProcessingDuration.observe({
-              topic,
-              operation: 'consume',
-              status: 'success'
-            }, duration);
-
-            eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-            msg.ack();
-
-          } catch (error) {
-            const duration = (Date.now() - startTime) / 1000;
-            eventBusMetrics.eventProcessingDuration.observe({
-              topic,
-              operation: 'consume',
-              status: 'error'
-            }, duration);
-
-            eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-
-            if (error instanceof Error) {
-              log.error(`Error processing PlanGenerated event: ${error.message}`);
-              log.error(`Stack: ${error.stack}`);
-            } else {
-              log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
-            }
-
-            // Determine retry based on error type
-            if (this.shouldRetry(error)) {
-              eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
-              msg.nak();
-            } else {
-              eventBusMetrics.eventsAckPermanent.inc({ topic });
-              msg.ack(); // Permanent failure, acknowledge message
-            }
+          if (messages.length === 0) {
+            // No messages, sleep briefly
+            await new Promise(resolve => setTimeout(resolve, 100));
+            continue;
           }
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          log.error(`Error in PlanGenerated subscription iterator: ${error.message}`);
-          log.error(`Stack: ${error.stack}`);
-        } else {
-          log.error(`Error in PlanGenerated subscription iterator: ${JSON.stringify(error)}`);
+
+          log.warn(`Processing batch of ${messages.length} PlanGenerated events`);
+
+          // Process messages concurrently
+          const processingPromises = messages.map(async (m: unknown) => {
+            const msg = m as { data: Uint8Array; ack: () => void; nak: () => void };
+            const startTime = Date.now();
+
+            try {
+              const eventData = JSON.parse(new TextDecoder().decode(msg.data));
+
+              // Schema validation
+              const validation = await eventValidator.validateEvent(topic, eventData);
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
+
+              if (!validation.valid) {
+                eventBusMetrics.schemaValidationFailures.inc({
+                  topic,
+                  error_type: 'validation_failed'
+                });
+                eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
+
+                log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
+                msg.nak();
+                return;
+              }
+
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
+
+              const event = eventData as PlanGeneratedEvent;
+              await callback(event);
+
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'success'
+              }, duration);
+
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
+              msg.ack();
+
+            } catch (error) {
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'error'
+              }, duration);
+
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
+              if (error instanceof Error) {
+                log.error(`Error processing PlanGenerated event: ${error.message}`);
+                log.error(`Stack: ${error.stack}`);
+              } else {
+                log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
+              }
+
+              // Determine retry based on error type
+              if (this.shouldRetry(error)) {
+                eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
+                msg.nak();
+              } else {
+                eventBusMetrics.eventsAckPermanent.inc({ topic });
+                msg.ack(); // Permanent failure, acknowledge message
+              }
+            }
+          });
+
+          // Wait for all messages to be processed
+          await Promise.allSettled(processingPromises);
+
+        } catch (error) {
+          if (error instanceof Error) {
+            log.error(`Error in PlanGenerated batch processing: ${error.message}`);
+            log.error(`Stack: ${error.stack}`);
+          } else {
+            log.error(`Error in PlanGenerated batch processing: ${JSON.stringify(error)}`);
+          }
+          // Wait longer on error
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     })();
