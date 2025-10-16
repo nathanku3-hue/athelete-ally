@@ -56,7 +56,7 @@ jobs:
             ALLOWED=false
             for pattern in "${ALLOWLIST[@]}"; do
               case "$file" in
-                $pattern|*"$pattern"*)
+                "$pattern"|*"$pattern"*)
                   ALLOWED=true
                   break
                   ;;

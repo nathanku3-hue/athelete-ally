@@ -576,19 +576,19 @@ export class EventBus {
               const lag = Number(info.num_pending || 0) + Number(info.num_ack_pending || 0);
               eventBusMetrics.consumerLag.set({ topic, durable }, lag);
               eventBusMetrics.consumerAckPending.set({ topic, durable }, Number(info.num_ack_pending || 0));
-            } catch (e) {
+            } catch {
               // ignore metric fetch errors
             }
           }, 5000);
         }
-      } catch (_) {
+      } catch {
         // ignore
       }
     })();
 
     // Simple async iterator - matches working pattern
     (async () => {
-      for await (const msg of psub as any) {
+      for await (const msg of psub as unknown as AsyncIterable<{ data: Uint8Array; ack: () => void; nak: () => void }>) {
         const startTime = Date.now();
 
         try {
