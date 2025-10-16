@@ -333,7 +333,7 @@ export class EventBus {
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.ONBOARDING_COMPLETED, {
       stream: 'ATHLETE_ALLY_EVENTS',
       durable_name: 'planning-engine-onboarding-sub'
-    } as never);
+    } as any);
 
     const topic = 'onboarding_completed';
 
@@ -456,7 +456,7 @@ export class EventBus {
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATION_REQUESTED, {
       stream: 'ATHLETE_ALLY_EVENTS',
       durable_name: 'planning-engine-plan-gen-sub'
-    } as never);
+    } as any);
 
     const topic = 'plan_generation_requested';
 
@@ -577,7 +577,7 @@ export class EventBus {
       psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
         stream: 'ATHLETE_ALLY_EVENTS',
         durable_name: 'coach-tip-plan-gen-consumer'
-      } as never);
+      } as any);
 
       // eslint-disable-next-line no-console
       console.error('[DEBUG] [event-bus] pullSubscribe completed successfully!');
