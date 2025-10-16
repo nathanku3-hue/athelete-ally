@@ -43,7 +43,13 @@ export async function registerCoachTipRoutes(
     Params: { id: string };
   }>('/v1/plans/:id/coach-tip', {
     schema: {
-      params: GetTipByPlanIdSchema,
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' }
+        },
+        required: ['id']
+      },
       response: {
         200: {
           type: 'object',
@@ -108,7 +114,13 @@ export async function registerCoachTipRoutes(
     Params: { tipId: string };
   }>('/v1/coach-tips/:tipId', {
     schema: {
-      params: GetTipByTipIdSchema,
+      params: {
+        type: 'object',
+        required: ['tipId'],
+        properties: {
+          tipId: { type: 'string' }
+        }
+      },
       response: {
         200: {
           type: 'object',
@@ -169,7 +181,13 @@ export async function registerCoachTipRoutes(
     Params: { userId: string };
   }>('/v1/users/:userId/coach-tips', {
     schema: {
-      params: GetUserTipsSchema,
+      params: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' }
+        },
+        required: ['userId']
+      },
       response: {
         200: {
           type: 'array',
