@@ -588,71 +588,87 @@ export class EventBus {
 
     // Simple async iterator - matches working pattern
     (async () => {
-      for await (const msg of psub as unknown as AsyncIterable<{ data: Uint8Array; ack: () => void; nak: () => void }>) {
-        const startTime = Date.now();
+      try {
+        log.warn(`[event-bus] PlanGenerated iterator started, waiting for messages...`);
 
-        try {
-          const eventData = JSON.parse(new TextDecoder().decode(msg.data));
-            
-            // Schema validation
-            const validation = await eventValidator.validateEvent(topic, eventData);
-            eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
-            
-            if (!validation.valid) {
-              eventBusMetrics.schemaValidationFailures.inc({ 
-                topic, 
-                error_type: 'validation_failed' 
-              });
-              eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-              eventBusMetrics.eventsNak.inc({ topic, reason: 'schema_validation_failed' });
-              
-              log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
-              msg.nak();
-              continue;
-            }
-            
-            eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
-            
-            const event = eventData as PlanGeneratedEvent;
-            await callback(event);
+        for await (const msg of psub as unknown as AsyncIterable<{ data: Uint8Array; ack: () => void; nak: () => void }>) {
+          const startTime = Date.now();
 
-            const duration = (Date.now() - startTime) / 1000;
-            eventBusMetrics.eventProcessingDuration.observe({
-              topic,
-              operation: 'consume',
-              status: 'success'
-            }, duration);
+          log.warn(`[event-bus] PlanGenerated message received`);
 
-            eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-            msg.ack();
-            
-          } catch (error) {
-            const duration = (Date.now() - startTime) / 1000;
-            eventBusMetrics.eventProcessingDuration.observe({
-              topic,
-              operation: 'consume',
-              status: 'error'
-            }, duration);
-            
-            eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-            if (error instanceof Error) {
-              log.error(`Error processing PlanGenerated event: ${error.message}`);
-              log.error(`Stack: ${error.stack}`);
-            } else {
-              log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
-            }
-            
-            // Determine retry based on error type
-            if (this.shouldRetry(error)) {
-              eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
-              msg.nak();
-            } else {
-              eventBusMetrics.eventsAckPermanent.inc({ topic });
-              msg.ack(); // Permanent failure, acknowledge message
-            }
+          try {
+            const eventData = JSON.parse(new TextDecoder().decode(msg.data));
+
+              // Schema validation
+              const validation = await eventValidator.validateEvent(topic, eventData);
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
+
+              if (!validation.valid) {
+                eventBusMetrics.schemaValidationFailures.inc({
+                  topic,
+                  error_type: 'validation_failed'
+                });
+                eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
+                eventBusMetrics.eventsNak.inc({ topic, reason: 'schema_validation_failed' });
+
+                log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
+                msg.nak();
+                continue;
+              }
+
+              eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
+
+              const event = eventData as PlanGeneratedEvent;
+              await callback(event);
+
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'success'
+              }, duration);
+
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
+              msg.ack();
+
+            } catch (error) {
+              const duration = (Date.now() - startTime) / 1000;
+              eventBusMetrics.eventProcessingDuration.observe({
+                topic,
+                operation: 'consume',
+                status: 'error'
+              }, duration);
+
+              eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
+              if (error instanceof Error) {
+                log.error(`Error processing PlanGenerated event: ${error.message}`);
+                log.error(`Stack: ${error.stack}`);
+              } else {
+                log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
+              }
+
+              // Determine retry based on error type
+              if (this.shouldRetry(error)) {
+                eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
+                msg.nak();
+              } else {
+                eventBusMetrics.eventsAckPermanent.inc({ topic });
+                msg.ack(); // Permanent failure, acknowledge message
+              }
+          }
         }
+
+        log.warn(`[event-bus] PlanGenerated iterator ended (subscription closed)`);
+      } catch (error) {
+        log.error(`[event-bus] Fatal error in PlanGenerated subscription iterator: ${error instanceof Error ? error.message : String(error)}`);
+        if (error instanceof Error) {
+          log.error(`[event-bus] Stack: ${error.stack}`);
+        }
+        throw error;
       }
-    })();
+    })().catch(err => {
+      log.error(`[event-bus] Unhandled error in PlanGenerated async IIFE: ${err instanceof Error ? err.message : String(err)}`);
+    });
   }
 
   async close() {
