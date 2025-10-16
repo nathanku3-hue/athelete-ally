@@ -132,7 +132,11 @@ jobs:
           echo "=== Process Status ==="
           if [ -f coach-tip-service.pid ]; then
             PID=$(cat coach-tip-service.pid)
-            ps aux | grep "$PID" || echo "Process not running"
+            if ps -p "$PID" > /dev/null 2>&1; then
+              ps -p "$PID" -o pid,ppid,cmd
+            else
+              echo "Process $PID not running"
+            fi
           fi
           exit 1
 
