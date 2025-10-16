@@ -90,13 +90,23 @@ jobs:
           echo "Building coach-tip-service..."
           npm run build --workspace=@athlete-ally/coach-tip-service
 
+      - name: Verify builds
+        run: |
+          echo "Verifying build outputs..."
+          ls -la packages/event-bus/dist/ || echo "❌ event-bus dist missing"
+          ls -la packages/contracts/ || echo "❌ contracts missing"
+          ls -la packages/logger/dist/ || echo "❌ logger dist missing"
+          ls -la services/coach-tip-service/dist/ || echo "❌ coach-tip-service dist missing"
+          echo "✅ Build verification complete"
+
       - name: Start coach-tip-service
         run: |
           echo "Starting coach-tip-service in background..."
           cd services/coach-tip-service
-          npm start &
+          npm start > ../../coach-tip-service.log 2>&1 &
           echo $! > ../../coach-tip-service.pid
           cd ../..
+          echo "Service started with PID: $(cat coach-tip-service.pid)"
         env:
           NODE_ENV: test
           PORT: 4106
@@ -115,6 +125,15 @@ jobs:
             sleep 2
           done
           echo "❌ Service health check timeout"
+          echo ""
+          echo "=== Service Logs ==="
+          cat coach-tip-service.log || echo "No log file found"
+          echo ""
+          echo "=== Process Status ==="
+          if [ -f coach-tip-service.pid ]; then
+            PID=$(cat coach-tip-service.pid)
+            ps aux | grep "$PID" || echo "Process not running"
+          fi
           exit 1
 
       - name: Run test suite
@@ -144,6 +163,7 @@ jobs:
           name: test-results
           path: |
             tests/coach-tip/*.log
+            coach-tip-service.log
           retention-days: 7
 
       - name: Extract performance metrics
