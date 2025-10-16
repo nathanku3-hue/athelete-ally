@@ -331,8 +331,9 @@ export class EventBus {
     if (!this.js) throw new Error('JetStream not initialized');
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.ONBOARDING_COMPLETED, {
-      stream: 'ATHLETE_ALLY_EVENTS',
-      durable_name: 'planning-engine-onboarding-sub'
+      durable: 'planning-engine-onboarding-sub',
+      batch: 10,
+      expires: 1000
     } as any);
 
     const topic = 'onboarding_completed';
@@ -454,8 +455,9 @@ export class EventBus {
     if (!this.js) throw new Error('JetStream not initialized');
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATION_REQUESTED, {
-      stream: 'ATHLETE_ALLY_EVENTS',
-      durable_name: 'planning-engine-plan-gen-sub'
+      durable: 'planning-engine-plan-gen-sub',
+      batch: 10,
+      expires: 1000
     } as any);
 
     const topic = 'plan_generation_requested';
@@ -564,8 +566,9 @@ export class EventBus {
     // eslint-disable-next-line no-console
     console.error('[DEBUG] [event-bus] About to call pullSubscribe with:', {
       subject: EVENT_TOPICS.PLAN_GENERATED,
-      stream: 'ATHLETE_ALLY_EVENTS',
-      durable_name: 'coach-tip-plan-gen-consumer'
+      durable: 'coach-tip-plan-gen-consumer',
+      batch: 10,
+      expires: 1000
     });
 
     let psub;
@@ -573,10 +576,11 @@ export class EventBus {
       // eslint-disable-next-line no-console
       console.error('[DEBUG] [event-bus] Calling pullSubscribe...');
 
-      // Fix: Pass stream and durable_name - batch/expires belong in fetch()
+      // Use planning-engine pattern: durable + batch/expires
       psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
-        stream: 'ATHLETE_ALLY_EVENTS',
-        durable_name: 'coach-tip-plan-gen-consumer'
+        durable: 'coach-tip-plan-gen-consumer',
+        batch: 10,
+        expires: 1000
       } as any);
 
       // eslint-disable-next-line no-console
