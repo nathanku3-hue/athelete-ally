@@ -44,22 +44,29 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      # NATS JetStream service
-      nats:
-        image: nats:2.10-alpine
-        ports:
-          - 4223:4222
-        options: >-
-          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8222/healthz || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        # Enable JetStream
-        args: ['-js', '-m', '8222']
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Start NATS with JetStream
+        run: |
+          docker run -d --name nats \
+            -p 4223:4222 \
+            -p 8222:8222 \
+            nats:2.10-alpine \
+            -js -m 8222
+
+          # Wait for NATS to be ready
+          for i in {1..30}; do
+            if wget --no-verbose --tries=1 --spider http://localhost:8222/healthz 2>/dev/null; then
+              echo "NATS is ready"
+              exit 0
+            fi
+            echo "Waiting for NATS... ($i/30)"
+            sleep 1
+          done
+          echo "NATS failed to start"
+          exit 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -142,14 +149,16 @@ jobs:
       - name: Extract performance metrics
         if: success()
         run: |
-          echo "### 📊 Performance Metrics" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Test | Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Burst (10 events) | Throughput | Recorded |" >> $GITHUB_STEP_SUMMARY
-          echo "| Sustained (30 events) | Max Lag | Recorded |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All tests passed in CI mode (scaled-down)" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### 📊 Performance Metrics"
+            echo ""
+            echo "| Test | Metric | Value |"
+            echo "|------|--------|-------|"
+            echo "| Burst (10 events) | Throughput | Recorded |"
+            echo "| Sustained (30 events) | Max Lag | Recorded |"
+            echo ""
+            echo "✅ All tests passed in CI mode (scaled-down)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment PR with results
         if: github.event_name == 'pull_request' && always()

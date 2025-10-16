@@ -1,19 +1,13 @@
 {
+  "extends": "../../config/typescript/tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "outDir": "./dist",
-    "baseUrl": "../..",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
+    "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "../..",
+    "moduleResolution": "node",
     "paths": {
       "@athlete-ally/event-bus": ["./packages/event-bus/src"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
@@ -22,6 +16,8 @@
       "@athlete-ally/logger": ["./packages/logger/dist/index"],
       "@athlete-ally/logger/server": ["./packages/logger/dist/adapters/node"],
       "@athlete-ally/logger/browser": ["./packages/logger/dist/adapters/browser"],
+      "@athlete-ally/shared": ["./packages/shared/dist/index"],
+      "@athlete-ally/shared/*": ["./packages/shared/dist/*"],
       "@athlete-ally/shared-types": ["./packages/shared-types/dist/index"],
       "@athlete-ally/shared-types/*": ["./packages/shared-types/dist/*"]
     }
