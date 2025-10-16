@@ -1,4 +1,12 @@
 import { CoachTipPayload, CoachTipAction } from '@athlete-ally/shared-types/coach-tip';
+import { createLogger } from '@athlete-ally/logger';
+import nodeAdapter from '@athlete-ally/logger/server';
+
+// Initialize structured logger
+const log = createLogger(nodeAdapter, {
+  module: 'tip-generator',
+  service: 'coach-tip-service'
+});
 
 export interface PlanScoringSummary {
   version: string;
@@ -50,21 +58,39 @@ export class CoachTipGenerator {
    */
   generateTips(context: TipGenerationContext): CoachTipPayload | null {
     const { scoring, planId, userId } = context;
-    
+
     if (!scoring) {
-      console.warn(`No scoring data available for plan ${planId}`);
+      log.warn('No scoring data available for plan', {
+        planId,
+        userId
+      });
       return null;
     }
 
     const candidates = this.generateTipCandidates(scoring);
-    
+
+    log.debug('Generated tip candidates', {
+      planId,
+      candidatesCount: candidates.length
+    });
+
     if (candidates.length === 0) {
+      log.info('No candidates generated, using fallback tip', {
+        planId
+      });
       return this.generateFallbackTip(context);
     }
 
     // Select the highest priority tip
     const selectedTip = this.selectBestTip(candidates);
-    
+
+    log.debug('Selected best tip from candidates', {
+      planId,
+      selectedTipType: selectedTip.type,
+      selectedTipPriority: selectedTip.priority,
+      improvementPotential: selectedTip.scoringContext.improvementPotential
+    });
+
     return {
       id: `tip-${planId}-${Date.now()}`,
       planId,

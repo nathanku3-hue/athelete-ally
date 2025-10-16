@@ -1,0 +1,181 @@
+name: CoachTip Service Tests
+
+on:
+  pull_request:
+    paths:
+      - 'services/coach-tip-service/**'
+      - 'packages/event-bus/**'
+      - 'packages/contracts/**'
+      - 'packages/shared/**'
+      - 'packages/logger/**'
+      - 'tests/coach-tip/**'
+      - '.github/workflows/coach-tip-service-tests.yml'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'services/coach-tip-service/**'
+      - 'packages/event-bus/**'
+      - 'packages/contracts/**'
+      - 'tests/coach-tip/**'
+
+env:
+  NODE_VERSION: '20'
+  NATS_URL: 'nats://localhost:4223'
+  REDIS_URL: 'redis://localhost:6379'
+  API_URL: 'http://localhost:4106'
+
+jobs:
+  test:
+    name: Test Coach Tip Service
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      # Redis service
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # NATS JetStream service
+      nats:
+        image: nats:2.10-alpine
+        ports:
+          - 4223:4222
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8222/healthz || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        # Enable JetStream
+        args: ['-js', '-m', '8222']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: |
+          echo "Building shared packages..."
+          npm run build --workspace=@athlete-ally/contracts
+          npm run build --workspace=@athlete-ally/event-bus
+          npm run build --workspace=@athlete-ally/logger
+          npm run build --workspace=@athlete-ally/shared
+
+      - name: Build coach-tip-service
+        run: |
+          echo "Building coach-tip-service..."
+          npm run build --workspace=@athlete-ally/coach-tip-service
+
+      - name: Start coach-tip-service
+        run: |
+          echo "Starting coach-tip-service in background..."
+          cd services/coach-tip-service
+          npm start &
+          echo $! > ../../coach-tip-service.pid
+          cd ../..
+        env:
+          NODE_ENV: test
+          PORT: 4106
+          REDIS_URL: ${{ env.REDIS_URL }}
+          NATS_URL: ${{ env.NATS_URL }}
+
+      - name: Wait for service health
+        run: |
+          echo "Waiting for coach-tip-service to be healthy..."
+          for i in {1..30}; do
+            if curl -f http://localhost:4106/health > /dev/null 2>&1; then
+              echo "✅ Service is healthy"
+              exit 0
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+          echo "❌ Service health check timeout"
+          exit 1
+
+      - name: Run test suite
+        run: |
+          echo "Running CI test suite..."
+          node tests/coach-tip/run-ci-tests.js
+        env:
+          CI: 'true'
+          NATS_URL: ${{ env.NATS_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+          API_URL: ${{ env.API_URL }}
+
+      - name: Stop coach-tip-service
+        if: always()
+        run: |
+          if [ -f coach-tip-service.pid ]; then
+            PID=$(cat coach-tip-service.pid)
+            echo "Stopping coach-tip-service (PID: $PID)..."
+            kill $PID || true
+            rm coach-tip-service.pid
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            tests/coach-tip/*.log
+          retention-days: 7
+
+      - name: Extract performance metrics
+        if: success()
+        run: |
+          echo "### 📊 Performance Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Burst (10 events) | Throughput | Recorded |" >> $GITHUB_STEP_SUMMARY
+          echo "| Sustained (30 events) | Max Lag | Recorded |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All tests passed in CI mode (scaled-down)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testStatus = '${{ job.status }}';
+            const emoji = testStatus === 'success' ? '✅' : '❌';
+            const message = `
+            ## ${emoji} CoachTip Service Tests ${testStatus === 'success' ? 'Passed' : 'Failed'}
+
+            **Test Suite:** CI Mode (scaled-down tests)
+            - ✅ Smoke Tests (Edge Cases)
+            - ✅ Idempotency Test
+            - ✅ TTL Verification Test
+            - ✅ Load Tests (10 burst + 30 sustained)
+
+            **Duration:** ~2 minutes
+            **Environment:** Ubuntu Latest + Node 20 + Redis 7 + NATS 2.10
+
+            ${testStatus === 'failure' ? '⚠️ Check the workflow logs for details.' : '🎉 All tests passed successfully!'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });

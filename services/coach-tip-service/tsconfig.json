@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext", 
+    "module": "ESNext",
     "moduleResolution": "Node",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "baseUrl": "../..",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,7 +13,18 @@
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "@athlete-ally/event-bus": ["./packages/event-bus/src"],
+      "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
+      "@athlete-ally/contracts": ["./packages/contracts"],
+      "@athlete-ally/contracts/*": ["./packages/contracts/*"],
+      "@athlete-ally/logger": ["./packages/logger/dist/index"],
+      "@athlete-ally/logger/server": ["./packages/logger/dist/adapters/node"],
+      "@athlete-ally/logger/browser": ["./packages/logger/dist/adapters/browser"],
+      "@athlete-ally/shared-types": ["./packages/shared-types/dist/index"],
+      "@athlete-ally/shared-types/*": ["./packages/shared-types/dist/*"]
+    }
   },
   "include": [
     "src/**/*"

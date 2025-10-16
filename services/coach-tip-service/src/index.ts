@@ -6,10 +6,11 @@ import { CoachTipGenerator } from './tip-generator.js';
 import { TipStorage } from './tip-storage.js';
 import { CoachTipSubscriber } from './subscriber.js';
 import { registerCoachTipRoutes } from './routes/coach-tips.js';
+import { register as metricsRegister } from './metrics.js';
 
 // Configuration
 const config = {
-  PORT: Number(process.env.PORT) || 4103,
+  PORT: Number(process.env.PORT) || 4106,
   REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
   NODE_ENV: process.env.NODE_ENV || 'development'
 };
@@ -66,20 +67,79 @@ async function initializeComponents() {
  * Register API routes and middleware
  */
 async function setupRoutes() {
-  // Health check endpoint
+  // Prometheus metrics endpoint (aggregates EventBus + CoachTip service metrics)
+  server.get('/metrics', async (_request, reply) => {
+    try {
+      // Get EventBus metrics
+      const eventBusMetrics = await eventBus.getMetrics();
+
+      // Get CoachTip service metrics (from our custom register)
+      const serviceMetrics = await metricsRegister.metrics();
+
+      // Combine both metric outputs
+      const combinedMetrics = `${eventBusMetrics}\n${serviceMetrics}`;
+
+      return reply.type('text/plain').send(combinedMetrics);
+    } catch (error) {
+      server.log.error({ error }, 'Failed to collect metrics');
+      return reply.code(500).send('Failed to collect metrics');
+    }
+  });
+
+  // Enhanced health check endpoint with detailed component status
   server.get('/health', async (_request, reply) => {
     const redisStatus = redis.status;
-    const subscriberStatus = subscriber.isConnected();
-    
-    const isHealthy = redisStatus === 'ready' && subscriberStatus;
-    
+    const subscriberConnected = subscriber.isConnected();
+    const subscriberStats = subscriber.getStats();
+
+    // Check EventBus connection
+    let eventBusConnected = false;
+    let eventBusStatus = 'disconnected';
+    try {
+      const nc = eventBus.getNatsConnection();
+      eventBusConnected = !nc.isClosed();
+      eventBusStatus = eventBusConnected ? 'connected' : 'closed';
+    } catch (e) {
+      eventBusStatus = 'not_initialized';
+    }
+
+    // Calculate health based on error rate
+    const errorRateThreshold = 100;
+    const subscriberHealthy = subscriberConnected && subscriberStats.errors < errorRateThreshold;
+
+    const isHealthy = redisStatus === 'ready' && subscriberConnected && eventBusConnected && subscriberHealthy;
+
     return reply.code(isHealthy ? 200 : 503).send({
       status: isHealthy ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: '0.1.0',
       components: {
-        redis: redisStatus,
-        subscriber: subscriberStatus,
-        tipStorage: 'operational'
+        redis: {
+          status: redisStatus,
+          healthy: redisStatus === 'ready'
+        },
+        eventBus: {
+          status: eventBusStatus,
+          connected: eventBusConnected,
+          healthy: eventBusConnected
+        },
+        subscriber: {
+          connected: subscriberConnected,
+          eventsReceived: subscriberStats.eventsReceived,
+          tipsGenerated: subscriberStats.tipsGenerated,
+          tipsSkipped: subscriberStats.tipsSkipped,
+          errors: subscriberStats.errors,
+          lastEventTimestamp: subscriberStats.lastEventTimestamp,
+          errorsByType: subscriberStats.errorsByType,
+          skipReasons: subscriberStats.skipReasons,
+          healthy: subscriberHealthy,
+          errorRateThreshold
+        },
+        tipStorage: {
+          status: 'operational',
+          healthy: true
+        }
       }
     });
   });
@@ -91,19 +151,42 @@ async function setupRoutes() {
       version: '0.1.0',
       description: 'CoachTip generation service for personalized coaching recommendations',
       endpoints: [
+        'GET /health - Health check with component status',
+        'GET /metrics - Prometheus metrics',
+        'GET /info - Service information',
+        'GET /subscriber/status - Event subscriber statistics',
         'GET /v1/plans/:id/coach-tip',
         'GET /v1/coach-tips/:tipId', 
         'GET /v1/users/:userId/coach-tips',
         'GET /v1/coach-tips/stats',
         'POST /v1/coach-tips/cleanup'
       ],
+      observability: {
+        structuredLogging: true,
+        prometheusMetrics: true,
+        correlationIds: true
+      },
       timestamp: new Date().toISOString()
     });
   });
 
-  // Subscriber status endpoint
+  // Subscriber status endpoint with detailed statistics
   server.get('/subscriber/status', async (_request, reply) => {
-    return reply.send(subscriber.getStats());
+    const stats = subscriber.getStats();
+    return reply.send({
+      ...stats,
+      performance: {
+        successRate: stats.eventsReceived > 0
+          ? ((stats.tipsGenerated / stats.eventsReceived) * 100).toFixed(2) + '%'
+          : '0%',
+        skipRate: stats.eventsReceived > 0
+          ? ((stats.tipsSkipped / stats.eventsReceived) * 100).toFixed(2) + '%'
+          : '0%',
+        errorRate: stats.eventsReceived > 0
+          ? ((stats.errors / stats.eventsReceived) * 100).toFixed(2) + '%'
+          : '0%'
+      }
+    });
   });
 
   // Register CoachTip API routes
