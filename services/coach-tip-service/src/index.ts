@@ -34,7 +34,6 @@ const server = Fastify({
 async function initializeComponents() {
   // Initialize Redis connection
   redis = new Redis(config.REDIS_URL, {
-    retryDelayOnFailover: 100,
     enableReadyCheck: false,
     maxRetriesPerRequest: null,
     lazyConnect: true

@@ -1,4 +1,4 @@
-import { CoachTipPayload, CoachTipAction } from '@athlete-ally/shared-types/coach-tip';
+import { CoachTipPayload, CoachTipAction } from './types.js';
 import { createLogger } from '@athlete-ally/logger';
 import nodeAdapter from '@athlete-ally/logger/server';
 

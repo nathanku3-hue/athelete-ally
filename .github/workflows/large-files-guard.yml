@@ -42,16 +42,32 @@ jobs:
             "dist/"
             "build/"
             "*.log"
+            "package-lock.json"
           )
           
           echo "🔍 Checking for files larger than 1MB..."
-          
+
           # Find all tracked files larger than 1MB
           LARGE_FILES=$(git ls-files | xargs -I {} sh -c "if [ -f \"{}\" ] && [ \$(stat -c%s \"{}\" 2>/dev/null || echo 0) -gt 1048576 ]; then echo \"{}\"; fi" | grep -v '^$' || true)
-          
-          if [ -n "$LARGE_FILES" ]; then
+
+          # Filter against allowlist
+          FILTERED_FILES=""
+          for file in $LARGE_FILES; do
+            ALLOWED=false
+            for pattern in "${ALLOWLIST[@]}"; do
+              if [[ "$file" == $pattern ]] || [[ "$file" == *"$pattern"* ]]; then
+                ALLOWED=true
+                break
+              fi
+            done
+            if [ "$ALLOWED" = false ]; then
+              FILTERED_FILES="$FILTERED_FILES$file\n"
+            fi
+          done
+
+          if [ -n "$FILTERED_FILES" ]; then
             echo "❌ Found large tracked files:"
-            echo "$LARGE_FILES"
+            echo -e "$FILTERED_FILES"
             echo ""
             echo "Files larger than 1MB should not be tracked in git."
             echo "Consider:"

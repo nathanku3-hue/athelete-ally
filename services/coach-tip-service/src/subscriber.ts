@@ -6,14 +6,9 @@ import { CoachTipGenerator, TipGenerationContext, PlanScoringSummary } from './t
 import { TipStorage } from './tip-storage.js';
 import {
   eventsReceivedCounter,
-  tipsGeneratedCounter,
-  tipsSkippedCounter,
-  processingErrorsCounter,
   tipGenerationDuration,
-  eventProcessingDuration,
   scoringExtractionsCounter,
   ErrorType,
-  ProcessingResult,
   recordSuccessfulProcessing,
   recordSkippedProcessing,
   recordProcessingError

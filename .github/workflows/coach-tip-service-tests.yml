@@ -133,7 +133,7 @@ jobs:
           if [ -f coach-tip-service.pid ]; then
             PID=$(cat coach-tip-service.pid)
             echo "Stopping coach-tip-service (PID: $PID)..."
-            kill $PID || true
+            kill "$PID" || true
             rm coach-tip-service.pid
           fi
 

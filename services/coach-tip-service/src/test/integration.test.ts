@@ -18,21 +18,21 @@ import { Redis } from 'ioredis';
 
 // Mock event processor for testing
 class MockEventProcessor {
-  private handlers = new Map<string, Function>();
-  
+  private handlers = new Map<string, (event: any) => Promise<void>>();
+
   async connect() {
     console.log('Mock event processor connected');
   }
-  
+
   async disconnect() {
     console.log('Mock event processor disconnected');
   }
-  
-  async subscribe(topic: string, handler: Function) {
+
+  async subscribe(topic: string, handler: (event: any) => Promise<void>) {
     this.handlers.set(topic, handler);
     console.log(`Subscribed to ${topic}`);
   }
-  
+
   async simulateEvent(topic: string, data: any) {
     const handler = this.handlers.get(topic);
     if (handler) {
@@ -82,12 +82,12 @@ const mockPlanGeneratedEvent = {
 
 async function runIntegrationTest() {
   console.log('🧪 Starting CoachTip Integration Test...\n');
-  
-  let redis: Redis;
+
+  let redis: Redis | undefined;
   let tipStorage: TipStorage;
   let tipGenerator: CoachTipGenerator;
   let mockEventProcessor: MockEventProcessor;
-  let subscriber: CoachTipSubscriber;
+  let subscriber: CoachTipSubscriber | undefined;
   
   try {
     // 1. Initialize components
@@ -97,7 +97,6 @@ async function runIntegrationTest() {
       host: 'localhost',
       port: 6379,
       db: 15, // Use test database
-      retryDelayOnFailover: 100,
       lazyConnect: true
     });
     

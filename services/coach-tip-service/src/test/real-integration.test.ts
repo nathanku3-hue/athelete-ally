@@ -13,21 +13,21 @@ import { Redis } from 'ioredis';
 
 // Mock event processor that simulates NATS behavior
 class MockEventProcessor {
-  private handlers = new Map<string, Function>();
-  
+  private handlers = new Map<string, (event: any) => Promise<void>>();
+
   async connect() {
     console.log('✅ Mock event processor connected (simulating NATS)');
   }
-  
+
   async disconnect() {
     console.log('✅ Mock event processor disconnected');
   }
-  
-  async subscribe(topic: string, handler: Function, options?: any) {
+
+  async subscribe(topic: string, handler: (event: any) => Promise<void>, options?: any) {
     this.handlers.set(topic, handler);
     console.log(`✅ Subscribed to ${topic} with options:`, options);
   }
-  
+
   async simulateEvent(topic: string, data: any) {
     const handler = this.handlers.get(topic);
     if (handler) {
@@ -78,12 +78,12 @@ const mockPlanGeneratedEvent = {
 
 async function runRealInfrastructureTest() {
   console.log('🏗️ Running CoachTip Integration Test with Real Infrastructure...\n');
-  
-  let redis: Redis;
+
+  let redis: Redis | undefined;
   let tipStorage: TipStorage;
   let tipGenerator: CoachTipGenerator;
   let mockEventProcessor: MockEventProcessor;
-  let subscriber: CoachTipSubscriber;
+  let subscriber: CoachTipSubscriber | undefined;
   
   try {
     // 1. Connect to real Redis
@@ -93,7 +93,6 @@ async function runRealInfrastructureTest() {
       host: 'localhost',
       port: 6379,
       db: 14, // Use dedicated test database
-      retryDelayOnFailover: 100,
       lazyConnect: true,
       maxRetriesPerRequest: 3
     });

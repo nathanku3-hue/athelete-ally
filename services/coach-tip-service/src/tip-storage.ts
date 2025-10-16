@@ -1,4 +1,4 @@
-import { CoachTipPayload } from '@athlete-ally/shared-types/coach-tip';
+import { CoachTipPayload, StoredCoachTip } from './types.js';
 import { Redis } from 'ioredis';
 import { createLogger } from '@athlete-ally/logger';
 import nodeAdapter from '@athlete-ally/logger/server';
@@ -9,11 +9,6 @@ const log = createLogger(nodeAdapter, {
   module: 'tip-storage',
   service: 'coach-tip-service'
 });
-
-export interface StoredCoachTip extends CoachTipPayload {
-  storedAt: string;
-  isExpired?: boolean;
-}
 
 /**
  * Storage system for coaching tips with Redis caching and persistence
