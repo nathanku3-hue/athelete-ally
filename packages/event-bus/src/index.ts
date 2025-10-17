@@ -1,4 +1,4 @@
-import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
@@ -549,14 +549,11 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    const opts = consumerOpts()
-      .durable('coach-tip-plan-gen-consumer')
-      .ackExplicit()
-      .manualAck()
-      .maxDeliver(3)
-      .maxAckPending(100);
-
-    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
+    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+      durable: 'coach-tip-plan-gen-consumer',
+      batch: 10,
+      expires: 1000
+    } as never);
 
     const topic = 'plan_generated';
 
