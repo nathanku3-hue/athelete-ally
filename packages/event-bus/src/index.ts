@@ -1,4 +1,4 @@
-import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts, createInbox } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
@@ -549,63 +549,20 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    try {
-      console.error('[DEBUG] ========== NATS PRE-FLIGHT DIAGNOSTICS ==========');
+    // Use durable consumer with auto-created push subscription
+    const opts = consumerOpts()
+      .durable('coach-tip-plan-gen-consumer')
+      .deliverTo(createInbox())  // Required for push consumers
+      .deliverAll()
+      .ackExplicit()
+      .maxDeliver(3)
+      .ackWait(30_000_000_000)  // 30 seconds in nanoseconds
+      .maxAckPending(100);
 
-      // Check stream info
-      if (this.jsm) {
-        try {
-          const streamInfo = await this.jsm.streams.info('ATHLETE_ALLY_EVENTS');
-          console.error('[DEBUG] Stream info:', JSON.stringify({
-            name: streamInfo.config.name,
-            subjects: streamInfo.config.subjects,
-            messages: streamInfo.state.messages
-          }, null, 2));
-        } catch (streamErr) {
-          console.error('[DEBUG] Failed to get stream info:', streamErr);
-        }
+    const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
+    const topic = 'plan_generated';
 
-        // List existing consumers
-        try {
-          const consumers = await this.jsm.consumers.list('ATHLETE_ALLY_EVENTS').next();
-          console.error('[DEBUG] Existing consumers:', JSON.stringify(consumers, null, 2));
-        } catch (consumerErr) {
-          console.error('[DEBUG] Failed to list consumers:', consumerErr);
-        }
-      }
-
-      console.error('[DEBUG] Creating consumerOpts for PlanGenerated subscription...');
-
-      // Use durable consumer with auto-created push subscription
-      const opts = consumerOpts()
-        .durable('coach-tip-plan-gen-consumer')
-        .deliverAll()
-        .ackExplicit()
-        .maxDeliver(3)
-        .ackWait(30_000_000_000)  // 30 seconds in nanoseconds
-        .maxAckPending(100);
-
-      console.error('[DEBUG] consumerOpts created successfully');
-      console.error('[DEBUG] About to call subscribe on subject:', EVENT_TOPICS.PLAN_GENERATED);
-
-      let sub;
-      try {
-        sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
-        console.error('[DEBUG] subscribe() call succeeded!');
-      } catch (subscribeErr) {
-        console.error('[DEBUG] ========== SUBSCRIBE CALL FAILED ==========');
-        console.error('[DEBUG] Error object:', subscribeErr);
-        console.error('[DEBUG] Error type:', typeof subscribeErr);
-        console.error('[DEBUG] Error constructor:', subscribeErr?.constructor?.name);
-        console.error('[DEBUG] Error message:', subscribeErr instanceof Error ? subscribeErr.message : String(subscribeErr));
-        console.error('[DEBUG] Error stack:', subscribeErr instanceof Error ? subscribeErr.stack : 'N/A');
-        console.error('[DEBUG] Error serialized:', JSON.stringify(subscribeErr, Object.getOwnPropertyNames(subscribeErr), 2));
-        throw subscribeErr;
-      }
-
-      const topic = 'plan_generated';
-
-      log.warn(`[event-bus] Starting PlanGenerated subscription with durable consumer`);
+    log.warn(`[event-bus] Starting PlanGenerated subscription with durable consumer`);
 
     // Consumer lag metrics (every 5s)
     (async () => {
@@ -696,16 +653,6 @@ export class EventBus {
         }
       }
     })();
-    } catch (error) {
-      console.error('[DEBUG] ========== OUTER CATCH - SUBSCRIPTION FAILED ==========');
-      console.error('[DEBUG] Error object:', error);
-      console.error('[DEBUG] Error type:', typeof error);
-      console.error('[DEBUG] Error constructor:', error?.constructor?.name);
-      console.error('[DEBUG] Error message:', error instanceof Error ? error.message : String(error));
-      console.error('[DEBUG] Error stack:', error instanceof Error ? error.stack : 'N/A');
-      console.error('[DEBUG] Error serialized:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-      throw error;
-    }
   }
 
   async close() {

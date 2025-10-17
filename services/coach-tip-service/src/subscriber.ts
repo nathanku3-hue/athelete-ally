@@ -70,25 +70,14 @@ export class CoachTipSubscriber {
     }
 
     try {
-      console.error('[DEBUG] About to call subscribeToPlanGenerated...');
-
-      // Subscribe to plan_generated events using bind pattern
+      // Subscribe to plan_generated events
       await this.eventBus.subscribeToPlanGenerated(
         this.handlePlanGenerated.bind(this)
       );
 
-      console.error('[DEBUG] subscribeToPlanGenerated completed successfully!');
       log.info('CoachTip subscriber listening for plan_generated events');
       this.isSubscribed = true;
     } catch (error) {
-      console.error('[DEBUG] ========== SUBSCRIBER CONNECT FAILED ==========');
-      console.error('[DEBUG] Error object:', error);
-      console.error('[DEBUG] Error type:', typeof error);
-      console.error('[DEBUG] Error constructor:', error?.constructor?.name);
-      console.error('[DEBUG] Error message:', error instanceof Error ? error.message : String(error));
-      console.error('[DEBUG] Error stack:', error instanceof Error ? error.stack : 'N/A');
-      console.error('[DEBUG] Error serialized:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-
       log.error('Failed to connect CoachTip subscriber', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
