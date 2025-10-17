@@ -298,6 +298,7 @@ export class CoachTipSubscriber {
 
   /**
    * Extract scoring data from plan data payload
+   * Handles both full PlanScoringSummary format and simplified test format
    */
   private extractScoringData(planData: any): PlanScoringSummary | null {
     try {
@@ -308,7 +309,7 @@ export class CoachTipSubscriber {
 
       const scoring = planData.scoring;
 
-      // Validate scoring structure
+      // Validate basic scoring structure
       if (!this.isValidScoringData(scoring)) {
         scoringExtractionsCounter.inc({ status: 'invalid' });
         log.warn('Invalid scoring data structure', {
@@ -317,6 +318,48 @@ export class CoachTipSubscriber {
         return null;
       }
 
+      // Check if this is simplified format (missing weights/metadata)
+      // Common in test events and basic plan_generated events
+      if (scoring.factors && !scoring.weights) {
+        log.debug('Converting simplified scoring format to PlanScoringSummary');
+
+        const adapted: PlanScoringSummary = {
+          version: '1.0',
+          total: scoring.total || 0,
+          weights: {
+            safety: 0.4,
+            compliance: 0.3,
+            performance: 0.3
+          },
+          factors: {
+            safety: {
+              score: scoring.factors.safety.score,
+              weight: 0.4,
+              details: this.extractDetails(scoring.factors.safety)
+            },
+            compliance: {
+              score: scoring.factors.compliance.score,
+              weight: 0.3,
+              details: this.extractDetails(scoring.factors.compliance)
+            },
+            performance: {
+              score: scoring.factors.performance.score,
+              weight: 0.3,
+              details: this.extractDetails(scoring.factors.performance)
+            }
+          },
+          metadata: {
+            generatedAt: new Date().toISOString(),
+            planComplexity: 'medium',
+            recommendationsApplied: []
+          }
+        };
+
+        scoringExtractionsCounter.inc({ status: 'success' });
+        return adapted;
+      }
+
+      // Already in full PlanScoringSummary format
       scoringExtractionsCounter.inc({ status: 'success' });
       return scoring as PlanScoringSummary;
     } catch (error) {
@@ -326,6 +369,20 @@ export class CoachTipSubscriber {
       });
       return null;
     }
+  }
+
+  /**
+   * Extract details string from factor data
+   * Handles both 'reasons' array and 'details' string formats
+   */
+  private extractDetails(factor: any): string {
+    if (factor.details && typeof factor.details === 'string') {
+      return factor.details;
+    }
+    if (factor.reasons && Array.isArray(factor.reasons)) {
+      return factor.reasons.join('; ');
+    }
+    return '';
   }
 
   /**

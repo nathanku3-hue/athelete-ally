@@ -8,9 +8,77 @@ const execPromise = util.promisify(exec);
 const NATS_URL = 'nats://localhost:4223';
 const API_URL = 'http://localhost:4103';
 const EXPECTED_TTL_DAYS = 7;
+const MAX_RETRIES = 10;
+const RETRY_DELAY_MS = 1000;
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function waitForServiceHealth() {
+  console.log('🔍 Waiting for coach-tip service to be healthy...');
+
+  for (let i = 1; i <= MAX_RETRIES; i++) {
+    try {
+      const response = await fetch(`${API_URL}/health`);
+      if (response.ok) {
+        const health = await response.json();
+        if (health.status === 'healthy') {
+          console.log('✅ Service is healthy\n');
+          return true;
+        }
+      }
+    } catch (error) {
+      // Service not ready yet
+    }
+
+    if (i < MAX_RETRIES) {
+      console.log(`   Attempt ${i}/${MAX_RETRIES} - service not ready, retrying...`);
+      await sleep(RETRY_DELAY_MS);
+    }
+  }
+
+  console.log('⚠️  Service health check timed out, proceeding anyway...\n');
+  return false;
+}
+
+async function checkTipWithRetry(planId) {
+  console.log('🔍 Checking if tip was generated (with retry)...');
+
+  for (let i = 1; i <= MAX_RETRIES; i++) {
+    try {
+      const response = await fetch(`${API_URL}/v1/plans/${planId}/coach-tip`);
+
+      if (response.ok) {
+        const tip = await response.json();
+        return { success: true, tip };
+      }
+
+      if (response.status === 404) {
+        // Tip not found yet, retry
+        if (i < MAX_RETRIES) {
+          console.log(`   Attempt ${i}/${MAX_RETRIES} - tip not found yet, retrying...`);
+          await sleep(RETRY_DELAY_MS);
+          continue;
+        }
+        return { success: false, error: 'Tip not found after retries' };
+      }
+
+      // Other error status
+      return { success: false, error: `HTTP ${response.status}` };
+
+    } catch (error) {
+      // Connection error - service might not be up
+      if (i < MAX_RETRIES) {
+        console.log(`   Attempt ${i}/${MAX_RETRIES} - connection failed, retrying...`);
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+      return { success: false, error: error.message };
+    }
+  }
+
+  return { success: false, error: 'Max retries exceeded' };
 }
 
 async function checkRedisTTL(planId) {
@@ -29,12 +97,15 @@ async function runTTLTest() {
   console.log('═══════════════════════════════════════════════════════');
   console.log('⏰ COACH TIP TTL VERIFICATION TEST');
   console.log('═══════════════════════════════════════════════════════\n');
-  
+
   try {
+    // Wait for service to be healthy
+    await waitForServiceHealth();
+
     console.log('📤 Publishing test event...');
     const nc = await connect({ servers: NATS_URL });
     const js = nc.jetstream();
-    
+
     const planId = randomUUID();
     const event = {
       eventId: randomUUID(),
@@ -55,24 +126,24 @@ async function runTTLTest() {
         }
       }
     };
-    
+
     await js.publish('athlete-ally.plans.generated', new TextEncoder().encode(JSON.stringify(event)));
     await nc.close();
-    
+
     console.log('✅ Event published\n');
     console.log('⏳ Waiting 3 seconds for processing and storage...');
     await sleep(3000);
-    
-    // Check if tip was generated
-    console.log('🔍 Checking if tip was generated...');
-    const response = await fetch(`${API_URL}/v1/plans/${planId}/coach-tip`);
-    
-    if (!response.ok) {
-      console.log('❌ Tip was not generated. Cannot verify TTL.');
+
+    // Check if tip was generated with retry logic
+    const result = await checkTipWithRetry(planId);
+
+    if (!result.success) {
+      console.log(`❌ Tip was not generated: ${result.error}`);
+      console.log('   Cannot verify TTL.');
       process.exit(1);
     }
-    
-    const tip = await response.json();
+
+    const tip = result.tip;
     console.log('✅ Tip generated:', tip.id);
     console.log(`   Type: ${tip.type}, Priority: ${tip.priority}\n`);
     
