@@ -78,17 +78,9 @@ export class CoachTipSubscriber {
       log.info('CoachTip subscriber listening for plan_generated events');
       this.isSubscribed = true;
     } catch (error) {
-      // Debug: Log raw error to console
-      console.error('[DEBUG] Raw error in subscriber.connect:', error);
-      console.error('[DEBUG] Error type:', typeof error);
-      console.error('[DEBUG] Error constructor:', error?.constructor?.name);
-      console.error('[DEBUG] Error keys:', Object.keys(error || {}));
-
       log.error('Failed to connect CoachTip subscriber', {
         error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        errorType: error?.constructor?.name,
-        errorKeys: Object.keys(error || {})
+        stack: error instanceof Error ? error.stack : undefined
       });
       throw error;
     }
