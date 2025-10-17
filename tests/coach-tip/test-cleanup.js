@@ -64,22 +64,10 @@ async function cleanupNATSConsumer() {
 
       console.log(`   Consumer status: ${pending} pending, ${ackPending} ack pending`);
 
-      // Delete and recreate consumer to reset state
+      // Delete consumer to reset state (service will recreate it)
       await jsm.consumers.delete(streamName, consumerName);
       console.log(`   ✅ Deleted consumer: ${consumerName}`);
-
-      // Recreate consumer with same configuration
-      await jsm.consumers.add(streamName, {
-        durable_name: consumerName,
-        ack_policy: 'explicit',
-        filter_subject: 'athlete-ally.plans.generated',
-        deliver_policy: 'all',
-        max_deliver: 5,
-        ack_wait: 30_000_000_000, // 30 seconds in nanoseconds
-        max_ack_pending: 100
-      });
-
-      console.log(`   ✅ Recreated consumer: ${consumerName}`);
+      console.log(`   ℹ️  Service will recreate consumer with proper push configuration`);
 
     } catch (error) {
       if (error.message.includes('not found')) {
