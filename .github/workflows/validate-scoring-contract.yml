@@ -1,0 +1,100 @@
+name: Validate Scoring Contract
+
+on:
+  pull_request:
+    paths:
+      - 'services/planning-engine/src/scoring/**'
+      - 'services/planning-engine/src/types/scoring.ts'
+      - 'services/planning-engine/src/validation/scoring-validator.ts'
+      - 'services/planning-engine/src/optimization/async-plan-generator.ts'
+      - 'services/planning-engine/scripts/validate-scoring-contract.ts'
+      - 'docs/contracts/SCORING_PAYLOAD_CONTRACT.md'
+      - '.github/workflows/validate-scoring-contract.yml'
+  push:
+    branches:
+      - main
+      - stream5
+    paths:
+      - 'services/planning-engine/src/scoring/**'
+      - 'services/planning-engine/src/types/scoring.ts'
+      - 'services/planning-engine/src/validation/scoring-validator.ts'
+      - 'services/planning-engine/src/optimization/async-plan-generator.ts'
+      - 'services/planning-engine/scripts/validate-scoring-contract.ts'
+      - 'docs/contracts/SCORING_PAYLOAD_CONTRACT.md'
+      - '.github/workflows/validate-scoring-contract.yml'
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  validate-contract:
+    name: Validate Scoring Payloads
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies (root)
+        run: npm ci
+      
+      - name: Install planning-engine dependencies
+        working-directory: services/planning-engine
+        run: npm ci
+      
+      - name: Type check validator
+        working-directory: services/planning-engine
+        run: npx tsc --noEmit src/validation/scoring-validator.ts
+      
+      - name: Validate sample payload from contract
+        working-directory: services/planning-engine
+        run: npm run validate:scoring -- --sample
+      
+      - name: Run scoring unit tests
+        working-directory: services/planning-engine
+        run: npm run test:unit -- fixed-weight-scoring.test.ts
+      
+      - name: Run scoring integration tests
+        working-directory: services/planning-engine
+        env:
+          # Use in-memory or mock database for integration tests
+          PLANNING_DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          FEATURE_V1_PLANNING_SCORING: "true"
+        run: |
+          echo "Integration tests would validate actual scoring outputs"
+          echo "Skipping for now - requires database setup"
+          # npm run test:integration -- async-plan-generator.scoring.integration.test.ts
+      
+      - name: Validation summary
+        if: success()
+        run: |
+          echo "✅ Scoring contract validation passed"
+          echo ""
+          echo "Validated:"
+          echo "  - Sample payload structure"
+          echo "  - Type definitions"
+          echo "  - Unit test coverage"
+          echo ""
+          echo "Contract: docs/contracts/SCORING_PAYLOAD_CONTRACT.md"
+
+  comment-on-pr:
+    name: Comment validation results
+    needs: validate-contract
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ **Scoring Contract Validation Passed**\n\nThe scoring payload structure has been validated against the contract:\n- Sample payload from `SCORING_PAYLOAD_CONTRACT.md` ✅\n- Type definitions validated ✅\n- Unit tests passed ✅\n\n**Contract:** [`docs/contracts/SCORING_PAYLOAD_CONTRACT.md`](../blob/main/docs/contracts/SCORING_PAYLOAD_CONTRACT.md)'
+            })

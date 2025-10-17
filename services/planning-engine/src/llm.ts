@@ -16,6 +16,8 @@ export interface TrainingPlanRequest {
   equipment: string[];
   purpose?: 'general_fitness' | 'sport_performance' | 'muscle_building' | 'weight_loss' | 'rehabilitation';
   competitionDate?: string;
+  selectedDaysPerWeek?: number;
+  goal?: 'hypertrophy' | 'strength' | 'endurance' | 'weight_loss' | 'rehabilitation' | 'general_fitness';
 }
 
 // 注意：PlanGenerationRequest别名已移除，请直接使用TrainingPlanRequest

@@ -1,0 +1,110 @@
+name: Generate Movement Seed Dump
+
+on:
+  workflow_dispatch: # Manual trigger
+  push:
+    branches:
+      - main
+      - stream5
+    paths:
+      - 'services/planning-engine/prisma/schema.prisma'
+      - 'services/planning-engine/data/movements-*.json'
+      - 'scripts/seed-movements.ts'
+
+jobs:
+  generate-dump:
+    name: Generate Seed Artifact
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: athlete
+          POSTGRES_PASSWORD: athlete_ci
+          POSTGRES_DB: athlete_planning_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate Prisma Client
+        working-directory: services/planning-engine
+        run: npx prisma generate
+      
+      - name: Apply Prisma schema
+        working-directory: services/planning-engine
+        env:
+          PLANNING_DATABASE_URL: postgresql://athlete:athlete_ci@localhost:5432/athlete_planning_ci
+        run: npx prisma db push --skip-generate
+      
+      - name: Seed movements
+        env:
+          PLANNING_DATABASE_URL: postgresql://athlete:athlete_ci@localhost:5432/athlete_planning_ci
+        run: npm run seed:movements
+      
+      - name: Generate dump artifact
+        run: |
+          mkdir -p artifacts/seed-dumps
+          
+          PGPASSWORD=athlete_ci pg_dump \
+            -h localhost \
+            -p 5432 \
+            -U athlete \
+            -d athlete_planning_ci \
+            -t movement_library \
+            -t movement_staging \
+            -t movement_audit_log \
+            --no-owner \
+            --no-privileges \
+            --clean \
+            --if-exists \
+            > artifacts/seed-dumps/movements_seed_ci.sql
+          
+          echo "Dump size: $(du -h artifacts/seed-dumps/movements_seed_ci.sql | cut -f1)"
+      
+      - name: Upload dump artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: movement-seed-dump-${{ github.sha }}
+          path: artifacts/seed-dumps/movements_seed_ci.sql
+          retention-days: 30
+      
+      - name: Verify dump
+        env:
+          PGPASSWORD: athlete_ci
+        run: |
+          echo "Movement counts:"
+          psql -h localhost -p 5432 -U athlete -d athlete_planning_ci \
+            -c "SELECT COUNT(*) as library_count FROM movement_library;"
+          
+          psql -h localhost -p 5432 -U athlete -d athlete_planning_ci \
+            -c "SELECT COUNT(*) as audit_count FROM movement_audit_log;"
+      
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Movement seed dump generated successfully!\n\nDownload artifact: `movement-seed-dump-${{ github.sha }}`'
+            })

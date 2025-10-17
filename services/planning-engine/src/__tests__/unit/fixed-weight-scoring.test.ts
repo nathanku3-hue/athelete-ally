@@ -93,7 +93,51 @@ describe('scorePlanCandidate', () => {
     const scoring = scorePlanCandidate(emptyPlan, request);
 
     expect(scoring.factors.safety.score).toBeCloseTo(0.7, 1);
-    expect(scoring.factors.compliance.score).toBeGreaterThan(0);
+    expect(scoring.factors.compliance.score).toBe(0);
     expect(scoring.total).toBeGreaterThan(0);
+  });
+});
+
+describe('scorePlanCandidate weighting behaviour', () => {
+  const baseRequest: TrainingPlanRequest = {
+    userId: 'user-003',
+    proficiency: 'intermediate',
+    season: 'offseason',
+    availabilityDays: 4,
+    weeklyGoalDays: 4,
+    equipment: ['barbell'],
+  };
+
+  it('penalizes compliance when planned cadence undershoots expectation', () => {
+    const plan = createBasePlan();
+    const request = { ...baseRequest, weeklyGoalDays: 5 };
+
+    const score = scorePlanCandidate(plan, request);
+
+    expect(score.factors.compliance.score).toBeLessThan(0.85);
+    expect(score.factors.compliance.reasons.some((reason) => reason.includes('versus target'))).toBe(
+      true
+    );
+  });
+
+  it('captures intensity variety impact on performance', () => {
+    const plan = createBasePlan();
+    const request = { ...baseRequest };
+
+    const score = scorePlanCandidate(plan, request);
+
+    expect(score.factors.performance.reasons.length).toBeGreaterThan(0);
+    expect(score.factors.performance.metrics.intensityVariety).toBeGreaterThan(0);
+  });
+
+  it('exposes request metadata for auditability', () => {
+    const plan = createBasePlan();
+    const request = { ...baseRequest, selectedDaysPerWeek: 3 };
+
+    const score = scorePlanCandidate(plan, request);
+
+    expect(score.metadata.requestContext?.weeklyGoalDays).toBe(4);
+    expect(score.metadata.requestContext?.availabilityDays).toBe(4);
+    expect(typeof score.metadata.evaluatedAt).toBe('string');
   });
 });

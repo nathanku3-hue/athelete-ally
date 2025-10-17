@@ -547,24 +547,79 @@ export class EventBus {
   }
 
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
+    console.error('[DEBUG-PUSH] ========== subscribeToPlanGenerated called ==========');
     if (!this.js) throw new Error('JetStream not initialized');
+    if (!this.jsm) throw new Error('JetStreamManager not initialized');
+
+    const streamName = 'ATHLETE_ALLY_EVENTS';
+    const consumerName = 'coach-tip-plan-gen-consumer';
+
+    // Check for existing consumer and delete it
+    console.error('[DEBUG-PUSH] Checking for existing consumer:', consumerName);
+    try {
+      const existingInfo = await this.jsm.consumers.info(streamName, consumerName);
+      console.error('[DEBUG-PUSH] Found existing consumer! Config:', JSON.stringify(existingInfo.config, null, 2));
+      console.error('[DEBUG-PUSH] Deleting existing consumer to start fresh...');
+      await this.jsm.consumers.delete(streamName, consumerName);
+      console.error('[DEBUG-PUSH] Existing consumer deleted successfully');
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      if (errMsg.includes('not found') || errMsg.includes('does not exist')) {
+        console.error('[DEBUG-PUSH] No existing consumer found (clean slate)');
+      } else {
+        console.error('[DEBUG-PUSH] Error checking consumer:', errMsg);
+        throw error;
+      }
+    }
+
+    // Create inbox and log it
+    const inboxSubject = createInbox();
+    console.error('[DEBUG-PUSH] Created inbox subject:', inboxSubject);
 
     const opts = consumerOpts()
-      .durable('coach-tip-plan-gen-consumer')
-      .deliverTo(createInbox())
+      .durable(consumerName)
+      .deliverTo(inboxSubject)
       .ackExplicit()
       .maxDeliver(3)
       .ackWait(30_000_000_000); // 30 seconds in nanoseconds
 
+    console.error('[DEBUG-PUSH] Subscribing with options:');
+    console.error('[DEBUG-PUSH]   - Subject:', EVENT_TOPICS.PLAN_GENERATED);
+    console.error('[DEBUG-PUSH]   - Durable:', consumerName);
+    console.error('[DEBUG-PUSH]   - Inbox:', inboxSubject);
+
     const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
     const topic = 'plan_generated';
 
-    log.warn(`Subscribed to ${EVENT_TOPICS.PLAN_GENERATED} with push consumer (durable: coach-tip-plan-gen-consumer)`);
+    console.error('[DEBUG-PUSH] ✅ Subscription created successfully!');
+    log.warn(`Subscribed to ${EVENT_TOPICS.PLAN_GENERATED} with push consumer (durable: ${consumerName})`);
+
+    // Query the consumer to see what was actually created
+    try {
+      const consumerInfo = await this.jsm.consumers.info(streamName, consumerName);
+      console.error('[DEBUG-PUSH] Consumer created with config:', JSON.stringify(consumerInfo.config, null, 2));
+      console.error('[DEBUG-PUSH] Consumer state:', JSON.stringify({
+        delivered: consumerInfo.delivered,
+        ack_floor: consumerInfo.ack_floor,
+        num_pending: consumerInfo.num_pending,
+        num_waiting: consumerInfo.num_waiting,
+        num_ack_pending: consumerInfo.num_ack_pending
+      }, null, 2));
+    } catch (error) {
+      console.error('[DEBUG-PUSH] Error querying consumer info:', error);
+    }
 
     // Process messages using async iterator (push pattern)
+    console.error('[DEBUG-PUSH] Starting async iterator loop...');
     (async () => {
-      for await (const msg of sub) {
-        const startTime = Date.now();
+      let iterationCount = 0;
+      console.error('[DEBUG-PUSH] Entered async iterator IIFE');
+
+      try {
+        for await (const msg of sub) {
+          iterationCount++;
+          console.error(`[DEBUG-PUSH] ========== RECEIVED MESSAGE ${iterationCount} ==========`);
+          const startTime = Date.now();
 
         try {
           const eventData = JSON.parse(new TextDecoder().decode(msg.data));
@@ -626,6 +681,12 @@ export class EventBus {
           }
         }
       }
+      console.error('[DEBUG-PUSH] ⚠️ EXITED async iterator loop! This should never happen.');
+    } catch (iteratorError) {
+      console.error('[DEBUG-PUSH] ❌ ERROR in async iterator:', iteratorError);
+      console.error('[DEBUG-PUSH] Error message:', iteratorError instanceof Error ? iteratorError.message : String(iteratorError));
+      console.error('[DEBUG-PUSH] Stack:', iteratorError instanceof Error ? iteratorError.stack : 'N/A');
+    }
     })();
   }
 

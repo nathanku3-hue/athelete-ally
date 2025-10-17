@@ -61,8 +61,18 @@ export async function initializeFeatureFlags(): Promise<void> {
 }
 
 export async function isFeatureEnabled(flagKey: string, defaultValue = false): Promise<boolean> {
+  // Environment variable override (for local dev without LaunchDarkly)
+  const envKey = flagKey.toUpperCase().replace(/\./g, '_');
+  const envOverride = process.env[envKey];
+  if (envOverride !== undefined) {
+    const enabled = envOverride === 'true' || envOverride === '1';
+    log.info({ flag: flagKey, enabled, source: 'env-override' }, 'Feature flag override from environment');
+    return enabled;
+  }
+
   const ldClient = await ensureClient();
   if (!ldClient) {
+    log.info({ flag: flagKey, defaultValue }, 'LaunchDarkly unavailable, using default');
     return defaultValue;
   }
 

@@ -177,9 +177,14 @@ function assessCompliance(
 ): ComplianceAssessment {
   const reasons: string[] = [];
 
-  const weeklyGoal = request.weeklyGoalDays ?? request.availabilityDays ?? 0;
-  if (weeklyGoal <= 0) {
-    reasons.push('No weekly goal provided; applying default compliance score');
+  const weeklyGoal =
+    request.selectedDaysPerWeek ??
+    request.weeklyGoalDays ??
+    request.availabilityDays ??
+    plannedWeeklySessions;
+
+  if (!weeklyGoal || weeklyGoal <= 0) {
+    reasons.push('No weekly cadence supplied; defaulting compliance score');
     return {
       score: 0.8,
       reasons,
@@ -192,18 +197,24 @@ function assessCompliance(
 
   const deviation = Math.abs(plannedWeeklySessions - weeklyGoal);
   const normalizedDeviation = deviation / Math.max(weeklyGoal, 1);
-  let score = 1 - normalizedDeviation * 0.6;
 
-  if (deviation < 0.5) {
-    reasons.push('Planned sessions align with athlete availability');
+  let score = 1 - normalizedDeviation * 0.75;
+
+  if (deviation < 0.25) {
+    reasons.push('Planned weekly sessions match the athlete goal');
   } else if (plannedWeeklySessions < weeklyGoal) {
     reasons.push(
-      `Plan schedules ${plannedWeeklySessions.toFixed(1)} sessions versus goal of ${weeklyGoal}`
+      `Plan schedules ${plannedWeeklySessions.toFixed(1)} sessions versus target ${weeklyGoal}`
     );
   } else {
     reasons.push(
-      `Plan schedules ${plannedWeeklySessions.toFixed(1)} sessions exceeding goal of ${weeklyGoal}`
+      `Plan schedules ${plannedWeeklySessions.toFixed(1)} sessions exceeding target ${weeklyGoal}`
     );
+  }
+
+  if (plannedWeeklySessions === 0) {
+    score = 0;
+    reasons.push('Plan has zero sessions scheduled for the week');
   }
 
   return {
@@ -223,7 +234,7 @@ function assessPerformance(
   microcycles: any[],
   sessions: any[]
 ): PerformanceAssessment {
-  let score = 0.5;
+  let score = 0.45;
   const reasons: string[] = [];
 
   const progressionPhases = Array.isArray((plan as any).progression?.phases)
@@ -231,7 +242,8 @@ function assessPerformance(
     : 0;
 
   if (progressionPhases > 0) {
-    score += Math.min(0.2, progressionPhases * 0.05);
+    const bonus = Math.min(0.2, progressionPhases * 0.05);
+    score += bonus;
     reasons.push(`Progression phases detected (${progressionPhases}) supporting long-term gains`);
   }
 
@@ -240,20 +252,35 @@ function assessPerformance(
       .map((session) =>
         typeof session.intensity === 'string' ? session.intensity.toLowerCase() : 'unspecified'
       )
+      .filter((value) => value !== 'unspecified')
   ).size;
 
-  if (intensityVariety > 2) {
+  if (intensityVariety >= 3) {
     score += 0.1;
-    reasons.push('Intensity variety supports varied stimulus and adaptation');
-  }
-
-  if ((plan as any).duration && (plan as any).duration >= 8) {
+    reasons.push('Intensity variety ensures balanced stimulus across the block');
+  } else if (intensityVariety === 2) {
     score += 0.05;
-    reasons.push('Program duration supports sustained progression');
+    reasons.push('Intensity variety partially supports adaptation');
+  } else {
+    reasons.push('Limited intensity variety may constrain stimulus variety');
   }
 
-  if (microcycles.some((mc) => Array.isArray(mc.sessions) && mc.sessions.length > 0)) {
+  const duration = typeof (plan as any).duration === 'number' ? (plan as any).duration : undefined;
+  if (duration && duration >= 12) {
+    score += 0.1;
+    reasons.push('Program duration supports sustained progression');
+  } else if (duration && duration >= 8) {
+    score += 0.05;
+    reasons.push('Program duration provides adequate progression window');
+  } else if (!duration) {
+    reasons.push('Plan duration not specified; limiting performance confidence');
+  }
+
+  if (microcycles.length > 0 && sessions.length > 0) {
     reasons.push('Microcycle structure present with defined sessions');
+  } else {
+    score *= 0.5;
+    reasons.push('No explicit microcycle structure detected');
   }
 
   return {
@@ -262,7 +289,7 @@ function assessPerformance(
     metrics: {
       progressionPhases,
       intensityVariety,
-      durationWeeks: (plan as any).duration,
+      durationWeeks: duration,
     },
   };
 }
@@ -286,4 +313,3 @@ function round(value: number, precision = 4): number {
   const factor = Math.pow(10, precision);
   return Math.round(value * factor) / factor;
 }
-

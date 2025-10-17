@@ -89,14 +89,34 @@ jobs:
         run: |
           echo "Building coach-tip-service..."
           npm run build --workspace=@athlete-ally/coach-tip-service
+          echo "Build exit code: $?"
 
       - name: Verify builds
         run: |
           echo "Verifying build outputs..."
+          echo ""
+          echo "=== event-bus dist ==="
           ls -la packages/event-bus/dist/ || echo "❌ event-bus dist missing"
+          echo ""
+          echo "=== contracts ==="
           ls -la packages/contracts/ || echo "❌ contracts missing"
+          echo ""
+          echo "=== logger dist ==="
           ls -la packages/logger/dist/ || echo "❌ logger dist missing"
+          echo ""
+          echo "=== coach-tip-service dist ==="
           ls -la services/coach-tip-service/dist/ || echo "❌ coach-tip-service dist missing"
+          echo ""
+          echo "=== coach-tip-service dist files ==="
+          find services/coach-tip-service/dist -name "*.js" 2>/dev/null || echo "No JS files in dist"
+          echo ""
+          if [ ! -f services/coach-tip-service/dist/index.js ]; then
+            echo "❌ CRITICAL: dist/index.js does not exist!"
+            echo "Checking for tsconfig and src files..."
+            ls -la services/coach-tip-service/tsconfig.json
+            ls -la services/coach-tip-service/src/
+            exit 1
+          fi
           echo "✅ Build verification complete"
 
       - name: Start coach-tip-service

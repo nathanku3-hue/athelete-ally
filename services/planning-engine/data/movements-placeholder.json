@@ -1,0 +1,172 @@
+{
+  "movements": [
+    {
+      "name": "Back Squat",
+      "slug": "back-squat",
+      "classification": "strength",
+      "equipment": ["barbell", "squat-rack"],
+      "primaryMuscles": ["quadriceps", "glutes"],
+      "secondaryMuscles": ["hamstrings", "core"],
+      "recommendedRpe": 7.5,
+      "progressionIds": ["front-squat", "overhead-squat"],
+      "regressionIds": ["goblet-squat", "bodyweight-squat"],
+      "tags": ["lower-body", "compound", "bilateral"],
+      "instructions": {
+        "setup": "Position barbell on upper back, feet shoulder-width apart",
+        "execution": ["Descend by breaking at hips and knees simultaneously", "Keep chest up and core braced", "Drive through heels to return to start"],
+        "cues": ["Push knees out", "Drive through heels", "Maintain neutral spine"]
+      },
+      "metadata": {
+        "difficulty": "intermediate",
+        "movementPattern": "squat"
+      }
+    },
+    {
+      "name": "Bench Press",
+      "slug": "bench-press",
+      "classification": "strength",
+      "equipment": ["barbell", "bench"],
+      "primaryMuscles": ["pectorals", "triceps"],
+      "secondaryMuscles": ["anterior-deltoids", "core"],
+      "recommendedRpe": 7.0,
+      "progressionIds": ["incline-bench-press", "close-grip-bench-press"],
+      "regressionIds": ["dumbbell-press", "push-up"],
+      "tags": ["upper-body", "compound", "horizontal-push"],
+      "instructions": {
+        "setup": "Lie on bench, feet flat, grip barbell slightly wider than shoulders",
+        "execution": ["Lower bar to chest with control", "Press back to start position", "Maintain tension throughout"],
+        "cues": ["Retract shoulder blades", "Drive through legs", "Keep wrists stacked"]
+      },
+      "metadata": {
+        "difficulty": "intermediate",
+        "movementPattern": "horizontal-press"
+      }
+    },
+    {
+      "name": "Deadlift",
+      "slug": "deadlift",
+      "classification": "strength",
+      "equipment": ["barbell"],
+      "primaryMuscles": ["hamstrings", "glutes", "erectors"],
+      "secondaryMuscles": ["lats", "traps", "core"],
+      "recommendedRpe": 8.0,
+      "progressionIds": ["sumo-deadlift", "deficit-deadlift"],
+      "regressionIds": ["romanian-deadlift", "trap-bar-deadlift"],
+      "tags": ["full-body", "compound", "hip-hinge"],
+      "instructions": {
+        "setup": "Stand with feet hip-width, bar over mid-foot, grip just outside legs",
+        "execution": ["Drive through heels", "Extend hips and knees simultaneously", "Finish fully extended with glutes"],
+        "cues": ["Chest up", "Pull slack from bar", "Finish with glutes"]
+      },
+      "metadata": {
+        "difficulty": "advanced",
+        "movementPattern": "hinge"
+      }
+    },
+    {
+      "name": "Pull-Up",
+      "slug": "pull-up",
+      "classification": "strength",
+      "equipment": ["pull-up-bar"],
+      "primaryMuscles": ["lats", "biceps"],
+      "secondaryMuscles": ["rhomboids", "rear-deltoids", "core"],
+      "recommendedRpe": 7.5,
+      "progressionIds": ["weighted-pull-up", "muscle-up"],
+      "regressionIds": ["assisted-pull-up", "lat-pulldown"],
+      "tags": ["upper-body", "compound", "vertical-pull"],
+      "instructions": {
+        "setup": "Hang from bar with hands shoulder-width apart, full arm extension",
+        "execution": ["Pull body up until chin clears bar", "Control descent to full hang", "Maintain core engagement throughout"],
+        "cues": ["Lead with chest", "Pull elbows down and back", "Engage core"]
+      },
+      "metadata": {
+        "difficulty": "intermediate",
+        "movementPattern": "vertical-pull"
+      }
+    },
+    {
+      "name": "Overhead Press",
+      "slug": "overhead-press",
+      "classification": "strength",
+      "equipment": ["barbell"],
+      "primaryMuscles": ["deltoids", "triceps"],
+      "secondaryMuscles": ["upper-chest", "core"],
+      "recommendedRpe": 7.0,
+      "progressionIds": ["push-press", "jerk"],
+      "regressionIds": ["dumbbell-overhead-press", "seated-press"],
+      "tags": ["upper-body", "compound", "vertical-push"],
+      "instructions": {
+        "setup": "Bar rests on front of shoulders, grip just outside shoulders",
+        "execution": ["Press bar overhead to lockout", "Return to start with control", "Maintain vertical bar path"],
+        "cues": ["Drive through heels", "Shrug at top", "Keep core braced"]
+      },
+      "metadata": {
+        "difficulty": "intermediate",
+        "movementPattern": "vertical-press"
+      }
+    },
+    {
+      "name": "Box Jump",
+      "slug": "box-jump",
+      "classification": "power",
+      "equipment": ["plyo-box"],
+      "primaryMuscles": ["quadriceps", "glutes", "calves"],
+      "secondaryMuscles": ["hamstrings", "core"],
+      "recommendedRpe": 6.5,
+      "progressionIds": ["depth-jump", "single-leg-box-jump"],
+      "regressionIds": ["step-up", "squat-jump"],
+      "tags": ["lower-body", "plyometric", "explosive"],
+      "instructions": {
+        "setup": "Stand facing box at arm's length, feet hip-width",
+        "execution": ["Swing arms and jump explosively onto box", "Land softly with bent knees", "Step down one foot at a time"],
+        "cues": ["Land softly", "Full hip extension", "Step down controlled"]
+      },
+      "metadata": {
+        "difficulty": "intermediate",
+        "movementPattern": "jump"
+      }
+    },
+    {
+      "name": "Rowing (Ergometer)",
+      "slug": "rowing-erg",
+      "classification": "conditioning",
+      "equipment": ["rowing-machine"],
+      "primaryMuscles": ["lats", "hamstrings", "quadriceps"],
+      "secondaryMuscles": ["glutes", "core", "biceps"],
+      "recommendedRpe": 6.0,
+      "progressionIds": [],
+      "regressionIds": [],
+      "tags": ["full-body", "cardio", "low-impact"],
+      "instructions": {
+        "setup": "Sit on erg, feet strapped in, handle at chest height",
+        "execution": ["Drive with legs first", "Swing torso back, then pull handle to ribs", "Reverse sequence for recovery"],
+        "cues": ["Legs-hips-arms", "Arms-hips-legs on recovery", "Maintain consistent pace"]
+      },
+      "metadata": {
+        "difficulty": "beginner",
+        "movementPattern": "conditioning"
+      }
+    },
+    {
+      "name": "Assault Bike",
+      "slug": "assault-bike",
+      "classification": "conditioning",
+      "equipment": ["assault-bike"],
+      "primaryMuscles": ["quadriceps", "hamstrings"],
+      "secondaryMuscles": ["deltoids", "triceps", "core"],
+      "recommendedRpe": 7.0,
+      "progressionIds": [],
+      "regressionIds": [],
+      "tags": ["full-body", "cardio", "high-intensity"],
+      "instructions": {
+        "setup": "Adjust seat height, hands on moving handles",
+        "execution": ["Pedal while pushing and pulling handles", "Maintain coordinated rhythm", "Keep steady breathing pattern"],
+        "cues": ["Full leg extension", "Push-pull rhythm", "Breathe steady"]
+      },
+      "metadata": {
+        "difficulty": "beginner",
+        "movementPattern": "conditioning"
+      }
+    }
+  ]
+}

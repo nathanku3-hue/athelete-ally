@@ -86,6 +86,25 @@ export function registerMagicSliceRoutes(server: FastifyInstance) {
     }
   });
 
+  // CoachTip routes
+  server.get('/v1/plans/:id/coach-tip', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const response = await fetch(`${process.env.COACHTIP_SERVICE_URL}/v1/plans/${id}/coach-tip`, {
+        method: 'GET',
+        headers: {
+          'Authorization': request.headers.authorization || '',
+        },
+      });
+
+      const data = await response.json();
+      reply.status(response.status).send(data);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      reply.status(500).send({ error: 'Internal server error', message: errMsg });
+    }
+  });
+
   // Health check for Magic Slice routes
   server.get('/v1/health', async (_request, reply) => {
     reply.send({ status: 'ok', service: 'magic-slice-routes' });

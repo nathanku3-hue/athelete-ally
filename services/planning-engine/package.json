@@ -30,7 +30,8 @@
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
     "lint": "eslint -c eslint.config.mjs src",
-    "lint:fix": "eslint -c eslint.config.mjs src --fix"
+    "lint:fix": "eslint -c eslint.config.mjs src --fix",
+    "validate:scoring": "npx tsx scripts/validate-scoring-contract.ts"
   },
   "dependencies": {
     "@athlete-ally/contracts": "file:../../packages/contracts",

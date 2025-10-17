@@ -11,6 +11,7 @@ const EnvSchema = z.object({
   EXERCISES_URL: z.string().url().default('http://localhost:4103'),
   FATIGUE_URL: z.string().url().default('http://localhost:4104'),
   WORKOUTS_URL: z.string().url().default('http://localhost:4105'),
+  COACHTIP_SERVICE_URL: z.string().url().default('http://localhost:4106'),
   
   // 监控配置
   JAEGER_ENDPOINT: z.string().url().default('http://localhost:16686/api/traces'),

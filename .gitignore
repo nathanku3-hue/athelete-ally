@@ -131,3 +131,7 @@ tmp_codemod*.json
 
 *storybook.log
 storybook-static
+
+# Stream 5 seed dumps
+artifacts/seed-dumps/
+*.sql
