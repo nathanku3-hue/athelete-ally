@@ -1,4 +1,4 @@
-import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts, createInbox } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
@@ -547,160 +547,83 @@ export class EventBus {
   }
 
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
-    console.error('[PHASE4-DEBUG] subscribeToPlanGenerated called - COMPILED VERSION v4');
     if (!this.js) throw new Error('JetStream not initialized');
-    if (!this.jsm) throw new Error('JetStreamManager not initialized');
 
-    const streamName = 'ATHLETE_ALLY_EVENTS';
-    const consumerName = 'coach-tip-plan-gen-consumer';
+    const opts = consumerOpts()
+      .durable('coach-tip-plan-gen-consumer')
+      .deliverTo(createInbox())
+      .ackExplicit()
+      .maxDeliver(3)
+      .ackWait(30_000_000_000); // 30 seconds in nanoseconds
 
-    // Phase 4: Check for existing consumer and delete if exists
-    console.error('[PHASE4-DEBUG] Checking for existing consumer:', consumerName);
-    try {
-      const consumerInfo = await this.jsm.consumers.info(streamName, consumerName);
-      console.error('[PHASE4-DEBUG] ========== EXISTING CONSUMER FOUND ==========');
-      console.error('[PHASE4-DEBUG] Consumer config:', JSON.stringify(consumerInfo.config, null, 2));
-      console.error('[PHASE4-DEBUG] Consumer state:', JSON.stringify(consumerInfo.delivered, null, 2));
-      console.error('[PHASE4-DEBUG] Deleting existing consumer to start fresh...');
-
-      await this.jsm.consumers.delete(streamName, consumerName);
-      console.error('[PHASE4-DEBUG] Consumer deleted successfully!');
-      console.error('[PHASE4-DEBUG] ============================================');
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
-        console.error('[PHASE4-DEBUG] No existing consumer found (this is good - clean slate)');
-      } else {
-        console.error('[PHASE4-DEBUG] Unexpected error checking consumer:', errorMsg);
-        throw error;
-      }
-    }
-
-    const options = {
-      durable: consumerName,
-      batch: 10,
-      expires: 1000
-    };
-
-    console.error('[PHASE4-DEBUG] About to call pullSubscribe with:', {
-      topic: EVENT_TOPICS.PLAN_GENERATED,
-      options: JSON.stringify(options),
-      optionsType: typeof options,
-      hasJs: !!this.js
-    });
-
-    let psub;
-    try {
-      psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, options as never);
-      console.error('[PHASE4-DEBUG] ✅ pullSubscribe succeeded! psub created:', typeof psub);
-    } catch (error) {
-      console.error('[PHASE4-DEBUG] ========== pullSubscribe FAILED ==========');
-      console.error('[PHASE4-DEBUG] Error object:', error);
-      console.error('[PHASE4-DEBUG] Error type:', typeof error);
-      console.error('[PHASE4-DEBUG] Error constructor:', error?.constructor?.name);
-      console.error('[PHASE4-DEBUG] Error message:', error instanceof Error ? error.message : String(error));
-      console.error('[PHASE4-DEBUG] Error stack:', error instanceof Error ? error.stack : 'no stack');
-      console.error('[PHASE4-DEBUG] Error keys:', Object.keys(error || {}));
-      console.error('[PHASE4-DEBUG] Error JSON:', JSON.stringify(error, null, 2));
-      console.error('[PHASE4-DEBUG] ========================================');
-      throw error;
-    }
-
+    const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
     const topic = 'plan_generated';
 
-    // Use batch pull pattern matching other working subscriptions
-    (async () => {
-      while (true) {
-        try {
-          // Batch fetch messages
-          const messages = await (psub as unknown as { fetch: (opts: { max: number; expires: number }) => Promise<unknown[]> }).fetch({ max: 10, expires: 1000 });
+    log.warn(`Subscribed to ${EVENT_TOPICS.PLAN_GENERATED} with push consumer (durable: coach-tip-plan-gen-consumer)`);
 
-          if (messages.length === 0) {
-            // Sleep when no messages available
-            await new Promise(resolve => setTimeout(resolve, 100));
+    // Process messages using async iterator (push pattern)
+    (async () => {
+      for await (const msg of sub) {
+        const startTime = Date.now();
+
+        try {
+          const eventData = JSON.parse(new TextDecoder().decode(msg.data));
+
+          // Schema validation
+          const validation = await eventValidator.validateEvent(topic, eventData);
+          eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
+
+          if (!validation.valid) {
+            eventBusMetrics.schemaValidationFailures.inc({
+              topic,
+              error_type: 'validation_failed'
+            });
+            eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
+
+            log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
+            msg.nak();
             continue;
           }
 
-          log.warn(`Processing batch of ${messages.length} PlanGenerated events`);
+          eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
 
-          // Process messages in parallel
-          const processingPromises = messages.map(async (m: unknown) => {
-            const msg = m as { data: Uint8Array; ack: () => void; nak: () => void };
-            const startTime = Date.now();
+          const event = eventData as PlanGeneratedEvent;
+          await callback(event);
 
-            try {
-              const eventData = JSON.parse(new TextDecoder().decode(msg.data));
+          const duration = (Date.now() - startTime) / 1000;
+          eventBusMetrics.eventProcessingDuration.observe({
+            topic,
+            operation: 'consume',
+            status: 'success'
+          }, duration);
 
-              // Schema validation
-              const validation = await eventValidator.validateEvent(topic, eventData);
-              eventBusMetrics.schemaValidation.inc({ topic, status: 'attempted' });
-
-              if (!validation.valid) {
-                eventBusMetrics.schemaValidationFailures.inc({
-                  topic,
-                  error_type: 'validation_failed'
-                });
-                eventBusMetrics.eventsRejected.inc({ topic, reason: 'schema_validation_failed' });
-
-                log.error(`Schema validation failed for received PlanGenerated event: ${JSON.stringify(validation.errors)}`);
-                msg.nak();
-                return;
-              }
-
-              eventBusMetrics.schemaValidation.inc({ topic, status: 'success' });
-
-              const event = eventData as PlanGeneratedEvent;
-              await callback(event);
-
-              const duration = (Date.now() - startTime) / 1000;
-              eventBusMetrics.eventProcessingDuration.observe({
-                topic,
-                operation: 'consume',
-                status: 'success'
-              }, duration);
-
-              eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
-              msg.ack();
-
-            } catch (error) {
-              const duration = (Date.now() - startTime) / 1000;
-              eventBusMetrics.eventProcessingDuration.observe({
-                topic,
-                operation: 'consume',
-                status: 'error'
-              }, duration);
-
-              eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
-              if (error instanceof Error) {
-                log.error(`Error processing PlanGenerated event: ${error.message}`);
-                log.error(`Stack: ${error.stack}`);
-              } else {
-                log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
-              }
-
-              // Determine retry based on error type
-              if (this.shouldRetry(error)) {
-                eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
-                msg.nak();
-              } else {
-                eventBusMetrics.eventsAckPermanent.inc({ topic });
-                msg.ack(); // Permanent failure, acknowledge message
-              }
-            }
-          });
-
-          // Wait for all messages to complete
-          await Promise.allSettled(processingPromises);
+          eventBusMetrics.eventsConsumed.inc({ topic, status: 'success' });
+          msg.ack();
 
         } catch (error) {
+          const duration = (Date.now() - startTime) / 1000;
+          eventBusMetrics.eventProcessingDuration.observe({
+            topic,
+            operation: 'consume',
+            status: 'error'
+          }, duration);
+
+          eventBusMetrics.eventsConsumed.inc({ topic, status: 'error' });
           if (error instanceof Error) {
-            log.error(`Error in PlanGenerated batch processing: ${error.message}`);
+            log.error(`Error processing PlanGenerated event: ${error.message}`);
             log.error(`Stack: ${error.stack}`);
           } else {
-            log.error(`Error in PlanGenerated batch processing: ${JSON.stringify(error)}`);
+            log.error(`Error processing PlanGenerated event: ${JSON.stringify(error)}`);
           }
-          // Wait longer on error
-          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Determine retry based on error type
+          if (this.shouldRetry(error)) {
+            eventBusMetrics.eventsNak.inc({ topic, reason: 'retryable_error' });
+            msg.nak();
+          } else {
+            eventBusMetrics.eventsAckPermanent.inc({ topic });
+            msg.ack(); // Permanent failure, acknowledge message
+          }
         }
       }
     })();
