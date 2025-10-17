@@ -119,6 +119,14 @@ jobs:
           fi
           echo "✅ Build verification complete"
 
+      - name: Cleanup before service start
+        run: |
+          echo "🧹 Cleaning up NATS consumer and Redis before starting service..."
+          node tests/coach-tip/test-cleanup.js
+        env:
+          NATS_URL: ${{ env.NATS_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+
       - name: Start coach-tip-service
         run: |
           echo "Starting coach-tip-service in background..."

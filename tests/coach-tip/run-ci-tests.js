@@ -154,13 +154,7 @@ async function runCITests() {
       throw new Error('Service health check failed - cannot proceed with tests');
     }
 
-    // Step 2: Cleanup before tests
-    console.log('🧹 Cleaning up test data before running tests...');
-    await cleanupRedis();
-    await cleanupNATSConsumer();
-    console.log('✅ Cleanup complete\n');
-
-    // Step 3: Run smoke tests
+    // Step 2: Run smoke tests (cleanup was done before service start)
     const smokeResult = await runTest('smoke-tests.js', 'Smoke Tests (Edge Cases)');
     results.tests.push(smokeResult);
 
@@ -168,25 +162,25 @@ async function runCITests() {
       console.log('\n⚠️  Smoke tests failed - continuing with remaining tests\n');
     }
 
-    // Step 4: Run idempotency test
+    // Step 3: Run idempotency test
     const idempotencyResult = await runTest('idempotency-test.js', 'Idempotency Test');
     results.tests.push(idempotencyResult);
 
-    // Step 5: Run TTL verification test
+    // Step 4: Run TTL verification test
     const ttlResult = await runTest('ttl-test.js', 'TTL Verification Test');
     results.tests.push(ttlResult);
 
-    // Step 6: Run load tests
+    // Step 5: Run load tests
     const loadResult = await runTest('load-test.js', `Load Tests (${CI_MODE ? 'CI Mode' : 'Full Mode'})`);
     results.tests.push(loadResult);
 
-    // Step 7: Calculate summary
+    // Step 6: Calculate summary
     results.summary.total = results.tests.length;
     results.summary.passed = results.tests.filter(t => t.passed).length;
     results.summary.failed = results.tests.filter(t => !t.passed).length;
     results.summary.duration = Date.now() - overallStartTime;
 
-    // Step 8: Display summary
+    // Step 7: Display summary
     console.log('\n\n');
     console.log('╔════════════════════════════════════════════════════════════╗');
     console.log('║                                                            ║');
@@ -208,7 +202,7 @@ async function runCITests() {
     });
     console.log('─'.repeat(60));
 
-    // Step 9: Performance metrics (if available from load test)
+    // Step 8: Performance metrics (if available from load test)
     const loadTestResults = results.tests.find(t => t.testName === 'load-test.js');
     if (loadTestResults && loadTestResults.jsonResults) {
       console.log('\n📊 Performance Metrics:');
@@ -233,7 +227,7 @@ async function runCITests() {
       console.log('─'.repeat(60));
     }
 
-    // Step 10: Overall result
+    // Step 9: Overall result
     const allPassed = results.summary.failed === 0;
     results.passed = allPassed;
 
@@ -260,12 +254,12 @@ async function runCITests() {
       });
     }
 
-    // Step 11: Output JSON for CI parsing
+    // Step 10: Output JSON for CI parsing
     console.log('\n<!-- CI_TEST_RESULTS_JSON');
     console.log(JSON.stringify(results, null, 2));
     console.log('-->');
 
-    // Step 12: Cleanup after tests
+    // Step 11: Cleanup after tests
     console.log('\n🧹 Cleaning up test data after tests...');
     await cleanupRedis();
     console.log('✅ Final cleanup complete\n');
