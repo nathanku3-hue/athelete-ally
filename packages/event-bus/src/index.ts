@@ -549,20 +549,28 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    // Use durable consumer with auto-created push subscription
-    const opts = consumerOpts()
-      .durable('coach-tip-plan-gen-consumer')
-      .deliverAll()
-      .ackExplicit()
-      .maxDeliver(3)
-      .ackWait(30_000_000_000)  // 30 seconds in nanoseconds
-      .maxAckPending(100);
+    try {
+      log.warn('[event-bus] [DEBUG] Creating consumerOpts for PlanGenerated subscription...');
 
-    const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
+      // Use durable consumer with auto-created push subscription
+      const opts = consumerOpts()
+        .durable('coach-tip-plan-gen-consumer')
+        .deliverAll()
+        .ackExplicit()
+        .maxDeliver(3)
+        .ackWait(30_000_000_000)  // 30 seconds in nanoseconds
+        .maxAckPending(100);
 
-    const topic = 'plan_generated';
+      log.warn('[event-bus] [DEBUG] consumerOpts created successfully');
+      log.warn(`[event-bus] [DEBUG] Calling subscribe on subject: ${EVENT_TOPICS.PLAN_GENERATED}`);
 
-    log.warn(`[event-bus] Starting PlanGenerated subscription with durable consumer`);
+      const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
+
+      log.warn('[event-bus] [DEBUG] subscribe() call succeeded!');
+
+      const topic = 'plan_generated';
+
+      log.warn(`[event-bus] Starting PlanGenerated subscription with durable consumer`);
 
     // Consumer lag metrics (every 5s)
     (async () => {
@@ -653,6 +661,14 @@ export class EventBus {
         }
       }
     })();
+    } catch (error) {
+      log.error('[event-bus] [DEBUG] ===== SUBSCRIPTION FAILED =====');
+      log.error('[event-bus] [DEBUG] Error type:', { errorType: typeof error });
+      log.error('[event-bus] [DEBUG] Error message:', { message: error instanceof Error ? error.message : String(error) });
+      log.error('[event-bus] [DEBUG] Error stack:', { stack: error instanceof Error ? error.stack : 'N/A' });
+      log.error('[event-bus] [DEBUG] Full error object:', { fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2) });
+      throw error;
+    }
   }
 
   async close() {
