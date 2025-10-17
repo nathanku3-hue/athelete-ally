@@ -550,7 +550,7 @@ export class EventBus {
     if (!this.js) throw new Error('JetStream not initialized');
 
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
-      durable: 'coach-tip-pull-consumer',
+      durable: 'coach-tip-simple-consumer',
       batch: 10,
       expires: 1000
     } as never);
