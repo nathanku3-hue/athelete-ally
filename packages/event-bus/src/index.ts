@@ -555,7 +555,7 @@ export class EventBus {
       .deliverAll()
       .ackExplicit()
       .maxDeliver(3)
-      .ackWait(30_000)
+      .ackWait(30_000_000_000)  // 30 seconds in nanoseconds
       .maxAckPending(100);
 
     const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
