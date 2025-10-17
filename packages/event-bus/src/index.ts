@@ -270,10 +270,11 @@ export class EventBus {
       log.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
 
-      // Pre-create coach-tip consumer for bind pattern
+      // Pre-create coach-tip consumer for bind pattern (push mode)
       log.warn('[event-bus] Pre-creating coach-tip consumer...');
       await this.ensureConsumer('ATHLETE_ALLY_EVENTS', {
         durable_name: 'coach-tip-plan-gen-consumer',
+        deliver_subject: '_INBOX.coach-tip-plan-gen-consumer',
         ack_policy: 'explicit',
         deliver_policy: 'all',
         max_deliver: 3,
@@ -333,7 +334,7 @@ export class EventBus {
       durable: 'planning-engine-onboarding-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    } as never);
 
     const topic = 'onboarding_completed';
 
@@ -457,7 +458,7 @@ export class EventBus {
       durable: 'planning-engine-plan-gen-sub',
       batch: 10,
       expires: 1000
-    } as any);
+    } as never);
 
     const topic = 'plan_generation_requested';
 
@@ -696,6 +697,7 @@ export class EventBus {
    */
   async ensureConsumer(streamName: string, consumerConfig: {
     durable_name: string;
+    deliver_subject?: string;
     filter_subject?: string;
     ack_policy: 'explicit' | 'none' | 'all';
     deliver_policy: 'all' | 'last' | 'new' | 'by_start_sequence' | 'by_start_time' | 'last_per_subject';
@@ -711,6 +713,7 @@ export class EventBus {
 
       // Check if configuration needs updating
       const needsUpdate =
+        (consumerConfig.deliver_subject !== undefined && existingConsumer.config.deliver_subject !== consumerConfig.deliver_subject) ||
         (consumerConfig.filter_subject !== undefined && existingConsumer.config.filter_subject !== consumerConfig.filter_subject) ||
         existingConsumer.config.ack_policy !== consumerConfig.ack_policy ||
         existingConsumer.config.deliver_policy !== consumerConfig.deliver_policy ||
