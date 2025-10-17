@@ -1,4 +1,4 @@
-import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts, createInbox } from 'nats';
+import { connect, NatsConnection, JetStreamManager, JetStreamClient, consumerOpts } from 'nats';
 import { OnboardingCompletedEvent, PlanGeneratedEvent, PlanGenerationRequestedEvent, PlanGenerationFailedEvent, HRVRawReceivedEvent, HRVNormalizedStoredEvent, SleepRawReceivedEvent, SleepNormalizedStoredEvent, EVENT_TOPICS } from '@athlete-ally/contracts';
 import { eventValidator } from './validator.js';
 import { nanos, getStreamConfigs, AppStreamConfig } from './config.js';
@@ -549,10 +549,10 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    // Use durable consumer with auto-created push subscription
+    // Use durable consumer with stable deliver subject
     const opts = consumerOpts()
       .durable('coach-tip-plan-gen-consumer')
-      .deliverTo(createInbox())  // Required for push consumers
+      .deliverTo('_INBOX.coach-tip-service.plan-generated')  // Fixed subject for durable consumer
       .deliverAll()
       .ackExplicit()
       .maxDeliver(3)
