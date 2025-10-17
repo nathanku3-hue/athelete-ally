@@ -70,24 +70,24 @@ export class CoachTipSubscriber {
     }
 
     try {
-      log.info('[DEBUG] About to call subscribeToPlanGenerated...');
+      console.error('[DEBUG] About to call subscribeToPlanGenerated...');
 
       // Subscribe to plan_generated events using bind pattern
       await this.eventBus.subscribeToPlanGenerated(
         this.handlePlanGenerated.bind(this)
       );
 
-      log.info('[DEBUG] subscribeToPlanGenerated completed successfully!');
+      console.error('[DEBUG] subscribeToPlanGenerated completed successfully!');
       log.info('CoachTip subscriber listening for plan_generated events');
       this.isSubscribed = true;
     } catch (error) {
-      log.error('[DEBUG] ===== SUBSCRIBER CONNECT FAILED =====', {
-        errorType: typeof error,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        errorStack: error instanceof Error ? error.stack : 'N/A',
-        errorName: error instanceof Error ? error.name : 'N/A',
-        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
-      });
+      console.error('[DEBUG] ========== SUBSCRIBER CONNECT FAILED ==========');
+      console.error('[DEBUG] Error object:', error);
+      console.error('[DEBUG] Error type:', typeof error);
+      console.error('[DEBUG] Error constructor:', error?.constructor?.name);
+      console.error('[DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('[DEBUG] Error stack:', error instanceof Error ? error.stack : 'N/A');
+      console.error('[DEBUG] Error serialized:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
 
       log.error('Failed to connect CoachTip subscriber', {
         error: error instanceof Error ? error.message : String(error),
