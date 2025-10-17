@@ -547,16 +547,42 @@ export class EventBus {
   }
 
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
-    console.error('[PHASE1-DEBUG] subscribeToPlanGenerated called - COMPILED VERSION v3');
+    console.error('[PHASE4-DEBUG] subscribeToPlanGenerated called - COMPILED VERSION v4');
     if (!this.js) throw new Error('JetStream not initialized');
+    if (!this.jsm) throw new Error('JetStreamManager not initialized');
+
+    const streamName = 'ATHLETE_ALLY_EVENTS';
+    const consumerName = 'coach-tip-plan-gen-consumer';
+
+    // Phase 4: Check for existing consumer and delete if exists
+    console.error('[PHASE4-DEBUG] Checking for existing consumer:', consumerName);
+    try {
+      const consumerInfo = await this.jsm.consumers.info(streamName, consumerName);
+      console.error('[PHASE4-DEBUG] ========== EXISTING CONSUMER FOUND ==========');
+      console.error('[PHASE4-DEBUG] Consumer config:', JSON.stringify(consumerInfo.config, null, 2));
+      console.error('[PHASE4-DEBUG] Consumer state:', JSON.stringify(consumerInfo.delivered, null, 2));
+      console.error('[PHASE4-DEBUG] Deleting existing consumer to start fresh...');
+
+      await this.jsm.consumers.delete(streamName, consumerName);
+      console.error('[PHASE4-DEBUG] Consumer deleted successfully!');
+      console.error('[PHASE4-DEBUG] ============================================');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
+        console.error('[PHASE4-DEBUG] No existing consumer found (this is good - clean slate)');
+      } else {
+        console.error('[PHASE4-DEBUG] Unexpected error checking consumer:', errorMsg);
+        throw error;
+      }
+    }
 
     const options = {
-      durable: 'coach-tip-plan-gen-consumer',
+      durable: consumerName,
       batch: 10,
       expires: 1000
     };
 
-    console.error('[PHASE1-DEBUG] About to call pullSubscribe with:', {
+    console.error('[PHASE4-DEBUG] About to call pullSubscribe with:', {
       topic: EVENT_TOPICS.PLAN_GENERATED,
       options: JSON.stringify(options),
       optionsType: typeof options,
@@ -566,17 +592,17 @@ export class EventBus {
     let psub;
     try {
       psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, options as never);
-      console.error('[PHASE1-DEBUG] pullSubscribe succeeded! psub created:', typeof psub);
+      console.error('[PHASE4-DEBUG] ✅ pullSubscribe succeeded! psub created:', typeof psub);
     } catch (error) {
-      console.error('[PHASE1-DEBUG] ========== pullSubscribe FAILED ==========');
-      console.error('[PHASE1-DEBUG] Error object:', error);
-      console.error('[PHASE1-DEBUG] Error type:', typeof error);
-      console.error('[PHASE1-DEBUG] Error constructor:', error?.constructor?.name);
-      console.error('[PHASE1-DEBUG] Error message:', error instanceof Error ? error.message : String(error));
-      console.error('[PHASE1-DEBUG] Error stack:', error instanceof Error ? error.stack : 'no stack');
-      console.error('[PHASE1-DEBUG] Error keys:', Object.keys(error || {}));
-      console.error('[PHASE1-DEBUG] Error JSON:', JSON.stringify(error, null, 2));
-      console.error('[PHASE1-DEBUG] ========================================');
+      console.error('[PHASE4-DEBUG] ========== pullSubscribe FAILED ==========');
+      console.error('[PHASE4-DEBUG] Error object:', error);
+      console.error('[PHASE4-DEBUG] Error type:', typeof error);
+      console.error('[PHASE4-DEBUG] Error constructor:', error?.constructor?.name);
+      console.error('[PHASE4-DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('[PHASE4-DEBUG] Error stack:', error instanceof Error ? error.stack : 'no stack');
+      console.error('[PHASE4-DEBUG] Error keys:', Object.keys(error || {}));
+      console.error('[PHASE4-DEBUG] Error JSON:', JSON.stringify(error, null, 2));
+      console.error('[PHASE4-DEBUG] ========================================');
       throw error;
     }
 
