@@ -15,6 +15,12 @@ dist/
 build/
 out/
 
+# Contracts compiled schemas (TypeScript outputs)
+packages/contracts/events/schemas.js
+packages/contracts/events/schemas.js.map
+packages/contracts/events/schemas.d.ts
+packages/contracts/events/schemas.d.ts.map
+
 # Coverage reports
 coverage/
 *.lcov

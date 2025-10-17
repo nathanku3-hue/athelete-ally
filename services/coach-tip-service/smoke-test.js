@@ -26,7 +26,7 @@ async function smokeTest() {
     console.log(`   - Stream: ${streamInfo.config.name}`);
     console.log(`   - Messages: ${streamInfo.state.messages}`);
     console.log(`   - Consumers: ${streamInfo.state.num_consumers}\n`);
-  } catch (e) {
+  } catch {
     console.log('⚠️  ATHLETE_ALLY_EVENTS stream not found\n');
   }
   

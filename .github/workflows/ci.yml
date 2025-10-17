@@ -420,6 +420,7 @@ jobs:
       - name: Run Services Tests (Known Good Path)
         env:
           JEST_JUNIT_OUTPUT: test-results/junit-services.xml
+          PLANNING_DATABASE_URL: postgresql://test:test@localhost:5432/planning_test?schema=public
         run: |
           set -euo pipefail
           echo "?? Running services tests with known good configuration..."
