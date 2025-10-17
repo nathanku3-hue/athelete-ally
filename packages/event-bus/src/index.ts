@@ -551,7 +551,6 @@ export class EventBus {
 
     const opts = consumerOpts()
       .durable('coach-tip-plan-gen-consumer')
-      .deliverAll()
       .ackExplicit()
       .manualAck()
       .maxDeliver(3)
