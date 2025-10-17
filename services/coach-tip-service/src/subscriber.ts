@@ -81,11 +81,13 @@ export class CoachTipSubscriber {
       log.info('CoachTip subscriber listening for plan_generated events');
       this.isSubscribed = true;
     } catch (error) {
-      log.error('[DEBUG] ===== SUBSCRIBER CONNECT FAILED =====');
-      log.error('[DEBUG] Error type:', { errorType: typeof error });
-      log.error('[DEBUG] Error message:', { message: error instanceof Error ? error.message : String(error) });
-      log.error('[DEBUG] Error stack:', { stack: error instanceof Error ? error.stack : 'N/A' });
-      log.error('[DEBUG] Full error object:', { fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2) });
+      log.error('[DEBUG] ===== SUBSCRIBER CONNECT FAILED =====', {
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : 'N/A',
+        errorName: error instanceof Error ? error.name : 'N/A',
+        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
+      });
 
       log.error('Failed to connect CoachTip subscriber', {
         error: error instanceof Error ? error.message : String(error),

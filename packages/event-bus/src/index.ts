@@ -662,11 +662,13 @@ export class EventBus {
       }
     })();
     } catch (error) {
-      log.error('[event-bus] [DEBUG] ===== SUBSCRIPTION FAILED =====');
-      log.error('[event-bus] [DEBUG] Error type:', { errorType: typeof error });
-      log.error('[event-bus] [DEBUG] Error message:', { message: error instanceof Error ? error.message : String(error) });
-      log.error('[event-bus] [DEBUG] Error stack:', { stack: error instanceof Error ? error.stack : 'N/A' });
-      log.error('[event-bus] [DEBUG] Full error object:', { fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2) });
+      log.error('[event-bus] [DEBUG] ===== SUBSCRIPTION FAILED =====', {
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : 'N/A',
+        errorName: error instanceof Error ? error.name : 'N/A',
+        fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
+      });
       throw error;
     }
   }
