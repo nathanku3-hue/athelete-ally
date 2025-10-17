@@ -550,7 +550,7 @@ export class EventBus {
     if (!this.js) throw new Error('JetStream not initialized');
 
     const opts = consumerOpts()
-      .durable('coach-tip-pull-consumer')
+      .durable('coach-tip-plan-gen-consumer')
       .deliverAll()
       .ackExplicit()
       .manualAck()
