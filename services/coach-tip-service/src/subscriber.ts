@@ -78,6 +78,10 @@ export class CoachTipSubscriber {
       log.info('CoachTip subscriber listening for plan_generated events');
       this.isSubscribed = true;
     } catch (error) {
+      console.error('[DEBUG] pullSubscribe error:', error);
+      console.error('[DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('[DEBUG] Error stack:', error instanceof Error ? error.stack : 'no stack');
+
       log.error('Failed to connect CoachTip subscriber', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
