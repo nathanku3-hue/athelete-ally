@@ -547,13 +547,38 @@ export class EventBus {
   }
 
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
+    console.error('[PHASE1-DEBUG] subscribeToPlanGenerated called - COMPILED VERSION v3');
     if (!this.js) throw new Error('JetStream not initialized');
 
-    const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, {
+    const options = {
       durable: 'coach-tip-plan-gen-consumer',
       batch: 10,
       expires: 1000
-    } as never);
+    };
+
+    console.error('[PHASE1-DEBUG] About to call pullSubscribe with:', {
+      topic: EVENT_TOPICS.PLAN_GENERATED,
+      options: JSON.stringify(options),
+      optionsType: typeof options,
+      hasJs: !!this.js
+    });
+
+    let psub;
+    try {
+      psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, options as never);
+      console.error('[PHASE1-DEBUG] pullSubscribe succeeded! psub created:', typeof psub);
+    } catch (error) {
+      console.error('[PHASE1-DEBUG] ========== pullSubscribe FAILED ==========');
+      console.error('[PHASE1-DEBUG] Error object:', error);
+      console.error('[PHASE1-DEBUG] Error type:', typeof error);
+      console.error('[PHASE1-DEBUG] Error constructor:', error?.constructor?.name);
+      console.error('[PHASE1-DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+      console.error('[PHASE1-DEBUG] Error stack:', error instanceof Error ? error.stack : 'no stack');
+      console.error('[PHASE1-DEBUG] Error keys:', Object.keys(error || {}));
+      console.error('[PHASE1-DEBUG] Error JSON:', JSON.stringify(error, null, 2));
+      console.error('[PHASE1-DEBUG] ========================================');
+      throw error;
+    }
 
     const topic = 'plan_generated';
 
