@@ -269,18 +269,6 @@ export class EventBus {
     if (manageStreams) {
       log.warn('[event-bus] Managing streams (FEATURE_SERVICE_MANAGES_STREAMS enabled)');
       await this.ensureStreams();
-
-      // Pre-create coach-tip consumer for bind pattern (push mode)
-      log.warn('[event-bus] Pre-creating coach-tip consumer...');
-      await this.ensureConsumer('ATHLETE_ALLY_EVENTS', {
-        durable_name: 'coach-tip-plan-gen-consumer',
-        deliver_subject: '_INBOX.coach-tip-plan-gen-consumer',
-        ack_policy: 'explicit',
-        deliver_policy: 'all',
-        max_deliver: 3,
-        ack_wait: 30_000_000_000, // 30 seconds in nanoseconds
-        max_ack_pending: 100
-      });
     } else {
       log.warn('[event-bus] Stream management disabled (FEATURE_SERVICE_MANAGES_STREAMS=false)');
     }
@@ -561,15 +549,20 @@ export class EventBus {
   async subscribeToPlanGenerated(callback: (event: PlanGeneratedEvent) => Promise<void>) {
     if (!this.js) throw new Error('JetStream not initialized');
 
-    // Use bind pattern to connect to pre-created consumer
+    // Use durable consumer with auto-created push subscription
     const opts = consumerOpts()
-      .bind('ATHLETE_ALLY_EVENTS', 'coach-tip-plan-gen-consumer');
+      .durable('coach-tip-plan-gen-consumer')
+      .deliverAll()
+      .ackExplicit()
+      .maxDeliver(3)
+      .ackWait(30_000)
+      .maxAckPending(100);
 
     const sub = await this.js.subscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
 
     const topic = 'plan_generated';
 
-    log.warn(`[event-bus] Starting PlanGenerated subscription with bind pattern`);
+    log.warn(`[event-bus] Starting PlanGenerated subscription with durable consumer`);
 
     // Consumer lag metrics (every 5s)
     (async () => {
