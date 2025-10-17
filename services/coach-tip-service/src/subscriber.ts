@@ -70,32 +70,14 @@ export class CoachTipSubscriber {
     }
 
     try {
-      // eslint-disable-next-line no-console
-      console.error('[DEBUG] [subscriber.ts] About to call subscribeToPlanGenerated...');
-
-      // Subscribe to plan_generated events
-      // consumerOpts will automatically create/bind the durable consumer
+      // Subscribe to plan_generated events using bind pattern
       await this.eventBus.subscribeToPlanGenerated(
         this.handlePlanGenerated.bind(this)
       );
 
-      // eslint-disable-next-line no-console
-      console.error('[DEBUG] [subscriber.ts] subscribeToPlanGenerated completed successfully');
-
       log.info('CoachTip subscriber listening for plan_generated events');
       this.isSubscribed = true;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[ERROR] [subscriber.ts] ===== SUBSCRIPTION FAILED =====');
-      // eslint-disable-next-line no-console
-      console.error('[ERROR] [subscriber.ts] Error type:', typeof error);
-      // eslint-disable-next-line no-console
-      console.error('[ERROR] [subscriber.ts] Error message:', error instanceof Error ? error.message : String(error));
-      // eslint-disable-next-line no-console
-      console.error('[ERROR] [subscriber.ts] Error stack:', error instanceof Error ? error.stack : 'N/A');
-      // eslint-disable-next-line no-console
-      console.error('[ERROR] [subscriber.ts] Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-
       log.error('Failed to connect CoachTip subscriber', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
