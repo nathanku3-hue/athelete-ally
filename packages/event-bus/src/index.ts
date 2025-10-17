@@ -557,9 +557,6 @@ export class EventBus {
       .maxDeliver(3)
       .maxAckPending(100);
 
-    // Bind to stream
-    opts.bind('ATHLETE_ALLY_EVENTS', 'coach-tip-pull-consumer');
-
     const psub = await this.js.pullSubscribe(EVENT_TOPICS.PLAN_GENERATED, opts);
 
     const topic = 'plan_generated';
