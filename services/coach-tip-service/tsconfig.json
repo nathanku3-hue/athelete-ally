@@ -1,0 +1,32 @@
+{
+  "extends": "../../config/typescript/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": "../..",
+    "moduleResolution": "node",
+    "paths": {
+      "@athlete-ally/event-bus": ["./packages/event-bus/dist/event-bus/src/index"],
+      "@athlete-ally/event-bus/*": ["./packages/event-bus/dist/event-bus/src/*"],
+      "@athlete-ally/contracts": ["./packages/contracts"],
+      "@athlete-ally/contracts/*": ["./packages/contracts/*"],
+      "@athlete-ally/logger": ["./packages/logger/dist/index"],
+      "@athlete-ally/logger/server": ["./packages/logger/dist/adapters/node"],
+      "@athlete-ally/logger/browser": ["./packages/logger/dist/adapters/browser"],
+      "@athlete-ally/shared": ["./packages/shared/dist/index"],
+      "@athlete-ally/shared/*": ["./packages/shared/dist/*"],
+      "@athlete-ally/shared-types": ["./packages/shared-types/dist/index"],
+      "@athlete-ally/shared-types/*": ["./packages/shared-types/dist/*"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

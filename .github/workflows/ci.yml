@@ -262,6 +262,20 @@ jobs:
       ARTIFACT_SUFFIX: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ matrix.event_stream_mode }}
     outputs:
       has_artifacts: ${{ steps.results_meta.outputs.has_files }}
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: planning_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout (selected ref)
         uses: actions/checkout@v4
@@ -345,6 +359,16 @@ jobs:
           done
           [ "$missing" -eq 0 ] || { echo "? Prisma client missing"; exit 1; }
 
+      - name: Run Prisma migrations (planning-engine)
+        env:
+          PLANNING_DATABASE_URL: postgresql://test:test@localhost:5432/planning_test?schema=public
+        run: |
+          set -euo pipefail
+          echo "📊 Running Prisma migrations for planning-engine..."
+          cd services/planning-engine
+          npx prisma migrate deploy
+          echo "✅ Migrations applied successfully"
+
       - name: Build shared packages
         run: |
           set -euo pipefail
@@ -420,6 +444,7 @@ jobs:
       - name: Run Services Tests (Known Good Path)
         env:
           JEST_JUNIT_OUTPUT: test-results/junit-services.xml
+          PLANNING_DATABASE_URL: postgresql://test:test@localhost:5432/planning_test?schema=public
         run: |
           set -euo pipefail
           echo "?? Running services tests with known good configuration..."

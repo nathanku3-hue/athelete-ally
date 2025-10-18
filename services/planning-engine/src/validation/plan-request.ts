@@ -22,6 +22,7 @@ export const PlanRequestSchema = z.object({
   equipment: z.array(z.string()).default(['bodyweight']),
   purpose: z.enum(PURPOSE_ENUM).optional(),
   competitionDate: z.string().optional(),
+  selectedDaysPerWeek: z.number().int().min(1).max(7).optional(),
 });
 
 /**
@@ -38,9 +39,24 @@ function createPlanRequestFromEvent(event: OnboardingCompletedEvent | PlanGenera
     equipment: event.equipment,
     purpose: event.purpose,
     competitionDate: event.competitionDate,
+    selectedDaysPerWeek: (event as any).selectedDaysPerWeek,
   });
 
-  return validated as TrainingPlanRequest;
+  return {
+    ...validated,
+    selectedDaysPerWeek:
+      validated.selectedDaysPerWeek ?? event.weeklyGoalDays ?? event.availabilityDays,
+    goal:
+      event.purpose === 'muscle_building'
+        ? 'hypertrophy'
+        : event.purpose === 'sport_performance'
+        ? 'strength'
+        : event.purpose === 'weight_loss'
+        ? 'weight_loss'
+        : event.purpose === 'rehabilitation'
+        ? 'rehabilitation'
+        : 'general_fitness',
+  } as TrainingPlanRequest;
 }
 
 /**

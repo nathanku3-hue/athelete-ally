@@ -97,7 +97,8 @@
     "verify:generated:report": "node -e \"process.exit(0)\"",
     "scan:client-bundle": "tsx scripts/scan-client-bundle.ts",
     "scan:console": "tsx scripts/scan-console-packages.ts",
-    "codemod:logger": "tsx scripts/migrate-console-to-logger.ts"
+    "codemod:logger": "tsx scripts/migrate-console-to-logger.ts",
+    "seed:movements": "tsx scripts/seed-movements.ts"
   },
   "lint-staged": {
     "**/*.{ts,js,json,md,yml,yaml}": [

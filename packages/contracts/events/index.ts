@@ -39,6 +39,7 @@ export interface PlanGeneratedEvent {
   planName: string;
   status: 'generating' | 'completed' | 'failed';
   version: number;
+  planData?: Record<string, unknown>; // Full plan content including scoring data
 }
 
 export interface PlanGenerationRequestedEvent {
@@ -127,4 +128,4 @@ export const EVENT_TOPICS = {
 } as const;
 
 // Export schemas from dedicated file
-export * from './schemas';
+export * from './schemas.js';

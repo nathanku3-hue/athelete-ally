@@ -166,6 +166,7 @@ async function handleOnboardingCompleted(task: Task<OnboardingCompletedEvent>) {
       planName: plan.name || 'Generated Plan',
       status: 'completed',
       version: plan.version,
+      planData: plan.content,
     };
 
     await eventPublisher.publishPlanGenerated(planGeneratedEvent);
