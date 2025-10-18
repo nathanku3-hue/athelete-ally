@@ -7,6 +7,7 @@ import { ConcurrencyController } from '../concurrency/controller.js';
 import { scorePlanCandidate } from '../scoring/fixed-weight.js';
 import { isFeatureEnabled } from '../feature-flags/index.js';
 import { PlanScoringSummary } from '../types/scoring.js';
+import { EnrichedPlanGeneratedEvent, PlanScoringData } from '@athlete-ally/contracts';
 
 // 缓存接口
 interface PlanCache {
@@ -312,13 +313,15 @@ export class AsyncPlanGenerator {
     userId: string,
     planData: TrainingPlan
   ): Promise<void> {
-    const event = {
+    const event: EnrichedPlanGeneratedEvent = {
       eventId: `plan-${jobId}-${Date.now()}`,
       userId,
-      jobId,
       planId: planData.name, // 使用计划名称作为ID
       timestamp: Date.now(),
-      planData,
+      planName: planData.name,
+      status: 'completed' as const,
+      version: 1,
+      planData: planData as unknown as Record<string, unknown> & { scoring?: PlanScoringData },
     };
 
     await this.eventPublisher.publishPlanGenerated(event);

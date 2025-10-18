@@ -2,12 +2,15 @@
 import { connect } from 'nats';
 import { randomUUID } from 'crypto';
 
+const API_URL = process.env.API_URL || 'http://localhost:4106';
+const NATS_URL = process.env.NATS_URL || NATS_URL;
+
 async function smokeTest() {
   console.log('🧪 CoachTip Stream 5 Smoke Test\n');
-  
+
   // Test 1: Service Health
   console.log('[1/5] Checking CoachTip service health...');
-  const healthRes = await fetch('http://localhost:4103/health');
+  const healthRes = await fetch(`${API_URL}/health`);
   const health = await healthRes.json();
   console.log(`✅ Service healthy: ${health.status}`);
   console.log(`   - Redis: ${health.components.redis}`);
@@ -15,7 +18,7 @@ async function smokeTest() {
   
   // Test 2: Check NATS/JetStream
   console.log('[2/5] Verifying NATS JetStream...');
-  const nc = await connect({ servers: 'nats://localhost:4223' });
+  const nc = await connect({ servers: NATS_URL });
   const jsm = await nc.jetstreamManager();
   const streams = await jsm.streams.list().next();
   console.log(`✅ JetStream enabled with ${streams.length} stream(s)`);
@@ -29,7 +32,7 @@ async function smokeTest() {
   } catch {
     console.log('⚠️  ATHLETE_ALLY_EVENTS stream not found\n');
   }
-  
+
   // Test 3: Publish plan_generated event
   console.log('[3/5] Publishing test plan_generated event...');
   const js = nc.jetstream();
@@ -61,7 +64,7 @@ async function smokeTest() {
   console.log('[4/5] Waiting 3 seconds for event processing...');
   await new Promise(resolve => setTimeout(resolve, 3000));
   
-  const tipRes = await fetch(`http://localhost:4103/v1/plans/${planId}/coach-tip`);
+  const tipRes = await fetch(`${API_URL}/v1/plans/${planId}/coach-tip`);
   if (tipRes.status === 200) {
     const tip = await tipRes.json();
     console.log(`✅ CoachTip generated successfully!`);
@@ -76,7 +79,7 @@ async function smokeTest() {
   
   // Test 5: Check stats
   console.log('[5/5] Checking CoachTip statistics...');
-  const statsRes = await fetch('http://localhost:4103/v1/coach-tips/stats');
+  const statsRes = await fetch('${API_URL}/v1/coach-tips/stats');
   const stats = await statsRes.json();
   console.log(`   - Total Tips: ${stats.totalTips}`);
   console.log(`   - Active Tips: ${stats.activeTips}`);

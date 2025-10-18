@@ -42,6 +42,57 @@ export interface PlanGeneratedEvent {
   planData?: Record<string, unknown>; // Full plan content including scoring data
 }
 
+/**
+ * Plan scoring factor details
+ * Detailed metrics and reasons for each scoring factor
+ */
+export interface PlanScoringFactorDetail {
+  weight: number;
+  score: number;
+  contribution: number;
+  reasons: string[];
+  metrics: Record<string, number>;
+}
+
+/**
+ * Plan scoring data structure
+ * Used by planning-engine to score plans and coach-tip-service to generate tips
+ * This matches the actual structure sent by planning-engine
+ */
+export interface PlanScoringData {
+  version: string;
+  total: number;
+  weights: {
+    safety: number;
+    compliance: number;
+    performance: number;
+  };
+  factors: {
+    safety: PlanScoringFactorDetail;
+    compliance: PlanScoringFactorDetail;
+    performance: PlanScoringFactorDetail;
+  };
+  metadata: {
+    evaluatedAt: string;
+    weeklySessionsPlanned: number;
+    weeklyGoalDays?: number;
+    requestContext?: {
+      availabilityDays?: number;
+      weeklyGoalDays?: number;
+    };
+  };
+}
+
+/**
+ * Enriched PlanGeneratedEvent with typed scoring data
+ * Used when planning-engine includes scoring information in the event payload
+ */
+export interface EnrichedPlanGeneratedEvent extends Omit<PlanGeneratedEvent, 'planData'> {
+  planData?: Record<string, unknown> & {
+    scoring?: PlanScoringData; // Scoring is optional - may not be present for all plans
+  };
+}
+
 export interface PlanGenerationRequestedEvent {
   eventId: string;
   userId: string;
