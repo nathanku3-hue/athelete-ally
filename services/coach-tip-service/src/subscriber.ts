@@ -1,5 +1,5 @@
 import { EventBus } from '@athlete-ally/event-bus';
-import { PlanGeneratedEvent } from '@athlete-ally/contracts';
+import { PlanGeneratedEvent, EnrichedPlanGeneratedEvent } from '@athlete-ally/contracts';
 import { createLogger } from '@athlete-ally/logger';
 import nodeAdapter from '@athlete-ally/logger/server';
 import { CoachTipGenerator, TipGenerationContext, PlanScoringSummary } from './tip-generator.js';
@@ -130,8 +130,9 @@ export class CoachTipSubscriber {
     });
 
     try {
-      // Extract scoring data from the enriched event payload
-      const planData = (event as any).planData;
+      // Type-safely extract scoring data from enriched event
+      const enrichedEvent = event as EnrichedPlanGeneratedEvent;
+      const planData = enrichedEvent.planData;
 
       log.info('[CoachTip] Extracting scoring data', {
         correlationId,

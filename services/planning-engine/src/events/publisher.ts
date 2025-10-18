@@ -1,4 +1,10 @@
 import { EventBus } from '@athlete-ally/event-bus';
+import {
+  OnboardingCompletedEvent,
+  PlanGenerationRequestedEvent,
+  EnrichedPlanGeneratedEvent,
+  PlanGenerationFailedEvent
+} from '@athlete-ally/contracts';
 import { config } from '../config.js';
 import { register, Counter, Histogram } from 'prom-client';
 
@@ -88,25 +94,25 @@ export class EventPublisher {
     }
   }
 
-  async publishOnboardingCompleted(event: any) {
+  async publishOnboardingCompleted(event: OnboardingCompletedEvent) {
     await this.publishWithMetrics('onboarding_completed', async () => {
       await this.eventBus.publishOnboardingCompleted(event);
     });
   }
 
-  async publishPlanGenerationRequested(event: any) {
+  async publishPlanGenerationRequested(event: PlanGenerationRequestedEvent) {
     await this.publishWithMetrics('plan_generation_requested', async () => {
       await this.eventBus.publishPlanGenerationRequested(event);
     });
   }
 
-  async publishPlanGenerated(event: any) {
+  async publishPlanGenerated(event: EnrichedPlanGeneratedEvent) {
     await this.publishWithMetrics('plan_generated', async () => {
       await this.eventBus.publishPlanGenerated(event);
     });
   }
 
-  async publishPlanGenerationFailed(event: any) {
+  async publishPlanGenerationFailed(event: PlanGenerationFailedEvent) {
     await this.publishWithMetrics('plan_generation_failed', async () => {
       await this.eventBus.publishPlanGenerationFailed(event);
     });

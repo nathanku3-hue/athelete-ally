@@ -310,12 +310,12 @@ server.post('/generate', async (request, reply) => {
       userId: parsed.data.userId,
       timestamp: Date.now(),
       jobId: jobId,
-      proficiency: 'intermediate', // Default value - will be enhanced with user profile integration
-      season: 'offseason',
+      proficiency: 'intermediate' as const, // Default value - will be enhanced with user profile integration
+      season: 'offseason' as const,
       availabilityDays: 3,
       weeklyGoalDays: 4,
       equipment: ['bodyweight', 'dumbbells'],
-      purpose: 'general_fitness',
+      purpose: 'general_fitness' as const,
     };
 
     // 发布事件到消息队列
