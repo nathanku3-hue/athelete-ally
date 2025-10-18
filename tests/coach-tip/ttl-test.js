@@ -5,8 +5,8 @@ const util = require('util');
 
 const execPromise = util.promisify(exec);
 
-const NATS_URL = 'nats://localhost:4223';
-const API_URL = 'http://localhost:4103';
+const NATS_URL = process.env.NATS_URL || 'nats://localhost:4223';
+const API_URL = process.env.API_URL || 'http://localhost:4106';
 const EXPECTED_TTL_DAYS = 7;
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 1000;

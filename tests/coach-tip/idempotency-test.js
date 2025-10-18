@@ -1,8 +1,8 @@
 const { connect } = require('nats');
 const { randomUUID } = require('crypto');
 
-const NATS_URL = 'nats://localhost:4223';
-const API_URL = 'http://localhost:4103';
+const NATS_URL = process.env.NATS_URL || 'nats://localhost:4223';
+const API_URL = process.env.API_URL || 'http://localhost:4106';
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
