@@ -1,12 +1,10 @@
 const { connect } = require('nats');
 const { randomUUID } = require('crypto');
-const { exec } = require('child_process');
-const util = require('util');
-
-const execPromise = util.promisify(exec);
+const Redis = require('ioredis');
 
 const NATS_URL = process.env.NATS_URL || 'nats://localhost:4223';
 const API_URL = process.env.API_URL || 'http://localhost:4106';
+const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 const EXPECTED_TTL_DAYS = 7;
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 1000;
@@ -82,13 +80,30 @@ async function checkTipWithRetry(planId) {
 }
 
 async function checkRedisTTL(planId) {
+  let redis;
   try {
-    // Use docker exec to check TTL in Redis (key format: plan-tips:{planId})
-    const { stdout } = await execPromise(`docker exec compose-redis-1 redis-cli TTL plan-tips:${planId}`);
-    const ttl = parseInt(stdout.trim());
+    // Connect to Redis using ioredis
+    redis = new Redis(REDIS_URL, {
+      lazyConnect: true,
+      maxRetriesPerRequest: 3
+    });
+
+    await redis.connect();
+
+    // Check TTL for the key (key format: plan-tips:{planId})
+    const ttl = await redis.ttl(`plan-tips:${planId}`);
+
+    await redis.quit();
     return ttl;
   } catch (error) {
     console.error('Error checking Redis TTL:', error.message);
+    if (redis) {
+      try {
+        await redis.quit();
+      } catch (quitError) {
+        // Ignore quit errors
+      }
+    }
     return null;
   }
 }
@@ -150,10 +165,10 @@ async function runTTLTest() {
     // Check Redis TTL
     console.log('🔍 Checking Redis TTL...');
     const ttl = await checkRedisTTL(planId);
-    
+
     if (ttl === null) {
       console.log('❌ Could not retrieve TTL from Redis');
-      console.log('   Make sure Redis container is running: docker ps | grep redis');
+      console.log('   Check Redis connection settings');
       process.exit(1);
     }
     
