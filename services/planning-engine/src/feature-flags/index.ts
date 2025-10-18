@@ -66,13 +66,13 @@ export async function isFeatureEnabled(flagKey: string, defaultValue = false): P
   const envOverride = process.env[envKey];
   if (envOverride !== undefined) {
     const enabled = envOverride === 'true' || envOverride === '1';
-    log.info({ flag: flagKey, enabled, source: 'env-override' }, 'Feature flag override from environment');
+    log.info('Feature flag override from environment', { flag: flagKey, enabled, source: 'env-override' });
     return enabled;
   }
 
   const ldClient = await ensureClient();
   if (!ldClient) {
-    log.info({ flag: flagKey, defaultValue }, 'LaunchDarkly unavailable, using default');
+    log.info('LaunchDarkly unavailable, using default', { flag: flagKey, defaultValue });
     return defaultValue;
   }
 

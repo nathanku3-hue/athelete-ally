@@ -219,7 +219,7 @@ function validateFactorDetail(
 function validateMetadata(
   metadata: Partial<PlanScoringSummary['metadata']>,
   errors: string[],
-  warnings: string[]
+  _warnings: string[]
 ): void {
   // evaluatedAt
   if (typeof metadata.evaluatedAt !== 'string') {
@@ -270,7 +270,7 @@ function validateMetadata(
 function validateCrossReferences(
   scoring: PlanScoringSummary,
   errors: string[],
-  warnings: string[]
+  _warnings: string[]
 ): void {
   // Validate factor weights match top-level weights
   const factors = ['safety', 'compliance', 'performance'] as const;
