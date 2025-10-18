@@ -171,6 +171,18 @@ Tips are stored in Redis with:
 - Implements graceful shutdown on SIGTERM/SIGINT
 - Maintains separation of concerns (generator, storage, subscriber)
 
+## Debug Scripts
+
+Development and debugging utilities are available in the `debug/` directory:
+
+- **`debug/smoke-test.js`** - End-to-end smoke test
+- **`debug/check-consumer.js`** - NATS consumer inspection
+- **`debug/test-publish-event.js`** - Manual event publishing
+
+See [`debug/README.md`](./debug/README.md) for detailed usage instructions.
+
+**Note:** These scripts are for local development only and should not be used in production.
+
 ## Related Services
 
 - **planning-engine:** Publishes `plan_generated` events with scoring data
