@@ -39,3 +39,111 @@ export interface WorkoutSession {
     sets: Set[];
   }[];
 }
+
+// Time Crunch Preview Types
+export interface TimeCrunchSet {
+  id: string;
+  index: number;
+  reps: number | string;
+  load?: string;
+  effort?: string;
+  estimatedDurationSeconds: number;
+}
+
+export interface TimeCrunchExerciseSnapshot {
+  id: string;
+  name: string;
+  sets: TimeCrunchSet[];
+  targetRestSeconds: number;
+}
+
+export interface TimeCrunchTiming {
+  workSeconds: number;
+  restSeconds: number;
+  totalSeconds: number;
+}
+
+export type TimeCrunchSegmentKind =
+  | 'core_lift'
+  | 'accessory_superset'
+  | 'accessory_block'
+  | 'accessory_single';
+
+interface TimeCrunchSegmentBase {
+  id: string;
+  kind: TimeCrunchSegmentKind;
+  order: number;
+  timing: TimeCrunchTiming;
+}
+
+export interface TimeCrunchCoreLiftSegment extends TimeCrunchSegmentBase {
+  kind: 'core_lift';
+  exercise: TimeCrunchExerciseSnapshot;
+}
+
+export type TimeCrunchSupersetPriority = 'antagonist' | 'equipment' | 'non_competing';
+
+export interface TimeCrunchSupersetSegment extends TimeCrunchSegmentBase {
+  kind: 'accessory_superset';
+  exercises: [TimeCrunchExerciseSnapshot, TimeCrunchExerciseSnapshot];
+  priority: TimeCrunchSupersetPriority;
+  restBetweenAlternationsSeconds: number;
+}
+
+export interface TimeCrunchBlockSegment extends TimeCrunchSegmentBase {
+  kind: 'accessory_block';
+  exercises: TimeCrunchExerciseSnapshot[];
+  rounds: number;
+  restBetweenExercisesSeconds: number;
+  restBetweenRoundsSeconds: number;
+  rationale: 'metabolic_stress' | 'equipment_cluster' | 'coach_defined';
+}
+
+export interface TimeCrunchSingleSegment extends TimeCrunchSegmentBase {
+  kind: 'accessory_single';
+  exercise: TimeCrunchExerciseSnapshot;
+}
+
+export type TimeCrunchSegment =
+  | TimeCrunchCoreLiftSegment
+  | TimeCrunchSupersetSegment
+  | TimeCrunchBlockSegment
+  | TimeCrunchSingleSegment;
+
+export interface TimeCrunchSessionContext {
+  sessionId: string;
+  microcycleId: string;
+  dayOfWeek: number;
+  originalDurationSeconds: number;
+}
+
+export interface TimeCrunchSessionSummary {
+  sessionId: string;
+  originalDurationSeconds: number;
+  compressedDurationSeconds: number;
+  durationDeltaSeconds: number;
+  segmentOrder: string[];
+}
+
+export interface TimeCrunchTelemetryEvent {
+  segmentId: string;
+  kind: string;
+  strategy: string;
+  notes?: string;
+}
+
+export interface TimeCrunchPreviewSession {
+  context: TimeCrunchSessionContext;
+  summary: TimeCrunchSessionSummary;
+  segments: TimeCrunchSegment[];
+  telemetry?: TimeCrunchTelemetryEvent[];
+}
+
+export interface TimeCrunchPreviewResponse {
+  planId: string;
+  targetMinutes: number;
+  originalDurationSeconds: number;
+  compressedDurationSeconds: number;
+  meetsTimeConstraint: boolean;
+  sessions: TimeCrunchPreviewSession[];
+}

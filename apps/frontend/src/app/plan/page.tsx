@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
+import { useTrainingStore } from '@/stores/trainingStore';
+import { TimeCrunchPreviewModal } from '@/components/training/TimeCrunchPreviewModal';
 
 // ============================================================================
 // Mock Data & Types
@@ -31,6 +33,7 @@ interface TrainingDay {
 }
 
 interface WeeklyPlan {
+  id?: string;
   weekNumber: number;
   theme: string;
   volume: 'Low' | 'Mid' | 'High';
@@ -87,7 +90,19 @@ const StatusDot = ({ status, details }: { status: 'low' | 'moderate' | 'high'; d
     </div>
 );
 
-const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan | null; unit: Unit; onUnitChange: (unit: Unit) => void; onModifyPlan: () => void; }) => {
+const Header = ({
+    plan,
+    unit,
+    onUnitChange,
+    onTimeCrunch,
+    canPreviewTimeCrunch
+  }: {
+    plan: WeeklyPlan | null;
+    unit: Unit;
+    onUnitChange: (unit: Unit) => void;
+    onTimeCrunch: () => void;
+    canPreviewTimeCrunch: boolean;
+  }) => {
     const router = useRouter();
     
     // 如果plan还在加载中，显示加载状态
@@ -106,7 +121,13 @@ const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan |
                         <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
                         <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
                     </div>
-                    <button onClick={onModifyPlan} className="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-md text-sm font-semibold hover:bg-gray-700 hover:border-gray-500 transition-colors">Modify Plan</button>
+                    <button
+                        onClick={onTimeCrunch}
+                        disabled={!canPreviewTimeCrunch}
+                        className={`px-3 py-1.5 border rounded-md text-sm font-semibold transition-colors ${canPreviewTimeCrunch ? 'border-blue-500 text-blue-200 hover:bg-blue-600/20 hover:border-blue-400' : 'border-gray-700 text-gray-500 cursor-not-allowed'}`}
+                    >
+                        Time Crunch Mode
+                    </button>
                 </div>
             </div>
         );
@@ -121,16 +142,22 @@ const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan |
                     <p className="text-sm text-gray-400">Volume: {plan.volume}</p>
                 </div>
             </div>
-            <div className="flex items-center gap-4">
-                <div className="flex p-1 bg-gray-700 rounded-md">
-                    <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
-                    <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
+                <div className="flex items-center gap-4">
+                    <div className="flex p-1 bg-gray-700 rounded-md">
+                        <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
+                        <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
+                    </div>
+                    <button
+                        onClick={onTimeCrunch}
+                        disabled={!canPreviewTimeCrunch}
+                        className={`px-3 py-1.5 border rounded-md text-sm font-semibold transition-colors ${canPreviewTimeCrunch ? 'border-blue-500 text-blue-200 hover:bg-blue-600/20 hover:border-blue-400' : 'border-gray-700 text-gray-500 cursor-not-allowed'}`}
+                    >
+                        Time Crunch Mode
+                    </button>
                 </div>
-                <button onClick={onModifyPlan} className="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-md text-sm font-semibold hover:bg-gray-700 hover:border-gray-500 transition-colors">Modify Plan</button>
             </div>
-        </div>
-    );
-};
+        );
+    };
 
 const ExerciseCard = ({ exercise, unit }: { exercise: ExerciseDetail; unit: Unit; }) => {
     const [isPopoverVisible, setIsPopoverVisible] = useState(false);
@@ -283,13 +310,26 @@ export default function TrainingPlanPageV2_Fixed() {
         }
     };
 
-    // 处理修改计划按钮点击
-    const handleModifyPlan = () => {
-        // Log for debugging (in development)
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Modify Plan clicked - redirecting to summary page');
+    const { currentPlan, plans: storedPlans } = useTrainingStore((state) => ({
+        currentPlan: state.currentPlan,
+        plans: state.plans
+    }));
+
+    const derivedPlanId = useMemo(() => currentPlan?.id ?? storedPlans[0]?.id ?? plan?.id ?? null, [currentPlan?.id, storedPlans, plan?.id]);
+    const canPreviewTimeCrunch = Boolean(derivedPlanId);
+
+    const [isTimeCrunchModalOpen, setIsTimeCrunchModalOpen] = useState(false);
+
+    // 处理 Time Crunch 预览按钮点击
+    const handleTimeCrunchPreview = () => {
+        if (derivedPlanId) {
+            setIsTimeCrunchModalOpen(true);
+            return;
         }
-        // 跳转到 summary 页面，讓用戶修改現有計劃
+
+        if (process.env.NODE_ENV === 'development') {
+            console.warn('No plan available for Time Crunch preview, redirecting to onboarding summary.');
+        }
         router.push('/onboarding/summary');
     };
 
@@ -319,11 +359,23 @@ export default function TrainingPlanPageV2_Fixed() {
 
     return (
         <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
+            <TimeCrunchPreviewModal
+                isOpen={isTimeCrunchModalOpen}
+                onClose={() => setIsTimeCrunchModalOpen(false)}
+                planId={derivedPlanId}
+            />
+
             <div className="max-w-7xl mx-auto">
                 {isLoading ? (
                     <HeaderSkeleton />
                 ) : plan ? (
-                    <Header plan={plan} unit={unit} onUnitChange={handleUnitChange} onModifyPlan={handleModifyPlan} />
+                    <Header
+                        plan={plan}
+                        unit={unit}
+                        onUnitChange={handleUnitChange}
+                        onTimeCrunch={handleTimeCrunchPreview}
+                        canPreviewTimeCrunch={canPreviewTimeCrunch}
+                    />
                 ) : (
                     <HeaderSkeleton />
                 )}

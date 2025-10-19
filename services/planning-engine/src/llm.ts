@@ -5,6 +5,7 @@
  * @note 这是一个占位符模块，实际LLM集成需要根据具体需求实现
  */
 
+import type { CompressionOutcome } from './time-crunch/types.js';
 import { PlanScoringSummary } from './types/scoring.js';
 
 export interface TrainingPlanRequest {
@@ -18,6 +19,7 @@ export interface TrainingPlanRequest {
   competitionDate?: string;
   selectedDaysPerWeek?: number;
   goal?: 'hypertrophy' | 'strength' | 'endurance' | 'weight_loss' | 'rehabilitation' | 'general_fitness';
+  targetMinutes?: number;
 }
 
 // 注意：PlanGenerationRequest别名已移除，请直接使用TrainingPlanRequest
@@ -32,6 +34,7 @@ export interface TrainingPlan {
   createdAt: Date;
   updatedAt: Date;
   scoring?: PlanScoringSummary;
+  timeCrunch?: CompressionOutcome;
 }
 
 /**

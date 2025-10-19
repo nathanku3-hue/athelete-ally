@@ -5,6 +5,8 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { trace, metrics } from '@opentelemetry/api';
+import { createLogger } from '@athlete-ally/logger';
+import serverAdapter from '@athlete-ally/logger/server';
 
 // 创建自定义资源信息
 const resource = new Resource({
@@ -139,3 +141,15 @@ process.on('SIGTERM', () => {
 
 export { sdk, tracer, meter };
 
+const telemetryLogger = createLogger(serverAdapter, {
+  module: 'telemetry',
+  service: 'planning-engine'
+});
+
+export const trackEvent = (eventName: string, payload: Record<string, unknown>) => {
+  telemetryLogger.info(`event=${eventName}`, {
+    event: eventName,
+    payload,
+    timestamp: new Date().toISOString()
+  });
+};

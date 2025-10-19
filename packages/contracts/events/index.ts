@@ -108,6 +108,7 @@ export interface PlanGenerationRequestedEvent {
   competitionDate?: string;
   fixedSchedules?: Array<{ day: string; start: string; end: string }>;
   recoveryHabits?: string[];
+  timeCrunchTargetMinutes?: number;
 }
 
 export interface PlanGenerationFailedEvent {

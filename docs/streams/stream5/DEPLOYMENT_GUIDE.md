@@ -345,6 +345,20 @@ ERROR   back-squat :: Published movements cannot be edited
 
 ---
 
+### Time Crunch Preview Fails or Returns Fallback
+
+```
+HTTP 422: plan_not_compressible
+```
+
+**Solutions:**
+1. Confirm the plan contains sessions with exercises. Empty or mock sessions cannot be compressed.
+2. Verify `plan.content` exists for the requested `planId` (seeded placeholder plans are not compressible).
+3. Check service logs for `stream5.time_crunch_preview_fallback` and inspect the `reason` value (`plan_missing_content`, `internal_error`).
+4. Regenerate a plan through onboarding and retry the preview request.
+
+---
+
 ## When Ops Delivers Staging DSN
 
 ### Quick Start

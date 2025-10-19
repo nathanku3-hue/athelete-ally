@@ -22,6 +22,7 @@ import { initializeFeatureFlags, closeFeatureFlags } from './feature-flags/index
 import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
 import apiDocsRoutes from './routes/api-docs.js';
 import { movementCurationRoutes } from './routes/movement-curation.js';
+import { timeCrunchRoutes } from './routes/time-crunch.js';
 // Error handling and performance monitoring integrated into server hooks
 // 使用统一的shared包组件
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
@@ -31,6 +32,7 @@ import { register } from 'prom-client';
 export const PlanGenerateRequest = z.object({
   userId: z.string(),
   seedPlanId: z.string().optional(),
+  targetMinutes: z.number().int().min(15).max(180).optional(),
 });
 
 export type PlanGenerateRequest = z.infer<typeof PlanGenerateRequest>;
@@ -94,9 +96,12 @@ server.addHook('onReady', async () => {
     // 注册增强计划API路由
     await server.register(enhancedPlanRoutes);
     server.log.info('enhanced plan routes registered');
-    
+
     await server.register(movementCurationRoutes, { prefix: '/api/internal/curation' });
     server.log.info('movement curation routes registered');
+
+    await server.register(timeCrunchRoutes);
+    server.log.info('time crunch routes registered');
     
     // 注册API文档路由
     await server.register(apiDocsRoutes);
@@ -316,6 +321,7 @@ server.post('/generate', async (request, reply) => {
       weeklyGoalDays: 4,
       equipment: ['bodyweight', 'dumbbells'],
       purpose: 'general_fitness' as const,
+      timeCrunchTargetMinutes: parsed.data.targetMinutes,
     };
 
     // 发布事件到消息队列

@@ -1,3 +1,5 @@
+import { TimeCrunchPreviewResponse } from '@/lib/types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 class TrainingAPI {
@@ -51,6 +53,13 @@ class TrainingAPI {
   async deletePlan(id: string) {
     return this.request(`/api/v1/plans/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async previewTimeCrunch(planId: string, targetMinutes: number): Promise<TimeCrunchPreviewResponse> {
+    return this.request<TimeCrunchPreviewResponse>('/api/v1/time-crunch/preview', {
+      method: 'POST',
+      body: JSON.stringify({ planId, targetMinutes }),
     });
   }
 
@@ -117,6 +126,3 @@ class TrainingAPI {
 }
 
 export const trainingAPI = new TrainingAPI();
-
-
-
