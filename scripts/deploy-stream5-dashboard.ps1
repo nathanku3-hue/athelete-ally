@@ -14,7 +14,7 @@ $DashboardFile = "infrastructure\monitoring\grafana\dashboards\stream5-time-crun
 # Configuration based on environment
 switch ($Environment) {
     "staging" {
-        $GrafanaUrl = "https://staging-grafana.athlete-ally.com"
+        $GrafanaUrl = "https://nkgss.grafana.net"
         $ApiKey = $env:STAGING_GRAFANA_API_KEY
     }
     "production" {

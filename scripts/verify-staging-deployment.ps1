@@ -2,7 +2,7 @@
 # Usage: .\verify-staging-deployment.ps1
 
 param(
-    [string]$StagingUrl = "https://staging-planning-engine.athlete-ally.com",
+    [string]$StagingUrl = "https://nkgss.grafana.net",
     [string]$TestPlanId = "test-plan-id",
     [string]$TestToken = "test-token"
 )
