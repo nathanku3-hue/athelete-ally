@@ -1,0 +1,298 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Stream5 - Time Crunch Mode Dashboard",
+    "description": "Monitoring dashboard for Time Crunch Mode preview endpoint and compression metrics",
+    "tags": ["stream5", "time-crunch", "athlete-ally", "planning-engine"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Time Crunch Preview Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_requested_total[5m]))",
+            "legendFormat": "Preview Requests/min"
+          },
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_succeeded_total[5m]))",
+            "legendFormat": "Successful Previews/min"
+          },
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_fallback_total[5m]))",
+            "legendFormat": "Fallback Events/min"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/min",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Compression Strategy Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_succeeded_total[5m])) by (compressionStrategy)",
+            "legendFormat": "{{compressionStrategy}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Time Constraint Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_succeeded_total{meetsTimeConstraint=\"true\"}[5m])) / sum(rate(stream5_time_crunch_preview_succeeded_total[5m])) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 70
+                },
+                {
+                  "color": "green",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 8,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Average Target Minutes",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(stream5_time_crunch_preview_requested_target_minutes)",
+            "legendFormat": "Avg Target Minutes"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 1
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 8,
+          "x": 8,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Preview Endpoint Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"planning-engine\",path=\"/api/v1/time-crunch/preview\"}[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"planning-engine\",path=\"/api/v1/time-crunch/preview\"}[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (seconds)",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 12
+        }
+      },
+      {
+        "id": 6,
+        "title": "Fallback Reasons",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_fallback_total[5m])) by (reason)",
+            "legendFormat": "{{reason}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Fallbacks/min",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 12
+        }
+      },
+      {
+        "id": 7,
+        "title": "Compression Ratio Distribution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(stream5_time_crunch_compression_ratio_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(stream5_time_crunch_compression_ratio_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "avg(stream5_time_crunch_compression_ratio)",
+            "legendFormat": "Average"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Compression Ratio",
+            "min": 0,
+            "max": 1
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 20
+        }
+      },
+      {
+        "id": 8,
+        "title": "Active Users (Time Crunch)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(count by (userId) (stream5_time_crunch_preview_requested_total))",
+            "legendFormat": "Unique Users"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 8,
+          "x": 12,
+          "y": 20
+        }
+      },
+      {
+        "id": 9,
+        "title": "Error Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(stream5_time_crunch_preview_fallback_total[5m])) / sum(rate(stream5_time_crunch_preview_requested_total[5m])) * 100",
+            "legendFormat": "Error Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 5
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 8,
+          "x": 12,
+          "y": 24
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "timeRange",
+          "type": "interval",
+          "query": "1m,5m,15m,30m,1h,6h,12h,1d",
+          "current": {
+            "text": "5m",
+            "value": "5m"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Stream5 Deployments",
+          "enable": true,
+          "iconColor": "blue",
+          "type": "tags",
+          "tags": ["stream5", "deployment"]
+        }
+      ]
+    }
+  }
+}

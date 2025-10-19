@@ -8,6 +8,7 @@ import {
 } from '../time-crunch/service.js';
 import { trackEvent } from '../telemetry.js';
 import { CompressionOutcome, SessionSegment } from '../time-crunch/types.js';
+import { isFeatureEnabled } from '../feature-flags/index.js';
 
 const TimeCrunchPreviewRequestSchema = z.object({
   planId: z.string().min(1),
@@ -53,6 +54,12 @@ export async function timeCrunchRoutes(fastify: FastifyInstance) {
       }
     },
     async (request, reply) => {
+      // Check if Time Crunch Mode is enabled
+      const isTimeCrunchEnabled = await isFeatureEnabled('feature.stream5_time_crunch_mode', false);
+      if (!isTimeCrunchEnabled) {
+        return reply.status(404).send({ error: 'feature_not_available' });
+      }
+
       const { planId, targetMinutes } = request.body as TimeCrunchPreviewRequest;
 
       const user = (request as unknown as { user?: { userId?: string } }).user;
