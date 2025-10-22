@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import Image from 'next';
+import Image from 'next/image';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
 import { useTrainingStore } from '@/stores/trainingStore';

@@ -27,7 +27,7 @@ export interface SessionCompressionOptions {
   config?: Partial<CompressionConfig>;
 }
 
-export interface PlanCompressionOptions extends SessionCompressionOptions {}
+export type PlanCompressionOptions = SessionCompressionOptions;
 
 const SECONDS_PER_MINUTE = 60;
 
