@@ -28,6 +28,9 @@ import { timeCrunchRoutes } from './routes/time-crunch.js';
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
 import { register } from 'prom-client';
 
+// Allow local dev to skip NATS/EventBus wiring for sanity checks
+const SKIP_EVENTS = process.env.SKIP_EVENTS === 'true' || process.env.FEATURE_DISABLE_EVENTS === 'true';
+
 // 定义类型（从 index.ts 移动过来）
 export const PlanGenerateRequest = z.object({
   userId: z.string(),
@@ -50,6 +53,14 @@ const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, 
 // Health check routes integrated into main server
 // Error handling and performance monitoring integrated into server hooks
 
+// Wrap initialization in async IIFE to handle errors properly
+(async () => {
+  // Register all routes BEFORE server starts listening
+  await server.register(enhancedPlanRoutes);
+  await server.register(movementCurationRoutes, { prefix: '/api/internal/curation' });
+  await server.register(timeCrunchRoutes);
+  await server.register(apiDocsRoutes);
+
 server.addHook('onReady', async () => {
   try {
     await initializeFeatureFlags();
@@ -67,6 +78,14 @@ server.addHook('onReady', async () => {
     server.log.error({ err: e }, 'failed to connect redis');
     process.exit(1);
   }
+
+  server.log.info('Routes registered: enhanced-plans, movement-curation, time-crunch, api-docs');
+
+  if (SKIP_EVENTS) {
+    server.log.warn('SKIP_EVENTS enabled - skipping EventBus connections and subscriptions');
+    return;
+  }
+
   try {
     // 连接到事件发布器
     await eventPublisher.connect();
@@ -91,22 +110,6 @@ server.addHook('onReady', async () => {
     
     // OpenTelemetry metrics collection enabled
     server.log.info('event processor connected successfully');
-    server.log.info('health check routes registered');
-    
-    // 注册增强计划API路由
-    await server.register(enhancedPlanRoutes);
-    server.log.info('enhanced plan routes registered');
-
-    await server.register(movementCurationRoutes, { prefix: '/api/internal/curation' });
-    server.log.info('movement curation routes registered');
-
-    await server.register(timeCrunchRoutes);
-    server.log.info('time crunch routes registered');
-    
-    // 注册API文档路由
-    await server.register(apiDocsRoutes);
-    server.log.info('API documentation routes registered');
-
   } catch (e) {
     server.log.error({ err: e }, 'failed to connect event processor');
     process.exit(1);
@@ -435,13 +438,10 @@ server.addHook('preHandler', async (request, reply) => {
   }
 });
 
-const port = Number(config.PORT || 4102);
-server
-  .listen({ port, host: '0.0.0.0' })
-  .then(() => console.log(`planning-engine listening on :${port}`))
-  .catch(async (err) => {
-    // const { safeLog } = await import('../../packages/shared/src/logger.js');
-    const safeLog = { error: console.error, info: console.log, warn: console.warn };
-    safeLog.error('Server startup error', err);
-    process.exit(1);
-  });
+  const port = Number(config.PORT || 4102);
+  await server.listen({ port, host: '0.0.0.0' });
+  console.log(`planning-engine listening on :${port}`);
+})().catch((err) => {
+  console.error('Server startup error', err);
+  process.exit(1);
+});

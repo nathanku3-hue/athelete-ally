@@ -45,22 +45,22 @@ const TimeCrunchPreviewResponseSchema = z.object({
 export async function timeCrunchRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/api/v1/time-crunch/preview',
-    {
-      schema: {
-        body: TimeCrunchPreviewRequestSchema,
-        response: {
-          200: TimeCrunchPreviewResponseSchema
-        }
-      }
-    },
     async (request, reply) => {
+      // Validate request body
+      const parsed = TimeCrunchPreviewRequestSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({
+          error: 'invalid_request',
+          details: parsed.error.issues,
+        });
+      }
+      const { planId, targetMinutes } = parsed.data;
+
       // Check if Time Crunch Mode is enabled
       const isTimeCrunchEnabled = await isFeatureEnabled('feature.stream5_time_crunch_mode', false);
       if (!isTimeCrunchEnabled) {
         return reply.status(404).send({ error: 'feature_not_available' });
       }
-
-      const { planId, targetMinutes } = request.body as TimeCrunchPreviewRequest;
 
       const user = (request as unknown as { user?: { userId?: string } }).user;
       if (!user?.userId) {

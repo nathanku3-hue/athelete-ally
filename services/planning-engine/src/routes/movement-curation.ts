@@ -93,10 +93,17 @@ const handleRouteError = (
 };
 
 export async function movementCurationRoutes(app: FastifyInstance) {
-  try {
-    await movementCurationService.synchronizeDraftMetrics();
-  } catch (error) {
-    app.log.warn({ err: error }, 'failed to synchronize movement curation metrics');
+  // Skip metrics sync during route registration unless explicitly enabled
+  // This allows the server to start even if the movement_staging table doesn't exist yet
+  if (process.env.ENABLE_CURATION_SYNC === 'true') {
+    try {
+      await movementCurationService.synchronizeDraftMetrics();
+      app.log.info('movement curation metrics synchronized');
+    } catch (error) {
+      app.log.warn({ err: error }, 'failed to synchronize movement curation metrics');
+    }
+  } else {
+    app.log.info('skipping movement curation metrics sync (ENABLE_CURATION_SYNC not set)');
   }
 
   app.addHook('preHandler', requireCurator);

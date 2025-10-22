@@ -60,23 +60,17 @@ const EnhancedPlanGenerationRequestSchema = z.object({
 
 export async function enhancedPlanRoutes(fastify: FastifyInstance) {
   // 生成增强训练计划
-  fastify.post('/api/v1/plans/enhanced/generate', {
-    schema: {
-      body: EnhancedPlanGenerationRequestSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' },
-            message: { type: 'string' },
-          },
-        },
-      },
-    },
-  }, async (request, reply) => {
+  fastify.post('/api/v1/plans/enhanced/generate', async (request, reply) => {
     try {
-      const requestData = request.body as z.infer<typeof EnhancedPlanGenerationRequestSchema>;
+      const parsed = EnhancedPlanGenerationRequestSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({
+          success: false,
+          error: 'Invalid request body',
+          details: parsed.error.issues,
+        });
+      }
+      const requestData = parsed.data;
       
       // 生成增强计划
       const plan = await generateEnhancedTrainingPlan(requestData);
@@ -145,23 +139,17 @@ export async function enhancedPlanRoutes(fastify: FastifyInstance) {
   });
 
   // 提交RPE反馈
-  fastify.post('/api/v1/plans/feedback/rpe', {
-    schema: {
-      body: RPEFeedbackSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' },
-            message: { type: 'string' },
-          },
-        },
-      },
-    },
-  }, async (request, reply) => {
+  fastify.post('/api/v1/plans/feedback/rpe', async (request, reply) => {
     try {
-      const feedback = request.body as z.infer<typeof RPEFeedbackSchema>;
+      const parsed = RPEFeedbackSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({
+          success: false,
+          error: 'Invalid request body',
+          details: parsed.error.issues,
+        });
+      }
+      const feedback = parsed.data;
       
       // 保存RPE反馈到数据库
       const savedFeedback = await prisma.rPEFeedback.create({
@@ -198,23 +186,17 @@ export async function enhancedPlanRoutes(fastify: FastifyInstance) {
   });
 
   // 提交性能指标
-  fastify.post('/api/v1/plans/feedback/performance', {
-    schema: {
-      body: PerformanceMetricsSchema,
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean' },
-            data: { type: 'object' },
-            message: { type: 'string' },
-          },
-        },
-      },
-    },
-  }, async (request, reply) => {
+  fastify.post('/api/v1/plans/feedback/performance', async (request, reply) => {
     try {
-      const metrics = request.body as z.infer<typeof PerformanceMetricsSchema>;
+      const parsed = PerformanceMetricsSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({
+          success: false,
+          error: 'Invalid request body',
+          details: parsed.error.issues,
+        });
+      }
+      const metrics = parsed.data;
       
       // 保存性能指标到数据库
       const savedMetrics = await prisma.performanceMetrics.create({
