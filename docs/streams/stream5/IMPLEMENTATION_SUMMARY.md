@@ -252,6 +252,45 @@ Error: Table "movement_library" does not exist
 3. Examine script output for specific error messages
 4. Verify environment variables are set correctly
 
+## Time Crunch Mode Compression (October 19, 2025)
+
+### Core Modules
+
+- `services/planning-engine/src/time-crunch/` – type-safe orchestration (translator, pairing heuristics, compression, preview service).
+- `services/planning-engine/src/routes/time-crunch.ts` – Fastify route for `/api/v1/time-crunch/preview`, applying Coach’s Amendment and returning ordered segments.
+- `apps/gateway-bff/src/index.ts` – Proxy + telemetry bridge so frontend calls land in the analytics dataset.
+- `apps/frontend/src/components/training/TimeCrunchPreviewModal.tsx` – Modal visualizing core-first order, supersets, and blocks with badge styling.
+
+### Preview Flow
+
+1. Frontend hits `POST /api/v1/time-crunch/preview` (gateway).
+2. Gateway logs `stream5.time_crunch_preview_requested` and forwards to planning-engine.
+3. Planning engine translates the stored plan, applies compression, and emits `stream5.time_crunch_preview_succeeded` or `stream5.time_crunch_preview_fallback`.
+4. Users can dismiss the preview; the frontend posts `stream5.time_crunch_preview_declined` through the gateway to capture declines.
+
+### Compression Strategy Tags
+
+Telemetry and response payloads label the dominant pattern so dashboards can aggregate behaviour:
+
+| Strategy | Description |
+|----------|-------------|
+| `core_only` | Only core lifts retained (no accessory pairing possible) |
+| `core_plus_accessory` | Core lifts followed by single accessories |
+| `core_plus_superset` | Accessories paired for density |
+| `core_plus_block` | Accessories grouped in metabolic blocks |
+| `core_plus_block_and_superset` | Mix of blocks and supersets |
+
+### Telemetry Events
+
+All events emit via `trackEvent` with payload `{ planId, targetMinutes, compressionStrategy, reason?, userId?, source }`:
+
+- `stream5.time_crunch_preview_requested`
+- `stream5.time_crunch_preview_succeeded`
+- `stream5.time_crunch_preview_fallback`
+- `stream5.time_crunch_preview_declined`
+
+These events feed existing analytics dashboards for activation rates, success ratios, and fallback diagnostics.
+
 ## Conclusion
 
 **Stream 5 movement seeding infrastructure is complete and production-ready.** 

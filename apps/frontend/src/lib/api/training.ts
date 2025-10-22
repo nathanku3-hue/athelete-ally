@@ -1,3 +1,5 @@
+import { TimeCrunchPreviewResponse } from '@/lib/types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 class TrainingAPI {
@@ -34,14 +36,14 @@ class TrainingAPI {
     return this.request(`/api/v1/plans/${id}`);
   }
   
-  async createPlan(plan: any) {
+  async createPlan(plan: Record<string, unknown>) {
     return this.request('/api/v1/plans', {
       method: 'POST',
       body: JSON.stringify(plan),
     });
   }
   
-  async updatePlan(id: string, updates: any) {
+  async updatePlan(id: string, updates: Record<string, unknown>) {
     return this.request(`/api/v1/plans/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
@@ -51,6 +53,13 @@ class TrainingAPI {
   async deletePlan(id: string) {
     return this.request(`/api/v1/plans/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async previewTimeCrunch(planId: string, targetMinutes: number): Promise<TimeCrunchPreviewResponse> {
+    return this.request<TimeCrunchPreviewResponse>('/api/v1/time-crunch/preview', {
+      method: 'POST',
+      body: JSON.stringify({ planId, targetMinutes }),
     });
   }
 
@@ -64,14 +73,14 @@ class TrainingAPI {
     return this.request(`/api/v1/sessions/${id}`);
   }
   
-  async createSession(session: any) {
+  async createSession(session: Record<string, unknown>) {
     return this.request('/api/v1/sessions', {
       method: 'POST',
       body: JSON.stringify(session),
     });
   }
   
-  async updateSession(id: string, updates: any) {
+  async updateSession(id: string, updates: Record<string, unknown>) {
     return this.request(`/api/v1/sessions/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
@@ -117,6 +126,3 @@ class TrainingAPI {
 }
 
 export const trainingAPI = new TrainingAPI();
-
-
-

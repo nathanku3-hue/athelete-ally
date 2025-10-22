@@ -23,6 +23,7 @@ export const PlanRequestSchema = z.object({
   purpose: z.enum(PURPOSE_ENUM).optional(),
   competitionDate: z.string().optional(),
   selectedDaysPerWeek: z.number().int().min(1).max(7).optional(),
+  targetMinutes: z.number().int().min(15).max(180).optional(),
 });
 
 /**
@@ -40,12 +41,14 @@ function createPlanRequestFromEvent(event: OnboardingCompletedEvent | PlanGenera
     purpose: event.purpose,
     competitionDate: event.competitionDate,
     selectedDaysPerWeek: (event as any).selectedDaysPerWeek,
+    targetMinutes: (event as PlanGenerationRequestedEvent).timeCrunchTargetMinutes,
   });
 
   return {
     ...validated,
     selectedDaysPerWeek:
       validated.selectedDaysPerWeek ?? event.weeklyGoalDays ?? event.availabilityDays,
+    targetMinutes: validated.targetMinutes,
     goal:
       event.purpose === 'muscle_building'
         ? 'hypertrophy'

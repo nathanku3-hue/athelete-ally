@@ -37,6 +37,26 @@ const eslintConfig = [
       '@next/next/no-title-in-document-head': 'off',
       '@next/next/no-head-element': 'off',
       '@next/next/no-script-component-in-head': 'off',
+      // Override Next.js preset that sets no-console to 'off'
+      'no-console': 'warn',
+      // Allow Next.js internal module imports
+      'import/no-internal-modules': ['warn', {
+        allow: [
+          './**',
+          '../**',
+          '@athlete-ally/**',
+          '@/**',
+          'next/font/google',
+          'next/font/local',
+          'next/navigation',
+          'next/server',
+          'next/image',
+          'next/link',
+          'next/headers',
+          'next/cache',
+          'next/og',
+        ],
+      }],
     },
   },
   // Test files configuration - relaxed rules for testing environment
@@ -70,7 +90,7 @@ const eslintConfig = [
   // Default TS rules (non-test files)
   {
     files: ['**/*.{ts,tsx}'],
-    ignores: ['**/__tests__/**', '**/tests/**', '**/*.spec.*', '**/*.test.*'],
+    ignores: ['**/__tests__/**', '**/tests/**', '**/*.spec.*', '**/*.test.*', 'apps/frontend/**'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
