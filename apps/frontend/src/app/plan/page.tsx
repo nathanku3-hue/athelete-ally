@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
 import Image from 'next';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
@@ -190,7 +189,6 @@ const ExerciseCard = ({ exercise, unit }: { exercise: ExerciseDetail; unit: Unit
 // Main Page Component
 // ============================================================================
 export default function TrainingPlanPageV2_Fixed() {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [unit, setUnit] = useState<Unit>('lbs');
     const [selectedDay, setSelectedDay] = useState(ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday");
@@ -205,9 +203,8 @@ export default function TrainingPlanPageV2_Fixed() {
                     const preferences = await response.json();
                     setUnit(preferences.unit || 'lbs');
                 }
-            } catch (error) {
+            } catch {
                 // Ignore error - use default preferences
-                // 使用默认值，不阻塞页面加载
             }
         };
 
@@ -287,7 +284,7 @@ export default function TrainingPlanPageV2_Fixed() {
             return;
         }
 
-        router.push('/onboarding/summary');
+        window.location.href = '/onboarding/summary';
     };
 
     const handleRestDayClick = (day: string) => {
