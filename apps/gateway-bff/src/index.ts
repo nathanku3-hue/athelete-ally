@@ -1,5 +1,5 @@
 // Initialize OpenTelemetry first
-import './telemetry.js';
+import { trackEvent } from './telemetry.js';
 import 'dotenv/config';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
@@ -186,6 +186,74 @@ server.post('/api/v1/plans/generate', async (request, reply) => {
     request.log.error({ err }, 'plan generate proxy failed');
     return reply.code(502).send({ error: 'bad_gateway' });
   }
+});
+
+// Proxy: Time Crunch preview -> Planning Engine
+server.post('/api/v1/time-crunch/preview', async (request, reply) => {
+  try {
+    const user = (request as any).user;
+    const { planId, targetMinutes } = (request.body ?? {}) as {
+      planId?: string;
+      targetMinutes?: number;
+    };
+
+    if (typeof planId !== 'string' || planId.length === 0) {
+      return reply.code(400).send({ error: 'planId_required' });
+    }
+
+    trackEvent('stream5.time_crunch_preview_requested', {
+      planId,
+      targetMinutes,
+      compressionStrategy: 'pending',
+      userId: user?.userId,
+      source: 'gateway-bff'
+    });
+
+    const url = `${config.PLANNING_ENGINE_URL}/api/v1/time-crunch/preview`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(request.headers.authorization ? { Authorization: String(request.headers.authorization) } : {}),
+      },
+      body: JSON.stringify(request.body || {}),
+    });
+    const text = await resp.text();
+    try { return reply.code(resp.status).send(text ? JSON.parse(text) : {}); } catch { return reply.code(resp.status).send(text); }
+  } catch (err) {
+    request.log.error({ err }, 'time crunch preview proxy failed');
+    return reply.code(502).send({ error: 'bad_gateway' });
+  }
+});
+
+server.post('/api/v1/time-crunch/telemetry', async (request, reply) => {
+  const user = (request as any).user;
+  const { event, planId, targetMinutes, reason, compressionStrategy } = (request.body ?? {}) as {
+    event?: string;
+    planId?: string;
+    targetMinutes?: number;
+    reason?: string;
+    compressionStrategy?: string;
+  };
+
+  if (event !== 'stream5.time_crunch_preview_declined') {
+    return reply.code(400).send({ error: 'unsupported_event' });
+  }
+
+  if (typeof planId !== 'string' || planId.length === 0) {
+    return reply.code(400).send({ error: 'planId_required' });
+  }
+
+  trackEvent(event, {
+    planId,
+    targetMinutes,
+    compressionStrategy: compressionStrategy ?? 'user_decline',
+    reason: reason ?? 'modal_closed',
+    userId: user?.userId,
+    source: 'gateway-bff'
+  });
+
+  return reply.code(204).send();
 });
 
 // Proxy: Plan generation status -> Planning Engine

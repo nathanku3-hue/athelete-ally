@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
+import { useTrainingStore } from '@/stores/trainingStore';
+import { TimeCrunchPreviewModal } from '@/components/training/TimeCrunchPreviewModal';
 
 // ============================================================================
 // Mock Data & Types
@@ -31,6 +33,7 @@ interface TrainingDay {
 }
 
 interface WeeklyPlan {
+  id?: string;
   weekNumber: number;
   theme: string;
   volume: 'Low' | 'Mid' | 'High';
@@ -87,9 +90,19 @@ const StatusDot = ({ status, details }: { status: 'low' | 'moderate' | 'high'; d
     </div>
 );
 
-const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan | null; unit: Unit; onUnitChange: (unit: Unit) => void; onModifyPlan: () => void; }) => {
-    const router = useRouter();
-    
+const Header = ({
+    plan,
+    unit,
+    onUnitChange,
+    onTimeCrunch,
+    canPreviewTimeCrunch
+  }: {
+    plan: WeeklyPlan | null;
+    unit: Unit;
+    onUnitChange: (unit: Unit) => void;
+    onTimeCrunch: () => void;
+    canPreviewTimeCrunch: boolean;
+  }) => {
     // 如果plan还在加载中，显示加载状态
     if (!plan) {
         return (
@@ -106,7 +119,13 @@ const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan |
                         <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
                         <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
                     </div>
-                    <button onClick={onModifyPlan} className="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-md text-sm font-semibold hover:bg-gray-700 hover:border-gray-500 transition-colors">Modify Plan</button>
+                    <button
+                        onClick={onTimeCrunch}
+                        disabled={!canPreviewTimeCrunch}
+                        className={`px-3 py-1.5 border rounded-md text-sm font-semibold transition-colors ${canPreviewTimeCrunch ? 'border-blue-500 text-blue-200 hover:bg-blue-600/20 hover:border-blue-400' : 'border-gray-700 text-gray-500 cursor-not-allowed'}`}
+                    >
+                        Time Crunch Mode
+                    </button>
                 </div>
             </div>
         );
@@ -121,16 +140,22 @@ const Header = ({ plan, unit, onUnitChange, onModifyPlan }: { plan: WeeklyPlan |
                     <p className="text-sm text-gray-400">Volume: {plan.volume}</p>
                 </div>
             </div>
-            <div className="flex items-center gap-4">
-                <div className="flex p-1 bg-gray-700 rounded-md">
-                    <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
-                    <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
+                <div className="flex items-center gap-4">
+                    <div className="flex p-1 bg-gray-700 rounded-md">
+                        <button onClick={() => onUnitChange('lbs')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'lbs' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>LBS</button>
+                        <button onClick={() => onUnitChange('kg')} className={`px-3 py-1 text-sm font-semibold rounded ${unit === 'kg' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}>KG</button>
+                    </div>
+                    <button
+                        onClick={onTimeCrunch}
+                        disabled={!canPreviewTimeCrunch}
+                        className={`px-3 py-1.5 border rounded-md text-sm font-semibold transition-colors ${canPreviewTimeCrunch ? 'border-blue-500 text-blue-200 hover:bg-blue-600/20 hover:border-blue-400' : 'border-gray-700 text-gray-500 cursor-not-allowed'}`}
+                    >
+                        Time Crunch Mode
+                    </button>
                 </div>
-                <button onClick={onModifyPlan} className="px-3 py-1.5 border border-gray-600 text-gray-300 rounded-md text-sm font-semibold hover:bg-gray-700 hover:border-gray-500 transition-colors">Modify Plan</button>
             </div>
-        </div>
-    );
-};
+        );
+    };
 
 const ExerciseCard = ({ exercise, unit }: { exercise: ExerciseDetail; unit: Unit; }) => {
     const [isPopoverVisible, setIsPopoverVisible] = useState(false);
@@ -148,7 +173,7 @@ const ExerciseCard = ({ exercise, unit }: { exercise: ExerciseDetail; unit: Unit
             {isPopoverVisible && (
                 <div className="absolute top-full left-0 mt-2 w-72 bg-gray-700 p-4 rounded-lg shadow-lg z-10 animate-fade-in">
                     <div className="flex items-start gap-4">
-                        <img src={exercise.videoThumbnailUrl} alt={`${exercise.name} thumbnail`} className="w-16 h-16 object-cover rounded-md bg-gray-600" />
+                        <Image src={exercise.videoThumbnailUrl} alt={`${exercise.name} thumbnail`} width={64} height={64} className="object-cover rounded-md bg-gray-600" />
                         <div>
                             <h4 className="font-bold mb-1">{exercise.name}</h4>
                             <p className="text-sm text-gray-300">{exercise.description}</p>
@@ -164,12 +189,10 @@ const ExerciseCard = ({ exercise, unit }: { exercise: ExerciseDetail; unit: Unit
 // Main Page Component
 // ============================================================================
 export default function TrainingPlanPageV2_Fixed() {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [unit, setUnit] = useState<Unit>('lbs');
     const [selectedDay, setSelectedDay] = useState(ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday");
     const [plan, setPlan] = useState<WeeklyPlan | null>(null);
-    const [error, setError] = useState<string | null>(null);
 
     // 加载用户偏好
     useEffect(() => {
@@ -180,12 +203,8 @@ export default function TrainingPlanPageV2_Fixed() {
                     const preferences = await response.json();
                     setUnit(preferences.unit || 'lbs');
                 }
-            } catch (error) {
-                // Log error for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Failed to fetch user preferences:', error);
-                }
-                // 使用默认值，不阻塞页面加载
+            } catch {
+                // Ignore error - use default preferences
             }
         };
 
@@ -196,13 +215,8 @@ export default function TrainingPlanPageV2_Fixed() {
     useEffect(() => {
         const fetchPlanData = async () => {
             setIsLoading(true);
-            setError(null);
             
             try {
-                // Log for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Fetching plan data from /api/v1/plans/current...');
-                }
                 const response = await fetch('/api/v1/plans/current');
                 
                 if (!response.ok) {
@@ -210,34 +224,13 @@ export default function TrainingPlanPageV2_Fixed() {
                 }
                 
                 const planData: WeeklyPlan = await response.json();
-                // Log for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Plan data received:', { 
-                        weekNumber: planData.weekNumber, 
-                        theme: planData.theme,
-                        trainingDaysCount: planData.trainingDays.length 
-                    });
-                }
-                
                 setPlan(planData);
                 
-                // 设置默认选中的日期
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
                 const todayPlan = planData.trainingDays.find(d => d.day === today);
                 setSelectedDay(todayPlan?.day || planData.trainingDays[0]?.day || today);
                 
-            } catch (error) {
-                // Log error for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Failed to fetch plan data:', error);
-                }
-                setError(error instanceof Error ? error.message : 'Failed to load plan');
-                
-                // 降级到模拟数据
-                // Log for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Falling back to mock data...');
-                }
+            } catch {
                 setPlan(MOCK_PLAN_V2);
                 
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
@@ -268,29 +261,30 @@ export default function TrainingPlanPageV2_Fixed() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const result = await response.json();
-            // Log for debugging (in development)
-            if (process.env.NODE_ENV === 'development') {
-                console.log('User preference updated:', result);
-            }
-            
-        } catch (error) {
-            // Log error for debugging (in development)
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Failed to save user preference:', error);
-            }
-            // 即使保存失败，也保持前端状态更新
+            await response.json();
+        } catch {
+            // Silently fail - frontend state is already updated
         }
     };
 
-    // 处理修改计划按钮点击
-    const handleModifyPlan = () => {
-        // Log for debugging (in development)
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Modify Plan clicked - redirecting to summary page');
+    const { currentPlan, plans: storedPlans } = useTrainingStore((state) => ({
+        currentPlan: state.currentPlan,
+        plans: state.plans
+    }));
+
+    const derivedPlanId = useMemo(() => currentPlan?.id ?? storedPlans[0]?.id ?? plan?.id ?? null, [currentPlan?.id, storedPlans, plan?.id]);
+    const canPreviewTimeCrunch = Boolean(derivedPlanId);
+
+    const [isTimeCrunchModalOpen, setIsTimeCrunchModalOpen] = useState(false);
+
+    // 处理 Time Crunch 预览按钮点击
+    const handleTimeCrunchPreview = () => {
+        if (derivedPlanId) {
+            setIsTimeCrunchModalOpen(true);
+            return;
         }
-        // 跳转到 summary 页面，讓用戶修改現有計劃
-        router.push('/onboarding/summary');
+
+        window.location.href = '/onboarding/summary';
     };
 
     const handleRestDayClick = (day: string) => {
@@ -299,31 +293,25 @@ export default function TrainingPlanPageV2_Fixed() {
 
     const todayString = ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday";
 
-    // 错误状态处理
-    if (error && !plan) {
-        return (
-            <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4 text-red-400">Failed to Load Plan</h1>
-                    <p className="text-gray-400 mb-8">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
+            <TimeCrunchPreviewModal
+                isOpen={isTimeCrunchModalOpen}
+                onClose={() => setIsTimeCrunchModalOpen(false)}
+                planId={derivedPlanId}
+            />
+
             <div className="max-w-7xl mx-auto">
                 {isLoading ? (
                     <HeaderSkeleton />
                 ) : plan ? (
-                    <Header plan={plan} unit={unit} onUnitChange={handleUnitChange} onModifyPlan={handleModifyPlan} />
+                    <Header
+                        plan={plan}
+                        unit={unit}
+                        onUnitChange={handleUnitChange}
+                        onTimeCrunch={handleTimeCrunchPreview}
+                        canPreviewTimeCrunch={canPreviewTimeCrunch}
+                    />
                 ) : (
                     <HeaderSkeleton />
                 )}

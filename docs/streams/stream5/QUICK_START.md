@@ -74,6 +74,21 @@ Errors: 0
 | `services/planning-engine/data/movements-placeholder.json` | 8 test movements |
 | `package.json` | Added `seed:movements` command |
 
+## 🆕 Time Crunch Preview (Stream 5 Activation)
+
+1. **Start the local stack**
+   ```powershell
+   npm run dev:all:local
+   ```
+2. **Generate a plan** via onboarding or use the existing mocked plan in `/plan`.
+3. **Open Today’s Training** (`http://localhost:3000/plan`) and select **Time Crunch Mode**.
+4. The modal calls `POST /api/v1/time-crunch/preview` (gateway → planning-engine) and renders the compressed structure (core-first, supersets, blocks).
+5. Preview telemetry is emitted automatically:
+   - Requested/succeeded/fallback events from planning-engine.
+   - Declines when users dismiss the modal (frontend → gateway).
+
+> **Tip:** Look for the `Time Crunch` badge on the modal header and verify segment badges (core, supersets, blocks). If compression fails, consult the troubleshooting note in `DEPLOYMENT_GUIDE.md` for fallback guidance.
+
 ## 🚀 Advanced Options
 
 ```powershell

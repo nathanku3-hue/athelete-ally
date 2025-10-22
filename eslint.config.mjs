@@ -44,8 +44,28 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
     // Disable pages directory warnings for App Router
     "@next/next/no-head-element": "off",
     "@next/next/no-script-component-in-head": "off",
+    // Override Next.js preset that sets no-console to 'off'
+    "no-console": "warn",
+    // Allow Next.js internal module imports
+    "import/no-internal-modules": ["warn", {
+      allow: [
+        "./**", 
+        "../**", 
+        "@athlete-ally/**", 
+        "@/**",
+        "next/font/google",
+        "next/font/local",
+        "next/navigation",
+        "next/server",
+        "next/image",
+        "next/link",
+        "next/headers",
+        "next/cache",
+        "next/og"
+      ]
+    }],
   },
-}, // Test files configuration - relaxed rules for testing environment
+},
 {
   files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}"],
   languageOptions: {
@@ -88,7 +108,7 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
   },
 }, {
   files: ["**/*.{ts,tsx}"],
-  ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*"],
+  ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*", "apps/frontend/**"],
   rules: {
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
@@ -96,7 +116,7 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
     "prefer-const": "warn",
     "no-var": "error",
     "import/no-internal-modules": ["warn", {
-      allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client", "next/server"]
+      allow: ["./**", "../**", "@athlete-ally/**", "@/**", "dotenv/config", "@prisma/client", "../prisma/generated/client", "next/server", "next/image"]
     }],
     "no-restricted-imports": ["warn", {
       patterns: [

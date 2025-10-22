@@ -5,9 +5,11 @@ import { config } from '../config.js';
 import { EventPublisher } from '../events/publisher.js';
 import { ConcurrencyController } from '../concurrency/controller.js';
 import { scorePlanCandidate } from '../scoring/fixed-weight.js';
+import { buildTimeCrunchInput, compressPlan } from '../time-crunch/index.js';
 import { isFeatureEnabled } from '../feature-flags/index.js';
 import { PlanScoringSummary } from '../types/scoring.js';
 import { EnrichedPlanGeneratedEvent, PlanScoringData } from '@athlete-ally/contracts';
+import type { CompressionOutcome } from '../time-crunch/types.js';
 
 // 缓存接口
 interface PlanCache {
@@ -234,12 +236,38 @@ export class AsyncPlanGenerator {
     const planData = await generateTrainingPlan(request);
 
     let scoringSummary: PlanScoringSummary | null = null;
+    let timeCrunchSummary: CompressionOutcome | null = null;
     const scoringEnabled = await isFeatureEnabled('feature.v1_planning_scoring', false);
 
     if (scoringEnabled) {
       scoringSummary = scorePlanCandidate(planData, request);
       (planData as TrainingPlan).scoring = scoringSummary;
       console.info({ jobId, scoring: scoringSummary.total }, 'Applied fixed-weight scoring to plan candidate');
+    }
+
+    if (typeof request.targetMinutes === 'number') {
+      const compressionInput = buildTimeCrunchInput(planData);
+      if (compressionInput) {
+        timeCrunchSummary = compressPlan(compressionInput, {
+          targetMinutes: request.targetMinutes
+        });
+        (planData as TrainingPlan).timeCrunch = timeCrunchSummary;
+        console.info(
+          {
+            jobId,
+            targetMinutes: request.targetMinutes,
+            meetsTimeConstraint: timeCrunchSummary.meetsTimeConstraint
+          },
+          'Applied time-crunch compression to plan candidate'
+        );
+      } else {
+        console.warn(
+          {
+            jobId
+          },
+          'Unable to build time-crunch input from plan data; skipping compression'
+        );
+      }
     }
 
     // 更新进度
@@ -256,12 +284,19 @@ export class AsyncPlanGenerator {
     await this.publishPlanGeneratedEvent(jobId, request.userId, planData);
 
     // 完成
-    await this.updateJobStatus(
-      jobId,
-      'completed',
-      100,
-      scoringSummary ? { resultData: { scoring: scoringSummary } } : undefined
-    );
+    const resultData: Record<string, unknown> = {};
+    if (scoringSummary) {
+      resultData.scoring = scoringSummary;
+    }
+    if (timeCrunchSummary) {
+      resultData.timeCrunch = {
+        targetMinutes: timeCrunchSummary.targetMinutes,
+        meetsConstraint: timeCrunchSummary.meetsTimeConstraint,
+        compressedDurationSeconds: timeCrunchSummary.compressedDurationSeconds
+      };
+    }
+
+    await this.updateJobStatus(jobId, 'completed', 100, Object.keys(resultData).length > 0 ? { resultData } : undefined);
   }
 
   // 保存计划到数据库
