@@ -44,8 +44,12 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
     // Disable pages directory warnings for App Router
     "@next/next/no-head-element": "off",
     "@next/next/no-script-component-in-head": "off",
+    // Allow Next.js internal module imports
+    "import/no-internal-modules": ["warn", {
+      allow: ["./**", "../**", "@athlete-ally/**", "@/**", "next/*"]
+    }],
   },
-}, // Test files configuration - relaxed rules for testing environment
+},
 {
   files: ["**/__tests__/**/*.{ts,tsx,js,jsx}", "**/*.test.{ts,tsx,js,jsx}"],
   languageOptions: {
