@@ -46,7 +46,21 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
     "@next/next/no-script-component-in-head": "off",
     // Allow Next.js internal module imports
     "import/no-internal-modules": ["warn", {
-      allow: ["./**", "../**", "@athlete-ally/**", "@/**", "next/*"]
+      allow: [
+        "./**", 
+        "../**", 
+        "@athlete-ally/**", 
+        "@/**",
+        "next/font/google",
+        "next/font/local",
+        "next/navigation",
+        "next/server",
+        "next/image",
+        "next/link",
+        "next/headers",
+        "next/cache",
+        "next/og"
+      ]
     }],
   },
 },
