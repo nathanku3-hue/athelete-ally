@@ -37,6 +37,8 @@ const eslintConfig = [
       '@next/next/no-title-in-document-head': 'off',
       '@next/next/no-head-element': 'off',
       '@next/next/no-script-component-in-head': 'off',
+      // Override Next.js preset that sets no-console to 'off'
+      'no-console': 'warn',
       // Allow Next.js internal module imports
       'import/no-internal-modules': ['warn', {
         allow: [
