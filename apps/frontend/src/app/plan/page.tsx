@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
 import { useTrainingStore } from '@/stores/trainingStore';
@@ -103,8 +104,6 @@ const Header = ({
     onTimeCrunch: () => void;
     canPreviewTimeCrunch: boolean;
   }) => {
-    const router = useRouter();
-    
     // 如果plan还在加载中，显示加载状态
     if (!plan) {
         return (
@@ -175,7 +174,7 @@ const ExerciseCard = ({ exercise, unit }: { exercise: ExerciseDetail; unit: Unit
             {isPopoverVisible && (
                 <div className="absolute top-full left-0 mt-2 w-72 bg-gray-700 p-4 rounded-lg shadow-lg z-10 animate-fade-in">
                     <div className="flex items-start gap-4">
-                        <img src={exercise.videoThumbnailUrl} alt={`${exercise.name} thumbnail`} className="w-16 h-16 object-cover rounded-md bg-gray-600" />
+                        <Image src={exercise.videoThumbnailUrl} alt={`${exercise.name} thumbnail`} width={64} height={64} className="object-cover rounded-md bg-gray-600" />
                         <div>
                             <h4 className="font-bold mb-1">{exercise.name}</h4>
                             <p className="text-sm text-gray-300">{exercise.description}</p>
@@ -208,10 +207,7 @@ export default function TrainingPlanPageV2_Fixed() {
                     setUnit(preferences.unit || 'lbs');
                 }
             } catch (error) {
-                // Log error for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Failed to fetch user preferences:', error);
-                }
+                // Ignore error - use default preferences
                 // 使用默认值，不阻塞页面加载
             }
         };
@@ -226,10 +222,7 @@ export default function TrainingPlanPageV2_Fixed() {
             setError(null);
             
             try {
-                // Log for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Fetching plan data from /api/v1/plans/current...');
-                }
+                // Fetching plan data
                 const response = await fetch('/api/v1/plans/current');
                 
                 if (!response.ok) {
@@ -237,14 +230,7 @@ export default function TrainingPlanPageV2_Fixed() {
                 }
                 
                 const planData: WeeklyPlan = await response.json();
-                // Log for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Plan data received:', { 
-                        weekNumber: planData.weekNumber, 
-                        theme: planData.theme,
-                        trainingDaysCount: planData.trainingDays.length 
-                    });
-                }
+                // Plan data received
                 
                 setPlan(planData);
                 
@@ -254,17 +240,10 @@ export default function TrainingPlanPageV2_Fixed() {
                 setSelectedDay(todayPlan?.day || planData.trainingDays[0]?.day || today);
                 
             } catch (error) {
-                // Log error for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.error('Failed to fetch plan data:', error);
-                }
+                // Failed to fetch plan data
                 setError(error instanceof Error ? error.message : 'Failed to load plan');
                 
                 // 降级到模拟数据
-                // Log for debugging (in development)
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Falling back to mock data...');
-                }
                 setPlan(MOCK_PLAN_V2);
                 
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
@@ -296,16 +275,10 @@ export default function TrainingPlanPageV2_Fixed() {
             }
             
             const result = await response.json();
-            // Log for debugging (in development)
-            if (process.env.NODE_ENV === 'development') {
-                console.log('User preference updated:', result);
-            }
+            // User preference updated successfully
             
         } catch (error) {
-            // Log error for debugging (in development)
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Failed to save user preference:', error);
-            }
+            // Failed to save user preference, keeping frontend state
             // 即使保存失败，也保持前端状态更新
         }
     };

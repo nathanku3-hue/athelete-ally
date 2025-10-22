@@ -15,33 +15,6 @@ const TimeCrunchPreviewRequestSchema = z.object({
   targetMinutes: z.number().int().min(15).max(180)
 });
 
-type TimeCrunchPreviewRequest = z.infer<typeof TimeCrunchPreviewRequestSchema>;
-
-const TimeCrunchPreviewResponseSchema = z.object({
-  planId: z.string(),
-  targetMinutes: z.number(),
-  originalDurationSeconds: z.number(),
-  compressedDurationSeconds: z.number(),
-  meetsTimeConstraint: z.boolean(),
-  sessions: z.array(
-    z.object({
-      context: z.object({
-        sessionId: z.string(),
-        microcycleId: z.string(),
-        dayOfWeek: z.number(),
-        originalDurationSeconds: z.number()
-      }),
-      summary: z.object({
-        sessionId: z.string(),
-        originalDurationSeconds: z.number(),
-        compressedDurationSeconds: z.number(),
-        durationDeltaSeconds: z.number(),
-        segmentOrder: z.array(z.string())
-      })
-    }).passthrough()
-  )
-});
-
 export async function timeCrunchRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/api/v1/time-crunch/preview',
