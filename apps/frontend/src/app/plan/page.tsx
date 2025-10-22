@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { useRouter } from 'next/router';
+import Image from 'next';
 // 引入新的重量转换服务
 import { formatWeight } from '@/lib/weightConverter';
 import { useTrainingStore } from '@/stores/trainingStore';
@@ -195,7 +195,6 @@ export default function TrainingPlanPageV2_Fixed() {
     const [unit, setUnit] = useState<Unit>('lbs');
     const [selectedDay, setSelectedDay] = useState(ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday");
     const [plan, setPlan] = useState<WeeklyPlan | null>(null);
-    const [error, setError] = useState<string | null>(null);
 
     // 加载用户偏好
     useEffect(() => {
@@ -219,10 +218,8 @@ export default function TrainingPlanPageV2_Fixed() {
     useEffect(() => {
         const fetchPlanData = async () => {
             setIsLoading(true);
-            setError(null);
             
             try {
-                // Fetching plan data
                 const response = await fetch('/api/v1/plans/current');
                 
                 if (!response.ok) {
@@ -230,20 +227,13 @@ export default function TrainingPlanPageV2_Fixed() {
                 }
                 
                 const planData: WeeklyPlan = await response.json();
-                // Plan data received
-                
                 setPlan(planData);
                 
-                // 设置默认选中的日期
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
                 const todayPlan = planData.trainingDays.find(d => d.day === today);
                 setSelectedDay(todayPlan?.day || planData.trainingDays[0]?.day || today);
                 
-            } catch (error) {
-                // Failed to fetch plan data
-                setError(error instanceof Error ? error.message : 'Failed to load plan');
-                
-                // 降级到模拟数据
+            } catch {
                 setPlan(MOCK_PLAN_V2);
                 
                 const today = ALL_DAYS_OF_WEEK[new Date().getDay() - 1] || "Monday";
@@ -274,12 +264,9 @@ export default function TrainingPlanPageV2_Fixed() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const result = await response.json();
-            // User preference updated successfully
-            
-        } catch (error) {
-            // Failed to save user preference, keeping frontend state
-            // 即使保存失败，也保持前端状态更新
+            await response.json();
+        } catch {
+            // Silently fail - frontend state is already updated
         }
     };
 
@@ -300,9 +287,6 @@ export default function TrainingPlanPageV2_Fixed() {
             return;
         }
 
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('No plan available for Time Crunch preview, redirecting to onboarding summary.');
-        }
         router.push('/onboarding/summary');
     };
 
@@ -311,24 +295,6 @@ export default function TrainingPlanPageV2_Fixed() {
     };
 
     const todayString = ALL_DAYS_OF_WEEK[new Date().getDay() -1] || "Monday";
-
-    // 错误状态处理
-    if (error && !plan) {
-        return (
-            <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4 text-red-400">Failed to Load Plan</h1>
-                    <p className="text-gray-400 mb-8">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
