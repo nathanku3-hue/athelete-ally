@@ -92,7 +92,7 @@ const eslintConfig = [...compat.extends("next/core-web-vitals", "next/typescript
   },
 }, {
   files: ["**/*.{ts,tsx}"],
-  ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*"],
+  ignores: ["**/__tests__/**", "**/tests/**", "**/*.spec.*", "**/*.test.*", "apps/frontend/**"],
   rules: {
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
