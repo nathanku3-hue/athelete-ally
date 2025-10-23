@@ -1,8 +1,11 @@
-[phases.build]
-dependsOn = []
+[phases.setup]
+nixPkgs = ["nodejs_20"]
 
 [phases.install]
-dependsOn = ["build"]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["cd services/planning-engine && npm run build"]
 
 [start]
-cmd = "echo 'Use Dockerfile.planning-engine instead'"
+cmd = "node services/planning-engine/dist/index.js"
