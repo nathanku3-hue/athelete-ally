@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd services/planning-engine && npm run build"
+watchPatterns = ["services/planning-engine/**"]
+
+[deploy]
+startCommand = "node services/planning-engine/dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10

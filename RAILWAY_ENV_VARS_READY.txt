@@ -1,0 +1,68 @@
+# Railway Environment Variables - Copy & Paste
+
+## ✅ Auto-Created by Railway (Just Verify)
+
+PLANNING_DATABASE_URL=<Railway will create this from PostgreSQL service>
+REDIS_URL=<Railway will create this from Redis service>
+
+## 🔑 Required - You Must Set These
+
+# OpenAI API Key - Get from https://platform.openai.com/api-keys
+OPENAI_API_KEY=<YOUR_OPENAI_KEY_HERE>
+
+# JWT Secret - Pre-generated for you (USE THIS ONE)
+JWT_SECRET=7NgpuC6BY0JR2eJ8RBTEkZlN5UL4wgiL0iXROLcRYs4=
+
+# LaunchDarkly SDK Key - Get from your LaunchDarkly dashboard
+LAUNCHDARKLY_SDK_KEY=<YOUR_LAUNCHDARKLY_KEY_HERE>
+
+## ⚙️ Optional - Recommended for MVP
+
+# Skip NATS if not ready (recommended for initial deployment)
+FEATURE_DISABLE_EVENTS=true
+
+# Node environment
+NODE_ENV=production
+
+# Port (Railway usually auto-detects, can omit)
+PORT=4102
+
+## ❌ NOT Needed (Unless You Have NATS Ready)
+
+# NATS_URL=nats://your-nats-server:4223
+
+---
+
+## 📋 Deployment Checklist
+
+Before clicking Deploy:
+
+1. [ ] PostgreSQL added to project
+2. [ ] Redis added to project
+3. [ ] PLANNING_DATABASE_URL renamed (not DATABASE_URL)
+4. [ ] OPENAI_API_KEY set
+5. [ ] JWT_SECRET set (use the one above)
+6. [ ] LAUNCHDARKLY_SDK_KEY set (if you have it)
+7. [ ] FEATURE_DISABLE_EVENTS=true set (if no NATS)
+8. [ ] Root Directory = /services/planning-engine
+9. [ ] Start Command = npm start
+10. [ ] Branch = main
+
+---
+
+## 🚀 Quick Copy Format (for Railway UI)
+
+Copy each line below and paste into Railway Variables:
+
+OPENAI_API_KEY=<paste_your_key>
+JWT_SECRET=7NgpuC6BY0JR2eJ8RBTEkZlN5UL4wgiL0iXROLcRYs4=
+LAUNCHDARKLY_SDK_KEY=<paste_your_key>
+FEATURE_DISABLE_EVENTS=true
+NODE_ENV=production
+
+---
+
+## ⚠️ Security Note
+
+DO NOT commit this file with real API keys!
+This is for your reference only during deployment.

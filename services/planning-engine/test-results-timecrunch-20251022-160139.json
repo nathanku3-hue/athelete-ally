@@ -1,0 +1,83 @@
+[
+  {
+    "TargetMinutes": 15,
+    "TargetSeconds": 900,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 20,
+    "TargetSeconds": 1200,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 30,
+    "TargetSeconds": 1800,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 45,
+    "TargetSeconds": 2700,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 60,
+    "TargetSeconds": 3600,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 75,
+    "TargetSeconds": 4500,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 90,
+    "TargetSeconds": 5400,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 120,
+    "TargetSeconds": 7200,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  },
+  {
+    "TargetMinutes": 180,
+    "TargetSeconds": 10800,
+    "CompressedSeconds": 1581,
+    "CompressedMinutes": 26.35,
+    "MeetsConstraint": true,
+    "SessionCount": 2,
+    "Status": "✅ SUCCESS"
+  }
+]
