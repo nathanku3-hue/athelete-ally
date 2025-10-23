@@ -21,7 +21,7 @@ RUN npx turbo run build --filter=@athlete-ally/planning-engine
 
 # --- STAGE 2: Runner ---
 FROM node:lts-alpine
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # 安裝 OpenSSL 和必要的系統庫
 RUN apk add --no-cache openssl ca-certificates
