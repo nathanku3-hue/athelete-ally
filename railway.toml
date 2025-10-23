@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd services/planning-engine && npm run build"
+buildCommand = "npm run build:planning-engine"
 watchPatterns = ["services/planning-engine/**"]
 
 [deploy]
