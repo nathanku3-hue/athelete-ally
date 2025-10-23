@@ -1,0 +1,25 @@
+# RAILWAY ENVIRONMENT VARIABLES
+# Copy and paste these into Railway dashboard
+
+NODE_ENV=production
+PORT=4102
+
+# LaunchDarkly (for feature flags)
+LAUNCHDARKLY_SDK_KEY=api-375bb749-5688-4691-a002-59d3d854984b
+
+# JWT Secret (for authentication) - GENERATED
+JWT_SECRET=77FUvZyXVyJyAKA70vrRTtjS/xkPUgb4uDks8W5s+oJ1+8B2/Ih1houGOa3U/9oG
+
+# OpenAI API Key - YOU NEED TO ADD THIS
+# Get from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-proj-[YOUR_KEY_HERE]
+
+# Database URL - AUTOMATICALLY SET BY RAILWAY
+# (Railway will add this when you add PostgreSQL database)
+# DATABASE_URL=postgresql://... (added automatically)
+
+# CORS (optional - adjust domains as needed)
+CORS_ORIGIN=https://your-frontend-domain.com
+
+# Logging
+LOG_LEVEL=info

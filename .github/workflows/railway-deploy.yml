@@ -1,0 +1,101 @@
+name: Railway Production Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/planning-engine/**'
+      - 'packages/**'
+      - '.github/workflows/railway-deploy.yml'
+
+concurrency:
+  group: railway-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --workspaces --include-workspace-root --no-audit --no-fund
+      
+      - name: Build packages
+        run: |
+          npm run build -w @athlete-ally/shared
+          npm run build -w @athlete-ally/shared-types
+          npm run build -w @athlete-ally/database-utils
+          npm run build -w @athlete-ally/logger
+      
+      - name: Build planning-engine
+        run: npm run build -w services/planning-engine
+      
+      - name: Run tests
+        run: npm run test -w services/planning-engine
+        env:
+          PLANNING_DATABASE_URL: postgresql://test:test@localhost:5432/test
+      
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      
+      - name: Deploy to Railway
+        run: |
+          railway link --project athlete-ally-production --environment production
+          railway up --service planning-engine --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
+      - name: Wait for deployment
+        run: sleep 60
+      
+      - name: Verify deployment
+        run: |
+          echo "🏥 Verifying production deployment..."
+          
+          # Get Railway service URL
+          DEPLOY_URL=$(railway status --json | jq -r '.deployments[0].url')
+          
+          # Health check
+          if curl -f "$DEPLOY_URL/health"; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed"
+            exit 1
+          fi
+          
+          # Metrics check
+          if curl -f "$DEPLOY_URL/metrics"; then
+            echo "✅ Metrics endpoint accessible"
+          else
+            echo "❌ Metrics endpoint failed"
+            exit 1
+          fi
+          
+          echo "✅ Deployment verified successfully"
+      
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Planning Engine deployed to production!"
+          echo "URL: https://planning-engine.up.railway.app"
+          echo "Commit: ${{ github.sha }}"
+      
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed - initiating rollback"
+          railway rollback --service planning-engine
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
