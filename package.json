@@ -16,6 +16,7 @@
     "dev:all:local": "node scripts/start-local-dev.js",
     "build": "npm run build:packages && npm run build:frontend",
     "build:packages": "npm run build -w @athlete-ally/database-utils && npm run build -w @athlete-ally/logger && npm run build -w @athlete-ally/health-schema && npm run build -w @athlete-ally/shared && npm run build -w @athlete-ally/shared-types",
+    "build:planning-engine": "npm run build:packages && npm run build -w @athlete-ally/planning-engine",
     "build:frontend": "npm run build -w apps/frontend",
     "start": "next start apps/frontend",
     "lint": "eslint -c eslint.config.unified.mjs",

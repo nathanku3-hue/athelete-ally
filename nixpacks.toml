@@ -1,15 +1,12 @@
 [phases.setup]
 nixPkgs = ["nodejs_20"]
-# Force redeploy: 2025-10-23 08:52 UTC
+# Force redeploy: 2025-10-23 11:56 UTC - workspace fix
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = ["npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund"]
 
 [phases.build]
-cmds = [
-  "npm run build:packages",
-  "cd services/planning-engine && npm run build"
-]
+cmds = ["npm run build:packages && cd services/planning-engine && npm run build"]
 
 [start]
 cmd = "node services/planning-engine/dist/index.js"

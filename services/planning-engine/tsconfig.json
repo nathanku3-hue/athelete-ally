@@ -29,7 +29,7 @@
       "@athlete-ally/shared-types/*": ["./packages/shared-types/dist/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/types/**/*.d.ts"],
   "exclude": ["node_modules", "dist", "**/__tests__/**", "prisma/**"]
 }
 
