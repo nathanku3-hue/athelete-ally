@@ -6,7 +6,10 @@ nixPkgs = ["nodejs_20"]
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["cd services/planning-engine && npm run build"]
+cmds = [
+  "cd services/planning-engine && npx prisma generate",
+  "cd services/planning-engine && npm run build"
+]
 
 [start]
 cmd = "node services/planning-engine/dist/index.js"
