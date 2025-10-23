@@ -1,44 +1,50 @@
-# Multi-stage build (monorepo-aware, Node 20.18.0)
-FROM node:20.18.0-alpine AS base
-RUN apk add --no-cache libc6-compat gcompat curl
+# --- STAGE 1: Builder ---
+FROM node:lts-alpine AS builder
 WORKDIR /app
 
-# Dependencies layer (dev deps for build)
-FROM base AS deps
-COPY package.json package-lock.json* ./
-RUN npm ci --ignore-scripts && npm cache clean --force
+# 從根目錄上下文，拷貝所有構建所需的文件
+COPY package*.json ./
+COPY tsconfig.base.json ./
+COPY config ./config
+COPY turbo.json ./
+# 拷貝所有需要被 link 的 workspace
+COPY packages ./packages
+COPY services/planning-engine ./services/planning-engine
+# 拷貝 scripts 目錄（preinstall 鉤子需要）
+COPY scripts ./scripts
 
-# Builder (root build compiles monorepo; Next.js app at apps/frontend)
-FROM base AS builder
+# 運行完整的 monorepo 安裝
+RUN npm ci
+
+# 在完整的 monorepo 上下文中，只構建我們需要的那個服務
+RUN npx turbo run build --filter=@athlete-ally/planning-engine
+
+# --- STAGE 2: Runner ---
+FROM node:lts-alpine
 WORKDIR /app
-COPY --from=deps /app/package.json /app/package-lock.json ./
-COPY . .
-RUN npm ci && npm run build
 
-# Runtime (non-root, minimal)
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+# 安裝 OpenSSL 和必要的系統庫
+RUN apk add --no-cache openssl ca-certificates
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+# 從 builder 階段，拷貝編譯好的產物和完整的依賴
+# 注意路徑是相對於 builder 內部的 /app 目錄
+COPY --from=builder /app/services/planning-engine/dist ./dist
+COPY --from=builder /app/services/planning-engine/prisma ./prisma
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/package-lock.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
 
-# Copy Next.js standalone output
-COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/.next/standalone ./
-COPY --from=builder /app/apps/frontend/.next/static ./.next/static
+# 生成 Prisma 客戶端
+RUN npx prisma generate
 
-# Permissions
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+# 創建非 root 用戶
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
+USER nodejs
 
-EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
+# 暴露端口 - 与配置保持一致
+EXPOSE 4102
 
-# HEALTHCHECK to in-app endpoint
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD curl -fsS http://localhost:3000/api/health || exit 1
-
-CMD ["node", "server.js"]
-
+# 啟動服務器的命令
+CMD ["node", "dist/index.js"]

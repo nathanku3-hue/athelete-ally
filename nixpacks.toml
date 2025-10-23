@@ -1,0 +1,8 @@
+[phases.build]
+dependsOn = []
+
+[phases.install]
+dependsOn = ["build"]
+
+[start]
+cmd = "echo 'Use Dockerfile.planning-engine instead'"

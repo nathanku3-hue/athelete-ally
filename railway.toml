@@ -1,6 +1,6 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "Dockerfile.planning-engine"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "node dist/index.js"

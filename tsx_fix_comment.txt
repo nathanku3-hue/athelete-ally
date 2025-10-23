@@ -1,0 +1,18 @@
+## 🔧 Additional Fix Applied: tsx Version Alignment
+
+### Issue Found
+After fixing ESLint, CI still failed with npm ci lockfile sync error for tsx@3.14.0
+
+### Root Cause
+coach-tip-service had outdated tsx version (^3.12.0 vs ^4.16.2 in root overrides)
+
+### Fix Applied (Commit 1804608)
+Updated services/coach-tip-service/package.json tsx to ^4.16.2 and regenerated package-lock.json
+
+### Verification
+- npm install completed successfully
+- package-lock.json regenerated
+- Pushed to branch
+
+### Expected CI Outcome
+npm ci should now succeed and allow checks to run
