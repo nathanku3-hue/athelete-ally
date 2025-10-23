@@ -2,16 +2,16 @@
 FROM node:lts-alpine AS builder
 WORKDIR /app
 
-# 關鍵：從根上下文，拷貝所有構建所需的文件
-COPY package*.json ./
-COPY tsconfig.base.json ./
-COPY config ./config
-COPY turbo.json ./
+# 從 services/planning-engine 上下文，拷貝根目錄的文件
+COPY ../../package*.json ./
+COPY ../../tsconfig.base.json ./
+COPY ../../config ./config
+COPY ../../turbo.json ./
 # 拷貝所有需要被 link 的 workspace
-COPY packages ./packages
-COPY services/planning-engine ./services/planning-engine
+COPY ../../packages ./packages
+COPY . ./services/planning-engine
 # 拷貝 scripts 目錄（preinstall 鉤子需要）
-COPY scripts ./scripts
+COPY ../../scripts ./scripts
 
 # 運行完整的 monorepo 安裝
 RUN npm ci
