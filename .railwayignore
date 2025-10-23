@@ -1,0 +1,4 @@
+# Force Railway to use nixpacks instead of Dockerfile
+Dockerfile.old
+Dockerfile.frontend.old
+services/*/Dockerfile.old
