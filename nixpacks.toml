@@ -1,6 +1,6 @@
 [phases.setup]
 nixPkgs = ["nodejs_20"]
-# Force redeploy: 2025-10-23 11:56 UTC - workspace fix
+# Force redeploy: 2025-10-23 13:42 UTC - workspace build fix
 
 [phases.install]
 cmds = ["npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund"]
