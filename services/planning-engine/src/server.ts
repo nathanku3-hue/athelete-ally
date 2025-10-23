@@ -27,6 +27,7 @@ import { timeCrunchRoutes } from './routes/time-crunch.js';
 // Error handling and performance monitoring integrated into server hooks
 // 使用统一的shared包组件
 import { authMiddleware, cleanupMiddleware } from '@athlete-ally/shared';
+import type {} from '@athlete-ally/shared/fastify-augment';
 import { register } from 'prom-client';
 
 // Allow local dev to skip NATS/EventBus wiring for sanity checks
