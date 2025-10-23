@@ -1,6 +1,5 @@
 [build]
-builder = "nixpacks"
-buildCommand = "cd services/planning-engine && npm run build"
+builder = "dockerfile"
 watchPatterns = ["services/planning-engine/**"]
 
 [deploy]
