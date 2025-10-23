@@ -1,4 +1,4 @@
-import { FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from '@athlete-ally/shared';
 import { z, ZodError } from 'zod';
 import { roleCheckMiddleware } from '@athlete-ally/shared';
 import {
