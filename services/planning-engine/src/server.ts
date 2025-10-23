@@ -19,6 +19,7 @@ import { AsyncPlanGenerator } from './optimization/async-plan-generator.js';
 import { DatabaseOptimizer } from './optimization/database-optimizer.js';
 import { initializeFeatureFlags, closeFeatureFlags } from './feature-flags/index.js';
 // 使用内置的健康检查功能
+import { HealthChecker, setupHealthRoutes } from './health.js';
 import { enhancedPlanRoutes } from './routes/enhanced-plans.js';
 import apiDocsRoutes from './routes/api-docs.js';
 import { movementCurationRoutes } from './routes/movement-curation.js';
@@ -53,6 +54,9 @@ const asyncPlanGenerator = new AsyncPlanGenerator(redis, concurrencyController, 
 // Health check routes integrated into main server
 // Error handling and performance monitoring integrated into server hooks
 
+// Declare healthChecker at module scope for access in hooks
+let healthChecker: HealthChecker | null = null;
+
 // Wrap initialization in async IIFE to handle errors properly
 (async () => {
   // Register all routes BEFORE server starts listening
@@ -80,6 +84,21 @@ server.addHook('onReady', async () => {
   }
 
   server.log.info('Routes registered: enhanced-plans, movement-curation, time-crunch, api-docs');
+
+  // Initialize health checker with basic dependencies first
+  // NATS connection will be added later if available
+  try {
+    const mockNatsConnection = {
+      isClosed: () => true,
+      close: async () => {}
+    } as any;
+    healthChecker = new HealthChecker(prisma, redis, mockNatsConnection);
+    setupHealthRoutes(server, healthChecker);
+    server.log.info('health check routes registered');
+  } catch (e) {
+    server.log.error({ err: e }, 'failed to initialize health checker');
+    // Continue without health checker - it's not critical
+  }
 
   if (SKIP_EVENTS) {
     server.log.warn('SKIP_EVENTS enabled - skipping EventBus connections and subscriptions');
@@ -110,6 +129,18 @@ server.addHook('onReady', async () => {
     
     // OpenTelemetry metrics collection enabled
     server.log.info('event processor connected successfully');
+    
+    // Update health checker with real NATS connection
+    try {
+      const natsConnection = eventProcessor.getNatsConnection();
+      if (healthChecker && natsConnection) {
+        // Replace the health checker with one that has the real NATS connection
+        healthChecker = new HealthChecker(prisma, redis, natsConnection);
+        server.log.info('health checker updated with NATS connection');
+      }
+    } catch (e) {
+      server.log.warn({ err: e }, 'could not update health checker with NATS connection');
+    }
   } catch (e) {
     server.log.error({ err: e }, 'failed to connect event processor');
     process.exit(1);

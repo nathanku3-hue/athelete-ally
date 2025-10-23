@@ -142,6 +142,10 @@ export class EventProcessor {
   isHealthy(): boolean {
     return this.isConnected && this.activeSubscriptions.size > 0;
   }
+  
+  getNatsConnection() {
+    return this.eventBus.getNatsConnection();
+  }
 
   getStatus() {
     return {
