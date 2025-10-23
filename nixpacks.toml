@@ -6,15 +6,7 @@ nixPkgs = ["nodejs_20"]
 cmds = ["npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund"]
 
 [phases.build]
-fix/ensure-dist-in-image
-cmds = [
-  "npm run build:planning-engine",
-  "echo '=== Checking dist folder ===' && ls -la services/planning-engine/ || true",
-  "echo '=== Dist contents ===' && ls -la services/planning-engine/dist/ || echo 'ERROR: No dist folder'",
-  "test -f services/planning-engine/dist/index.js && echo 'SUCCESS: index.js found' || echo 'ERROR: index.js missing'"
-]
-=======
-cmds = ["npm run build:planning-engine", "ls -la services/planning-engine/dist || echo 'dist folder missing'"]
+cmds = ["npm run build:planning-engine"]
 
 [start]
 cmd = "node services/planning-engine/dist/index.js"
