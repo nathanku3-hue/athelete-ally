@@ -2,23 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files - copy workspace directories first to preserve structure
-COPY package*.json ./
-COPY packages ./packages
-COPY services ./services
-COPY apps ./apps
-hotfix/docker-build-127
-
-# Copy scripts directory for preinstall hook
-COPY scripts ./scripts
-=======
-main
+# Copy all source code first (needed for workspace structure)
+COPY . .
 
 # Install all dependencies
 RUN npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund
-
-# Copy source code
-COPY . .
 
 # Build packages and planning-engine
 RUN npm run build:planning-engine
