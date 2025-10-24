@@ -8,10 +8,8 @@ cmds = ["npm ci --workspaces --include-workspace-root --include=dev --no-audit -
 cmds = [
   "export DATABASE_URL=${DATABASE_URL:-postgresql://dummy:dummy@localhost:5432/dummy}",
   "npm run build:planning-engine",
-  "ls -la services/planning-engine/dist && echo 'Build OK' || echo 'ERROR: dist not found'"
+  "ls -la services/planning-engine/dist || exit 1"
 ]
-
-[staticAssets]
 
 [start]
 cmd = "node services/planning-engine/dist/index.js"
