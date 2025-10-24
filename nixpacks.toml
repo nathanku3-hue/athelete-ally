@@ -1,12 +1,16 @@
 [phases.setup]
 nixPkgs = ["nodejs_20"]
-# Force redeploy: 2025-10-23 13:42 UTC - workspace build fix
+# Force redeploy: 2025-10-24 09:35 UTC - add DATABASE_URL for prisma
 
 [phases.install]
 cmds = ["npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund"]
 
 [phases.build]
-cmds = ["npm run build:planning-engine"]
+cmds = [
+  "export DATABASE_URL=${DATABASE_URL:-postgresql://dummy:dummy@localhost:5432/dummy}",
+  "npm run build:planning-engine",
+  "ls -la services/planning-engine/dist || echo 'ERROR: dist not found'"
+]
 
 [start]
-cmd = "npm run build:planning-engine && node services/planning-engine/dist/index.js"
+cmd = "node services/planning-engine/dist/index.js"
