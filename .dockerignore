@@ -15,8 +15,6 @@
 # Ignore build caches and outputs at the root
 .next
 .turbo
-dist
-build
 
 # Ignore log files
 *.log
