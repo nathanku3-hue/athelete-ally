@@ -3,7 +3,7 @@ builder = "dockerfile"
 watchPatterns = ["services/planning-engine/**"]
 
 [deploy]
-startCommand = "npm run build:planning-engine && node services/planning-engine/dist/index.js"
+startCommand = "node services/planning-engine/dist/index.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
