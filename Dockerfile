@@ -2,11 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files - copy workspace directories first to preserve structure
 COPY package*.json ./
-COPY packages/*/package*.json ./packages/
-COPY services/*/package*.json ./services/
-COPY apps/*/package*.json ./apps/
+COPY packages ./packages
+COPY services ./services
+COPY apps ./apps
 
 # Install all dependencies
 RUN npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund
