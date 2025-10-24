@@ -8,6 +8,9 @@ COPY packages ./packages
 COPY services ./services
 COPY apps ./apps
 
+# Copy scripts directory for preinstall hook
+COPY scripts ./scripts
+
 # Install all dependencies
 RUN npm ci --workspaces --include-workspace-root --include=dev --no-audit --no-fund
 
