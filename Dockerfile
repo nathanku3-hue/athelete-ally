@@ -21,6 +21,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy built artifacts and necessary files
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/services/planning-engine/dist ./services/planning-engine/dist
 COPY --from=builder /app/services/planning-engine/package*.json ./services/planning-engine/
 COPY --from=builder /app/services/planning-engine/prisma ./services/planning-engine/prisma
