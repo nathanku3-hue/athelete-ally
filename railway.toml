@@ -2,6 +2,9 @@
 fix/add-dockerfile
 builder = "dockerfile"
 =======
+fix/add-dockerfile
+builder = "dockerfile"
+=======
 builder = "nixpacks"
 buildCommand = "npm run build:planning-engine"
 main
