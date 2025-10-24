@@ -1,6 +1,13 @@
 [build]
+fix/add-dockerfile
+builder = "dockerfile"
+=======
+fix/add-dockerfile
+builder = "dockerfile"
+=======
 builder = "nixpacks"
-buildCommand = "cd services/planning-engine && npm run build"
+buildCommand = "npm run build:planning-engine"
+main
 watchPatterns = ["services/planning-engine/**"]
 
 [deploy]
