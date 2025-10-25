@@ -1,5 +1,0 @@
-[build]
-command = "npm run build:planning-engine"
-
-[deploy]
-startCommand = "node services/planning-engine/dist/index.js"
