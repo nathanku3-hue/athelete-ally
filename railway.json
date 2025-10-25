@@ -1,8 +1,16 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
+hotfix/docker-prisma-129
     "builder": "NIXPACKS",
     "buildCommand": "npm run build:planning-engine"
+hotfix/docker-prisma-129
+=======
+=======
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+    main
+main
   }
   "deploy": {
     "startCommand": "node services/planning-engine/dist/index.js",
