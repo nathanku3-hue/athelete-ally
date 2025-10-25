@@ -14,7 +14,7 @@
     "dev:frontend": "next dev apps/frontend -p 3000",
     "dev:bff": "npm run dev -w apps/gateway-bff",
     "dev:all:local": "node scripts/start-local-dev.js",
-    "build": "npm run build:packages && npm run build:frontend",
+    "build": "npm run build:packages && npm run build -w @athlete-ally/planning-engine",
     "build:packages": "npm run build -w @athlete-ally/database-utils && npm run build -w @athlete-ally/logger && npm run build -w @athlete-ally/health-schema && npm run build -w @athlete-ally/shared && npm run build -w @athlete-ally/shared-types",
     "build:planning-engine": "npm run build:packages && npm run build -w @athlete-ally/planning-engine",
     "build:frontend": "npm run build -w apps/frontend",
