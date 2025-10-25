@@ -5,7 +5,10 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
+    hotfix/docker-prisma-129
     "startCommand": null,
+=======
+    main
     "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
