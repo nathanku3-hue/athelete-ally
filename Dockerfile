@@ -15,5 +15,8 @@ RUN npm run build:planning-engine
 # Verify build output exists and NEVER gets overwritten
 RUN ls -la services/planning-engine/dist && echo "✓ Build successful - dist exists" || (echo "✗ ERROR: dist not found" && exit 1)
 
-# Start the service
+# Expose the port
+EXPOSE 3004
+
+# Start the service - NO BUILD AT RUNTIME
 CMD ["node", "services/planning-engine/dist/index.js"]
