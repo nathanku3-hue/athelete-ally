@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs_20", "openssl"]
 
 [phases.install]
-cmds = ["npm ci --workspaces --include-workspace-root"]
+cmds = ['''npm ci --workspaces --include-workspace-root''']
 
 [phases.build]
-cmds = ["npm run build:planning-engine"]
+cmds = ['''npm run build:planning-engine''']
 
 [start]
-cmd = "node services/planning-engine/dist/index.js"
+cmd = '''node services/planning-engine/dist/index.js'''
