@@ -10,7 +10,13 @@ ENV DATABASE_URL=${PLANNING_DATABASE_URL}
 emergency/final-fix
 ENV PORT=3004
 ENV NODE_ENV=production
+ENTRYPOINT ["/app/start.sh"]
+=======
+emergency/final-fix
+ENV PORT=3004
+ENV NODE_ENV=production
 
 =======
 main
 ENTRYPOINT ["/app/start.sh"]
+main
