@@ -14,5 +14,5 @@ RUN npm run build:planning-engine
 # Verify build succeeded
 RUN test -d services/planning-engine/dist || (echo "ERROR: dist directory not found after build" && exit 1)
 
-# Start the service
-CMD ["node", "services/planning-engine/dist/index.js"]
+# Start the service - use ENTRYPOINT to prevent Railway from overriding
+ENTRYPOINT ["node", "services/planning-engine/dist/index.js"]
