@@ -2,6 +2,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+emergency/dockerfile-fix
+COPY . .
+
+RUN npm ci --workspaces --include-workspace-root
+
+RUN npm run build:planning-engine
+
+RUN test -d services/planning-engine/dist || (echo "Build verification failed" && exit 1)
+
+ENTRYPOINT ["node", "services/planning-engine/dist/index.js"]
+=======
 # Copy everything
 COPY . .
 
@@ -20,4 +31,5 @@ ENTRYPOINT ["node", "services/planning-engine/dist/index.js"]
 =======
 # Start the service
 CMD ["node", "services/planning-engine/dist/index.js"]
+main
 main
