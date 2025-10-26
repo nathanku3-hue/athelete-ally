@@ -1,7 +1,0 @@
-[build]
-# Build during the build phase
-buildCommand = "npm ci --workspaces --include-workspace-root && npm run build:planning-engine"
-
-[deploy]
-# Start the pre-built application
-startCommand = "node services/planning-engine/dist/index.js"
