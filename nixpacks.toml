@@ -1,6 +1,18 @@
 [phases.setup]
 hotfix/railpack-fix
 nixPkgs = ["nodejs_20", "openssl"]
+
+[phases.install]
+cmds = ['''npm ci --workspaces --include-workspace-root''']
+
+[phases.build]
+cmds = ['''npm run build:planning-engine''']
+
+[start]
+cmd = '''node services/planning-engine/dist/index.js'''
+=======
+hotfix/railpack-fix
+nixPkgs = ["nodejs_20", "openssl"]
 =======
 nixPkgs = ["nodejs-20_x", "openssl"]
 main
@@ -13,3 +25,4 @@ cmds = ["npm run build:planning-engine"]
 
 [start]
 cmd = "node services/planning-engine/dist/index.js"
+main
