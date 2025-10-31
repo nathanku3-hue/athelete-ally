@@ -100,7 +100,7 @@ jobs:
       
       - name: Build Docker image
         run: |
-          docker build -t athlete-ally/planning-engine:latest -f services/planning-engine/Dockerfile .
+          docker build -t athlete-ally/planning-engine:latest -f Dockerfile .
       
       - name: Deploy to production
         run: |
