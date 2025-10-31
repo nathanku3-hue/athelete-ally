@@ -471,8 +471,9 @@ server.addHook('preHandler', async (request, reply) => {
 });
 
   const port = Number(config.PORT || 4102);
-  await server.listen({ port, host: '0.0.0.0' });
-  console.log(`planning-engine listening on :${port}`);
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  await server.listen({ port, host });
+  console.log(`planning-engine listening on ${host}:${port}`);
 })().catch((err) => {
   console.error('Server startup error', err);
   process.exit(1);
