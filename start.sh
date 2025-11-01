@@ -17,16 +17,15 @@ ls -R services/planning-engine/dist/ | head -50
 
 echo ""
 echo "=== Starting planning-engine ==="
-# Try multiple possible locations
-if [ -f "services/planning-engine/dist/index.js" ]; then
-  echo "Found at: services/planning-engine/dist/index.js"
-  exec node services/planning-engine/dist/index.js
-elif [ -f "services/planning-engine/dist/src/index.js" ]; then
-  echo "Found at: services/planning-engine/dist/src/index.js"
-  exec node services/planning-engine/dist/src/index.js
+# TypeScript outputs to dist/services/planning-engine/src/ due to baseUrl config
+ENTRY_POINT="services/planning-engine/dist/services/planning-engine/src/index.js"
+
+if [ -f "$ENTRY_POINT" ]; then
+  echo "Starting from: $ENTRY_POINT"
+  exec node "$ENTRY_POINT"
 else
-  echo "ERROR: index.js not found in expected locations!"
-  echo "Full file search:"
-  find services/planning-engine/dist -type f -name "*.js" | head -20
+  echo "ERROR: Entry point not found at $ENTRY_POINT"
+  echo "Searching for index.js..."
+  find services/planning-engine/dist -name "index.js" -type f
   exit 1
 fi
