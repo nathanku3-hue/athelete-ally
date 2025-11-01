@@ -30,7 +30,7 @@
     }
   },
   "include": ["src/**/*", "src/types/**/*.d.ts"],
-  "exclude": ["node_modules", "dist", "**/__tests__/**", "prisma/**"]
+  "exclude": ["node_modules", "dist", "**/__tests__/**", "prisma/**", "../../packages/**", "../../apps/**", "../../services/**/node_modules"]
 }
 
 
