@@ -8,7 +8,6 @@ echo "PORT=${PORT}"
 echo "DATABASE_URL is set: $([ -n "$DATABASE_URL" ] && echo 'YES' || echo 'NO')"
 
 echo "=== Checking build artifacts ==="
-hotfix/railway-debug-logging-v2
 echo "Searching for index.js in planning-engine..."
 find services/planning-engine -name "index.js" -type f 2>/dev/null | head -10
 
@@ -31,10 +30,3 @@ else
   find services/planning-engine/dist -type f -name "*.js" | head -20
   exit 1
 fi
-=======
-ls -la services/planning-engine/ || echo "ERROR: planning-engine directory not found!"
-ls -la services/planning-engine/dist/ || echo "ERROR: dist directory not found!"
-
-echo "=== Starting planning-engine ==="
-exec node services/planning-engine/dist/index.js
-main
