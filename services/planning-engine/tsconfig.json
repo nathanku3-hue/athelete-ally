@@ -9,8 +9,11 @@
     "baseUrl": "../..",
     "moduleResolution": "node",
     "paths": {
+hotfix/tsconfig-json-clean
+=======
       // Packages that point to src (no build required) - explicit index.js for ESM
       "@athlete-ally/database-utils": ["./packages/database-utils/src/index.js"],
+main
       "@athlete-ally/event-bus": ["./packages/event-bus/src/index.js"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
       "@athlete-ally/contracts": ["./packages/contracts/index.js"],
@@ -18,6 +21,9 @@
       "@athlete-ally/contracts/events": ["./packages/contracts/events/index.js"],
       "@athlete-ally/contracts/events/*": ["./packages/contracts/events/*"],
       "@athlete-ally/protocol-types": ["./packages/protocol-types/src/index.js"],
+hotfix/tsconfig-json-clean
+      "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"]
+=======
       "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"],
       // Packages that point to dist (built dependencies) - explicit .js for ESM
       "@athlete-ally/logger": ["./packages/logger/dist/index.js"],
@@ -27,6 +33,7 @@
       "@athlete-ally/shared/*": ["./packages/shared/dist/*"],
       "@athlete-ally/shared-types": ["./packages/shared-types/dist/index.js"],
       "@athlete-ally/shared-types/*": ["./packages/shared-types/dist/*"]
+main
     }
   },
   "include": ["src/**/*", "src/types/**/*.d.ts"],
