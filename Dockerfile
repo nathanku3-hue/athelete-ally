@@ -7,6 +7,5 @@ RUN test -d services/planning-engine/dist || exit 1
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 ENV DATABASE_URL=${PLANNING_DATABASE_URL}
-ENV PORT=3004
 ENV NODE_ENV=production
 ENTRYPOINT ["/app/start.sh"]
