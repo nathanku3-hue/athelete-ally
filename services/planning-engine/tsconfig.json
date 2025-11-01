@@ -9,7 +9,6 @@
     "baseUrl": "../..",
     "moduleResolution": "node",
     "paths": {
-      // Source-only packages (no build step) - need path mappings
       "@athlete-ally/event-bus": ["./packages/event-bus/src/index.js"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
       "@athlete-ally/contracts": ["./packages/contracts/index.js"],
