@@ -1,5 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
+
+# Install OpenSSL for Prisma engine compatibility
+RUN apk add --no-cache openssl
+
 COPY . .
 RUN npm ci --workspaces --include-workspace-root
 RUN npm run build:planning-engine
