@@ -3,7 +3,7 @@ import nodeAdapter from '@athlete-ally/logger/server';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { config } from './config.js';
-import { EventSchemas, type EventSchemaKey } from '@athlete-ally/contracts/events/schemas.js';
+import { EventSchemas, type EventSchemaKey } from '@athlete-ally/contracts/events/schemas';
 const log = createLogger(nodeAdapter, { module: 'validator' });
 
 export interface ValidationResult {
