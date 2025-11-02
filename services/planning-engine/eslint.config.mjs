@@ -18,8 +18,7 @@ const eslintConfig = [
       parser: typescriptParser,
       parserOptions: {
         ecmaVersion: "latest",
-        sourceType: "module",
-        project: "./tsconfig.json"
+        sourceType: "module"
       },
       globals: {
         // Node.js globals
