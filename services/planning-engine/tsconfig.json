@@ -7,7 +7,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": "../..",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "paths": {
       "@athlete-ally/event-bus": ["./packages/event-bus/src/index.js"],
       "@athlete-ally/event-bus/*": ["./packages/event-bus/src/*"],
@@ -16,14 +16,7 @@
       "@athlete-ally/contracts/events": ["./packages/contracts/events/index.js"],
       "@athlete-ally/contracts/events/*": ["./packages/contracts/events/*"],
       "@athlete-ally/protocol-types": ["./packages/protocol-types/src/index.js"],
-      "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"],
-      "@athlete-ally/logger": ["./packages/logger/dist/index.js"],
-      "@athlete-ally/logger/server": ["./packages/logger/dist/adapters/node.js"],
-      "@athlete-ally/logger/browser": ["./packages/logger/dist/adapters/browser.js"],
-      "@athlete-ally/database-utils": ["./packages/database-utils/dist/index.js"],
-      "@athlete-ally/shared": ["./packages/shared/dist/index.js"],
-      "@athlete-ally/shared/*": ["./packages/shared/dist/*"],
-      "@athlete-ally/shared/fastify-augment": ["./packages/shared/dist/fastify-augment.js"]
+      "@athlete-ally/protocol-types/*": ["./packages/protocol-types/src/*"]
     }
   },
   "include": ["src/**/*", "src/types/**/*.d.ts"],
