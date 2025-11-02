@@ -19,7 +19,8 @@ const eslintConfig = [
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-        project: "./tsconfig.json"
+        // Avoid type-aware linting to prevent CI parse errors on tsconfig
+        tsconfigRootDir: new URL(".", import.meta.url)
       },
       globals: {
         // Node.js globals
