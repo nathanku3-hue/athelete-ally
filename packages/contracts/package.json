@@ -21,6 +21,10 @@
     "./events/schemas": {
       "types": "./dist/events/schemas.d.ts",
       "import": "./dist/events/schemas.js"
+    },
+    "./events/schemas.js": {
+      "types": "./dist/events/schemas.d.ts",
+      "import": "./dist/events/schemas.js"
     }
   },
   "typesVersions": {
