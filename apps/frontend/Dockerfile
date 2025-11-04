@@ -25,9 +25,8 @@ RUN npm ci --workspaces --include-workspace-root
 FROM base AS builder
 WORKDIR /app
 
-# Copy node_modules from deps stage
+# Copy node_modules from deps stage (workspaces hoist to root)
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
 
 # Copy source code
 COPY . .
