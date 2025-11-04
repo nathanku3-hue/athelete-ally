@@ -2,6 +2,10 @@
 hotfix/tsconfig-paths-final-2
 # Updated to force Railway rebuild
 =======
+hotfix/tsconfig-paths-final-2
+# Updated to force Railway rebuild
+=======
+main
 main
 FROM node:20-alpine AS base
 
@@ -29,6 +33,12 @@ hotfix/tsconfig-paths-final-2
 COPY scripts ./scripts
 
 =======
+hotfix/tsconfig-paths-final-2
+# Copy scripts directory (needed for preinstall hook)
+COPY scripts ./scripts
+
+=======
+main
 main
 main
 # Install dependencies
