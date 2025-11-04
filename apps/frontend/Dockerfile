@@ -15,6 +15,9 @@ COPY packages/protocol-types/package.json ./packages/protocol-types/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared-types/package.json ./packages/shared-types/
 
+# Copy scripts directory (needed for preinstall hook)
+COPY scripts ./scripts
+
 # Install dependencies
 RUN npm ci --workspaces --include-workspace-root
 
