@@ -1,15 +1,4 @@
 # Multi-stage build for Next.js frontend
-hotfix/tsconfig-paths-final-2
-=======
-hotfix/tsconfig-paths-final-2
-# Updated to force Railway rebuild
-=======
-hotfix/tsconfig-paths-final-2
-# Updated to force Railway rebuild
-=======
-main
-main
-main
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed
@@ -17,7 +6,7 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
+# Copy package files (root and workspaces needed for install)
 COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/health-schema/package.json ./packages/health-schema/
@@ -26,34 +15,13 @@ COPY packages/protocol-types/package.json ./packages/protocol-types/
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared-types/package.json ./packages/shared-types/
 
-hotfix/tsconfig-paths-final-2
 # Copy scripts directory (needed for preinstall hook)
 COPY scripts ./scripts
 
-=======
-hotfix/tsconfig-paths-final-2
-# Copy scripts directory (needed for preinstall hook)
-COPY scripts ./scripts
-
-=======
-hotfix/tsconfig-paths-final-2
-# Copy scripts directory (needed for preinstall hook)
-COPY scripts ./scripts
-
-=======
-hotfix/tsconfig-paths-final-2
-# Copy scripts directory (needed for preinstall hook)
-COPY scripts ./scripts
-
-=======
-main
-main
-main
-main
 # Install dependencies
 RUN npm ci --workspaces --include-workspace-root
 
-# Build dependencies
+# Build stage
 FROM base AS builder
 WORKDIR /app
 
@@ -95,6 +63,6 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV HOSTNAME="*******"
 
 CMD ["node", "apps/frontend/server.js"]
