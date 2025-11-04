@@ -1,4 +1,5 @@
 # Multi-stage build for Next.js frontend
+# Updated to force Railway rebuild
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed
