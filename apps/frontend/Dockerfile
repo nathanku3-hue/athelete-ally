@@ -1,4 +1,8 @@
 # Multi-stage build for Next.js frontend
+hotfix/tsconfig-paths-final-2
+# Updated to force Railway rebuild
+=======
+main
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed
@@ -20,6 +24,12 @@ hotfix/tsconfig-paths-final-2
 COPY scripts ./scripts
 
 =======
+hotfix/tsconfig-paths-final-2
+# Copy scripts directory (needed for preinstall hook)
+COPY scripts ./scripts
+
+=======
+main
 main
 # Install dependencies
 RUN npm ci --workspaces --include-workspace-root
