@@ -31,6 +31,13 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+hotfix/main-sync
+# Build workspace dependencies that frontend imports (in dependency order)
+RUN npm run build -w @athlete-ally/health-schema
+RUN npm run build -w @athlete-ally/shared-types
+RUN npm run build -w @athlete-ally/logger
+RUN npm run build -w @athlete-ally/shared
+=======
 hotfix/frontend-final-clean
 =======
 hotfix/frontend-followup
@@ -51,6 +58,7 @@ hotfix/frontend-followup
 # Build workspace dependencies that frontend imports
 RUN npm run build -w @athlete-ally/health-schema
 RUN npm run build -w @athlete-ally/shared-types
+main
 main
 main
 main
