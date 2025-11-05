@@ -31,8 +31,9 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
-# Build health-schema first (prebuild dependency)
+# Build workspace dependencies that frontend imports
 RUN npm run build -w @athlete-ally/health-schema
+RUN npm run build -w @athlete-ally/shared-types
 
 # Build Next.js application
 WORKDIR /app/apps/frontend
