@@ -31,9 +31,17 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+hotfix/frontend-build-all-deps
+# Build workspace dependencies that frontend imports (in dependency order)
+RUN npm run build -w @athlete-ally/health-schema
+RUN npm run build -w @athlete-ally/shared-types
+RUN npm run build -w @athlete-ally/logger
+RUN npm run build -w @athlete-ally/shared
+=======
 # Build workspace dependencies that frontend imports
 RUN npm run build -w @athlete-ally/health-schema
 RUN npm run build -w @athlete-ally/shared-types
+main
 
 # Build Next.js application
 WORKDIR /app/apps/frontend
