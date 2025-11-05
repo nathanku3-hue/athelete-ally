@@ -27,13 +27,13 @@ jobs:
       - name: Validate Dockerfile formatting
         shell: bash
         run: |
-          test -f Dockerfile || { echo "Dockerfile not found at repo root"; exit 1; }
-          LINES=$(wc -l < Dockerfile | tr -d '[:space:]')
+          test -f Dockerfile.backend || { echo "Dockerfile.backend not found at repo root"; exit 1; }
+          LINES=$(wc -l < Dockerfile.backend | tr -d '[:space:]')
           if [ "$LINES" -lt 5 ]; then
-            echo "Dockerfile appears to be corrupted (only $LINES lines)." >&2
+            echo "Dockerfile.backend appears to be corrupted (only $LINES lines)." >&2
             exit 1
           fi
-          echo "Dockerfile lines: $LINES"
+          echo "Dockerfile.backend lines: $LINES"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
