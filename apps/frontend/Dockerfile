@@ -65,6 +65,5 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT=3000
-ENV HOSTNAME="*******"
 
 CMD ["node", "apps/frontend/server.js"]
