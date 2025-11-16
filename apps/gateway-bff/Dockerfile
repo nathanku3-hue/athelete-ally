@@ -8,6 +8,8 @@ COPY tsconfig.base.json ./
 COPY turbo.json ./
 # 拷貝 scripts 目錄 (preinstall hook 需要)
 COPY scripts ./scripts
+# 拷貝 config 目錄 (tsconfig.base.json 需要)
+COPY config ./config
 # 拷貝所有需要被 link 的 workspace
 COPY packages ./packages
 COPY apps/gateway-bff ./apps/gateway-bff
