@@ -6,6 +6,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY turbo.json ./
+# 拷貝 scripts 目錄 (preinstall hook 需要)
+COPY scripts ./scripts
 # 拷貝所有需要被 link 的 workspace
 COPY packages ./packages
 COPY apps/gateway-bff ./apps/gateway-bff
