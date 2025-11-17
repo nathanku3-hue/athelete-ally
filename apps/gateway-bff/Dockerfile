@@ -6,15 +6,20 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY turbo.json ./
+hotfix/main-clean-dockerfile
+=======
 fix/gateway-bff-dockerfile
 =======
 fix/deploy-workflow-dockerfile-backend
+main
 main
 # Copy scripts directory (needed for preinstall hook)
 COPY scripts ./scripts
 # Copy config directory (needed for tsconfig.base.json)
 COPY config ./config
 # Copy all workspace packages
+hotfix/main-clean-dockerfile
+=======
 fix/gateway-bff-dockerfile
 =======
 =======
@@ -28,12 +33,16 @@ main
 # 拷貝所有需要被 link 的 workspace
 main
 main
+main
 COPY packages ./packages
 COPY apps/gateway-bff ./apps/gateway-bff
 
 # Install all dependencies
 RUN npm ci
 
+hotfix/main-clean-dockerfile
+# Build workspace dependencies (in dependency order)
+=======
 fix/gateway-bff-dockerfile
 # Build workspace dependencies (in dependency order)
 =======
@@ -43,11 +52,15 @@ fix/deploy-workflow-dockerfile-backend
 # 構建 workspace 依賴（按依賴順序）
 main
 main
+main
 RUN npm run build -w @athlete-ally/logger || true
 RUN npm run build -w @athlete-ally/health-schema || true
 RUN npm run build -w @athlete-ally/shared-types || true
 RUN npm run build -w @athlete-ally/shared || true
 
+hotfix/main-clean-dockerfile
+# Build gateway-bff
+=======
 fix/gateway-bff-dockerfile
 # Build gateway-bff
 =======
@@ -55,6 +68,7 @@ fix/deploy-workflow-dockerfile-backend
 # Build gateway-bff
 =======
 # 在完整的 monorepo 上下文中，只構建我們需要的那個服務
+main
 main
 main
 RUN npm run build -w @athlete-ally/gateway-bff
@@ -66,6 +80,19 @@ WORKDIR /usr/src/app
 # Install OpenSSL and required system libraries
 RUN apk add --no-cache openssl
 
+hotfix/main-clean-dockerfile
+# Copy built artifacts from builder stage
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/package-lock.json ./
+# Copy built workspace packages (includes OpenAPI spec)
+COPY --from=builder /app/packages ./packages
+# Copy gateway-bff app (includes dist and package.json)
+COPY --from=builder /app/apps/gateway-bff ./apps/gateway-bff
+# Install production dependencies only (will link built workspace packages)
+RUN npm ci --production --workspaces --include-workspace-root
+
+# Create non-root user
+=======
 fix/gateway-bff-dockerfile
 # Copy built artifacts from builder stage
 COPY --from=builder /app/package.json ./
@@ -106,6 +133,7 @@ RUN npm ci --production --workspaces --include-workspace-root
 # 創建非 root 用戶
 main
 main
+main
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 USER nodejs
@@ -113,6 +141,10 @@ USER nodejs
 # Expose port
 EXPOSE 4000
 
+hotfix/main-clean-dockerfile
+# Start command
+CMD ["node", "apps/gateway-bff/dist/index.js"]
+=======
 fix/gateway-bff-dockerfile
 # Start command
 CMD ["node", "apps/gateway-bff/dist/index.js"]
@@ -123,5 +155,6 @@ CMD ["node", "apps/gateway-bff/dist/index.js"]
 =======
 # 啟動服務器的命令
 CMD ["node", "apps/gateway-bff/dist/index.js"]
+main
 main
 main
